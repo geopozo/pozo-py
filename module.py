@@ -24,13 +24,15 @@ class ConflictingDepths(Exception): # Not sure if subclassing Exception is the b
 ## No idea what to do with LAS3
 ## Declarative?
 
+LAS_TYPE = "<class 'lasio.las.LASFile'>"
+
 class Data();
     def __init__(self, index, values, mnemonic): # so it should default to the default index if there is only one 
         self.index = index
         self.values = values
         self.mnemonic = mnemonic
 
-class TrackExplorer():
+class Explorer():
     def __init__(self, *args, **kwargs):
 
         # Essential Configuration
@@ -48,7 +50,7 @@ class TrackExplorer():
 
         for ar in args:
             # This is for processing a whole LASio LAS file
-            if str(type(ar)) == "<class 'lasio.las.LASFile'>":
+            if str(type(ar)) == LAS_TYPE:
                 # What we're going to need to do is point this data to its Y-Axis
                 if self.yaxisname in ar.curves.keys():
                     self.yaxis.append(ar.curves[self.yaxisname])
