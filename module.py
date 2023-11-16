@@ -26,13 +26,16 @@ class ConflictingDepths(Exception): # Not sure if subclassing Exception is the b
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 
-class Data();
+# Data must have a y axis, a value axis, and a mnemonic
+class Data():
     def __init__(self, index, values, mnemonic): # so it should default to the default index if there is only one 
         self.index = index
         self.values = values
         self.mnemonic = mnemonic
+    def info(self):
+        return  {'mnemonic': self.mnemonic, 'shape': self.values.shape}
 
-class Explorer():
+class Graph():
     def __init__(self, *args, **kwargs):
 
         # Essential Configuration
@@ -43,7 +46,7 @@ class Explorer():
 
         # Objects
         # A list and its index see NOTE:ORDEREDDICT
-        self.track_ordered = [] 
+        self.tracks_ordered = [] 
         self.tracks = {}
         
         self.yaxis = []
@@ -51,29 +54,33 @@ class Explorer():
         for ar in args:
             # This is for processing a whole LASio LAS file
             if str(type(ar)) == LAS_TYPE:
-                # What we're going to need to do is point this data to its Y-Axis
+                # Probably need this idea of flattening y axes
                 if self.yaxisname in ar.curves.keys():
                     self.yaxis.append(ar.curves[self.yaxisname])
                 else:
                     self.yaxis.append(ar.index)
-                    if !indexOK:
+                    if not indexOK:
                         warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
-                for curve in ar.curves if curve not in {self.yaxisname}:
+                for curve in ar.curves:
+                    if curve.mnemonic == self.yaxisname: continue
                     data = Data(self.yaxis[-1], curve.data, curve.mnemonic)
+                    # TODO: need to check if mnemonic is modified, now!
                     newTrack = Track(data)
 
                     # NOTE:ORDEREDDICT the dictionary contains multi value per key, but insert order is still maintained
-                    self.track_ordered.append(newTrack)
-                    if data.mnemonic is in self.tracks:
+                    self.tracks_ordered.append(newTrack)
+                    if data.mnemonic in self.tracks:
                         self.tracks[data.mnemonic].append(newTrack)
-                    eslse:
+                    else:
                         self.tracks[data.mnemonic] = [newTrack]
                     
     
-    def list_tracks(self):
+    def get_data(self):
         # This isn't gong to work: print(self.yaxisname + ": " + self.yaxis.shape())
-        for track in self.track_ordered:
-            track.list()
+        result = []
+        for track in self.tracks_ordered:
+            result.append(track.get_data())
+        return {'graph': result}
                     
     # def render(self):
     # def remove_track(self, *args):
@@ -84,7 +91,13 @@ class Explorer():
     # def split_tracks(self, )
 
 # TODO: how would we accept multiple data
+# What do we do with multiple data?
+# How do we organize the axis?
+# If we want them on the same axis, they must pass an Axis structure
+# If they pass a data, it will be wrapped in an axis
 class Track():
+    # TODO Track also as to take axes
+    # TODO What do do with multiple data
     def __init__(self, data, **kwargs): # {name: data}
         self.name = kwargs.get('name', data.mnemonic) # Gets trackname from the one data
         self.display_name = kwargs.get('display_name', self.name)
@@ -97,26 +110,53 @@ class Track():
         
         newAxis = Axis(data)
 
-        if self.name is in self.axes:
+        if self.name in self.axes:
             self.axes[self.name].append(newAxis)
-        eslse:
+        else:
             self.axes[self.name] = [newAxis]
         
         self.axes_below.append(newAxis)
-        # Flag For Above and Below
-        # Setting Positions 
+    def get_data(self):
+        above = []
+        below = []
+        for axis in reversed(self.axes_above):
+            above.append(axis.get_data())
+        for axis in reversed(self.axes_below):
+            below.append(axis.get_data())
+        return { self.name: {"above": above, "below": below} }
 
+# Axis can take multiple data
+# It will place all the data on the same axis
+# What happens if the axis has multiple y data?
+# If it should be on a different y axis, that's the users problem
+# We shoudl accept data, data, data and [data, data], data
 class Axis():
     def __init__(self, data, **kwargs):
         if type(data) != list:
             self.data = [data]
         else:
             self.data = data
-        self.name = kwargs.get('name', data[0].mnemonic)
+        self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
-        
-# TODO RIGHT NOW
-        
-# Okay, now we have to print the list
-# Then I guess we have to render (which isn't that different then list, really)
+    def get_data(self):
+        result = []
+        for el in self.data:
+            result.append(el.info())
+        return {self.name: result}
+
+# Explore ideas of creating each item individually, just take notes
+# Then I guess we have to render (which isn't that different then list, really) )yes, we have to render(
 # Then we have to explore different ways to add axis, add tracks, combine tracks
+
+
+# Dropping in your lasio LAS file, your panda dataframe, your welly well, your well project, your curve, your whatever
+
+# Constructing custom tracks! (several axes on one track, several curves on one axes)
+
+# Modifying tracks and axis (combining two tracks into one track w/ two axes)
+
+# Changing (and specifying) color schemes, Graph Schemes
+
+# Deviation
+
+# Getting at plotly
