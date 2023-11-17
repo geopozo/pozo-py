@@ -63,11 +63,13 @@ class Graph():
                         warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
                 for curve in ar.curves:
                     if curve.mnemonic == self.yaxisname: continue
+
+                    ## Create Data and Track
                     data = Data(self.yaxis[-1], curve.data, curve.mnemonic)
                     # TODO: need to check if mnemonic is modified, now!
                     newTrack = Track(data)
 
-                    # NOTE:ORDEREDDICT the dictionary contains multi value per key, but insert order is still maintained
+                    # NOTE:ORDEREDDICT- >1 value per key, but insert order is still maintained
                     self.tracks_ordered.append(newTrack)
                     if data.mnemonic in self.tracks:
                         self.tracks[data.mnemonic].append(newTrack)
@@ -76,7 +78,6 @@ class Graph():
                     
     
     def get_data(self):
-        # This isn't gong to work: print(self.yaxisname + ": " + self.yaxis.shape())
         result = []
         for track in self.tracks_ordered:
             result.append(track.get_data())
@@ -129,7 +130,9 @@ class Track():
 # It will place all the data on the same axis
 # What happens if the axis has multiple y data?
 # If it should be on a different y axis, that's the users problem
-# We shoudl accept data, data, data and [data, data], data
+# We should accept data, data, data and [data, data], data
+# Do we allow formatting in construction?
+# Will it be able to create a "pause render" function?
 class Axis():
     def __init__(self, data, **kwargs):
         if type(data) != list:
