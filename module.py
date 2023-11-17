@@ -9,25 +9,19 @@ class ConflictingDepths(Exception): # Not sure if subclassing Exception is the b
     def __str__(self): return self.message
 """
 
-# inspect that ugly ass error
 # go through to-do list
 # doc strings w/ tags
-
-
-# Okay, so we need a data structure that stores actual mnemonic and a ponter to the data
-
-# We also have axes in tracks. Both of those will have display names + keys by which to identify them.
-# I think the way this goes is, you create a track, and then you can add, remove, and move axis.
-# Axis can also have multiple data.
-# So I think all the key access should always return a list.
-# We can have two functions, one plural, one singular, like HTML.
-# And we want to initialize with data fypes.
+# get rid of legend
+# make sure to reverse (autorange=reversed)
+# get names up on traces
+# play around with axis positioning
+# combining tracks. combing traces.
+# initializizers
+# what if you just want a bare track, a bare axis, a bare data, what does it create
+# What if you want to access tracks? We can have two functions, one plural, one singular, like HTML.
 # Helper Functions
-# Plotly Functions (dealing w/ key v value)
-# Dealing with widget
-## No idea what to do with multidimensional data
-## No idea what to do with LAS3
-## Declarative?
+# Plotly Functions
+# Dealing with widget (pausing rendering)
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 
@@ -58,7 +52,8 @@ class Graph():
         self.yaxis = []
 
         for ar in args:
-            # This is for processing a whole LASio LAS file
+            
+            # Process LASio LAS Object
             if str(type(ar)) == LAS_TYPE:
 
                 ## Create Y-Axis
@@ -70,7 +65,7 @@ class Graph():
                     if not indexOK:
                         warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
 
-                ## Create Data and Track
+                ## Create Data and Tracks
                 for curve in ar.curves:
                     if curve.mnemonic == self.yaxisname: continue
 
@@ -99,21 +94,19 @@ class Graph():
         return result
     def get_layout(self):
         num_tracks = len(self.tracks_ordered) 
-        margin = .01 # this will have to be changeable
-        start = .01 # this might change
+        margin = .002 # default by changeable
+        start = .01   # default but must change for numberline
         waste_space = start + (num_tracks-1) * .01
         width = (1 - waste_space) / num_tracks
 
         args = {}
         # There will be no number line here! Let's deal with that later!
-        # We also don't know if this work
         i_axes = 1
-        for track in self.tracks_ordered: # this is what we do for every track    
+        for track in self.tracks_ordered:    
             axis_key = "xaxis"
             for i in range(1, track.count_axes()+1):
                 axis_key += str(i_axes)
                 args[axis_key] = dict(domain = [start, start + width])
-                #print("args["+axis_key+"]  = dict(domain= ["+str(start)+", "+str(start + width)+"])")
                 i_axes += 1
             start += width + margin
         layout = go.Layout(**args)
@@ -132,7 +125,6 @@ class Graph():
                         xaxis='x' + suffix,
                         yaxis='y'
                     ))
-                    #print("go.Scatter(xaxis=x"+str(num_axes) + ")")
                 num_axes += 1
             for axis in track[1]:
                 for data in axis:
@@ -142,7 +134,6 @@ class Graph():
                         xaxis='x' + suffix,
                         yaxis='y'
                     ))
-                    #print("go.Scatter(xaxis=x"+str(num_axes) + ")")
                 num_axes += 1
         return traces
             
@@ -175,7 +166,8 @@ class Track():
 
         # There will have to be a switch for this
         self.axes_below.append(newAxis)
-        self.axes_by_id[id(newAxis)] = newAxis # c style lol
+        self.axes_by_id[id(newAxis)] = newAxis
+
     def count_axes(self):
         return len(self.axes)
 
@@ -222,35 +214,22 @@ class Axis():
             result.append(el)
         return result
 
-# Explore ideas of creating each item individually, just take notes
-# Then I guess we have to render (which isn't that different then list, really) )yes, we have to render(
-# Then we have to explore different ways to add axis, add tracks, combine tracks
 
 
-# Dropping in your lasio LAS file, your panda dataframe, your welly well, your well project, your curve, your whatever
+# Dropping in your  
+# -lasio LAS file
+# - panda dataframe
+# - welly well
+# - well project
+# - curve
+# - whatever
 
 # Constructing custom tracks! (several axes on one track, several curves on one axes)
-
 # Modifying tracks and axis (combining two tracks into one track w/ two axes)
-
 # Changing (and specifying) color schemes, Graph Schemes
-
 # Deviation
-
 # Getting at plotly
 
+# they all need destructors, to indicate if they don't exist anymore
 
-
-### Old notes
-    # def render(self):
-    # def remove_track(self, *args):
-    # def add_track(self, *args):
-    # def list_tracks(self, *args):
-    # def get_track(self, track):
-    # def combine_tracks(self, track):
-    # def split_tracks(self, )
-
-
-# they all need destructors
-
-# this tree thign is bad, shoudl probably be like "get tracks" "get axis" etc
+# this tree thign is bad, should probably be like "get tracks" "get axis" etc
