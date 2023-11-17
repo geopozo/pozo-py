@@ -33,7 +33,7 @@ class Data():
         self.values = values
         self.mnemonic = mnemonic
     def info(self):
-        return  {'mnemonic': self.mnemonic, 'shape': self.values.shape}
+        return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape} }
 
 class Graph():
     def __init__(self, *args, **kwargs):
@@ -48,12 +48,15 @@ class Graph():
         # A list and its index see NOTE:ORDEREDDICT
         self.tracks_ordered = [] 
         self.tracks = {}
-        
+        self.track_by_id = {}
+
         self.yaxis = []
 
         for ar in args:
             # This is for processing a whole LASio LAS file
             if str(type(ar)) == LAS_TYPE:
+
+                ## Create Y-Axis
                 # Probably need this idea of flattening y axes
                 if self.yaxisname in ar.curves.keys():
                     self.yaxis.append(ar.curves[self.yaxisname])
@@ -61,10 +64,11 @@ class Graph():
                     self.yaxis.append(ar.index)
                     if not indexOK:
                         warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
+
+                ## Create Data and Track
                 for curve in ar.curves:
                     if curve.mnemonic == self.yaxisname: continue
 
-                    ## Create Data and Track
                     data = Data(self.yaxis[-1], curve.data, curve.mnemonic)
                     # TODO: need to check if mnemonic is modified, now!
                     newTrack = Track(data)
@@ -75,6 +79,7 @@ class Graph():
                         self.tracks[data.mnemonic].append(newTrack)
                     else:
                         self.tracks[data.mnemonic] = [newTrack]
+                    self.track_by_id[id(newTrack)] = newTrack
                     
     
     def get_data(self):
@@ -82,14 +87,6 @@ class Graph():
         for track in self.tracks_ordered:
             result.append(track.get_data())
         return {'graph': result}
-                    
-    # def render(self):
-    # def remove_track(self, *args):
-    # def add_track(self, *args):
-    # def list_tracks(self, *args):
-    # def get_track(self, track):
-    # def combine_tracks(self, track):
-    # def split_tracks(self, )
 
 # TODO: how would we accept multiple data
 # What do we do with multiple data?
@@ -108,15 +105,19 @@ class Track():
         self.axes = {}
         self.axes_above = []
         self.axes_below = []
+        self.axes_by_id = {}
         
         newAxis = Axis(data)
 
-        if self.name in self.axes:
-            self.axes[self.name].append(newAxis)
+        if newAxis.name in self.axes:
+            self.axes[newAxis.name].append(newAxis)
         else:
-            self.axes[self.name] = [newAxis]
-        
+            self.axes[newAxis.name] = [newAxis]
+
+        # There will have to be a switch for this
         self.axes_below.append(newAxis)
+        self.axes_by_id[id(newAxis)] = newAxis # c style lol
+
     def get_data(self):
         above = []
         below = []
@@ -124,7 +125,7 @@ class Track():
             above.append(axis.get_data())
         for axis in reversed(self.axes_below):
             below.append(axis.get_data())
-        return { self.name: {"above": above, "below": below} }
+        return { "track": { self.name: {"above": above, "below": below} } }
 
 # Axis can take multiple data
 # It will place all the data on the same axis
@@ -145,7 +146,7 @@ class Axis():
         result = []
         for el in self.data:
             result.append(el.info())
-        return {self.name: result}
+        return { "axis" : {self.name: result} }
 
 # Explore ideas of creating each item individually, just take notes
 # Then I guess we have to render (which isn't that different then list, really) )yes, we have to render(
@@ -163,3 +164,17 @@ class Axis():
 # Deviation
 
 # Getting at plotly
+
+
+
+### Old notes
+    # def render(self):
+    # def remove_track(self, *args):
+    # def add_track(self, *args):
+    # def list_tracks(self, *args):
+    # def get_track(self, track):
+    # def combine_tracks(self, track):
+    # def split_tracks(self, )
+
+
+# they all need destructors
