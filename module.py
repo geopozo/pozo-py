@@ -9,6 +9,11 @@ class ConflictingDepths(Exception): # Not sure if subclassing Exception is the b
     def __str__(self): return self.message
 """
 
+# Get visuals better (legend, label)
+# Combine Tracks
+# Flatten
+# Save transformation on a LAS files
+
 # go through to-do list
 # doc strings w/ tags
 # get rid of legend
@@ -81,7 +86,10 @@ class Graph():
                         self.tracks[data.mnemonic] = [newTrack]
                     self.track_by_id[id(newTrack)] = newTrack
                     
-    
+    def draw(self):
+        layout = self.get_layout()
+        traces = self.get_traces()
+        return go.Figure(data=traces, layout=layout)
     def get_named_tree(self):
         result = []
         for track in self.tracks_ordered:
@@ -96,7 +104,7 @@ class Graph():
         num_tracks = len(self.tracks_ordered) 
         margin = .002 # default by changeable
         start = .01   # default but must change for numberline
-        waste_space = start + (num_tracks-1) * .01
+        waste_space = start + (num_tracks-1) * margin
         width = (1 - waste_space) / num_tracks
 
         args = {}
@@ -104,12 +112,13 @@ class Graph():
         i_axes = 1
         for track in self.tracks_ordered:    
             axis_key = "xaxis"
-            for i in range(1, track.count_axes()+1):
+            for i in range(1, track.count_axes()+1): # may have to seperate above and belo where to name properly
                 axis_key += str(i_axes)
-                args[axis_key] = dict(domain = [start, start + width])
+                final = start + width if start+width <= 1 else 1 # rounding errors
+                args[axis_key] = dict(domain = [start, final], title = track.name) # correct name?
                 i_axes += 1
             start += width + margin
-        layout = go.Layout(**args)
+        layout = go.Layout(**args,showlegend=False,margin=dict(l=10, r=10, t=10, b=10),yaxis=dict(autorange='reversed'))
         return layout
 
     def get_traces(self):
@@ -123,7 +132,7 @@ class Graph():
                     traces.append(go.Scatter(x=data.values,
                         y=data.index,
                         xaxis='x' + suffix,
-                        yaxis='y'
+                        yaxis='y',
                     ))
                 num_axes += 1
             for axis in track[1]:
@@ -132,7 +141,7 @@ class Graph():
                     traces.append(go.Scatter(x=data.values,
                         y=data.index,
                         xaxis='x' + suffix,
-                        yaxis='y'
+                        yaxis='y',
                     ))
                 num_axes += 1
         return traces
