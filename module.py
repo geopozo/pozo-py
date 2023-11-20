@@ -9,9 +9,12 @@ class ConflictingDepths(Exception): # Not sure if subclassing Exception is the b
     def __str__(self): return self.message
 """
 
-# Get visuals better (legend, label)
+# Get visuals better (legend on hover, labels, colors)
+
 # Combine Tracks
+
 # Flatten
+
 # Save transformation on a LAS files
 
 # go through to-do list
@@ -40,6 +43,23 @@ class Data():
         return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }
 
 class Graph():
+    axes_template = dict(showgrid=False, zeroline=False)
+    other_styles = dict(
+        showlegend = False,
+        margin = dict(l=5, r=5, t=5, b=5),
+        yaxis = dict(autorange='reversed',showgrid=False, zeroline=False)
+    )
+    def _gen_style(self, num = 0):
+        if num == 0:
+            num = len(self.tracks)
+        axes = {}
+        for i in range(1, num+1):
+            axes["xaxis"+str(i)] = self.axes_template
+        return_dict = dict(
+            **self.other_styles,
+            **axes
+        )
+        return return_dict
     def __init__(self, *args, **kwargs):
 
         # Essential Configuration
@@ -115,11 +135,11 @@ class Graph():
             for i in range(1, track.count_axes()+1): # may have to seperate above and belo where to name properly
                 axis_key += str(i_axes)
                 final = start + width if start+width <= 1 else 1 # rounding errors
-                args[axis_key] = dict(domain = [start, final], title = track.name) # correct name?
+                args[axis_key] = dict(domain = [start, final], title = track.name) # TODO correct name, probably not, need our own?
                 i_axes += 1
             start += width + margin
-        layout = go.Layout(**args,showlegend=False,margin=dict(l=10, r=10, t=10, b=10),yaxis=dict(autorange='reversed'))
-        return layout
+        layout = go.Layout(**args).update(**self._gen_style())
+        return layout # this layout is not fully updated!
 
     def get_traces(self):
         traces = []
@@ -129,7 +149,7 @@ class Graph():
             for axis in track[0]:
                 for data in axis:
                     suffix = str(num_axes)
-                    traces.append(go.Scatter(x=data.values,
+                    traces.append(go.Scattergl(x=data.values,
                         y=data.index,
                         xaxis='x' + suffix,
                         yaxis='y',
@@ -138,7 +158,7 @@ class Graph():
             for axis in track[1]:
                 for data in axis:
                     suffix = str(num_axes)
-                    traces.append(go.Scatter(x=data.values,
+                    traces.append(go.Scattergl(x=data.values,
                         y=data.index,
                         xaxis='x' + suffix,
                         yaxis='y',
