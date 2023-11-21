@@ -1,6 +1,5 @@
 import plotly.graph_objects as go
-import warnings
-import itertools
+import itertools, copy, warnings
 
 from IPython.display import Javascript # Part of Hack #1
 
@@ -59,8 +58,8 @@ class Graph():
     # so, take these styles, self them (or deep copy)
     # some thing are going to be generated automatically
     # if they already exist in the temple you are supplied, ignore them
-    axes_template = dict(showgrid=False, zeroline=False)
-    specified_styles = dict( # change this to default
+    axes_template_default = dict(showgrid=False, zeroline=False)
+    specified_styles_default = dict( # change this to default
         showlegend = False,
         margin = dict(l=5, r=5, t=5, b=5),
         yaxis = dict(
@@ -69,6 +68,7 @@ class Graph():
             zeroline=False,
         ),
         height = 600,
+        plot_bgcolor = "#FFFFFF",
     )
 
     # calculate number of ticks based on width TODO (4)
@@ -78,7 +78,8 @@ class Graph():
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', 200)
-
+        self.axes_template = copy.deepcopy(self.axes_template_default)
+        self.specified_styles = copy.deepcopy(self.specified_styles_default)
         # Random Configuration
         self.indexOK = kwargs.get('indexOK', False)
 
@@ -88,7 +89,7 @@ class Graph():
         self.tracks = {}
         self.track_by_id = {}
 
-        self.yaxis = []
+        self.yaxis = [] # what if we have weird axes? axes that contain other axes?
 
         for ar in args:
             
