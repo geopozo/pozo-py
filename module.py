@@ -3,6 +3,18 @@ import itertools, copy, warnings
 
 from IPython.display import Javascript # Part of Hack #1
 
+axes_template_default = dict(showgrid=False, zeroline=False)
+default_styles_default = dict( # change this to default
+    showlegend = False,
+    margin = dict(l=5, r=5, t=5, b=5),
+    yaxis = dict(
+        autorange='reversed',
+        showgrid=False,
+        zeroline=False,
+    ),
+    height = 600,
+    plot_bgcolor = "#FFFFFF",
+)
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 
@@ -17,25 +29,11 @@ def scrollON(): # TODO can we really not just display this directly form here?
     return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflow = 'scroll');''') # Part of Hack #1
 
 class Graph():
-    axes_template_default = dict(showgrid=False, zeroline=False)
-    default_styles_default = dict( # change this to default
-        showlegend = False,
-        margin = dict(l=5, r=5, t=5, b=5),
-        yaxis = dict(
-            autorange='reversed',
-            showgrid=False,
-            zeroline=False,
-        ),
-        height = 600,
-        plot_bgcolor = "#FFFFFF",
-    )
-
     def __init__(self, *args, **kwargs):
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', 200)
-        self.axes_template = kwargs.get('axes_template', copy.deepcopy(self.axes_template_default))
-        self.default_styles = kwargs.get('default_styles', copy.deepcopy(self.default_styles_default))
+        self.default_styles = kwargs.get('default_styles', copy.deepcopy(default_styles_default))
         # Random Configuration
         self.indexOK = kwargs.get('indexOK', False) # Supresses warning about using index, not column.
                                                     # Probably need a way to conform to index
@@ -61,7 +59,7 @@ class Graph():
                     if not indexOK:
                         warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
 
-                ## Create Data and Tracks
+                ## Create Data and Tracks ## Should be separate function
                 for curve in ar.curves:
                     if curve.mnemonic == self.yaxisname: continue
 
@@ -101,64 +99,37 @@ class Graph():
 
         axes = {}
         i = 0
+        
+        # yeah, you can ask track for a bunch of axis structs
+        # you iterate trhough and add
         for track in self.tracks_ordered:
-            for axis in track.get_all_axes():
-                i+=1
-                axes["xaxis"+str(i)] = dict(
-                    domain = [start, start + width if start+width <= 1 else 1],
-                    title = dict(
-                        text=axis.display_name,
-                        font=dict(
-                            color=randomColor(axis.data[0].mnemonic) # TODO call a color behavior
-                        )
-                    ), 
-                    **self.axes_template
+            for style in track.get_axis_styles():
+                i += 1
+                # Style shouldn't have a domain members
+                axes["xaxis" + str(i)] = dict(
+                    domain = [start, min(start + width, 1)],
+                    **style
                 )
             start += width + margin
         if len(self.tracks_ordered) > 6: # TODO tune this number
             warnings.warn("If you need scroll bars, call `display(scrollON())` after rendering the graph. This is a plotly issue and we will fix it eventually.")   
         generated_styles = dict(
             **axes,
-            width=len(self.tracks_ordered) * self.width_per_track,
+            width=len(self.tracks_ordered) * self.width_per_track, # probably fixed width option?
         )
         layout = go.Layout(**generated_styles).update(**self.default_styles)
         return layout
 
     def get_traces(self):
-        traces = []
-        tree = self.get_unnamed_tree() # UGLY 
+        traces = [] 
         num_axes = 1
-        for track in tree:
-            for axis in track[0]: # UGLY (but this guy has to differentiate)
-                for data in axis:
-                    suffix = str(num_axes)
-                    traces.append(
-                        go.Scattergl(
-                            x=data.values,
-                            y=data.index,
-                            mode='lines',
-                            line=dict(color=randomColor(data.mnemonic)),
-                            xaxis='x' + suffix,
-                            yaxis='y',
-                            name = data.mnemonic,
-                        
-                    ))
-                num_axes += 1
-            for axis in track[1]: # these are above
-                for data in axis:
-                    suffix = str(num_axes)
-                    traces.append(
-                        go.Scattergl(
-                            x=data.values,
-                            y=data.index,
-                            mode='lines',
-                            line=dict(color=randomColor(data.mnemonic)),
-                            xaxis='x' + suffix,
-                            yaxis='y',
-                            name = data.mnemonic,
-                    ))
+        for track in self.tracks_ordered:
+            for axis in track.get_all_axes():
+                # if there is an update_trace, it's better to update the axis than pass a num axes
+                traces.extend(axis.render_traces(num_axes))
                 num_axes += 1
         return traces
+
     def draw(self):
         layout = self.get_layout()
         traces = self.get_traces()
@@ -174,28 +145,38 @@ class Track():
 
         # This is really one object (but we can't private in python)
         self.axes = {}
+        self.axes_below = [] # Considered "before" axes_above list
         self.axes_above = []
-        self.axes_below = [] # Probably return these as combined iterator
         self.axes_by_id = {}
         
         newAxis = Axis(data)
 
+        ## add_axis function
         if newAxis.name in self.axes:
             self.axes[newAxis.name].append(newAxis)
         else:
             self.axes[newAxis.name] = [newAxis]
-
-        # There will have to be a switch for this TODO
         self.axes_below.append(newAxis)
         self.axes_by_id[id(newAxis)] = newAxis
-
+        # end
+        
     def count_axes(self):
         return len(self.axes)
 
     def get_all_axes(self):
-       return list(itertools.chain(self.axes_below, self.axes_above)) 
+        return list(itertools.chain(self.axes_below, self.axes_above)) 
+    def get_lower_axes(self):
+        return self.axes_below
+    def get_upper_axes(self):
+        return self.axes_above
 
+    def get_axis_styles(self):
+        styles = []
+        for axis in self.get_all_axes():
+            styles.append(axis.get_style())
+        return styles
 
+    
     ## Ugly
     def get_named_tree(self):
         above = []
@@ -218,13 +199,39 @@ class Track():
 
 class Axis():
     def __init__(self, data, **kwargs):
-        if type(data) != list:
-            self.data = [data]
-        else:
-            self.data = data
+        self.data = data if type(data) == list else [data]
+        self.axis_template = kwargs.get('template', copy.deepcopy(axes_template_default))
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
+        
+    def get_color(self):
+        return randomColor(self.data[0].mnemonic) # for now, more options later
 
+    def get_style(self):
+        return dict(
+            title = dict(
+                text=self.display_name,
+                font=dict(
+                    color=self.get_color() # TODO call a color behavior
+                )
+            ), 
+            **self.axis_template,
+        )
+
+    def render_traces(self, axis_number): ## is there an update trace?
+    # TODO should create several traces
+        all_traces = []
+        for datum in self.data: 
+           all_traces.append(go.Scattergl(
+                x=datum.values,
+                y=datum.index,
+                mode='lines', # nope, based on data w/ default
+                line=dict(color=self.get_color()), # needs to be better, based on data
+                xaxis='x' + str(axis_number),
+                yaxis='y',
+                name = datum.mnemonic, # probably needs to be better
+            ))
+        return all_traces
 
     ##### Not sure I like these, if nothing uses them, re-evaluated them
     def get_named_tree(self): # I feel this might be useful? Tracks really can be numbers.
