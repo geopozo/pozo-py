@@ -3,36 +3,9 @@ import itertools, copy, warnings
 
 from IPython.display import Javascript # Part of Hack #1
 
-# Actually, this doesn't matter. If the depths are the same, it's fine.
-"""
-class ConflictingDepths(Exception): # Not sure if subclassing Exception is the best answer here
-    def __init__(self):
-        self.message = "More than one data source has a \"DEPTH\" column- TrackExplorer doesn't know which to use as a Y Axis. You can use \"yaxiname=COLUMN_NAME\" or \"maindata=DATA_SOURCE\" to disambiguate."
-    def __str__(self): return self.message
-"""
 
-# Get visuals better (legend on hover, labels, colors)
-
-# Combine Tracks
-
-# Flatten
-
-# Save transformation on a LAS files
-
-# go through to-do list
-# doc strings w/ tags
-# get rid of legend
-# make sure to reverse (autorange=reversed)
-# get names up on traces
-# play around with axis positioning
-# combining tracks. combing traces.
-# initializizers
-# what if you just want a bare track, a bare axis, a bare data, what does it create
-# What if you want to access tracks? We can have two functions, one plural, one singular, like HTML.
-# Helper Functions
-# Plotly Functions
-# Dealing with widget (pausing rendering)
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
+
 def randomColor(toNumber = 0):
     import random
     if toNumber != 0:
@@ -42,15 +15,6 @@ def randomColor(toNumber = 0):
 
 def scrollON(): # TODO can we really not just display this directly form here?
     return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflow = 'scroll');''') # Part of Hack #1
-
-# Data must have a y axis, a value axis, and a mnemonic
-class Data():
-    def __init__(self, index, values, mnemonic): # so it should default to the default index if there is only one 
-        self.index = index
-        self.values = values
-        self.mnemonic = mnemonic
-    def info(self):
-        return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }
 
 class Graph():
     axes_template_default = dict(showgrid=False, zeroline=False)
@@ -65,8 +29,6 @@ class Graph():
         height = 600,
         plot_bgcolor = "#FFFFFF",
     )
-
-
 
     def __init__(self, *args, **kwargs):
         # Essential Configuration
@@ -83,8 +45,7 @@ class Graph():
         self.tracks_ordered = [] 
         self.tracks = {}
         self.track_by_id = {}
-
-        self.yaxis = [] # what if we have weird axes? axes that contain other axes?
+        self.yaxis = [] # Why are we storing information about the x and y axis?
 
         for ar in args:
             
@@ -116,7 +77,7 @@ class Graph():
                         self.tracks[data.mnemonic] = [newTrack]
                     self.track_by_id[id(newTrack)] = newTrack
                     
-
+    ## Uglies
     def get_named_tree(self):
         result = []
         for track in self.tracks_ordered:
@@ -128,9 +89,8 @@ class Graph():
             result.append(track.get_unnamed_tree())
         return result
 
-    # calculate number of ticks based on width TODO (4)
-    # don't use tree like that
-    # Rendering Functions
+    ## Rendering Functions
+    
     def get_layout(self):
         # default but changeable
         margin = .002
@@ -166,10 +126,10 @@ class Graph():
 
     def get_traces(self):
         traces = []
-        tree = self.get_unnamed_tree() # really don't know if this is the best way to iterate given we need styling information for trace (its not all in layout) and this object only contains the actual data. 
+        tree = self.get_unnamed_tree() # UGLY 
         num_axes = 1
         for track in tree:
-            for axis in track[0]: # these are... below
+            for axis in track[0]: # UGLY (but this guy has to differentiate)
                 for data in axis:
                     suffix = str(num_axes)
                     traces.append(
@@ -204,11 +164,6 @@ class Graph():
         traces = self.get_traces()
         return go.Figure(data=traces, layout=layout)
 
-# TODO: how would we accept multiple data
-# What do we do with multiple data?
-# How do we organize the axis?
-# If we want them on the same axis, they must pass an Axis structure
-# If they pass a data, it will be wrapped in an axis
 class Track():
     # TODO Track also as to take axes
     # TODO What do do with multiple data
@@ -255,15 +210,8 @@ class Track():
         return [above, below]
     def get_all_axes(self):
        return list(itertools.chain(self.axes_below, self.axes_above)) 
-        
 
-# Axis can take multiple data
-# It will place all the data on the same axis
-# What happens if the axis has multiple y data?
-# If it should be on a different y axis, that's the users problem
-# We should accept data, data, data and [data, data], data
-# Do we allow formatting in construction?
-# Will it be able to create a "pause render" function?
+
 class Axis():
     def __init__(self, data, **kwargs):
         if type(data) != list:
@@ -272,33 +220,27 @@ class Axis():
             self.data = data
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
-    def get_named_tree(self):
+
+
+    ##### Not sure I like these, if nothing uses them, re-evaluated them
+    def get_named_tree(self): # I feel this might be useful? Tracks really can be numbers.
         result = []
         for el in self.data:
             result.append(el.info())
         return { "axis" : { self.name: result } }
-    def get_unnamed_tree(self):
+    def get_unnamed_tree(self): # I don't want to use this at all
         result = []
         for el in self.data:
             result.append(el)
         return result
 
+# Data must have a y axis, a value axis, and a mnemonic
+class Data():
+    def __init__(self, index, values, mnemonic): # so it should default to the default index if there is only one 
+        self.index = index
+        self.values = values
+        self.mnemonic = mnemonic
 
-
-# Dropping in your  
-# -lasio LAS file
-# - panda dataframe
-# - welly well
-# - well project
-# - curve
-# - whatever
-
-# Constructing custom tracks! (several axes on one track, several curves on one axes)
-# Modifying tracks and axis (combining two tracks into one track w/ two axes)
-# Changing (and specifying) color schemes, Graph Schemes
-# Deviation
-# Getting at plotly
-
-# they all need destructors, to indicate if they don't exist anymore
-
-# this tree thign is bad, should probably be like "get tracks" "get axis" etc
+    ##### Not sure I like these!
+    def info(self): # This should be just for display, so maybe a _repr_*_ function
+        return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }
