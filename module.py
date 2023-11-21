@@ -75,20 +75,14 @@ class Graph():
                         self.tracks[data.mnemonic] = [newTrack]
                     self.track_by_id[id(newTrack)] = newTrack
                     
-    ## Uglies
+    ## For your info
     def get_named_tree(self):
         result = []
         for track in self.tracks_ordered:
             result.append(track.get_named_tree())
         return { 'graph': result }
-    def get_unnamed_tree(self):
-        result = []
-        for track in self.tracks_ordered:
-            result.append(track.get_unnamed_tree())
-        return result
-
-    ## Rendering Functions
     
+    ## Rendering Functions
     def get_layout(self):
         # default but changeable
         margin = .002
@@ -177,7 +171,7 @@ class Track():
         return styles
 
     
-    ## Ugly
+    ## FYI
     def get_named_tree(self):
         above = []
         below = []
@@ -186,14 +180,7 @@ class Track():
         for axis in reversed(self.axes_below):
             below.append(axis.get_named_tree())
         return { "track": { self.name: { "above": above, "below": below } } }
-    def get_unnamed_tree(self):
-        above = []
-        below = []
-        for axis in reversed(self.axes_above):
-            above.append(axis.get_unnamed_tree())
-        for axis in reversed(self.axes_below):
-            below.append(axis.get_unnamed_tree())
-        return [above, below]
+
 
 
 
@@ -237,13 +224,8 @@ class Axis():
     def get_named_tree(self): # I feel this might be useful? Tracks really can be numbers.
         result = []
         for el in self.data:
-            result.append(el.info())
+            result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
-    def get_unnamed_tree(self): # I don't want to use this at all
-        result = []
-        for el in self.data:
-            result.append(el)
-        return result
 
 # Data must have a y axis, a value axis, and a mnemonic
 class Data():
@@ -253,5 +235,5 @@ class Data():
         self.mnemonic = mnemonic
 
     ##### Not sure I like these!
-    def info(self): # This should be just for display, so maybe a _repr_*_ function
+    def get_named_tree(self): # This should be just for display, so maybe a _repr_*_ function
         return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }
