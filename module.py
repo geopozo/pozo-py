@@ -60,39 +60,24 @@ class Graph():
     # some thing are going to be generated automatically
     # if they already exist in the temple you are supplied, ignore them
     axes_template = dict(showgrid=False, zeroline=False)
-    other_styles = dict(
+    specified_styles = dict( # change this to default
         showlegend = False,
         margin = dict(l=5, r=5, t=5, b=5),
         yaxis = dict(
             autorange='reversed',
             showgrid=False,
-            zeroline=False
-        )
+            zeroline=False,
+        ),
+        height = 600,
     )
 
-    # fix track name to axis name # TODO (1)
-    # make width internal calculator so it's not passed TODO (3)
     # calculate number of ticks based on width TODO (4)
     # don't use tree like that
 
-    def _gen_style(self): # fundamentally broken because it is numAxis not numTracks
-        numTracks = len(self.tracks) # TODO (2) gonna have to get axis
-        axes = {}
-        i = 0
-        for track in self.tracks_ordered:
-            for axis in track.get_all_axes():
-                i+=1
-                if "axis"+str(i) not in self.other_styles: # if user overrides other_styles w/ axis (which I don't recommend, don't generate it
-                    axes["xaxis"+str(i)] = self.axes_template
-        return_dict = dict(
-            **self.other_styles,
-            **axes
-        )
-        return return_dict
     def __init__(self, *args, **kwargs):
-
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
+        self.width_per_track = kwargs.get('width_per_track', 200)
 
         # Random Configuration
         self.indexOK = kwargs.get('indexOK', False)
@@ -150,33 +135,37 @@ class Graph():
             result.append(track.get_unnamed_tree())
         return result
     def get_layout(self):
-        num_tracks = len(self.tracks_ordered) 
-        margin = .002 # default by changeable
-        start = .01   # default but must change for numberline
+        # default but changeable
+        margin = .002
+        start = .01 
+        num_tracks = len(self.tracks_ordered)
         waste_space = start + (num_tracks-1) * margin
         width = (1 - waste_space) / num_tracks
 
-        args = {}
-        # There will be no number line here! Let's deal with that later!
-        i_axes = 1
-        for track in self.tracks_ordered:    
-            axis_key = "xaxis"
-            for axis in track.get_all_axes(): # may have to seperate above and belo where to name properly
-                axis_key += str(i_axes)
-                final = start + width if start+width <= 1 else 1 # rounding errors
-                # This is doing some generating, I want to get it out of the main code TODO
-                args[axis_key] = dict(domain = [start, final], title = dict(text=axis.display_name, font=dict(color=randomColor(axis.data[0].mnemonic)))) 
-                i_axes += 1
+        axes = {}
+        i = 0
+        for track in self.tracks_ordered:
+            for axis in track.get_all_axes():
+                i+=1
+                axes["xaxis"+str(i)] = dict(
+                    domain = [start, start + width if start+width <= 1 else 1],
+                    title = dict(
+                        text=axis.display_name,
+                        font=dict(
+                            color=randomColor(axis.data[0].mnemonic) # TODO call a color behavior
+                        )
+                    ), 
+                    **self.axes_template
+                )
             start += width + margin
-        if len(self.tracks_ordered) > 6:
-            warnings.warn("If you need scroll bars, call `display(scrollON())` after rendering the graph. This is a plotly issue and we will fix it eventually.")
-                
-        width = len(self.tracks_ordered) * 200
-        args["width"] = width
-        args["height"] = 600
-        layout = go.Layout(**args).update(**self._gen_style())
-        return layout # this layout is not fully updated!
-
+        if len(self.tracks_ordered) > 6: # TODO tune this number
+            warnings.warn("If you need scroll bars, call `display(scrollON())` after rendering the graph. This is a plotly issue and we will fix it eventually.")   
+        generated_styles = dict(
+            **axes,
+            width=len(self.tracks_ordered) * self.width_per_track,
+        )
+        layout = go.Layout(**generated_styles).update(**self.specified_styles)
+        return layout
     def get_traces(self):
         traces = []
         tree = self.get_unnamed_tree() # really don't know if this is the best way to iterate given we need styling information for trace (its not all in layout) and this object only contains the actual data. 
