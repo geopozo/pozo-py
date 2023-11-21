@@ -71,7 +71,6 @@ class Graph():
     )
 
     # fix track name to axis name # TODO (1)
-    # fix numTracks to numx axis # TODO (2)
     # make width internal calculator so it's not passed TODO (3)
     # calculate number of ticks based on width TODO (4)
     # don't use tree like that
@@ -162,10 +161,11 @@ class Graph():
         i_axes = 1
         for track in self.tracks_ordered:    
             axis_key = "xaxis"
-            for i in range(1, track.count_axes()+1): # may have to seperate above and belo where to name properly
+            for axis in track.get_all_axes(): # may have to seperate above and belo where to name properly
                 axis_key += str(i_axes)
                 final = start + width if start+width <= 1 else 1 # rounding errors
-                args[axis_key] = dict(domain = [start, final], title = dict(text=track.name, font=dict(color=randomColor(track.name)))) # TODO correct name, probably not, need our own? 
+                # This is doing some generating, I want to get it out of the main code TODO
+                args[axis_key] = dict(domain = [start, final], title = dict(text=axis.display_name, font=dict(color=randomColor(axis.data[0].mnemonic)))) 
                 i_axes += 1
             start += width + margin
         if len(self.tracks_ordered) > 6:
