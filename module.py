@@ -146,22 +146,31 @@ class Graph():
         tree = self.get_unnamed_tree()
         num_axes = 1
         for track in tree:
-            for axis in track[0]:
+            for axis in track[0]: # these are... below
                 for data in axis:
                     suffix = str(num_axes)
-                    traces.append(go.Scattergl(x=data.values,
-                        y=data.index,
-                        xaxis='x' + suffix,
-                        yaxis='y',
+                    traces.append(
+                        go.Scattergl(
+                            x=data.values,
+                            y=data.index,
+                            mode='lines',
+                            line=dict(color='blue'),
+                            xaxis='x' + suffix,
+                            yaxis='y',
+                        
                     ))
                 num_axes += 1
-            for axis in track[1]:
+            for axis in track[1]: # these are above
                 for data in axis:
                     suffix = str(num_axes)
-                    traces.append(go.Scattergl(x=data.values,
-                        y=data.index,
-                        xaxis='x' + suffix,
-                        yaxis='y',
+                    traces.append(
+                        go.Scattergl(
+                            x=data.values,
+                            y=data.index,
+                            mode='lines',
+                            line=dict(color='blue'),
+                            xaxis='x' + suffix,
+                            yaxis='y',
                     ))
                 num_axes += 1
         return traces
