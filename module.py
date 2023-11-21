@@ -40,8 +40,7 @@ def randomColor(toNumber = 0):
     ops = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     return ops[random.randint(0, len(ops)-1)]
 
-def scrollON():
-    #return Javascript("alert('hello')")
+def scrollON(): # TODO can we really not just display this directly form here?
     return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflow = 'scroll');''') # Part of Hack #1
 
 # Data must have a y axis, a value axis, and a mnemonic
@@ -54,12 +53,8 @@ class Data():
         return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }
 
 class Graph():
-        
-    # so, take these styles, self them (or deep copy)
-    # some thing are going to be generated automatically
-    # if they already exist in the temple you are supplied, ignore them
     axes_template_default = dict(showgrid=False, zeroline=False)
-    specified_styles_default = dict( # change this to default
+    default_styles_default = dict( # change this to default
         showlegend = False,
         margin = dict(l=5, r=5, t=5, b=5),
         yaxis = dict(
@@ -71,17 +66,17 @@ class Graph():
         plot_bgcolor = "#FFFFFF",
     )
 
-    # calculate number of ticks based on width TODO (4)
-    # don't use tree like that
+
 
     def __init__(self, *args, **kwargs):
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', 200)
-        self.axes_template = copy.deepcopy(self.axes_template_default)
-        self.specified_styles = copy.deepcopy(self.specified_styles_default)
+        self.axes_template = kwargs.get('axes_template', copy.deepcopy(self.axes_template_default))
+        self.default_styles = kwargs.get('default_styles', copy.deepcopy(self.default_styles_default))
         # Random Configuration
-        self.indexOK = kwargs.get('indexOK', False)
+        self.indexOK = kwargs.get('indexOK', False) # Supresses warning about using index, not column.
+                                                    # Probably need a way to conform to index
 
         # Objects
         # A list and its index see NOTE:ORDEREDDICT
@@ -121,10 +116,7 @@ class Graph():
                         self.tracks[data.mnemonic] = [newTrack]
                     self.track_by_id[id(newTrack)] = newTrack
                     
-    def draw(self):
-        layout = self.get_layout()
-        traces = self.get_traces()
-        return go.Figure(data=traces, layout=layout)
+
     def get_named_tree(self):
         result = []
         for track in self.tracks_ordered:
@@ -135,6 +127,10 @@ class Graph():
         for track in self.tracks_ordered:
             result.append(track.get_unnamed_tree())
         return result
+
+    # calculate number of ticks based on width TODO (4)
+    # don't use tree like that
+    # Rendering Functions
     def get_layout(self):
         # default but changeable
         margin = .002
@@ -165,8 +161,9 @@ class Graph():
             **axes,
             width=len(self.tracks_ordered) * self.width_per_track,
         )
-        layout = go.Layout(**generated_styles).update(**self.specified_styles)
+        layout = go.Layout(**generated_styles).update(**self.default_styles)
         return layout
+
     def get_traces(self):
         traces = []
         tree = self.get_unnamed_tree() # really don't know if this is the best way to iterate given we need styling information for trace (its not all in layout) and this object only contains the actual data. 
@@ -202,7 +199,10 @@ class Graph():
                     ))
                 num_axes += 1
         return traces
-            
+    def draw(self):
+        layout = self.get_layout()
+        traces = self.get_traces()
+        return go.Figure(data=traces, layout=layout)
 
 # TODO: how would we accept multiple data
 # What do we do with multiple data?
