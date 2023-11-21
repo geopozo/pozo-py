@@ -192,6 +192,11 @@ class Track():
     def count_axes(self):
         return len(self.axes)
 
+    def get_all_axes(self):
+       return list(itertools.chain(self.axes_below, self.axes_above)) 
+
+
+    ## Ugly
     def get_named_tree(self):
         above = []
         below = []
@@ -208,8 +213,7 @@ class Track():
         for axis in reversed(self.axes_below):
             below.append(axis.get_unnamed_tree())
         return [above, below]
-    def get_all_axes(self):
-       return list(itertools.chain(self.axes_below, self.axes_above)) 
+
 
 
 class Axis():
