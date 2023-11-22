@@ -14,6 +14,8 @@ default_styles_default = dict(
     height = 600,
     plot_bgcolor = "#FFFFFF",
 )
+default_width_per_track = 200
+default_ticks_per_track = 3
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 
@@ -31,7 +33,7 @@ class Graph():
     def __init__(self, *args, **kwargs):
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
-        self.width_per_track = kwargs.get('width_per_track', 200)
+        self.width_per_track = kwargs.get('width_per_track', default_width_per_track)
         self.default_styles = kwargs.get('default_styles', copy.deepcopy(default_styles_default))
         # Random Configuration
         self.indexOK = kwargs.get('indexOK', False) # Supresses warning about using index, not column.
