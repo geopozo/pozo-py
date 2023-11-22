@@ -12,6 +12,7 @@ xaxes_template_default = dict(
     linewidth=2,
     ticks="outside",
     tickwidth=1,
+    automargin=True, # i dunno was trying to create margin, didn't work
     #tickcolor='crimson', # automatic
     ticklen=6,
     tickangle=0,
@@ -26,9 +27,8 @@ xaxes_template_default = dict(
 )
 default_styles_default = dict(
     showlegend = False,
-    margin = dict(l=15, r=15, t=15, b=5),
+    margin = dict(l=15, r=15, t=25, b=5),
     yaxis = dict(
-        autorange='reversed',
         showgrid=True,
         zeroline=False,
         gridcolor="#f0f0f0",
@@ -53,7 +53,7 @@ def scrollON(): # TODO can we really not just display this directly form here?
 class Graph():
     def __init__(self, *args, **kwargs):
         self.yaxis_max = 0
-        self.yaxis_min = 0
+        self.yaxis_min = 30000 # it's a hack, but it'll do
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', default_width_per_track)
@@ -140,8 +140,11 @@ class Graph():
             **axes,
             width=len(self.tracks_ordered) * self.width_per_track, # probably fixed width option?
         )
+
+        #### place some checks in here TOOO (user can edit defaults)
         self.default_styles['yaxis']['maxallowed']= self.yaxis_max
         self.default_styles['yaxis']['minallowed']= self.yaxis_min
+        self.default_styles['yaxis']['range'] = [self.yaxis_max, self.yaxis_min]
         layout = go.Layout(**generated_styles).update(**self.default_styles)
         return layout
 
@@ -183,7 +186,7 @@ class Track():
             self.axes[newAxis.name].append(newAxis)
         else:
             self.axes[newAxis.name] = [newAxis]
-        self.axes_below.append(newAxis)
+        self.axes_above.append(newAxis)
         self.axes_by_id[id(newAxis)] = newAxis
         # end
         
@@ -199,8 +202,14 @@ class Track():
 
     def get_axis_styles(self):
         styles = []
-        for axis in self.get_all_axes():
-            styles.append(axis.get_style())
+        for axis in self.get_lower_axes():
+            style = axis.get_style()
+            style['side'] = "bottom"
+            styles.append(style)
+        for axis in self.get_upper_axes():
+            style = axis.get_style()
+            style['side'] = "top"
+            styles.append(style)
         return styles
 
     
@@ -231,6 +240,7 @@ class Axis():
         color = self.get_color()
         return dict(
             title = dict(
+                standoff=20, # dunno, trying to create margin, didn't work
                 text=self.display_name,
                 font=dict(
                     color=color
