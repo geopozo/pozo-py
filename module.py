@@ -1,10 +1,9 @@
 import plotly.graph_objects as go
 import itertools, copy, warnings
-
 from IPython.display import Javascript # Part of Hack #1
 
 axes_template_default = dict(showgrid=False, zeroline=False)
-default_styles_default = dict( # change this to default
+default_styles_default = dict(
     showlegend = False,
     margin = dict(l=5, r=5, t=5, b=5),
     yaxis = dict(
