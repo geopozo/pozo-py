@@ -10,6 +10,11 @@ xaxes_template_default = dict(
     gridcolor="#f0f0f0",
     showline=True,
     linewidth=2,
+    ticks="outside",
+    tickwidth=1,
+    #tickcolor='crimson', # automatic
+    ticklen=6,
+    tickangle=0,
     # All generated automatically
     #linecolor='#1f77b4',
     #titlefont=dict(
@@ -47,6 +52,8 @@ def scrollON(): # TODO can we really not just display this directly form here?
 
 class Graph():
     def __init__(self, *args, **kwargs):
+        self.yaxis_max = 0
+        self.yaxis_min = 0
         # Essential Configuration
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', default_width_per_track)
@@ -70,10 +77,15 @@ class Graph():
 
                 ## Create Y-Axis
                 # Probably need this idea of flattening y axes
+                # Oof, even max and min here is tough, what if this doesn't exist
                 if self.yaxisname in ar.curves.keys():
                     self.yaxis.append(ar.curves[self.yaxisname].data)
+                    self.yaxis_max = max(self.yaxis_max, ar.curves[self.yaxisname].data.max())
+                    self.yaxis_min = min(self.yaxis_min, ar.curves[self.yaxisname].data.min())
                 else:
                     self.yaxis.append(ar.index)
+                    self.yaxis_max = max(self.yaxis_max, ar.index.max())
+                    self.yaxis_min = min(self.yaxis_min, ar.index.min())
                     if not indexOK:
                         warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
 
@@ -128,6 +140,8 @@ class Graph():
             **axes,
             width=len(self.tracks_ordered) * self.width_per_track, # probably fixed width option?
         )
+        self.default_styles['yaxis']['maxallowed']= self.yaxis_max
+        self.default_styles['yaxis']['minallowed']= self.yaxis_min
         layout = go.Layout(**generated_styles).update(**self.default_styles)
         return layout
 
@@ -214,17 +228,19 @@ class Axis():
         return randomColor(self.data[0].mnemonic) # for now, more options later
 
     def get_style(self):
+        color = self.get_color()
         return dict(
             title = dict(
                 text=self.display_name,
                 font=dict(
-                    color=self.get_color()
+                    color=color
                 )
             ), 
-            linecolor=self.get_color(),
+            linecolor=color,
             tickfont=dict(
-                color=self.get_color(),
+                color=color,
             ),
+            tickcolor=color,
             **self.axis_template,
         )
 
