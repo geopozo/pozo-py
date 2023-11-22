@@ -2,20 +2,36 @@ import plotly.graph_objects as go
 import itertools, copy, warnings
 from IPython.display import Javascript # Part of Hack #1
 
-axes_template_default = dict(showgrid=False, zeroline=False)
+track_margin_default = .004
+track_start_default = .01 
+xaxes_template_default = dict(
+    showgrid=True,
+    zeroline=False,
+    gridcolor="#f0f0f0",
+    showline=True,
+    linewidth=2,
+    # All generated automatically
+    #linecolor='#1f77b4',
+    #titlefont=dict(
+    #    color="#1f77b4"
+    #),
+    #tickfont=dict(
+    #    color="#1f77b4"
+    #)
+)
 default_styles_default = dict(
     showlegend = False,
-    margin = dict(l=5, r=5, t=5, b=5),
+    margin = dict(l=15, r=15, t=15, b=5),
     yaxis = dict(
         autorange='reversed',
-        showgrid=False,
+        showgrid=True,
         zeroline=False,
+        gridcolor="#f0f0f0",
     ),
     height = 600,
     plot_bgcolor = "#FFFFFF",
 )
 default_width_per_track = 200
-default_ticks_per_track = 3
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 
@@ -35,9 +51,10 @@ class Graph():
         self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', default_width_per_track)
         self.default_styles = kwargs.get('default_styles', copy.deepcopy(default_styles_default))
+        self.track_margin = kwargs.get('track_margin', track_margin_default)
+        self.track_start = kwargs.get('track_start', track_start_default)
         # Random Configuration
         self.indexOK = kwargs.get('indexOK', False) # Supresses warning about using index, not column.
-                                                    # Probably need a way to conform to index
 
         # Objects
         # A list and its index see NOTE:ORDEREDDICT
@@ -86,17 +103,16 @@ class Graph():
     ## Rendering Functions
     def get_layout(self):
         # default but changeable
-        margin = .002
-        start = .01 
+ 
         num_tracks = len(self.tracks_ordered)
-        waste_space = start + (num_tracks-1) * margin
+        waste_space = self.track_start + (num_tracks-1) * self.track_margin
         width = (1 - waste_space) / num_tracks
 
         axes = {}
         i = 0
+        start = self.track_start
         
-        # yeah, you can ask track for a bunch of axis structs
-        # you iterate trhough and add
+        # Graph is what organize it into a layout structure
         for track in self.tracks_ordered:
             for style in track.get_axis_styles():
                 i += 1
@@ -105,7 +121,7 @@ class Graph():
                     domain = [start, min(start + width, 1)],
                     **style
                 )
-            start += width + margin
+            start += width + self.track_margin
         if len(self.tracks_ordered) > 6: # TODO tune this number
             warnings.warn("If you need scroll bars, call `display(scrollON())` after rendering the graph. This is a plotly issue and we will fix it eventually.")   
         generated_styles = dict(
@@ -128,7 +144,9 @@ class Graph():
     def draw(self):
         layout = self.get_layout()
         traces = self.get_traces()
-        return go.Figure(data=traces, layout=layout)
+        fig = go.Figure(data=traces, layout=layout)
+        fig.show()
+        display(scrollON()) # This is going to have some CSS mods
 
 class Track():
     # TODO Track also as to take axes
@@ -188,7 +206,7 @@ class Track():
 class Axis():
     def __init__(self, data, **kwargs):
         self.data = data if type(data) == list else [data]
-        self.axis_template = kwargs.get('template', copy.deepcopy(axes_template_default))
+        self.axis_template = kwargs.get('template', copy.deepcopy(xaxes_template_default))
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
         
@@ -200,9 +218,13 @@ class Axis():
             title = dict(
                 text=self.display_name,
                 font=dict(
-                    color=self.get_color() # TODO call a color behavior
+                    color=self.get_color()
                 )
             ), 
+            linecolor=self.get_color(),
+            tickfont=dict(
+                color=self.get_color(),
+            ),
             **self.axis_template,
         )
 
