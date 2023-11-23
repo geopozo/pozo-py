@@ -12,18 +12,18 @@ xaxes_template_default = dict(
     linewidth=2,
     ticks="outside",
     tickwidth=1,
-    automargin=True, # i dunno was trying to create margin, didn't work
-    #tickcolor='crimson', # automatic
     ticklen=6,
     tickangle=0,
-    # All generated automatically
-    #linecolor='#1f77b4',
-    #titlefont=dict(
-    #    color="#1f77b4"
-    #),
-    #tickfont=dict(
-    #    color="#1f77b4"
-    #)
+#   side=['']          # generated
+#   tickcolor=='#???', # generated
+#   linecolor='#???',  # generated
+#   titlefont=dict(
+#       color="#???"   # generated
+#   ),
+#   tickfont=dict(
+#       color="#???"   # generated
+#   )
+#   domain = [?,?]     # generated
 )
 default_styles_default = dict(
     showlegend = False,
@@ -32,9 +32,13 @@ default_styles_default = dict(
         showgrid=True,
         zeroline=False,
         gridcolor="#f0f0f0",
+#       maxallowed=, # generated, can be overwritten here
+#       minallowed=, # generated, can be overwritten here
+#       range=[,], # generated, can be overwritten here
     ),
     height = 600,
     plot_bgcolor = "#FFFFFF",
+#   width=? # automatic
 )
 default_width_per_track = 200
 
@@ -48,7 +52,7 @@ def randomColor(toNumber = 0):
     return ops[random.randint(0, len(ops)-1)]
 
 def scrollON(): # TODO can we really not just display this directly form here?
-    return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflow = 'scroll');''') # Part of Hack #1
+    return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'scroll');''') # Part of Hack #1
 
 class Graph():
     def __init__(self, *args, **kwargs):
@@ -140,12 +144,15 @@ class Graph():
             **axes,
             width=len(self.tracks_ordered) * self.width_per_track, # probably fixed width option?
         )
-
-        #### place some checks in here TOOO (user can edit defaults)
-        self.default_styles['yaxis']['maxallowed']= self.yaxis_max
-        self.default_styles['yaxis']['minallowed']= self.yaxis_min
-        self.default_styles['yaxis']['range'] = [self.yaxis_max, self.yaxis_min]
-        layout = go.Layout(**generated_styles).update(**self.default_styles)
+        styles_modified = copy.deepcopy(self.default_styles)
+        if 'yaxis' in styles_modified:
+            if 'maxallowed' not in styles_modified['yaxis']:
+                styles_modified['yaxis']['maxallowed'] = self.yaxis_max
+            if 'minallowed' not in styles_modified['yaxis']:
+                styles_modified['yaxis']['minallowed'] = self.yaxis_min
+            if 'range' not in styles_modified['yaxis']:
+                styles_modified['yaxis']['range'] = [self.yaxis_max, self.yaxis_min]
+        layout = go.Layout(**generated_styles).update(**styles_modified)
         return layout
 
     def get_traces(self):
@@ -166,8 +173,6 @@ class Graph():
         display(scrollON()) # This is going to have some CSS mods
 
 class Track():
-    # TODO Track also as to take axes
-    # TODO What do do with multiple data
     def __init__(self, data, **kwargs): # {name: data}
         self.name = kwargs.get('name', data.mnemonic) # Gets trackname from the one data
         self.display_name = kwargs.get('display_name', self.name)
