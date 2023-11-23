@@ -2,6 +2,12 @@ import plotly.graph_objects as go
 import itertools, copy, warnings
 from IPython.display import Javascript # Part of Hack #1
 
+####
+####
+#### Style Template/Defaults
+####
+####
+
 track_margin_default = .004
 track_start_default = .01 
 xaxes_template_default = dict(
@@ -42,7 +48,19 @@ default_styles_default = dict(
 )
 default_width_per_track = 200
 
+####
+####
+#### Constants
+####
+####
+
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
+
+####
+####
+#### Helper/Hack Functions
+####
+####
 
 def randomColor(toNumber = 0):
     import random
@@ -54,18 +72,27 @@ def randomColor(toNumber = 0):
 def scrollON(): # TODO can we really not just display this directly form here?
     return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'scroll');''') # Part of Hack #1
 
+####
+####
+#### Graph Class
+####
+####
+
 class Graph():
+
+    ## Constructor
     def __init__(self, *args, **kwargs):
+        yaxis = kwargs.get('yaxis', None)
+        yaxis_name = kwargs.get('yaxis_name',"DEPTH")
+        self.indexOK = kwargs.get('indexOK', False)
+
         self.yaxis_max = 0
         self.yaxis_min = 30000 # it's a hack, but it'll do
         # Essential Configuration
-        self.yaxisname = kwargs.get('yaxisname',"DEPTH")
         self.width_per_track = kwargs.get('width_per_track', default_width_per_track)
         self.default_styles = kwargs.get('default_styles', copy.deepcopy(default_styles_default))
         self.track_margin = kwargs.get('track_margin', track_margin_default)
         self.track_start = kwargs.get('track_start', track_start_default)
-        # Random Configuration
-        self.indexOK = kwargs.get('indexOK', False) # Supresses warning about using index, not column.
 
         # Objects
         # A list and its index see NOTE:ORDEREDDICT
@@ -73,56 +100,73 @@ class Graph():
         self.tracks = {}
         self.track_by_id = {}
         self.yaxis = [] # Why are we storing information about the x and y axis?
+            
+        self.add_data(self, *args, yaxis_name=yaxis_name, yaxix=yaxis)
+
+    ####
+    ####
+    #### Data Adding and Decoding Functions
+    #### Note: I would like a way to detect depth vs range() type index
+    #### And then possibly map a range() to an already existing index #TODO what is this index?
+    #### Maybe a map to y axis function
+    #### Yaxis could be multiple values
+    def add_yaxis(self, yaxis):
+        self.yaxis.append(yaxis)
+        self.yaxis_max = max(self.yaxis_max, yaxis.max())
+        self.yaxis_min = min(self.yaxis_min, yaxis.min())
+    #def set_yaxis(self, yaxis):
+    
+    def add_data(self, *args, **kwargs):
+        yaxis = kwargs.get('yaxis', None) # what if not none
+        yaxis_name = kwargs.get('yaxis_name',"DEPTH")
+        self.indexOK = kwargs.get('indexOK', False)
 
         for ar in args:
-            
             # Process LASio LAS Object
             if str(type(ar)) == LAS_TYPE:
+                self.add_las_object(ar, **kwargs)   
 
-                ## Create Y-Axis
-                # Probably need this idea of flattening y axes
-                # Oof, even max and min here is tough, what if this doesn't exist
-                if self.yaxisname in ar.curves.keys():
-                    self.yaxis.append(ar.curves[self.yaxisname].data)
-                    self.yaxis_max = max(self.yaxis_max, ar.curves[self.yaxisname].data.max())
-                    self.yaxis_min = min(self.yaxis_min, ar.curves[self.yaxisname].data.min())
-                else:
-                    self.yaxis.append(ar.index)
-                    self.yaxis_max = max(self.yaxis_max, ar.index.max())
-                    self.yaxis_min = min(self.yaxis_min, ar.index.min())
-                    if not indexOK:
-                        warnings.warn("No " + self.yaxisname + " column was found in the LAS data, so we're using `las.index`. set ")
+    def add_las_object(self, ar, **kwargs):
+        yaxis = kwargs.get('yaxis', None) # what if not none
+        yaxis_name = kwargs.get('yaxis_name',"DEPTH")
+        self.indexOK = kwargs.get('indexOK', False)
 
-                ## Create Data and Tracks ## Should be separate function
-                for curve in ar.curves:
-                    if curve.mnemonic == self.yaxisname: continue
+        if yaxis is not None:
+            self.add_yaxis(yaxis)
+        elif yaxis_name in ar.curves.keys():
+            self.add_yaxis(ar.curves[yaxis_name].data)
+        else:
+            self.add_yaxis(ar.index)
+            if not self.indexOK:
+                warnings.warn("No yaxis or \"" + yaxis_name + "\" column was found in the LAS data, so we're using `las.index`.")
 
-                    data = Data(self.yaxis[-1], curve.data, curve.mnemonic)
-                    # TODO: need to check if mnemonic is modified, now!
-                    newTrack = Track(data)
+        for curve in ar.curves:
+            if curve.mnemonic == yaxis_name: continue
 
-                    # NOTE:ORDEREDDICT- >1 value per key, but insert order is still maintained
-                    self.tracks_ordered.append(newTrack)
-                    if data.mnemonic in self.tracks:
-                        self.tracks[data.mnemonic].append(newTrack)
-                    else:
-                        self.tracks[data.mnemonic] = [newTrack]
-                    self.track_by_id[id(newTrack)] = newTrack
-                    
-    ## For your info
-    def get_named_tree(self):
-        result = []
-        for track in self.tracks_ordered:
-            result.append(track.get_named_tree())
-        return { 'graph': result }
+            mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
+            data = Data(self.yaxis[-1], curve.data, mnemonic)
+            newTrack = Track(data)
+
+            # NOTE:ORDEREDDICT- >1 value per key, but insert order is still maintained
+            self.tracks_ordered.append(newTrack)
+            if data.mnemonic in self.tracks:
+                self.tracks[data.mnemonic].append(newTrack)
+            else:
+                self.tracks[data.mnemonic] = [newTrack]
+            self.track_by_id[id(newTrack)] = newTrack
+
+    ####
+    ####
+    #### Rendering Functions
+    ####
+    ####
     
-    ## Rendering Functions
     def get_layout(self):
         # default but changeable
  
         num_tracks = len(self.tracks_ordered)
         waste_space = self.track_start + (num_tracks-1) * self.track_margin
-        width = (1 - waste_space) / num_tracks
+        width = (1 - waste_space) / num_tracks # could be /0
 
         axes = {}
         i = 0
@@ -171,7 +215,20 @@ class Graph():
         fig = go.Figure(data=traces, layout=layout)
         fig.show()
         display(scrollON()) # This is going to have some CSS mods
-
+    
+    ####
+    ####
+    #### Utility Functions
+    ####
+    ####
+    
+    ## For your info
+    def get_named_tree(self):
+        result = []
+        for track in self.tracks_ordered:
+            result.append(track.get_named_tree())
+        return { 'graph': result }
+    
 class Track():
     def __init__(self, data, **kwargs): # {name: data}
         self.name = kwargs.get('name', data.mnemonic) # Gets trackname from the one data
