@@ -296,6 +296,18 @@ class Track():
     def get_upper_axes(self):
         return self.axes_above
 
+    ####
+    ####
+    #### Get Axes
+    ####
+    ####
+
+    def get_axes_by_name(self, name): #gtbn
+        axes = []
+        for axis in self.get_all_axes():
+            if axis.name == name: axes.append(axis)
+        return axes
+
     def get_axis_styles(self):
         styles = []
         for axis in self.get_lower_axes():
