@@ -82,6 +82,8 @@ class Graph():
 
     ## Constructor
     def __init__(self, *args, **kwargs):
+        include = kwargs.get('include', [])
+        exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         self.indexOK = kwargs.get('indexOK', False)
@@ -101,7 +103,7 @@ class Graph():
         self.track_by_id = {}
         self.yaxis = [] # Why are we storing information about the x and y axis?
             
-        self.add_data(self, *args, yaxis_name=yaxis_name, yaxix=yaxis)
+        self.add_data(self, *args, **kwargs)
 
     ####
     ####
@@ -117,6 +119,8 @@ class Graph():
     #def set_yaxis(self, yaxis):
     
     def add_data(self, *args, **kwargs):
+        include = kwargs.get('include', [])
+        exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         self.indexOK = kwargs.get('indexOK', False)
@@ -127,6 +131,8 @@ class Graph():
                 self.add_las_object(ar, **kwargs)   
 
     def add_las_object(self, ar, **kwargs):
+        include = kwargs.get('include', [])
+        exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         self.indexOK = kwargs.get('indexOK', False)
@@ -142,7 +148,11 @@ class Graph():
 
         for curve in ar.curves:
             if curve.mnemonic == yaxis_name: continue
+            mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
+            if len(include) != 0 and curve.mnemonic not in include and mnemonic not in include: continue # if there is an include, ignore
+            elif len(exclude) != 0 and curve.mnemonic in exclude or mnemonic in exclude: continue 
 
+            
             mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
             data = Data(self.yaxis[-1], curve.data, mnemonic)
             newTrack = Track(data)
@@ -213,6 +223,7 @@ class Graph():
         layout = self.get_layout()
         traces = self.get_traces()
         fig = go.Figure(data=traces, layout=layout)
+        
         fig.show()
         display(scrollON()) # This is going to have some CSS mods
     
