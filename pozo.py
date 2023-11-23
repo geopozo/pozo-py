@@ -70,7 +70,7 @@ def randomColor(toNumber = 0):
     return ops[random.randint(0, len(ops)-1)]
 
 def scrollON(): # TODO can we really not just display this directly form here?
-    return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'scroll');''') # Part of Hack #1
+    return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');''') # Part of Hack #1
 
 ####
 ####
