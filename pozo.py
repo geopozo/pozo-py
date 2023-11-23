@@ -99,25 +99,34 @@ class Graph():
         # Objects
         # A list and its index see NOTE:ORDEREDDICT
         self.tracks_ordered = [] 
-        self.tracks = {}
-        self.track_by_id = {}
+        self.tracks_by_id = {}
+
         self.yaxis = [] # Why are we storing information about the x and y axis?
-            
+
         self.add_data(self, *args, **kwargs)
 
     ####
     ####
     #### Data Adding and Decoding Functions
-    #### Note: I would like a way to detect depth vs range() type index
-    #### And then possibly map a range() to an already existing index #TODO what is this index?
-    #### Maybe a map to y axis function
-    #### Yaxis could be multiple values
+    ####
+    ####
+
+    def add_track(self, track):
+        if id(track) in self.tracks_by_id: return
+        self.tracks_ordered.append(track)
+        self.tracks_by_id[id(track)] = track
+
+    def remove_track(self, track):
+        if id(track) not in self.tracks_by_id: return
+        del self.tracks_by_id[id(track)]
+        self.tracks_ordered.remove(track)
+
     def add_yaxis(self, yaxis):
         self.yaxis.append(yaxis)
         self.yaxis_max = max(self.yaxis_max, yaxis.max())
         self.yaxis_min = min(self.yaxis_min, yaxis.min())
     #def set_yaxis(self, yaxis):
-    
+
     def add_data(self, *args, **kwargs):
         include = kwargs.get('include', [])
         exclude = kwargs.get('exclude', [])
@@ -152,25 +161,20 @@ class Graph():
             if len(include) != 0 and curve.mnemonic not in include and mnemonic not in include: continue # if there is an include, ignore
             elif len(exclude) != 0 and curve.mnemonic in exclude or mnemonic in exclude: continue 
 
-            
+
             mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
             data = Data(self.yaxis[-1], curve.data, mnemonic)
             newTrack = Track(data)
 
             # NOTE:ORDEREDDICT- >1 value per key, but insert order is still maintained
-            self.tracks_ordered.append(newTrack)
-            if data.mnemonic in self.tracks:
-                self.tracks[data.mnemonic].append(newTrack)
-            else:
-                self.tracks[data.mnemonic] = [newTrack]
-            self.track_by_id[id(newTrack)] = newTrack
+            self.add_track(newTrack)
 
     ####
     ####
     #### Rendering Functions
     ####
     ####
-    
+
     def get_layout(self):
         # default but changeable
  
@@ -181,7 +185,7 @@ class Graph():
         axes = {}
         i = 0
         start = self.track_start
-        
+
         # Graph is what organize it into a layout structure
         for track in self.tracks_ordered:
             for style in track.get_axis_styles():
@@ -226,32 +230,51 @@ class Graph():
         
         fig.show()
         display(scrollON()) # This is going to have some CSS mods
-    
+
+    ####
+    ####
+    #### Get Tracks
+    ####
+    ####
+
+    def get_track_by_index(self, index): #gtbi
+        index -=1
+        if index >= len(self.tracks_ordered) or index < 0:
+            raise IndexError("Track index out of range") # I think
+        return self.tracks_ordered[index]
+
+    def get_tracks_by_name(self, name): #gtbn
+        tracks = []
+        for track in self.tracks_ordered:
+            for axis in track.get_all_axes():
+                if axis.name == name: tracks.append(track)
+        return tracks
+
     ####
     ####
     #### Utility Functions
     ####
     ####
-    
+
     ## For your info
     def get_named_tree(self):
         result = []
         for track in self.tracks_ordered:
             result.append(track.get_named_tree())
         return { 'graph': result }
-    
+
 class Track():
     def __init__(self, data, **kwargs): # {name: data}
         self.name = kwargs.get('name', data.mnemonic) # Gets trackname from the one data
         self.display_name = kwargs.get('display_name', self.name)
-        
+
 
         # This is really one object (but we can't private in python)
         self.axes = {}
         self.axes_below = [] # Considered "before" axes_above list
         self.axes_above = []
         self.axes_by_id = {}
-        
+
         newAxis = Axis(data)
 
         ## add_axis function
@@ -262,7 +285,7 @@ class Track():
         self.axes_above.append(newAxis)
         self.axes_by_id[id(newAxis)] = newAxis
         # end
-        
+
     def count_axes(self):
         return len(self.axes)
 
@@ -285,7 +308,7 @@ class Track():
             styles.append(style)
         return styles
 
-    
+
     ## FYI
     def get_named_tree(self):
         above = []
@@ -305,7 +328,7 @@ class Axis():
         self.axis_template = kwargs.get('template', copy.deepcopy(xaxes_template_default))
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
-        
+
     def get_color(self):
         return randomColor(self.data[0].mnemonic) # for now, more options later
 
