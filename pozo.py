@@ -277,30 +277,60 @@ class Track():
 
         newAxis = Axis(data)
 
-        ## add_axis function
-        if newAxis.name in self.axes:
-            self.axes[newAxis.name].append(newAxis)
+        self.add_axis(newAxis)
+        
+    def add_axis(self, axis, position=1):
+        if position == 0:
+            raise Exception("Position must be > or < 0")
+        if id(axis) in self.axes_by_id:
+            return
+        
+        if axis.name in self.axes:
+            self.axes[axis.name].append(axis)
         else:
-            self.axes[newAxis.name] = [newAxis]
-        self.axes_above.append(newAxis)
-        self.axes_by_id[id(newAxis)] = newAxis
-        # end
+            self.axes[axis.name] = [axis]
+        
+        if position > 0:
+            if position >= len(self.axes_above):
+                self.axes_above.append(axis)
+            self.axes_above.insert(position-1, axis)
+        else:
+            position = -position
+            if position >= len(self.axes_below):
+                self.axes_below.append(axis)
+            self.axes_below.insert(position-1, axis)
+        
+        self.axes_by_id[id(axis)] = axis
+        
+    def remove_axis(self, axis):
+        if id(axis) not in self.axes_by_id:
+            return
+        del self.axes_by_id[id(axis)]
+        self.axes[axis.name].remove(axis)
+        if len(self.axes[axis.name]) == 0:
+            del self.axes[axis.name]
+        try:
+            self.axes_below.remove(axis)
+        except ValueError:
+            self.axes_above.remove(axis)
+            pass
 
+    
     def count_axes(self):
         return len(self.axes)
-
+    
+    ####
+    ####
+    #### Get Axes
+    ####
+    ####
+    
     def get_all_axes(self):
         return list(itertools.chain(self.axes_below, self.axes_above)) 
     def get_lower_axes(self):
         return self.axes_below
     def get_upper_axes(self):
         return self.axes_above
-
-    ####
-    ####
-    #### Get Axes
-    ####
-    ####
 
     def get_axes_by_name(self, name): #gtbn
         axes = []
