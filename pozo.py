@@ -103,7 +103,7 @@ class Graph():
 
         self.yaxis = [] # Why are we storing information about the x and y axis?
 
-        self.add_data(self, *args, **kwargs)
+        self.add_data_as_track(self, *args, **kwargs)
 
     ####
     ####
@@ -127,7 +127,7 @@ class Graph():
         self.yaxis_min = min(self.yaxis_min, yaxis.min())
     #def set_yaxis(self, yaxis):
 
-    def add_data(self, *args, **kwargs):
+    def add_data_as_track(self, *args, **kwargs): # as track
         include = kwargs.get('include', [])
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
@@ -250,6 +250,27 @@ class Graph():
                 if axis.name == name: tracks.append(track)
         return tracks
 
+    ####
+    ####
+    #### Modify Tracks
+    ####
+    ####
+    def combine_tracks(self, destination, tracks):
+        if not isinstance(tracks, list):
+            tracks = [tracks]
+        if id(destination) not in self.tracks_by_id:
+            raise Exception("Destination track does not exist")
+        for track in tracks:
+            print("One track being added")
+            if id(track) in self.tracks_by_id:
+                self.remove_track(track)
+            for lower in track.get_lower_axes():
+                destination.add_axis(lower, position=-1)
+            for upper in track.get_upper_axes():
+                destination.add_axis(upper, position=1)
+
+    #def combine_tracks_by_index(self, index, indices)
+    #def separate_axis
     ####
     ####
     #### Utility Functions
