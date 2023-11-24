@@ -9,7 +9,15 @@ from IPython.display import Javascript # Part of Hack #1
 ####
 
 track_margin_default = .004
-track_start_default = .01 
+track_start_default = .01
+
+xaxes_off_axis = dict( # no way to override this global
+    anchor="free",
+#   autoshift=True, # doesn't work for xaxis
+#   position=1, # generated
+#   overlaying="x" # generated
+)
+
 xaxes_template_default = dict(
     showgrid=True,
     zeroline=False,
@@ -38,11 +46,12 @@ default_styles_default = dict(
         showgrid=True,
         zeroline=False,
         gridcolor="#f0f0f0",
+        domain=[.2,.8],
 #       maxallowed=, # generated, can be overwritten here
 #       minallowed=, # generated, can be overwritten here
 #       range=[,], # generated, can be overwritten here
     ),
-    height = 600,
+    height = 900,
     plot_bgcolor = "#FFFFFF",
 #   width=? # automatic
 )
@@ -183,18 +192,21 @@ class Graph():
         width = (1 - waste_space) / num_tracks # could be /0
 
         axes = {}
-        i = 0
         start = self.track_start
 
         # Graph is what organize it into a layout structure
+        i = 1
         for track in self.tracks_ordered:
-            for style in track.get_axis_styles():
-                i += 1
+            print(f"Graph asking {i}th axis")
+            for style in track.get_axis_styles(i):
                 # Style shouldn't have a domain members
                 axes["xaxis" + str(i)] = dict(
                     domain = [start, min(start + width, 1)],
                     **style
                 )
+                display("xaxis" + str(i))
+                display(axes["xaxis" + str(i)])
+                i += 1
             start += width + self.track_margin
         if len(self.tracks_ordered) > 6: # TODO tune this number
             warnings.warn("If you need scroll bars, call `display(scrollON())` after rendering the graph. This is a plotly issue and we will fix it eventually.")   
@@ -261,7 +273,6 @@ class Graph():
         if id(destination) not in self.tracks_by_id:
             raise Exception("Destination track does not exist")
         for track in tracks:
-            print("One track being added")
             if id(track) in self.tracks_by_id:
                 self.remove_track(track)
             for lower in track.get_lower_axes():
@@ -362,15 +373,24 @@ class Track():
             if axis.name == name: axes.append(axis)
         return axes
 
-    def get_axis_styles(self):
+    def get_axis_styles(self, start_axis = 0):
         styles = []
-        for axis in self.get_lower_axes():
-            style = axis.get_style()
+        print(f'Im track, My parents axis is {start_axis}')
+        total_axes = 0
+        for i, axis in enumerate(self.get_lower_axes()):
+            parent_axis = 0 if not i or not start_axis else start_axis
+            style = axis.get_style(parent_axis)
             style['side'] = "bottom"
             styles.append(style)
-        for axis in self.get_upper_axes():
-            style = axis.get_style()
+            total_axes += 1
+        for i, axis in enumerate(self.get_upper_axes()):
+            parent_axis = 0
+            if i and start_axis:
+                parent_axis = start_axis + total_axes
+            style = axis.get_style(parent_axis)
             style['side'] = "top"
+            if parent_axis:
+                style['position'] = .85 + .15*(i/3)
             styles.append(style)
         return styles
 
@@ -398,11 +418,11 @@ class Axis():
     def get_color(self):
         return randomColor(self.data[0].mnemonic) # for now, more options later
 
-    def get_style(self):
+    def get_style(self, parent_axis):
         color = self.get_color()
-        return dict(
+        ret = dict(
             title = dict(
-                standoff=20, # dunno, trying to create margin, didn't work
+                standoff=5,
                 text=self.display_name,
                 font=dict(
                     color=color
@@ -415,6 +435,12 @@ class Axis():
             tickcolor=color,
             **self.axis_template,
         )
+        off_axis = {}
+        if parent_axis:
+            off_axis = copy.deepcopy(xaxes_off_axis)
+            off_axis["overlaying"] = "x" + str(parent_axis)
+        return ret | off_axis # >=python 3.9
+
 
     def render_traces(self, axis_number): ## is there an update trace?
     # TODO should create several traces
