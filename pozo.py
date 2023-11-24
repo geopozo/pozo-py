@@ -300,35 +300,29 @@ class Track():
         
         self.add_axis(newAxis)
         
+        
     def add_axis(self, axis, position=1):
-        print(f"Adding axis at position {position}")
         if position == 0:
-            print("Bad Position")
             raise Exception("Position must be > or < 0")
         if id(axis) in self.axes_by_id:
-            print("Axis already exists")
             return
         
         if axis.name in self.axes:
-            print(f"Found axis with name {axis.name}")
             self.axes[axis.name].append(axis)
         else:
-            print(f"Creating new axes set with name {axis.name}")
             self.axes[axis.name] = [axis]
         
         if position > 0:
-            print("Axis above!")
             if position >= len(self.axes_above):
-                print("Appending because position is too high")
                 self.axes_above.append(axis)
-            self.axes_above.insert(position-1, axis)
+            else:
+                self.axes_above.insert(position-1, axis)
         else:
             position = -position
-            print(f"Switching sign {position}")
             if position >= len(self.axes_below):
-                print("Appending because position is too high")
                 self.axes_below.append(axis)
-            self.axes_below.insert(position-1, axis)
+            else:
+                self.axes_below.insert(position-1, axis)
         
         self.axes_by_id[id(axis)] = axis
         
