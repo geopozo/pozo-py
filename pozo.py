@@ -8,19 +8,17 @@ from IPython.display import Javascript # Part of Hack #1
 ####
 ####
 
+### For track widths
 track_margin_default = .004
 track_start_default = .01
 
+### For heigh sizing
 height_default = 900
 
-axis_label_height = 60 
-# 60 makes the stacking look even
-# less than sixty and the second axis is too high
-# it would work perfectly if we generated an error term
-# that was proportational to distance from 60
+axis_label_height = 60
 
 
-xaxes_off_axis = dict( # no way to override this global
+xaxes_off_axis = dict(
     anchor="free",
 #   autoshift=True, # doesn't work for xaxis
 #   position=1,     # generated
@@ -55,10 +53,10 @@ default_styles_default = dict(
         showgrid=True,
         zeroline=False,
         gridcolor="#f0f0f0",
-        domain=[0,.8], # needs to be generated TODO
-#       maxallowed=, # generated, can be overwritten here
-#       minallowed=, # generated, can be overwritten here
-#       range=[,], # generated, can be overwritten here
+#       domain=[0,.8], # generated
+#       maxallowed=,    # generated, can be overwritten here
+#       minallowed=,    # generated, can be overwritten here
+#       range=[,],      # generated, can be overwritten here
     ),
     height = height_default,
     plot_bgcolor = "#FFFFFF",
@@ -66,12 +64,9 @@ default_styles_default = dict(
 )
 default_width_per_track = 200
 
-def calculate_domain(num_axes):
-    proportion_per_axis = axis_label_height / height_default 
-    height_of_graph = 1 - (num_axes * proportion_per_axis)
-    print(f"Proportion per Axis: {proportion_per_axis}, Height of Graph: {height_of_graph}")
-    #rror = proportion_per_axis * 
-    return height_of_graph
+def calculate_axes_height(num_axes):
+    proportion_per_axis = axis_label_height / height_default
+    return num_axes * proportion_per_axis
 
 ####
 ####
@@ -204,6 +199,8 @@ class Graph():
         # default but changeable
  
         num_tracks = len(self.tracks_ordered)
+        if not num_tracks:
+            raise Exception("There are no tracks, this could return a blank layout tho")
         waste_space = self.track_start + (num_tracks-1) * self.track_margin
         width = (1 - waste_space) / num_tracks # could be /0
 
@@ -217,10 +214,12 @@ class Graph():
         for track in self.tracks_ordered: # must calculate
             max_axes_bottom = max(len(track.get_lower_axes())-1, max_axes_bottom)
             max_axes_top = max(len(track.get_upper_axes())-1, max_axes_top)
-        graph_end_pos = calculate_domain(max_axes_top)
+        domain = [
+            calculate_axes_height(max_axes_bottom),
+            1 - calculate_axes_height(max_axes_top)
+        ]
         for track in self.tracks_ordered:
-            print(f"Graph asking for track w/ starts with {i}th axis")
-            for style in track.get_axis_styles(i, graph_end_pos=graph_end_pos):
+            for style in track.get_axis_styles(i, domain=domain):
                 # Style shouldn't have a domain members
                 axes["xaxis" + str(i)] = dict(
                     domain = [start, min(start + width, 1)],
@@ -237,6 +236,7 @@ class Graph():
             width=len(self.tracks_ordered) * self.width_per_track, # probably fixed width option?
         )
         styles_modified = copy.deepcopy(self.default_styles)
+        # Don't love this generation
         if 'yaxis' in styles_modified:
             if 'maxallowed' not in styles_modified['yaxis']:
                 styles_modified['yaxis']['maxallowed'] = self.yaxis_max
@@ -245,7 +245,7 @@ class Graph():
             if 'range' not in styles_modified['yaxis']:
                 styles_modified['yaxis']['range'] = [self.yaxis_max, self.yaxis_min]
             if 'domain' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['domain'] = [0, calculate_domain(max_axes_top)]
+                styles_modified['yaxis']['domain'] = domain
         layout = go.Layout(**generated_styles).update(**styles_modified)
         return layout
 
@@ -336,7 +336,7 @@ class Track():
         self.add_axis(newAxis)
         
         
-    def add_axis(self, axis, position=1):
+    def add_axis(self, axis, position=-1):
         if position == 0:
             raise Exception("Position must be > or < 0")
         if id(axis) in self.axes_by_id:
@@ -397,7 +397,7 @@ class Track():
             if axis.name == name: axes.append(axis)
         return axes
 
-    def get_axis_styles(self, start_axis = 0, graph_end_pos = 1):
+    def get_axis_styles(self, start_axis = 0, domain = [0, 1]):
         styles = []
         #print(f'Im track, My parents axis is {start_axis}')
         total_axes = 0
@@ -405,6 +405,8 @@ class Track():
             parent_axis = 0 if not i or not start_axis else start_axis
             style = axis.get_style(parent_axis)
             style['side'] = "bottom"
+            if parent_axis:
+                style['position'] = (domain[0])*((i-1)/(len(self.get_lower_axes())-1))
             styles.append(style)
             total_axes += 1
         for i, axis in enumerate(self.get_upper_axes()):
@@ -414,8 +416,7 @@ class Track():
             style = axis.get_style(parent_axis)
             style['side'] = "top"
             if parent_axis:
-                style['position'] = graph_end_pos + (1-graph_end_pos)*(i/(len(self.get_upper_axes())-1)) 
-                print(f'Positioning: Axis number: {i}, graph_end_pos: {graph_end_pos}. position: {style["position"]}')
+                style['position'] = domain[1] + (1-domain[1])*(i/(len(self.get_upper_axes())-1)) 
             styles.append(style)
         return styles
 
