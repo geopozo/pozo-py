@@ -1,0 +1,82 @@
+Our Visualization Library:
+- Next
+  # need to properly stack axes w/ dynamic margins
+    -- # fix combine order
+    -- # separate everything into different files
+    -- refactor style (proper defaulting + overrides) (call it all render)
+
+    -- Refactor number calculation (add debugging points, deal with changes in size)
+    -- Don't allow more than 4 axis!
+    -- axis on both sides
+    -- what to do when any of these things are called independetly
+  # need to interpret how we are referring to the axis/track (by name, by position, by object, it should be automatic)
+  -- get axis/get track should have one function
+  -- should axis/tracks point at their parents? I think so, and we should have a delete operator
+  -- gotta deal with all of the ways we delete it
+  -- what happens if you delete the underlying data?
+  -- can we make that shit immutable (unless you delete... the axis?... or the trace?...)
+  -- recalibrate y axis (should this happen during rendering)
+  # function to flip axis
+  # function to reorder axes
+  # A separate style object
+  - Combine Axes into one xaxis
+  - Design Review with Design Helper Functions
+  - Combine Two Figures (Overlow, Concatenate)
+  - Test with title
+  - Add ndarray
+  - Add xarray
+  - Add pandas
+  - Add welly well
+  - Add welly project
+  - Steven's Tops
+  - Other categorical data
+  - Functions for accessing dictionary
+  - Categories
+  - need to catch layout change and set ticks (auto nticks doesn't work, no tickmode kinda works, wish i knew what it fucking was)
+  - impossible to get yaxis lines if all yaxis anchored to the same thing
+  - Concatenate should be default figure behavior, but there could be a match mnemonic directive
+- Structural Issues
+ - How do we deal with y axis that are different/missing etc
+ - set Y limits and don't use autorange=reversed
+- Datahealth Visualization (different than tracks)
+- Documentation, Docstrings, Tags
+- Basic Displayers
+    - We need to steal clicks and write clicks
+    - You can also add lines
+    - You can also shade depths
+    - Be able to save visualizations (obviously)
+    - But apply that saved visualization to other data? And to include adding and removing curves
+    - Margin's on axis
+- Change depth/hide/remove/etc visualizations easily
+- Calculate Chatter
+- Convert to widget and include a pause rendering
+
+
+Data Structure Enhancements:
+- Adding notes on depths
+- Adding on depts on curves
+- Adding ranges
+- Alternative fileformat, LivingLasFiles (versions)
+- Curves could be "add to las file" or not
+- Welly Based?
+- Quality checks
+
+Database Enhancements:
+- Browse Mnemonics, Their Relationships, and Recipts for them, Tools, Tolerances, and Ranges
+
+Jupyter Enhancements:
+- Las files in their own tab (some kind of versioning/original system)
+- Explore las files, menumonics, adn their meanings
+- All the just typical juptyer enhancements
+
+Plotly Enhancements:
+- Better hover 
+- Polygons
+- Separate Legends
+- Add markers
+- mode bar needs to be mine
+- mode bar open/close
+- more options
+
+read plotly, all of it, yjs, js, python, juperlab, dash, dash-lab
+your living las object will be the structure
