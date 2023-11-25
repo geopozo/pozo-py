@@ -127,7 +127,7 @@ class Graph():
 
     ####
     ####
-    #### Data Adding and Decoding Functions
+    #### Basic Add/Remove Track
     ####
     ####
 
@@ -136,15 +136,74 @@ class Graph():
         self.tracks_ordered.append(track)
         self.tracks_by_id[id(track)] = track
 
-    def remove_track(self, track):
+    def remove_track(self, track): # shoudl take track, name of track, or name of mnemonic. # should return truacks if you want them
         if id(track) not in self.tracks_by_id: return
         del self.tracks_by_id[id(track)]
         self.tracks_ordered.remove(track)
 
+   ####
+    ####
+    #### Get Tracks
+    ####
+    ####
+
+    def get_tracks(self, selectors): #doesn't support slices
+        tracks = []
+        try:
+            test = iter(selectors)
+        except Exception as e:
+            selectors = [selectors]
+        for selector in selectors:
+            if isinstance(selector, int):
+                selector -=1
+                if selector >= len(self.tracks_ordered) or selector < 0:
+                    raise IndexError("Track index out of range")
+                tracks.append(self.tracks_ordered[index])
+            elif isinstances(selector, str):
+                for track in self.tracks_ordered:
+                    if track.has_axis(selector):
+                        tracks.append(track)
+            elif isinstance(selector, Track): # should we just return it? weird, shouldn't allow this? i dunno.
+                tracks.append(selector)
+        if len(tracks) == 0:
+            return None
+        return tracks
+
+    def get_track(self, selector, match=0):
+        tracks = self.get_tracks(selector)
+        if match >= len(tracks):
+            return None
+        return tracks[match]
+
+    ####
+    ####
+    #### Modify Tracks
+    ####
+    ####
+
+    def combine_tracks(self, destination, tracks):
+        if not isinstance(tracks, list):
+            tracks = [tracks]
+        if id(destination) not in self.tracks_by_id:
+            raise Exception("Destination track does not exist")
+        for track in tracks:
+            if id(track) in self.tracks_by_id:
+                self.remove_track(track)
+            for lower in track.get_lower_axes():
+                destination.add_axis(lower, position=-1000)
+            for upper in track.get_upper_axes():
+                destination.add_axis(upper, position=1000)
+
+    
     def add_yaxis(self, yaxis):
-        self.yaxis.append(yaxis)
-        self.yaxis_max = max(self.yaxis_max, yaxis.max())
-        self.yaxis_min = min(self.yaxis_min, yaxis.min())
+        if yaxis not in self.yaxis:
+            self.yaxis.append(yaxis) 
+            # Do we really need to to store the y axis? # Would all this be better done at render time
+            # Only way to deal with yaxis changing is to do it at render time
+            # Also, I don't want to store y axises
+            # Maybe we can do y axis analysis
+            self.yaxis_max = max(self.yaxis_max, yaxis.max()) # O(n), but god dammit this thing is ordered
+            self.yaxis_min = min(self.yaxis_min, yaxis.min()) # O(n), but god dammit this thing is ordered
     #def set_yaxis(self, yaxis):
 
     def add_data_as_track(self, *args, **kwargs): # as track
@@ -267,45 +326,7 @@ class Graph():
         fig.show()
         display(scrollON()) # This is going to have some CSS mods
 
-    ####
-    ####
-    #### Get Tracks
-    ####
-    ####
-
-    def get_track_by_index(self, index): #gtbi
-        index -=1
-        if index >= len(self.tracks_ordered) or index < 0:
-            raise IndexError("Track index out of range") # I think
-        return self.tracks_ordered[index]
-
-    def get_tracks_by_name(self, name): #gtbn
-        tracks = []
-        for track in self.tracks_ordered:
-            for axis in track.get_all_axes():
-                if axis.name == name: tracks.append(track)
-        return tracks
-
-    ####
-    ####
-    #### Modify Tracks
-    ####
-    ####
-    def combine_tracks(self, destination, tracks):
-        if not isinstance(tracks, list):
-            tracks = [tracks]
-        if id(destination) not in self.tracks_by_id:
-            raise Exception("Destination track does not exist")
-        for track in tracks:
-            if id(track) in self.tracks_by_id:
-                self.remove_track(track)
-            for lower in track.get_lower_axes():
-                destination.add_axis(lower, position=-1000)
-            for upper in track.get_upper_axes():
-                destination.add_axis(upper, position=1000)
-
-    #def combine_tracks_by_index(self, index, indices)
-    #def separate_axis
+ 
     ####
     ####
     #### Utility Functions

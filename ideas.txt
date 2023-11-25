@@ -1,14 +1,14 @@
 Our Visualization Library:
 - Next
-  # need to properly stack axes w/ dynamic margins
-    -- # fix combine order
-    -- # separate everything into different files
-    -- refactor style (proper defaulting + overrides) (call it all render)
+    -- refactor a bit function order
+    -- change naming of functions?
+    -- seperate styling and defaults into seperate file called "style.py"
+    -- all style calculations and modifcations now done in object
 
-    -- Refactor number calculation (add debugging points, deal with changes in size)
+    -- test changes of size
     -- Don't allow more than 4 axis!
     -- axis on both sides
-    -- what to do when any of these things are called independetly
+    -- what to do when any of these render functions are called independetly
   # need to interpret how we are referring to the axis/track (by name, by position, by object, it should be automatic)
   -- get axis/get track should have one function
   -- should axis/tracks point at their parents? I think so, and we should have a delete operator
@@ -23,6 +23,8 @@ Our Visualization Library:
   - Design Review with Design Helper Functions
   - Combine Two Figures (Overlow, Concatenate)
   - Test with title
+  - Basic Styling Functions
+  - More documentation?
   - Add ndarray
   - Add xarray
   - Add pandas
