@@ -125,93 +125,7 @@ class Graph():
 
         self.process_data(self, *args, **kwargs)
 
-    ####
-    ####
-    #### Basic Add/Remove Track
-    ####
-    ####
-
-    def add_track(self, track):
-        if id(track) in self.tracks_by_id: return
-        self.tracks_ordered.append(track)
-        self.tracks_by_id[id(track)] = track
-
-    def remove_track(self, track):
-        tracks = self.get_tracks(track)
-        if tracks is None: return None
-        for track in tracks:
-            if id(track) not in self.tracks_by_id: continue
-            del self.tracks_by_id[id(track)]
-            self.tracks_ordered.remove(track)
-        return tracks
-
-    ####
-    ####
-    #### Get Tracks
-    ####
-    ####
-
-    def get_tracks(self, selectors, ignore_orphans=True):
-        tracks = []
-        try:
-            test = iter(selectors)
-        except Exception as e:
-            selectors = [selectors]
-        for selector in selectors:
-            if isinstance(selector, int):
-                selector -=1
-                if selector >= len(self.tracks_ordered) or selector < 0:
-                    raise IndexError("Track index out of range")
-                tracks.append(self.tracks_ordered[index])
-            elif isinstances(selector, str):
-                for track in self.tracks_ordered:
-                    if track.has_axis(selector):
-                        tracks.append(track)
-            elif isinstance(selector, Track):
-                if id(selector) in self.tracks_by_id or not ignore_orphans:
-                    tracks.append(selector)
-        if len(tracks) == 0:
-            return None
-        return tracks
-
-    def get_track(self, selector, match=0):
-        tracks = self.get_tracks(selector)
-        if match >= len(tracks):
-            return None
-        return tracks[match]
-
-    ####
-    ####
-    #### Modify Tracks
-    ####
-    ####
-
-    def combine_tracks(self, destination, tracks):
-        destination = self.get_track(destination)
-        if destination is None: raise Exception("Destination track does not exist")
-        tracks = self.get_tracks(tracks, ignore_orphans=False)
-        if tracks is None: return    
-        for track in tracks:
-            if id(track) in self.tracks_by_id:
-                self.remove_track(track)
-            for lower in track.get_lower_axes():
-                destination.add_axis(lower, position=-1000)
-            for upper in track.get_upper_axes():
-                destination.add_axis(upper, position=1000)
-
-    # DEPRECATED
-    def add_yaxis(self, yaxis):
-        if yaxis not in self.yaxis:
-            self.yaxis.append(yaxis) 
-            # Do we really need to to store the y axis? # Would all this be better done at render time
-            # Only way to deal with yaxis changing is to do it at render time
-            # Also, I don't want to store y axises
-            # Maybe we can do y axis analysis
-            self.yaxis_max = max(self.yaxis_max, yaxis.max()) # O(n), but god dammit this thing is ordered
-            self.yaxis_min = min(self.yaxis_min, yaxis.min()) # O(n), but god dammit this thing is ordered
-    # TODO TODO TODO TODO TODO 
-
-    def process_data(self, *args, **kwargs): # as track
+    def process_data(self, *args, **kwargs):
         include = kwargs.get('include', [])
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
@@ -220,7 +134,14 @@ class Graph():
         for ar in args:
             # Process LASio LAS Object
             if str(type(ar)) == LAS_TYPE:
-                self.add_las_object(ar, **kwargs)   
+                self.add_las_object(ar, **kwargs)
+            # Process Data
+            # Process Track
+            # Process Axis
+            # Process Numpy
+            # Process Welly
+            # Process Panda
+            # Process XArray
 
     def add_las_object(self, ar, **kwargs):
         include = kwargs.get('include', [])
@@ -250,6 +171,85 @@ class Graph():
             newTrack = Track(data)
 
             self.add_track(newTrack)
+
+    #### 
+    #### 
+    #### Basic Add-Get(s)-Remove Track
+    #### 
+    #### 
+
+    def add_track(self, track):
+        if id(track) in self.tracks_by_id: return
+        self.tracks_ordered.append(track)
+        self.tracks_by_id[id(track)] = track
+
+    def get_tracks(self, selectors, ignore_orphans=True): # add cap
+        tracks = []
+        try:
+            test = iter(selectors)
+        except Exception as e:
+            selectors = [selectors]
+        for selector in selectors:
+            if isinstance(selector, int):
+                selector -=1
+                if selector >= len(self.tracks_ordered) or selector < 0:
+                    raise IndexError("Track index out of range")
+                tracks.append(self.tracks_ordered[index])
+            elif isinstance(selector, str) or isinstance(selector, Axis):
+                for track in self.tracks_ordered:
+                    if track.has_axis(selector):
+                        tracks.append(track)
+            elif isinstance(selector, Track):
+                if id(selector) in self.tracks_by_id or not ignore_orphans:
+                    tracks.append(selector)
+        if len(tracks) == 0:
+            return None
+        return tracks
+
+    def get_track(self, selector, match=0):
+        tracks = self.get_tracks(selector)
+        if match >= len(tracks):
+            return None
+        return tracks[match]
+
+    def remove_tracks(self, tracks):
+        tracks = self.get_tracks(tracks)
+        if tracks is None: return None
+        for track in tracks:
+            if id(track) not in self.tracks_by_id: continue
+            del self.tracks_by_id[id(track)]
+            self.tracks_ordered.remove(track)
+        return tracks
+
+    ####
+    ####
+    #### Modify Tracks
+    ####
+    ####
+
+    def combine_tracks(self, destination, tracks):
+        destination = self.get_track(destination)
+        if destination is None: raise Exception("Destination track does not exist")
+        tracks = self.get_tracks(tracks, ignore_orphans=False)
+        if tracks is None: return    
+        for track in tracks:
+            if id(track) in self.tracks_by_id:
+                self.remove_track(track)
+            for lower in track.get_lower_axes():
+                destination.add_axis(lower, position=-1000)
+            for upper in track.get_upper_axes():
+                destination.add_axis(upper, position=1000)
+
+    # DEPRECATED, WON'T WORK
+    #def add_yaxis(self, yaxis):
+    #    if yaxis not in self.yaxis:
+    #        self.yaxis.append(yaxis) 
+            # Do we really need to to store the y axis? # Would all this be better done at render time
+            # Only way to deal with yaxis changing is to do it at render time
+            # Also, I don't want to store y axises
+            # Maybe we can do y axis analysis
+    #        self.yaxis_max = max(self.yaxis_max, yaxis.max()) # O(n), but god dammit this thing is ordered
+    #        self.yaxis_min = min(self.yaxis_min, yaxis.min()) # O(n), but god dammit this thing is ordered
 
     ####
     ####
@@ -299,11 +299,11 @@ class Graph():
         # Don't love this generation
         if 'yaxis' in styles_modified:
             if 'maxallowed' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['maxallowed'] = self.yaxis_max
+                styles_modified['yaxis']['maxallowed'] = self.yaxis_max # WON'T WORK
             if 'minallowed' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['minallowed'] = self.yaxis_min
+                styles_modified['yaxis']['minallowed'] = self.yaxis_min # WON'T WORK
             if 'range' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['range'] = [self.yaxis_max, self.yaxis_min]
+                styles_modified['yaxis']['range'] = [self.yaxis_max, self.yaxis_min] # WON'T WORK
             if 'domain' not in styles_modified['yaxis']:
                 styles_modified['yaxis']['domain'] = domain
 
@@ -325,6 +325,7 @@ class Graph():
         layout = self.get_layout()
         traces = self.get_traces()
         fig = go.Figure(data=traces, layout=layout)
+        # Could seperate this into render and config
         fig.show()
         display(scrollON()) # This is going to be in layout, Display
 
@@ -343,10 +344,7 @@ class Graph():
         return { 'graph': result }
 
 class Track():
-    def __init__(self, data, **kwargs): # {name: data}
-        self.name = kwargs.get('name', data.mnemonic) # Gets trackname from the one data
-        self.display_name = kwargs.get('display_name', self.name)
-
+    def __init__(self, *args, **kwargs): # {name: data}
 
         # This is really one object (but we can't private in python)
         self.axes = {}
@@ -354,18 +352,29 @@ class Track():
         self.axes_above = []
         self.axes_by_id = {}
 
-        newAxis = Axis(data)
-        
-        self.add_axis(newAxis)
-        
-        
-    def add_axis(self, axis, position=1):
+        self.process_data(*args, **kwargs)
+
+    def process_data(self, *args, **kwargs): # accept "upper" and "lower"
+        for ar in args:
+            if isinstance(ar, Data):
+                self.add_axis(Axis(ar))
+            ## process axis
+            ## how do we indicate where to add the axis (top or bottom)
+            ## Process other types?
+
+    #### 
+    #### 
+    #### Basic Add-Get(s)-Remove Axis
+    #### 
+    #### 
+
+    def add_axis(self, axis, position=1): # add_axes?
         if position == 0:
             raise Exception("Position must be > or < 0")
         if id(axis) in self.axes_by_id:
             return
-        
-        if axis.name in self.axes:
+
+        if axis.name in self.axes: # Because more than one axis can have the same now
             self.axes[axis.name].append(axis)
         else:
             self.axes[axis.name] = [axis]
@@ -383,33 +392,7 @@ class Track():
                 self.axes_below.insert(position-1, axis)
         
         self.axes_by_id[id(axis)] = axis
-        
-    def remove_axis(self, axis):
-        if id(axis) not in self.axes_by_id:
-            return
-        del self.axes_by_id[id(axis)]
-        self.axes[axis.name].remove(axis)
-        if len(self.axes[axis.name]) == 0:
-            del self.axes[axis.name]
-        try:
-            self.axes_below.remove(axis)
-        except ValueError:
-            self.axes_above.remove(axis)
-            pass
 
-    
-    def count_axes(self):
-        return len(self.axes)
-    def count_lower_axes(self):
-        return len(self.axes_below)
-    def count_upper_axes(self):
-        return len(self.axes_above)
-    ####
-    ####
-    #### Get Axes
-    ####
-    ####
-    
     def get_all_axes(self):
         return list(itertools.chain(self.axes_below, self.axes_above)) 
     def get_lower_axes(self):
@@ -417,11 +400,65 @@ class Track():
     def get_upper_axes(self):
         return self.axes_above
 
-    def get_axes_by_name(self, name): #gtbn
+    def get_axes(self, selectors, ignore_orphans=True, cap=0):
         axes = []
-        for axis in self.get_all_axes():
-            if axis.name == name: axes.append(axis)
+        try:
+            test = iter(selectors)
+        except Exception as e:
+            selectors = [selectors]
+        for selector in selectors:
+            if cap and len(axes) >= cap: break
+            if isinstance(selector, str):
+                if selector in self.axes:
+                    axes.extend(self.axes[selector])
+            elif isinstance(selector, int):
+                if selector < 0:
+                    index = (-selector) - 1
+                    if index >= len(self.axes_below):
+                        raise KeyError("Invalid index in get_axes")
+                    axes.append(self.axes_below[index])
+                else:
+                    index = selector - 1
+                    if index >= len(self.axes_above):
+                        raise KeyError("Invalid index in get_axes")
+                    axes.append(self.axes_below[index])
+            elif isinstance(select, axis):
+                if id(axis) in self.axes_by_id or not ignore_orphans:
+                    axes.append(axis)
+        if len(axes) == 0: return None
+        if cap and len(axes) > cap: axes = axes[0:cap]
         return axes
+
+    def get_axis(self, selector, match=0):
+        axes = self.get_axes(selector, cap=1)
+        if axes is None or match >= len(axes):
+            return None
+        return axes[match]
+
+    def remove_axes(self, axes):
+        axes = self.get_axes(axes)
+        if axes is None: return None
+        for axis in axes:
+            if id(axis) not in self.axes_by_id: continue
+            del self.axes_by_id[id(axis)]
+            self.axes[axis.name].remove(axis)
+            if len(self.axes[axis.name]) == 0:
+                del self.axes[axis.name]
+            try:
+                self.axes_below.remove(axis)
+            except ValueError:
+                self.axes_above.remove(axis)
+        return axes
+    
+    def count_axes(self):
+        return len(self.axes)
+    def count_lower_axes(self):
+        return len(self.axes_below)
+    def count_upper_axes(self):
+        return len(self.axes_above)
+
+    def has_axis(self, selector):
+        return self.get_axis(selector) not None
 
     def get_axis_styles(self, start_axis = 0, domain = [0, 1]):
         styles = []
@@ -462,7 +499,11 @@ class Track():
 
 class Axis():
     def __init__(self, data, **kwargs):
-        self.data = data if type(data) == list else [data]
+        try:
+            test = iter(data)
+        except Exception as e:
+            data = [data]
+        self.data = data
         self.axis_template = kwargs.get('template', copy.deepcopy(xaxes_template_default))
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)

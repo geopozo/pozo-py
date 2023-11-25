@@ -1,10 +1,19 @@
+· finish first refactor
+- create style signleton
+- test refactor
+- debug
+- second refactor (add features in notes)
+- refactor todo list
+
+
+
 Our Visualization Library:
 - Next
     -- First Refactor: Just Naming (and small improvements)
     -- seperate styling and defaults into seperate file called "style.py"
     -- so really, style is a render object? it renders the whole layout
     -- all style calculations and modifcations now done in object
-
+    -- factor out make iterable
     -- test changes of size
     -- Don't allow more than 4 axis!
     -- axis on both sides
@@ -13,12 +22,16 @@ Our Visualization Library:
   -- get axis/get track should have one function
   -- should axis/tracks point at their parents? I think so, and we should have a delete operator
   -- gotta deal with all of the ways we delete it
+  -- make sure axis can't be added twice
   -- what happens if you delete the underlying data?
   -- can we make that shit immutable (unless you delete... the axis?... or the trace?...)
   -- recalibrate y axis (should this happen during rendering)
   # function to flip axis
   # function to reorder axes
+  # Calling process data outside of stuff
   # A separate style object
+  # Use examples
+  # tracks have optional names, titles?
   - Deal with deleting objects and notifying parent objects
   - Combine Axes into one xaxis
   - Design Review with Design Helper Functions
