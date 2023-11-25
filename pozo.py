@@ -65,6 +65,7 @@ default_styles_default = dict(
 default_width_per_track = 200
 
 def calculate_axes_height(num_axes):
+    num_axes -= 1 # why tho, we need dots to figure out this math (cause positioning assumes there is one?)
     proportion_per_axis = axis_label_height / height_default
     return num_axes * proportion_per_axis
 
@@ -122,7 +123,7 @@ class Graph():
 
         self.yaxis = [] # Why are we storing information about the x and y axis?
 
-        self.add_data_as_track(self, *args, **kwargs)
+        self.process_data(self, *args, **kwargs)
 
     ####
     ####
@@ -150,7 +151,7 @@ class Graph():
     ####
     ####
 
-    def get_tracks(self, selectors, ignore_orphans=True): #doesn't support slices
+    def get_tracks(self, selectors, ignore_orphans=True):
         tracks = []
         try:
             test = iter(selectors)
@@ -208,9 +209,9 @@ class Graph():
             # Maybe we can do y axis analysis
             self.yaxis_max = max(self.yaxis_max, yaxis.max()) # O(n), but god dammit this thing is ordered
             self.yaxis_min = min(self.yaxis_min, yaxis.min()) # O(n), but god dammit this thing is ordered
-    #def set_yaxis(self, yaxis):
+    # TODO TODO TODO TODO TODO 
 
-    def add_data_as_track(self, *args, **kwargs): # as track
+    def process_data(self, *args, **kwargs): # as track
         include = kwargs.get('include', [])
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
@@ -228,24 +229,26 @@ class Graph():
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
 
         if yaxis is not None:
-            self.add_yaxis(yaxis)
+            pass
         elif yaxis_name in ar.curves.keys():
-            self.add_yaxis(ar.curves[yaxis_name].data)
+            yaxis = ar.curves[yaxis_name].data
         else:
-            self.add_yaxis(ar.index)
+            yaxis = ar.index
 
         for curve in ar.curves:
-            if curve.mnemonic == yaxis_name: continue
+            ## Deciding to ignore?
+            if curve.mnemonic == yaxis_name:
+                continue
             mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
-            if len(include) != 0 and curve.mnemonic not in include and mnemonic not in include: continue # if there is an include, ignore
-            elif len(exclude) != 0 and curve.mnemonic in exclude or mnemonic in exclude: continue 
+            if len(include) != 0 and curve.mnemonic not in include and mnemonic not in include: 
+                continue
+            elif len(exclude) != 0 and curve.mnemonic in exclude or mnemonic in exclude:
+                continue 
 
 
-            mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
-            data = Data(self.yaxis[-1], curve.data, mnemonic)
+            data = Data(yaxis, curve.data, mnemonic)
             newTrack = Track(data)
 
-            # NOTE:ORDEREDDICT- >1 value per key, but insert order is still maintained
             self.add_track(newTrack)
 
     ####
@@ -257,42 +260,40 @@ class Graph():
     def get_layout(self):
         # default but changeable
  
-        num_tracks = len(self.tracks_ordered)
+        num_tracks = len(self.tracks_ordered) # TODO should be done by style
         if not num_tracks:
             raise Exception("There are no tracks, this could return a blank layout tho")
-        waste_space = self.track_start + (num_tracks-1) * self.track_margin
-        width = (1 - waste_space) / num_tracks # could be /0
+        non_track_space = self.track_start + (num_tracks-1) * self.track_margin
+        width = (1 - non_track_space) / num_tracks # could be /0
+
+        max_axes_top = 0
+        max_axes_bottom = 0
+        for track in self.tracks_ordered:
+            max_axes_bottom = max(track.count_lower_axes(), max_axes_bottom)
+            max_axes_top = max(track.count_upper_axes(), max_axes_top)
+        domain = [ # TODO should be done by style
+            calculate_axes_height(max_axes_bottom),
+            1 - calculate_axes_height(max_axes_top)
+        ]
 
         axes = {}
         start = self.track_start
 
         # Graph is what organize it into a layout structure
-        i = 1
-        max_axes_top = 0
-        max_axes_bottom = 0
-        for track in self.tracks_ordered: # must calculate
-            max_axes_bottom = max(len(track.get_lower_axes())-1, max_axes_bottom)
-            max_axes_top = max(len(track.get_upper_axes())-1, max_axes_top)
-        domain = [
-            calculate_axes_height(max_axes_bottom),
-            1 - calculate_axes_height(max_axes_top)
-        ]
+        current_axis = 1
         for track in self.tracks_ordered:
-            for style in track.get_axis_styles(i, domain=domain):
-                # Style shouldn't have a domain members
-                axes["xaxis" + str(i)] = dict(
+            for style in track.get_axis_styles(current_axis, domain=domain): # I don't really want graph iterating through axis
+                axes["xaxis" + str(current_axis)] = dict(
                     domain = [start, min(start + width, 1)],
                     **style
                 )
-                #display("xaxis" + str(i))
-                #display(axes["xaxis" + str(i)])
-                i += 1
+                current_axis += 1
             start += width + self.track_margin
-        if len(self.tracks_ordered) > 6: # TODO tune this number
-            warnings.warn("If you need scroll bars, call `display(scrollON())` after rendering the graph. This is a plotly issue and we will fix it eventually.")   
+
+        ## Gotta seperate this out! TODO STYLES
         generated_styles = dict(
             **axes,
-            width=len(self.tracks_ordered) * self.width_per_track, # probably fixed width option?
+            width=num_tracks * self.width_per_track,
         )
         styles_modified = copy.deepcopy(self.default_styles)
         # Don't love this generation
@@ -305,6 +306,8 @@ class Graph():
                 styles_modified['yaxis']['range'] = [self.yaxis_max, self.yaxis_min]
             if 'domain' not in styles_modified['yaxis']:
                 styles_modified['yaxis']['domain'] = domain
+
+        # oof and UGH
         layout = go.Layout(**generated_styles).update(**styles_modified)
         return layout
 
@@ -314,7 +317,7 @@ class Graph():
         for track in self.tracks_ordered:
             for axis in track.get_all_axes():
                 # if there is an update_trace, it's better to update the axis than pass a num axes
-                traces.extend(axis.render_traces(num_axes))
+                traces.extend(axis.render_traces(num_axes)) # Big UGH
                 num_axes += 1
         return traces
 
@@ -322,9 +325,8 @@ class Graph():
         layout = self.get_layout()
         traces = self.get_traces()
         fig = go.Figure(data=traces, layout=layout)
-        
         fig.show()
-        display(scrollON()) # This is going to have some CSS mods
+        display(scrollON()) # This is going to be in layout, Display
 
  
     ####
@@ -398,7 +400,10 @@ class Track():
     
     def count_axes(self):
         return len(self.axes)
-    
+    def count_lower_axes(self):
+        return len(self.axes_below)
+    def count_upper_axes(self):
+        return len(self.axes_above)
     ####
     ####
     #### Get Axes

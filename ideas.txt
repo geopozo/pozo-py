@@ -1,8 +1,8 @@
 Our Visualization Library:
 - Next
-    -- refactor a bit function order
-    -- change naming of functions?
+    -- First Refactor: Just Naming (and small improvements)
     -- seperate styling and defaults into seperate file called "style.py"
+    -- so really, style is a render object? it renders the whole layout
     -- all style calculations and modifcations now done in object
 
     -- test changes of size
