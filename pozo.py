@@ -300,9 +300,9 @@ class Graph():
             if id(track) in self.tracks_by_id:
                 self.remove_track(track)
             for lower in track.get_lower_axes():
-                destination.add_axis(lower, position=-1)
+                destination.add_axis(lower, position=-1000)
             for upper in track.get_upper_axes():
-                destination.add_axis(upper, position=1)
+                destination.add_axis(upper, position=1000)
 
     #def combine_tracks_by_index(self, index, indices)
     #def separate_axis
@@ -336,7 +336,7 @@ class Track():
         self.add_axis(newAxis)
         
         
-    def add_axis(self, axis, position=-1):
+    def add_axis(self, axis, position=1):
         if position == 0:
             raise Exception("Position must be > or < 0")
         if id(axis) in self.axes_by_id:
@@ -406,7 +406,7 @@ class Track():
             style = axis.get_style(parent_axis)
             style['side'] = "bottom"
             if parent_axis:
-                style['position'] = (domain[0])*((i-1)/(len(self.get_lower_axes())-1))
+                style['position'] = domain[0] - (domain[0])*((i)/(len(self.get_lower_axes())-1))
             styles.append(style)
             total_axes += 1
         for i, axis in enumerate(self.get_upper_axes()):
