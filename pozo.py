@@ -106,7 +106,6 @@ class Graph():
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-        self.indexOK = kwargs.get('indexOK', False)
 
         self.yaxis_max = 0
         self.yaxis_min = 30000 # it's a hack, but it'll do
@@ -199,7 +198,7 @@ class Graph():
             for upper in track.get_upper_axes():
                 destination.add_axis(upper, position=1000)
 
-    
+    # DEPRECATED
     def add_yaxis(self, yaxis):
         if yaxis not in self.yaxis:
             self.yaxis.append(yaxis) 
@@ -216,7 +215,6 @@ class Graph():
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-        self.indexOK = kwargs.get('indexOK', False)
 
         for ar in args:
             # Process LASio LAS Object
@@ -228,7 +226,6 @@ class Graph():
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None) # what if not none
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-        self.indexOK = kwargs.get('indexOK', False)
 
         if yaxis is not None:
             self.add_yaxis(yaxis)
@@ -236,8 +233,6 @@ class Graph():
             self.add_yaxis(ar.curves[yaxis_name].data)
         else:
             self.add_yaxis(ar.index)
-            if not self.indexOK:
-                warnings.warn("No yaxis or \"" + yaxis_name + "\" column was found in the LAS data, so we're using `las.index`.")
 
         for curve in ar.curves:
             if curve.mnemonic == yaxis_name: continue
