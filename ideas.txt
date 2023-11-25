@@ -19,6 +19,7 @@ Our Visualization Library:
   # function to flip axis
   # function to reorder axes
   # A separate style object
+  - Deal with deleting objects and notifying parent objects
   - Combine Axes into one xaxis
   - Design Review with Design Helper Functions
   - Combine Two Figures (Overlow, Concatenate)

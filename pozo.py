@@ -136,10 +136,14 @@ class Graph():
         self.tracks_ordered.append(track)
         self.tracks_by_id[id(track)] = track
 
-    def remove_track(self, track): # shoudl take track, name of track, or name of mnemonic. # should return truacks if you want them
-        if id(track) not in self.tracks_by_id: return
-        del self.tracks_by_id[id(track)]
-        self.tracks_ordered.remove(track)
+    def remove_track(self, track):
+        tracks = self.get_tracks(track)
+        if tracks is None: return None
+        for track in tracks:
+            if id(track) not in self.tracks_by_id: continue
+            del self.tracks_by_id[id(track)]
+            self.tracks_ordered.remove(track)
+        return tracks
 
    ####
     ####
