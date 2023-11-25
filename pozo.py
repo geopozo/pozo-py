@@ -145,13 +145,13 @@ class Graph():
             self.tracks_ordered.remove(track)
         return tracks
 
-   ####
+    ####
     ####
     #### Get Tracks
     ####
     ####
 
-    def get_tracks(self, selectors): #doesn't support slices
+    def get_tracks(self, selectors, ignore_orphans=True): #doesn't support slices
         tracks = []
         try:
             test = iter(selectors)
@@ -167,8 +167,9 @@ class Graph():
                 for track in self.tracks_ordered:
                     if track.has_axis(selector):
                         tracks.append(track)
-            elif isinstance(selector, Track): # should we just return it? weird, shouldn't allow this? i dunno.
-                tracks.append(selector)
+            elif isinstance(selector, Track):
+                if id(selector) in self.tracks_by_id or not ignore_orphans:
+                    tracks.append(selector)
         if len(tracks) == 0:
             return None
         return tracks
@@ -186,10 +187,10 @@ class Graph():
     ####
 
     def combine_tracks(self, destination, tracks):
-        if not isinstance(tracks, list):
-            tracks = [tracks]
-        if id(destination) not in self.tracks_by_id:
-            raise Exception("Destination track does not exist")
+        destination = self.get_track(destination)
+        if destination is None: raise Exception("Destination track does not exist")
+        tracks = self.get_tracks(tracks, ignore_orphans=False)
+        if tracks is None: return    
         for track in tracks:
             if id(track) in self.tracks_by_id:
                 self.remove_track(track)
