@@ -87,17 +87,16 @@ class Style:
         self.layout_actual["width"] = num_tracks * self.template["width_per_track"]
         self.layout_actual["yaxis"]["domain"] = [
             self.calculate_axes_height(max_axes_bottom),
-            1 - calculate_axes_height(max_axes_top)
+            1 - self.calculate_axes_height(max_axes_top)
         ]
         self.max_axes_bottom = max_axes_bottom
         self.max_axes_top = max_axes_top
 
     # Calculate proportional height of each axis
     def calculate_axes_height(self, num_axes):
-        ## The height of axis 1 is baked into the figure height (Plotly design)
-        ## So when we calculate this height, we subtract one 
-        num_axes -= 1
-        proportion_per_axis = axis_label_height / self.template["plotly"]["height"]
+        # num_axes as 0 and 1 are the same because both are autoaligned, so minus 1 and floor @ 0
+        num_axes = max(num_axes -1, 0)
+        proportion_per_axis = self.template["axis_label_height"] / self.template["plotly"]["height"]
         return num_axes * proportion_per_axis
 
     def calculate_track_domain(self, track_position):
@@ -105,7 +104,7 @@ class Style:
             (self.num_tracks-1) * self.template["track_margin"]
         )
         track_width = (1 - non_track_space) / self.num_tracks
-        whole_track_width = track_width = self.template["track_margin"]
+        whole_track_width = track_width + self.template["track_margin"]
         start = self.template["track_start"] + track_position*(whole_track_width)
         end = start + track_width
         return [start, end]
@@ -118,13 +117,12 @@ class Style:
         self.layout_actual['yaxis']['minallowed'] = self.ymin
         self.layout_actual['yaxis']['range'] = [self.ymax, self.ymin]
         
-    def add_axes(self, axes):
+    def set_axes(self, axes):
         for i, axis in enumerate(axes):
-            self.layout_actual["xaxis" + str(i)] = axis
+            self.layout_actual["xaxis" + str(i+1)] = axis
             
     def set_axis_horizontal_position(self, axis, position):
         axis['domain'] = self.calculate_track_domain(position)
-        return axis # return technically unnecessary but completes pattern
 
     def set_axis_vertical_position(self, axis, position, parent):
         axis['side'] = "top" if position>0 else "bottom"
@@ -132,7 +130,6 @@ class Style:
             axis['anchor'] = "free"
             axis['position'] = self.get_axis_position(position) # fuck
             axis['overlaying'] = "x" + str(parent) 
-        return axis
 
     def get_axis(self, display_name, mnemonic=None):
         color='#AAAAAA' # default axis color if not set? # if no mnemonic
@@ -147,9 +144,9 @@ class Style:
                 color=color
             )
         )
-        axis['linecolor'] = color,
-        axis['tickcolor'] = color,
-        axis['tickfont']=dict(color=color,),
+        axis['linecolor'] = color
+        axis['tickcolor'] = color
+        axis['tickfont']=dict(color=color,)
         return axis
 
     def get_axis_position(self, i):

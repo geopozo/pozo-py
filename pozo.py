@@ -149,10 +149,10 @@ class Graph():
     ####
 
     def get_layout(self):
-        # default but changeable
+        
         self.style.init_layout()
 
-        num_tracks = len(self.tracks_ordered) # TODO should be done by style
+        num_tracks = len(self.tracks_ordered)
         if not num_tracks:
             raise Exception("There are no tracks, there is nothing to lay out")
         max_axes_top = 0
@@ -167,12 +167,13 @@ class Graph():
         # Although it could be written to do that retroactively, I suppose
         axes = []
         for track_position, track in enumerate(self.tracks_ordered):
-            new_axes = track.render_style(self.style, len(axes))
+            parent_axis = len(axes) # axes need to anchor to first axis of track
+            new_axes = track.render_style(self.style, parent_axis)
             for axis in new_axes:
-                axes.append(self.style.set_axis_horizontal_position(axis, track_position))
-        self.style.add_axes(axes)
+                self.style.set_axis_horizontal_position(axis, track_position) # modified in place
+                axes.append(axis)
+        self.style.set_axes(axes)
         self.style.set_y_limits()
-        # Don't love this generation
         
         return self.style.get_layout()
 
@@ -192,7 +193,7 @@ class Graph():
         fig = go.Figure(data=traces, layout=layout)
         # Could seperate this into render and config
         fig.show()
-        display(scrollON()) # This is going to be in layout, Display
+        display(self.style.javascript()) # This is going to be in layout, Display
 
  
     ####
@@ -326,23 +327,23 @@ class Track():
         return self.get_axis(selector) is not None
 
     def render_style(self, style, lower_parent):
-        axes = []
+        axes = [] # array of style dictionaries, not Axis()
         for axis_position, axis in enumerate(self.get_lower_axes()):
-            axes.append(
-                style.set_axis_veritcal_position(
-                    axis.render_style(style),
-                    -axis_position+1,
-                    lower_parent,
-                )
-            )
+            axis_dict=axis.render_style(style)
+            style.set_axis_veritcal_position(
+                axis_dict,
+                -axis_position+1,
+                lower_parent,
+            ) # modifies the dict
+            axes.append(axis_dict)
         for axis_position, axis in enumerate(self.get_upper_axes()):
-            axes.append(
-                style.set_axis_vertical_position(
-                    axis.render_style(style),
-                    axis_position+1,
-                    lower_parent+self.count_lower_axes(),
-                )
-            )
+            axis_dict=axis.render_style(style)
+            style.set_axis_vertical_position(
+                axis_dict,
+                axis_position+1,
+                lower_parent+self.count_lower_axes(),
+            ) # modifies the dict
+            axes.append(axis_dict)
         return axes
 
     def get_named_tree(self):
@@ -385,7 +386,7 @@ class Axis():
                 x=datum.values,
                 y=datum.index,
                 mode='lines', # nope, based on data w/ default
-                line=dict(color=self.get_color()), # needs to be better, based on data
+                line=dict(color='#000000'), # needs to be better, based on data
                 xaxis='x' + str(axis_number),
                 yaxis='y',
                 name = datum.mnemonic, # probably needs to be better

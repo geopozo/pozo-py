@@ -1,10 +1,6 @@
-· finish first refactor
-- create style signleton
-- test refactor
-- debug
-- second refactor (add features in notes)
-- refactor todo list
-
+- domain on y axis not correct
+- test different combinations of combining
+- get render_traces() calling style
 
 
 Our Visualization Library:
