@@ -146,6 +146,7 @@ class Graph():
         num_tracks = len(self.tracks_ordered)
         if not num_tracks:
             raise Exception("There are no tracks, there is nothing to lay out")
+            
         max_axes_top = 0
         max_axes_bottom = 0
         for track in self.tracks_ordered:
@@ -163,9 +164,9 @@ class Graph():
             for axis in new_axes: # axis dictionaries
                 self.style.set_axis_horizontal_position(axis, track_position) # axis modified in place
                 axes.append(axis)
+
         self.style.set_axes(axes)
         self.style.set_y_limits()
-        
         return self.style.get_layout()
 
     def get_traces(self):
@@ -203,7 +204,6 @@ class Graph():
 class Track():
     def __init__(self, *args, **kwargs): # {name: data}
 
-        # This is really one object (but we can't private in python)
         self.axes = {}
         self.axes_below = [] # Considered "before" axes_above list
         self.axes_above = []
@@ -215,9 +215,8 @@ class Track():
         for ar in args:
             if isinstance(ar, Data):
                 self.add_axis(Axis(ar))
-            ## process axis
+            ## process axism, other types
             ## how do we indicate where to add the axis (top or bottom)
-            ## Process other types?
 
     #### 
     #### 
@@ -269,16 +268,11 @@ class Track():
                 if selector in self.axes:
                     axes.extend(self.axes[selector])
             elif isinstance(selector, int):
-                if selector < 0:
-                    index = (-selector) - 1
-                    if index >= len(self.axes_below):
-                        raise KeyError("Invalid index in get_axes")
-                    axes.append(self.axes_below[index])
-                else:
-                    index = selector - 1
-                    if index >= len(self.axes_above):
-                        raise KeyError("Invalid index in get_axes")
-                    axes.append(self.axes_below[index])
+                source = self.axes_below if selector < 0 else self.axes_above
+                index = abs(selector) - 1
+                if index >= len(source):
+                    raise KeyError("Invalid index in get_axes")
+                axes.append(source[index])
             elif isinstance(select, axis):
                 if id(axis) in self.axes_by_id or not ignore_orphans:
                     axes.append(axis)
@@ -323,7 +317,7 @@ class Track():
             axis_dict=axis.render_style(style)
             style.set_axis_veritcal_position(
                 axis_dict,
-                -axis_position+1,
+                -(axis_position+1),
                 lower_parent,
             ) # modifies the dict
             axes.append(axis_dict)

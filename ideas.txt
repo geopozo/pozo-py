@@ -1,22 +1,19 @@
-    - read pozo
     - read style
+    - git commit
+    - refactor according ot sheet
     - get render_traces() calling style
     - test bottom axis
-    - test axi son both sides
-    - write description of problem, refactor? breadth-first search. document how anchored axis exist w/in fifgure.
+    - test axis son both sides
     - factor out "make iterable"
     - test height changes
     - check for unused imports
-    - pass kwargs better
     - how to deal with more than 4 axis? just keep goin!
-    - render functions called on both sides
     - remove from parent if child is deleted __del__
-    - make sure axis can't be added twice to same tract
-    - what if we delete underlyin data?
+    - what if we delete underlyin data? (sanity check on data)
     - make data immutable?
     - function to flip axis
     - function to reorder axes
-    - use examples
+    - use (not yooz, yoose) examples
     - tracks have optional names, titles?
     - Combine Axes into one xaxis
     - Design Review with Design Helper Functions
