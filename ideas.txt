@@ -1,59 +1,38 @@
-- domain on y axis not correct
-- test different combinations of combining
-- get render_traces() calling style
+    - read pozo
+    - read style
+    - get render_traces() calling style
+    - test bottom axis
+    - test axi son both sides
+    - write description of problem, refactor? breadth-first search. document how anchored axis exist w/in fifgure.
+    - factor out "make iterable"
+    - test height changes
+    - check for unused imports
+    - pass kwargs better
+    - how to deal with more than 4 axis? just keep goin!
+    - render functions called on both sides
+    - remove from parent if child is deleted __del__
+    - make sure axis can't be added twice to same tract
+    - what if we delete underlyin data?
+    - make data immutable?
+    - function to flip axis
+    - function to reorder axes
+    - use examples
+    - tracks have optional names, titles?
+    - Combine Axes into one xaxis
+    - Design Review with Design Helper Functions
+    - Combine Two Figures (Overlow, Concatenate)
+        - Concatenate should be default figure behavior, but there could be a match mnemonic directive    
+    - Test with title
+    - Add ndarray
+    - Add xarray
+    - Add pandas
+    - Add welly well
+    - Add welly project
+    - Steven's Tops
+    - Other categorical data
+    - Functions for accessing dictionary
+    - need to catch layout change and set ticks (auto nticks doesn't work, no tickmode kinda works, wish i knew what it fucking was)
 
-
-Our Visualization Library:
-- Next
-    -- First Refactor: Just Naming (and small improvements)
-    -- seperate styling and defaults into seperate file called "style.py"
-    -- so really, style is a render object? it renders the whole layout
-    -- all style calculations and modifcations now done in object
-    -- factor out make iterable
-    -- test changes of size
-    -- check for unused imports
-    -- better pass style a coordinate rather than a state machine
-    -- passing kwargs poorly
-    -- test with different # of axis on track
-    -- Don't allow more than 4 axis!
-    -- axis on both sides
-    -- what to do when any of these render functions are called independetly
-  # need to interpret how we are referring to the axis/track (by name, by position, by object, it should be automatic)
-  -- get axis/get track should have one function
-  -- should axis/tracks point at their parents? I think so, and we should have a delete operator
-  -- gotta deal with all of the ways we delete it
-  -- make sure axis can't be added twice
-  -- what happens if you delete the underlying data?
-  -- can we make that shit immutable (unless you delete... the axis?... or the trace?...)
-  -- recalibrate y axis (should this happen during rendering)
-  # function to flip axis
-  # function to reorder axes
-  # Calling process data outside of stuff
-  # A separate style object
-  # Use examples
-  # tracks have optional names, titles?
-  - Deal with deleting objects and notifying parent objects
-  - Combine Axes into one xaxis
-  - Design Review with Design Helper Functions
-  - Combine Two Figures (Overlow, Concatenate)
-  - Test with title
-  - Basic Styling Functions
-  - More documentation?
-  - Add ndarray
-  - Add xarray
-  - Add pandas
-  - Add welly well
-  - Add welly project
-  - Steven's Tops
-  - Other categorical data
-  - Functions for accessing dictionary
-  - Categories
-  - need to catch layout change and set ticks (auto nticks doesn't work, no tickmode kinda works, wish i knew what it fucking was)
-  - impossible to get yaxis lines if all yaxis anchored to the same thing
-  - Concatenate should be default figure behavior, but there could be a match mnemonic directive
-- Structural Issues
- - How do we deal with y axis that are different/missing etc
- - set Y limits and don't use autorange=reversed
 - Datahealth Visualization (different than tracks)
 - Documentation, Docstrings, Tags
 - Basic Displayers

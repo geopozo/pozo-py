@@ -144,7 +144,7 @@ class Style:
             font=dict(
                 color=color
             ),
-            standoff=0,
+            standoff=0, # just tighten it up
         )
         axis['linecolor'] = color
         axis['tickcolor'] = color
