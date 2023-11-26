@@ -128,7 +128,8 @@ class Style:
         axis['side'] = "top" if position>0 else "bottom"
         if not abs(position) == 1:
             axis['anchor'] = "free"
-            axis['position'] = self.get_axis_position(position) # fuck
+            print(f"position: {position}")
+            axis['position'] = self.get_axis_position(position)
             axis['overlaying'] = "x" + str(parent) 
 
     def get_axis(self, display_name, mnemonic=None):
@@ -142,7 +143,8 @@ class Style:
             text=display_name,
             font=dict(
                 color=color
-            )
+            ),
+            standoff=0,
         )
         axis['linecolor'] = color
         axis['tickcolor'] = color
@@ -152,14 +154,18 @@ class Style:
     def get_axis_position(self, i):
         domain = self.layout_actual["yaxis"]["domain"]
         if i > 0:
+            print("Above")
             bottom = domain[1]
             total_axis_space = 1-domain[1]
-            proportion = abs(i) / (self.max_axes_top - 1 )
+            proportion = abs(i-1) / (self.max_axes_top - 1 )
         elif i < 0:
+            print("Below")
             bottom = domain[0]
             total_axis_space = -domain[0]
-            proportion = abs(i) / (self.max_axes_bottom -1 )
-        return bottom + total_axis_space * proportion
+            proportion = abs(i-1) / (self.max_axes_bottom -1 )
+        print(f"bottom: {bottom} and total axis space: {total_axis_space} and proportion: {proportion}")
+        print(f"because: i = {i}")
+        return min(bottom + total_axis_space * proportion, 1)
 
     def set_min_max(self, ymin, ymax):
         self.ymin = ymin if self.ymin is None else min(self.ymin, ymin)

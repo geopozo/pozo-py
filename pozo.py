@@ -96,7 +96,7 @@ class Graph():
                 selector -=1
                 if selector >= len(self.tracks_ordered) or selector < 0:
                     raise IndexError("Track index out of range")
-                tracks.append(self.tracks_ordered[index])
+                tracks.append(self.tracks_ordered[selector])
             elif isinstance(selector, str) or isinstance(selector, Axis):
                 for track in self.tracks_ordered:
                     if track.has_axis(selector):
@@ -136,7 +136,7 @@ class Graph():
         if tracks is None: return    
         for track in tracks:
             if id(track) in self.tracks_by_id:
-                self.remove_track(track)
+                self.remove_tracks(track)
             for lower in track.get_lower_axes():
                 destination.add_axis(lower, position=-1000)
             for upper in track.get_upper_axes():
@@ -167,10 +167,10 @@ class Graph():
         # Although it could be written to do that retroactively, I suppose
         axes = []
         for track_position, track in enumerate(self.tracks_ordered):
-            parent_axis = len(axes) # axes need to anchor to first axis of track
+            parent_axis = len(axes)+1 # axes need to anchor to first axis of track
             new_axes = track.render_style(self.style, parent_axis)
-            for axis in new_axes:
-                self.style.set_axis_horizontal_position(axis, track_position) # modified in place
+            for axis in new_axes: # axis dictionaries
+                self.style.set_axis_horizontal_position(axis, track_position) # axis modified in place
                 axes.append(axis)
         self.style.set_axes(axes)
         self.style.set_y_limits()
