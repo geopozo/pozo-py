@@ -1,4 +1,4 @@
-
+its a bredth width search taking information from other layers
 ## Ways to change the style: 
 We provide helper functions that change the style of the graph in common ways in a way that places nice with pozo, plotly, and jupyter. You can also update plotly objects directly with fig.update_layout (if you know plotly and read *working directly with plotly*) but there is spooky behavior. For example, you can set { title: "Hello World" }, which will work, but it will completely override the more verbose description { title: {text: "Hello World", color: "#00FF00" } } and therefore change the text AND the color. TODO: Also, you can look at these `default_templates`, copy and paste them, and provide your own!
 

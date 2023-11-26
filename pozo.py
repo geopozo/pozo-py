@@ -1,73 +1,5 @@
 import plotly.graph_objects as go
 import itertools, copy, warnings
-from IPython.display import Javascript # Part of Hack #1
-
-####
-####
-#### Style Template/Defaults
-####
-####
-
-### For track widths
-track_margin_default = .004
-track_start_default = .01
-
-### For heigh sizing
-height_default = 900
-
-axis_label_height = 60
-
-
-xaxes_off_axis = dict(
-    anchor="free",
-#   autoshift=True, # doesn't work for xaxis
-#   position=1,     # generated
-#   overlaying="x"  # generated
-)
-
-xaxes_template_default = dict(
-    showgrid=True,
-    zeroline=False,
-    gridcolor="#f0f0f0",
-    showline=True,
-    linewidth=2,
-    ticks="outside",
-    tickwidth=1,
-    ticklen=6,
-    tickangle=0,
-#   side=['']          # generated
-#   tickcolor=='#???', # generated
-#   linecolor='#???',  # generated
-#   titlefont=dict(
-#       color="#???"   # generated
-#   ),
-#   tickfont=dict(
-#       color="#???"   # generated
-#   )
-#   domain = [?,?]     # generated
-)
-default_styles_default = dict(
-    showlegend = False,
-    margin = dict(l=15, r=15, t=5, b=5),
-    yaxis = dict(
-        showgrid=True,
-        zeroline=False,
-        gridcolor="#f0f0f0",
-#       domain=[0,.8], # generated
-#       maxallowed=,    # generated, can be overwritten here
-#       minallowed=,    # generated, can be overwritten here
-#       range=[,],      # generated, can be overwritten here
-    ),
-    height = height_default,
-    plot_bgcolor = "#FFFFFF",
-#   width=? # automatic
-)
-default_width_per_track = 200
-
-def calculate_axes_height(num_axes):
-    num_axes -= 1 # why tho, we need dots to figure out this math (cause positioning assumes there is one?)
-    proportion_per_axis = axis_label_height / height_default
-    return num_axes * proportion_per_axis
 
 ####
 ####
@@ -76,22 +8,6 @@ def calculate_axes_height(num_axes):
 ####
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
-
-####
-####
-#### Helper/Hack Functions
-####
-####
-
-def randomColor(toNumber = 0):
-    import random
-    if toNumber != 0:
-        random.seed(hash(toNumber))
-    ops = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
-    return ops[random.randint(0, len(ops)-1)]
-
-def scrollON(): # TODO can we really not just display this directly form here?
-    return Javascript('''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');''') # Part of Hack #1
 
 ####
 ####
@@ -107,21 +23,13 @@ class Graph():
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
+        self.style = kwargs.get('style', Style())
 
-        self.yaxis_max = 0
-        self.yaxis_min = 30000 # it's a hack, but it'll do
-        # Essential Configuration
-        self.width_per_track = kwargs.get('width_per_track', default_width_per_track)
-        self.default_styles = kwargs.get('default_styles', copy.deepcopy(default_styles_default))
-        self.track_margin = kwargs.get('track_margin', track_margin_default)
-        self.track_start = kwargs.get('track_start', track_start_default)
 
         # Objects
         # A list and its index see NOTE:ORDEREDDICT
         self.tracks_ordered = [] 
         self.tracks_by_id = {}
-
-        self.yaxis = [] # Why are we storing information about the x and y axis?
 
         self.process_data(self, *args, **kwargs)
 
@@ -135,13 +43,7 @@ class Graph():
             # Process LASio LAS Object
             if str(type(ar)) == LAS_TYPE:
                 self.add_las_object(ar, **kwargs)
-            # Process Data
-            # Process Track
-            # Process Axis
-            # Process Numpy
-            # Process Welly
-            # Process Panda
-            # Process XArray
+            # Process Data, Track, Axis, Numpy, Welly, Panda, XArray
 
     def add_las_object(self, ar, **kwargs):
         include = kwargs.get('include', [])
@@ -240,17 +142,6 @@ class Graph():
             for upper in track.get_upper_axes():
                 destination.add_axis(upper, position=1000)
 
-    # DEPRECATED, WON'T WORK
-    #def add_yaxis(self, yaxis):
-    #    if yaxis not in self.yaxis:
-    #        self.yaxis.append(yaxis) 
-            # Do we really need to to store the y axis? # Would all this be better done at render time
-            # Only way to deal with yaxis changing is to do it at render time
-            # Also, I don't want to store y axises
-            # Maybe we can do y axis analysis
-    #        self.yaxis_max = max(self.yaxis_max, yaxis.max()) # O(n), but god dammit this thing is ordered
-    #        self.yaxis_min = min(self.yaxis_min, yaxis.min()) # O(n), but god dammit this thing is ordered
-
     ####
     ####
     #### Rendering Functions
@@ -259,57 +150,31 @@ class Graph():
 
     def get_layout(self):
         # default but changeable
- 
+        self.style.init_layout()
+
         num_tracks = len(self.tracks_ordered) # TODO should be done by style
         if not num_tracks:
-            raise Exception("There are no tracks, this could return a blank layout tho")
-        non_track_space = self.track_start + (num_tracks-1) * self.track_margin
-        width = (1 - non_track_space) / num_tracks # could be /0
-
+            raise Exception("There are no tracks, there is nothing to lay out")
         max_axes_top = 0
         max_axes_bottom = 0
         for track in self.tracks_ordered:
             max_axes_bottom = max(track.count_lower_axes(), max_axes_bottom)
             max_axes_top = max(track.count_upper_axes(), max_axes_top)
-        domain = [ # TODO should be done by style
-            calculate_axes_height(max_axes_bottom),
-            1 - calculate_axes_height(max_axes_top)
-        ]
 
-        axes = {}
-        start = self.track_start
+        self.style.set_figure_dimensions(num_tracks, max_axes_bottom, max_axes_top)
 
-        # Graph is what organize it into a layout structure
-        current_axis = 1
-        for track in self.tracks_ordered:
-            for style in track.get_axis_styles(current_axis, domain=domain): # I don't really want graph iterating through axis
-                axes["xaxis" + str(current_axis)] = dict(
-                    domain = [start, min(start + width, 1)],
-                    **style
-                )
-                current_axis += 1
-            start += width + self.track_margin
-
-        ## Gotta seperate this out! TODO STYLES
-        generated_styles = dict(
-            **axes,
-            width=num_tracks * self.width_per_track,
-        )
-        styles_modified = copy.deepcopy(self.default_styles)
+        # Style object must have figure dimensions before it can render axis styles
+        # Although it could be written to do that retroactively, I suppose
+        axes = []
+        for track_position, track in enumerate(self.tracks_ordered):
+            new_axes = track.render_style(self.style, len(axes))
+            for axis in new_axes:
+                axes.append(self.style.set_axis_horizontal_position(axis, track_position))
+        self.style.add_axes(axes)
+        self.style.set_y_limits()
         # Don't love this generation
-        if 'yaxis' in styles_modified:
-            if 'maxallowed' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['maxallowed'] = self.yaxis_max # WON'T WORK
-            if 'minallowed' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['minallowed'] = self.yaxis_min # WON'T WORK
-            if 'range' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['range'] = [self.yaxis_max, self.yaxis_min] # WON'T WORK
-            if 'domain' not in styles_modified['yaxis']:
-                styles_modified['yaxis']['domain'] = domain
-
-        # oof and UGH
-        layout = go.Layout(**generated_styles).update(**styles_modified)
-        return layout
+        
+        return self.style.get_layout()
 
     def get_traces(self):
         traces = [] 
@@ -458,33 +323,28 @@ class Track():
         return len(self.axes_above)
 
     def has_axis(self, selector):
-        return self.get_axis(selector) not None
+        return self.get_axis(selector) is not None
 
-    def get_axis_styles(self, start_axis = 0, domain = [0, 1]):
-        styles = []
-        #print(f'Im track, My parents axis is {start_axis}')
-        total_axes = 0
-        for i, axis in enumerate(self.get_lower_axes()):
-            parent_axis = 0 if not i or not start_axis else start_axis
-            style = axis.get_style(parent_axis)
-            style['side'] = "bottom"
-            if parent_axis:
-                style['position'] = domain[0] - (domain[0])*((i)/(len(self.get_lower_axes())-1))
-            styles.append(style)
-            total_axes += 1
-        for i, axis in enumerate(self.get_upper_axes()):
-            parent_axis = 0
-            if i and start_axis:
-                parent_axis = start_axis + total_axes
-            style = axis.get_style(parent_axis)
-            style['side'] = "top"
-            if parent_axis:
-                style['position'] = domain[1] + (1-domain[1])*(i/(len(self.get_upper_axes())-1)) 
-            styles.append(style)
-        return styles
+    def render_style(self, style, lower_parent):
+        axes = []
+        for axis_position, axis in enumerate(self.get_lower_axes()):
+            axes.append(
+                style.set_axis_veritcal_position(
+                    axis.render_style(style),
+                    -axis_position+1,
+                    lower_parent,
+                )
+            )
+        for axis_position, axis in enumerate(self.get_upper_axes()):
+            axes.append(
+                style.set_axis_vertical_position(
+                    axis.render_style(style),
+                    axis_position+1,
+                    lower_parent+self.count_lower_axes(),
+                )
+            )
+        return axes
 
-
-    ## FYI
     def get_named_tree(self):
         above = []
         below = []
@@ -494,49 +354,31 @@ class Track():
             below.append(axis.get_named_tree())
         return { "track": { self.name: { "above": above, "below": below } } }
 
-
-
-
 class Axis():
+
     def __init__(self, data, **kwargs):
         try:
             test = iter(data)
         except Exception as e:
             data = [data]
         self.data = data
-        self.axis_template = kwargs.get('template', copy.deepcopy(xaxes_template_default))
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
 
-    def get_color(self):
-        return randomColor(self.data[0].mnemonic) # for now, more options later
+    def render_style(self, style):
+        min = None
+        max = None
+        for datum in self.data:
+            min = datum.index[0] if min is None else min(datum.index[0], min)
+            max = datum.index[-1] if max is None else max(datum.index[-1], max)
+        style.set_min_max(min, max)
 
-    def get_style(self, parent_axis):
-        color = self.get_color()
-        ret = dict(
-            title = dict(
-                standoff=0, # should be in template
-                text=self.display_name,
-                font=dict(
-                    color=color
-                )
-            ), 
-            linecolor=color,
-            tickfont=dict(
-                color=color,
-            ),
-            tickcolor=color,
-            **self.axis_template,
-        )
-        off_axis = {}
-        if parent_axis:
-            off_axis = copy.deepcopy(xaxes_off_axis)
-            off_axis["overlaying"] = "x" + str(parent_axis)
-        return ret | off_axis # >=python 3.9
-
-
-    def render_traces(self, axis_number): ## is there an update trace?
-    # TODO should create several traces
+        mnemonic = None
+        if len(self.data) == 1:
+            mnemonic = self.data[0].mnemonic
+        return style.get_axis(self.display_name, mnemonic=mnemonic)
+    
+    def render_traces(self, axis_number): 
         all_traces = []
         for datum in self.data: 
            all_traces.append(go.Scattergl(
@@ -550,20 +392,17 @@ class Axis():
             ))
         return all_traces
 
-    ##### Not sure I like these, if nothing uses them, re-evaluated them
-    def get_named_tree(self): # I feel this might be useful? Tracks really can be numbers.
+    def get_named_tree(self):
         result = []
         for el in self.data:
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
 
-# Data must have a y axis, a value axis, and a mnemonic
 class Data():
-    def __init__(self, index, values, mnemonic): # so it should default to the default index if there is only one 
+    def __init__(self, index, values, mnemonic): # Default Index?
         self.index = index
         self.values = values
         self.mnemonic = mnemonic
 
-    ##### Not sure I like these!
-    def get_named_tree(self): # This should be just for display, so maybe a _repr_*_ function
+    def get_named_tree(self):
         return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }

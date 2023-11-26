@@ -15,6 +15,10 @@ Our Visualization Library:
     -- all style calculations and modifcations now done in object
     -- factor out make iterable
     -- test changes of size
+    -- check for unused imports
+    -- better pass style a coordinate rather than a state machine
+    -- passing kwargs poorly
+    -- test with different # of axis on track
     -- Don't allow more than 4 axis!
     -- axis on both sides
     -- what to do when any of these render functions are called independetly
