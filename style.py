@@ -148,7 +148,7 @@ class Style:
         )
         axis['linecolor'] = color
         axis['tickcolor'] = color
-        axis['tickfont']=dict(color=color,)
+        axis['tickfont']  = dict(color=color,)
         return axis
 
     def get_axis_position(self, i):

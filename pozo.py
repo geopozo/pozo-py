@@ -19,10 +19,6 @@ class Graph():
 
     ## Constructor
     def __init__(self, *args, **kwargs):
-        include = kwargs.get('include', [])
-        exclude = kwargs.get('exclude', [])
-        yaxis = kwargs.get('yaxis', None)
-        yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         self.style = kwargs.get('style', Style())
 
 
@@ -34,11 +30,6 @@ class Graph():
         self.process_data(self, *args, **kwargs)
 
     def process_data(self, *args, **kwargs):
-        include = kwargs.get('include', [])
-        exclude = kwargs.get('exclude', [])
-        yaxis = kwargs.get('yaxis', None) # what if not none
-        yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-
         for ar in args:
             # Process LASio LAS Object
             if str(type(ar)) == LAS_TYPE:
