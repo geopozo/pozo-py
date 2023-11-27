@@ -19,3 +19,4 @@ gerbers.zip
 gerbers/
 *.lck
 .ipynb_checkpoints/
+__pycache__/

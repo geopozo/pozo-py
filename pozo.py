@@ -360,48 +360,69 @@ class Track():
 
 class Axis():
 
-    def __init__(self, data, **kwargs):
-        try:
-            test = iter(data)
-        except Exception as e:
-            data = [data]
-        self.data = data
-        self.name = kwargs.get('name', self.data[0].mnemonic)
-        self.display_name = kwargs.get('display_name', self.name)
+    def __init__(self, *args, **kwargs):
+        self._name = kwargs.get('name', self.data[0].mnemonic)
+        self._display_name = kwargs.get('display_name', self.name)
+        # Add Color TODO
+        self._data = {}
+        self._data_ordered = []
+        self._data_by_id = {} # Could we just
+
+        for ar in args:
+            self.add_data(ar)
+
     def add_data(self, data):
-
-    def get_data(self, data):
-
-    def remove_data(self, data):
-        
-    def set_default_color(self, color): # could be a solid, could be a list, could be a function?
-        
-    def render_style(self, style):
-        min = None
-        max = None
-        for datum in self.data:
-            min = datum.index[0] if min is None else min(datum.index[0], min)
-            max = datum.index[-1] if max is None else max(datum.index[-1], max)
-        style.set_min_max(min, max)
-
-        mnemonic = None
-        if len(self.data) == 1:
-            mnemonic = self.data[0].mnemonic
-        return style.get_axis(self.display_name, mnemonic=mnemonic)
+        data = make_iter(data)
+        for datum in data:
+            if id(datum) in self.data_by_id:
+                #warnings ## WARNING TODO
+                continue
+            if isinstance(datum, Data):
+                self._data_ordered.append(datum)
+                if datum.get_name() in self._data:
+                    self._data[datum.get_name()].append(datum)
+                else:
+                    self._data[datum.get_name()] = [datum]
+                self._data_by_id[id(datum)] = datum
+                datum._register_axes(self)
+            elif isinstance(datum, Axis):
+                self.add_data(datum.get_data())
+            else:
+                warnings.Warn("Axis.add_data() takes Data, Axis, or an iterable of those types. Type " + type(datum) + " was ignored")
+            
+    def get_data(self, selectors = None, cap = 0, ignore_orphans=True): # TODO get by name or by actual
+        if selectors is None:
+            if cap: return self._data[0:cap]
+            return self._data
+        selectors = make_iter(selectors)
+        data = []
+        for selector in selectors:
+            if cap and len(data) >= cap: break
+            elif isinstance(selector, str):
+                data.extend(self._data[selector])
+            elif isinstance(selector, Data):
+                if id(selector) in self._data_by_id or not ignore_orphans:
+                    data.append(selector)
+        if not len(data): return None
+        if cap and len(data) > cap: data = data[0:cap]
+        return data
     
-    def render_traces(self, axis_number): 
-        all_traces = []
-        for datum in self.data: 
-           all_traces.append(go.Scattergl(
-                x=datum.values,
-                y=datum.index,
-                mode='lines', # nope, based on data w/ default
-                line=dict(color='#000000'), # needs to be better, based on data
-                xaxis='x' + str(axis_number),
-                yaxis='y',
-                name = datum.mnemonic, # probably needs to be better
-            ))
-        return all_traces
+    def get_datum(self, selector, match=0):
+        data = self.get_data(selector, cap=match+1)
+        if not data or match >= len(data): return None
+        return data[match]
+
+    def remove_data(self, selectors = None, cap=0):
+        selectors = make_iter(selectors)
+        data = self.get_data(selectors, cap)
+        for datum in data:
+            pass ### TODO
+        return data
+            
+    def _change_data_name(self, datum, old_name, new_name):
+        if old_name == new_name:
+            return
+        ### TODO (remove from one index, put it in the other index)
 
     def get_named_tree(self):
         result = []
@@ -410,13 +431,16 @@ class Axis():
         return { "axis" : { self.name: result } }
 
 class Data():
-    def __init__(self, index, values, mnemonic, **kwargs): # Default Index?
+    def __init__(self, index, values, **kwargs): # Default Index?
+        if 'name' not in kwargs and 'mnemonic' not in kwargs:
+            raise ValueError("You must specifiy either 'name=' or 'mnemonic' equals. If not told to be different, they will be the same.")
         axes = kwargs.get('axes', [])
         self._axes = {}
         self._name = kwargs.get('name', mnemonic)
         self._index = index
         self._values = values
         self._mnemonic = mnemonic
+        self._color = kwargs.get('color', Color())
 
         if not isinstance(axes, list) or len(axes) > 0:
             axes = make_iter(axes)
@@ -425,39 +449,41 @@ class Data():
     def _register_axes(self, axes):
         axes = make_iter(axes)
         for axis in axes:
-            if axis in self._axes:
+            if id(axis) in self._axes_by_id:
                 warnings.Warn("Tried to add data to axes which already contains data. Ignored")
                 continue
-            self._axes[axis] = True
+            self._axes_by_id[id(axis)] = axis
             
     def _deregister_axes(self, axes):
         axes = make_iter(axes)
         for axis in axes:
-            if axis not in self._axes:
+            if id(axis) not in self._axes_by_id:
                 warnings.Warn("Tried to remove data from axes where it doesn't exist. Ignored.")
                 continue
-            del self._axes[axis]
+            del self._axes_by_id[id(axis)]
 
     def set_name(self, name):
         if self._name == name:
             return
         old_name = self._name
         self._name = name
-        for axis in self._axes:
-            axis.change_data_name(self, old_name, self._name)
+        for axis_id in self._axes_by_id:
+            self._axes_by_id[axis_id]._change_data_name(self, old_name, self._name)
 
     def get_name(self):
         return self._name
     
-    def set_index(self, values):
+    def set_values(self, values):
         self._values = values
-    def get_index(self):
+    def get_values(self):
         return self._values
 
-    def set_index(self, values):
-        self._values = values
+    def set_index(self, index):
+        self._index = index
     def get_index(self):
-        return self._values
+        return self._index
+    
+    ## TODO: if user changes set values/index, should we automatically update graph?
 
     def set_values(self, values):
         self._values = values
@@ -468,6 +494,29 @@ class Data():
         self._mnemonic = mnemonic
     def get_mnemonic(self):
         return self._mnemonic
+        
+    def set_color(self, color):
+        self._color = color
 
     def get_named_tree(self):
-        return  { "data" : {'mnemonic': self._mnemonic, 'shape': self._values.shape } }
+        return  { "data" : {
+            'name': self._name,
+            'mnemonic': self._mnemonic,
+            'shape': self._values.shape,
+            'color': self._color,
+        } }
+
+class Color(): ## TODO better default colors, in pozo.style
+    def __init__(self, color=None):
+        self.set_color(color)
+        self._i = 0
+    
+    def set_color(self, color):
+        if color:
+            color = make_iter(color)
+        ## TODO, verify colors
+        self._color = color
+
+    def get_color(self, i=0):
+        if not self._color or not len(self._color): return "#000000"
+        return self._color[i % len(self._color)]
