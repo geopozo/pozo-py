@@ -3,6 +3,18 @@ import itertools, copy, warnings
 
 ####
 ####
+#### Utilities
+####
+####
+def make_iter(thing):
+    try:
+        test = iter(thing)
+        return thing
+    except Exception as e:
+        thing = [thing]
+        return thing
+####
+####
 #### Constants
 ####
 ####
@@ -23,7 +35,6 @@ class Graph():
 
 
         # Objects
-        # A list and its index see NOTE:ORDEREDDICT
         self.tracks_ordered = [] 
         self.tracks_by_id = {}
 
@@ -43,15 +54,19 @@ class Graph():
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
 
         if yaxis is not None:
-            pass
+            if len(yaxis) != len(ar.index):
+                raise ValueError(f"Length of supplied yaxis ({len(yaxis)}) does not match length of LAS File index ({len(ar.index)})")
+            yaxis_name = None
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
         else:
             yaxis = ar.index
+            yaxis_name = None
+
 
         for curve in ar.curves:
             ## Deciding to ignore?
-            if curve.mnemonic == yaxis_name:
+            if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
             mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
             if len(include) != 0 and curve.mnemonic not in include and mnemonic not in include: 
@@ -71,36 +86,37 @@ class Graph():
     #### 
     #### 
 
-    def add_track(self, track):
+    def add_track(self, track): #TODO allow it take axes and data
         if id(track) in self.tracks_by_id: return
         self.tracks_ordered.append(track)
         self.tracks_by_id[id(track)] = track
 
-    def get_tracks(self, selectors, ignore_orphans=True): # add cap
+    def get_tracks(self, selectors, ignore_orphans=True, cap=0): # add cap
         tracks = []
-        try:
+        try: # TODO: factor out
             test = iter(selectors)
         except Exception as e:
             selectors = [selectors]
         for selector in selectors:
-            if isinstance(selector, int):
+            if cap and len(tracks) >= cap: break
+            if isinstance(selector, int): # get by track index
                 selector -=1
                 if selector >= len(self.tracks_ordered) or selector < 0:
                     raise IndexError("Track index out of range")
                 tracks.append(self.tracks_ordered[selector])
-            elif isinstance(selector, str) or isinstance(selector, Axis):
+            elif isinstance(selector, str) or isinstance(selector, Axis): # get by axis/axis-name
                 for track in self.tracks_ordered:
                     if track.has_axis(selector):
                         tracks.append(track)
-            elif isinstance(selector, Track):
+            elif isinstance(selector, Track): # get by track object
                 if id(selector) in self.tracks_by_id or not ignore_orphans:
                     tracks.append(selector)
-        if len(tracks) == 0:
-            return None
+        if len(tracks) == 0: return None
+        if cap and len(tracks) >= cap: tracks = tracks[0:cap]
         return tracks
 
-    def get_track(self, selector, match=0):
-        tracks = self.get_tracks(selector)
+    def get_track(self, selector, match=0): # get first match
+        tracks = self.get_tracks(selector, cap=1)
         if match >= len(tracks):
             return None
         return tracks[match]
@@ -120,7 +136,7 @@ class Graph():
     ####
     ####
 
-    def combine_tracks(self, destination, tracks):
+    def add_to_track(self, destination, tracks):
         destination = self.get_track(destination)
         if destination is None: raise Exception("Destination track does not exist")
         tracks = self.get_tracks(tracks, ignore_orphans=False)
@@ -139,7 +155,7 @@ class Graph():
     ####
     ####
 
-    def get_layout(self):
+    def get_layout(self): # TODO will not be done this way
         
         self.style.init_layout()
 
@@ -184,7 +200,7 @@ class Graph():
         traces = self.get_traces()
         fig = go.Figure(data=traces, layout=layout)
         # Could seperate this into render and config
-        fig.show()
+        fig.show() # TODO renderer will create figure so... Graph.Renderer.Render() probably
         display(self.style.javascript()) # This is going to be in layout, Display
 
  
@@ -209,13 +225,13 @@ class Track():
         self.axes_above = []
         self.axes_by_id = {}
 
-        self.process_data(*args, **kwargs)
+        self.add_axes(*args, **kwargs)
 
-    def process_data(self, *args, **kwargs): # accept "upper" and "lower"
+    def add_axes(self, *args, **kwargs): # accept "upper" and "lower"
         for ar in args:
             if isinstance(ar, Data):
                 self.add_axis(Axis(ar))
-            ## process axism, other types
+            ## process Axes, [Data], Axis
             ## how do we indicate where to add the axis (top or bottom)
 
     #### 
@@ -225,9 +241,11 @@ class Track():
     #### 
 
     def add_axis(self, axis, position=1): # add_axes?
+        # should it also accept data, and [data] (and then process_data doesn't have to
         if position == 0:
             raise Exception("Position must be > or < 0")
         if id(axis) in self.axes_by_id:
+            warnings.Warn("An axis was not added as it is already on the track")
             return
 
         if axis.name in self.axes: # Because more than one axis can have the same now
@@ -264,16 +282,16 @@ class Track():
             selectors = [selectors]
         for selector in selectors:
             if cap and len(axes) >= cap: break
-            if isinstance(selector, str):
+            if isinstance(selector, str): # axes by name
                 if selector in self.axes:
                     axes.extend(self.axes[selector])
-            elif isinstance(selector, int):
+            elif isinstance(selector, int): # axes by index # (amything but 0)
                 source = self.axes_below if selector < 0 else self.axes_above
                 index = abs(selector) - 1
                 if index >= len(source):
                     raise KeyError("Invalid index in get_axes")
                 axes.append(source[index])
-            elif isinstance(select, axis):
+            elif isinstance(select, axis): # just get by actual axis
                 if id(axis) in self.axes_by_id or not ignore_orphans:
                     axes.append(axis)
         if len(axes) == 0: return None
@@ -350,7 +368,14 @@ class Axis():
         self.data = data
         self.name = kwargs.get('name', self.data[0].mnemonic)
         self.display_name = kwargs.get('display_name', self.name)
+    def add_data(self, data):
 
+    def get_data(self, data):
+
+    def remove_data(self, data):
+        
+    def set_default_color(self, color): # could be a solid, could be a list, could be a function?
+        
     def render_style(self, style):
         min = None
         max = None
@@ -385,10 +410,64 @@ class Axis():
         return { "axis" : { self.name: result } }
 
 class Data():
-    def __init__(self, index, values, mnemonic): # Default Index?
-        self.index = index
-        self.values = values
-        self.mnemonic = mnemonic
+    def __init__(self, index, values, mnemonic, **kwargs): # Default Index?
+        axes = kwargs.get('axes', [])
+        self._axes = {}
+        self._name = kwargs.get('name', mnemonic)
+        self._index = index
+        self._values = values
+        self._mnemonic = mnemonic
+
+        if not isinstance(axes, list) or len(axes) > 0:
+            axes = make_iter(axes)
+            self._register_axes(axes)
+
+    def _register_axes(self, axes):
+        axes = make_iter(axes)
+        for axis in axes:
+            if axis in self._axes:
+                warnings.Warn("Tried to add data to axes which already contains data. Ignored")
+                continue
+            self._axes[axis] = True
+            
+    def _deregister_axes(self, axes):
+        axes = make_iter(axes)
+        for axis in axes:
+            if axis not in self._axes:
+                warnings.Warn("Tried to remove data from axes where it doesn't exist. Ignored.")
+                continue
+            del self._axes[axis]
+
+    def set_name(self, name):
+        if self._name == name:
+            return
+        old_name = self._name
+        self._name = name
+        for axis in self._axes:
+            axis.change_data_name(self, old_name, self._name)
+
+    def get_name(self):
+        return self._name
+    
+    def set_index(self, values):
+        self._values = values
+    def get_index(self):
+        return self._values
+
+    def set_index(self, values):
+        self._values = values
+    def get_index(self):
+        return self._values
+
+    def set_values(self, values):
+        self._values = values
+    def get_values(self):
+        return self._values
+        
+    def set_mnemonic(self, mnemonic):
+        self._mnemonic = mnemonic
+    def get_mnemonic(self):
+        return self._mnemonic
 
     def get_named_tree(self):
-        return  { "data" : {'mnemonic': self.mnemonic, 'shape': self.values.shape } }
+        return  { "data" : {'mnemonic': self._mnemonic, 'shape': self._values.shape } }

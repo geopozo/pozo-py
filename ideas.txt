@@ -1,16 +1,19 @@
-    - read style
+    - start from the bottom and go up, we need to notify parents of name changes of data or axis
+    - read style (we're going to do two iterations)
     - git commit
     - refactor according ot sheet
     - get render_traces() calling style
     - test bottom axis
     - test axis son both sides
     - factor out "make iterable"
+    - add_tracks, add_axes (a bit different than process data, no process data in Track()
     - test height changes
     - check for unused imports
     - how to deal with more than 4 axis? just keep goin!
     - remove from parent if child is deleted __del__
     - what if we delete underlyin data? (sanity check on data)
     - make data immutable?
+    - what do all add_track add_axis add_tracks add_axes options takae? data, [data], axis, [axis], and for track, track, [tracks]. What does it do for unnamed data? Just that, empty string!
     - function to flip axis
     - function to reorder axes
     - use (not yooz, yoose) examples
