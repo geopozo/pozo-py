@@ -7,12 +7,21 @@ import itertools, copy, warnings
 ####
 ####
 def make_iter(thing):
+    if isinstance(thing, str):
+        return [thing]
     try:
         test = iter(thing)
         return thing
     except Exception as e:
         thing = [thing]
         return thing
+
+def flatten_array(things):
+    things2 = []
+    for thing in things:
+        thing = make_iter(thing)
+        things2.extend(thing)
+    return things2
 ####
 ####
 #### Constants
@@ -361,8 +370,8 @@ class Track():
 class Axis():
 
     def __init__(self, *args, **kwargs):
-        self._name = kwargs.get('name', self.data[0].mnemonic)
-        self._display_name = kwargs.get('display_name', self.name)
+        self._name = kwargs.get('name', None)
+        self._display_name = kwargs.get('display_name', self._name)
         # Add Color TODO
         self._data = {}
         self._data_ordered = []
@@ -371,11 +380,11 @@ class Axis():
         for ar in args:
             self.add_data(ar)
 
-    def add_data(self, data):
-        data = make_iter(data)
+    def add_data(self, *data):
+        data = flatten_array(data)
         for datum in data:
-            if id(datum) in self.data_by_id:
-                #warnings ## WARNING TODO
+            if id(datum) in self._data_by_id:
+                warnings.warn(f"Trying to add data which is already present:  {datum.get_name()} {id(datum)}")
                 continue
             if isinstance(datum, Data):
                 self._data_ordered.append(datum)
@@ -388,41 +397,67 @@ class Axis():
             elif isinstance(datum, Axis):
                 self.add_data(datum.get_data())
             else:
-                warnings.Warn("Axis.add_data() takes Data, Axis, or an iterable of those types. Type " + type(datum) + " was ignored")
-            
-    def get_data(self, selectors = None, cap = 0, ignore_orphans=True): # TODO get by name or by actual
-        if selectors is None:
-            if cap: return self._data[0:cap]
-            return self._data
-        selectors = make_iter(selectors)
+                raise TypeError("Axis.add_data() only excepts data, axis, and groups of those")
+
+    def _len_dict(self):
+        i = 0
+        for key in self._data:
+            i += len(self._data[key])
+        return i
+
+    def get_data(self, *selectors, **kwargs): # TODO get by name or by actual
+        selectors = flatten_array(selectors)
+        cap = kwargs.get('_cap', 0)
+        ignore_orphans = kwargs.get('ignore_orphans', True)
+        if not selectors or selectors[0] is None:
+            if cap and cap <= len(self._data_ordered): 
+                return self._data_ordered[0:cap]
+            return self._data_ordered
         data = []
         for selector in selectors:
             if cap and len(data) >= cap: break
             elif isinstance(selector, str):
-                data.extend(self._data[selector])
+                if selector in self._data:
+                    data.extend(self._data[selector])
             elif isinstance(selector, Data):
                 if id(selector) in self._data_by_id or not ignore_orphans:
                     data.append(selector)
-        if not len(data): return None
+        if not len(data): return []
         if cap and len(data) > cap: data = data[0:cap]
         return data
     
-    def get_datum(self, selector, match=0):
-        data = self.get_data(selector, cap=match+1)
+    def get_datum(self, selector=None, match=0):
+        data = self.get_data(selector, _cap=match+1)
         if not data or match >= len(data): return None
         return data[match]
 
-    def remove_data(self, selectors = None, cap=0):
-        selectors = make_iter(selectors)
-        data = self.get_data(selectors, cap)
+    def remove_data(self,  *selectors):
+        selectors = flatten_array(selectors)
+        data = self.get_data(*selectors)
+        data_removed = []
         for datum in data:
-            pass ### TODO
+            if id(datum) not in self._data_by_id:
+                warnings.warn(f"Trying to remove data {datum.get_name()} which doesn't exist. Ignored.")
+                continue
+            self._data[datum.get_name()].remove(datum)
+            if len(self._data[datum.get_name()]) == 0:
+                del self._data[datum.get_name()]
+            self._data_ordered.remove(datum)
+            del self._data_by_id[id(datum)]
+            datum._deregister_axes(self)
+            data_removed.append(datum)
         return data
             
     def _change_data_name(self, datum, old_name, new_name):
         if old_name == new_name:
             return
-        ### TODO (remove from one index, put it in the other index)
+        self._data[old_name].remove(datum)
+        if len(self._data[old_name]) == 0:
+            del self._data[old_name]
+        if new_name in self._data:
+            self._data[new_name].append(datum)
+        else:
+            self._data[new_name] = [datum]
 
     def get_named_tree(self):
         result = []
@@ -433,24 +468,28 @@ class Axis():
 class Data():
     def __init__(self, index, values, **kwargs): # Default Index?
         if 'name' not in kwargs and 'mnemonic' not in kwargs:
-            raise ValueError("You must specifiy either 'name=' or 'mnemonic' equals. If not told to be different, they will be the same.")
-        axes = kwargs.get('axes', [])
+            raise ValueError("You must supply 'name'. Or 'mnemonic' will be used as 'name' if 'name' absent...")
+        _axes = kwargs.get('axes', None)
         self._axes = {}
-        self._name = kwargs.get('name', mnemonic)
+        self._mnemonic = self._name = kwargs.get('mnemonic', None)
+        self._name = kwargs.get('name', self._mnemonic)
+        if len(index) != len(values):
+            raise ValueError("Index and values have different length")
         self._index = index
         self._values = values
-        self._mnemonic = mnemonic
         self._color = kwargs.get('color', Color())
 
-        if not isinstance(axes, list) or len(axes) > 0:
-            axes = make_iter(axes)
-            self._register_axes(axes)
+        self._axes_by_id = {}
+        
+        if _axes is not None:
+            _axes = make_iter(_axes)
+            self._register_axes(_axes)
 
     def _register_axes(self, axes):
         axes = make_iter(axes)
         for axis in axes:
             if id(axis) in self._axes_by_id:
-                warnings.Warn("Tried to add data to axes which already contains data. Ignored")
+                warnings.warn(f"Tried to add data to axes which already contains data. Ignored {self._name}")
                 continue
             self._axes_by_id[id(axis)] = axis
             
@@ -458,7 +497,7 @@ class Data():
         axes = make_iter(axes)
         for axis in axes:
             if id(axis) not in self._axes_by_id:
-                warnings.Warn("Tried to remove data from axes where it doesn't exist. Ignored.")
+                warnings.warn("Tried to remove data from axes where it doesn't exist. Ignored.")
                 continue
             del self._axes_by_id[id(axis)]
 
@@ -474,21 +513,26 @@ class Data():
         return self._name
     
     def set_values(self, values):
+        if len(values) != len(self._index):
+            raise ValueError("Index and values have different length. Use set_index_values(index, values) to set both.")
         self._values = values
     def get_values(self):
         return self._values
 
     def set_index(self, index):
+        if len(index) != len(self._values):
+            raise ValueError("Index and values have different length. Use set_index_values(index, values) to set both.")
         self._index = index
     def get_index(self):
         return self._index
+
+    def set_index_values(self, index, values):
+        if len(index) != len(values):
+            raise ValueError("Index and values have different length")
+        self._index = index
+        self._values = values
     
     ## TODO: if user changes set values/index, should we automatically update graph?
-
-    def set_values(self, values):
-        self._values = values
-    def get_values(self):
-        return self._values
         
     def set_mnemonic(self, mnemonic):
         self._mnemonic = mnemonic
