@@ -1,9 +1,11 @@
-    - yes, do tests
-    - start from the bottom and go up, we need to notify parents of name changes of data or axis
-    - read style (we're going to do two iterations)
-    - git commit
-    - refactor according ot sheet
-    - get render_traces() calling style
+    - get-name/set-name axis (displayname) probably color
+    - yes, do tests, refactor track and graph
+    - refactor track
+    - change axis to track parent
+    - refactor graph
+    - change track to track parent
+    - read style (we're going to do two iterations according to sheets)
+    - add colors
     - test bottom axis
     - test axis son both sides
     - factor out "make iterable"

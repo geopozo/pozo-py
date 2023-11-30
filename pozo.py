@@ -313,11 +313,14 @@ class Track():
             return None
         return axes[match]
 
-    def remove_axes(self, axes):
+    def remove_axes(self, *axes):
+        axes = flatten_array(axes)
         axes = self.get_axes(axes)
-        if axes is None: return None
+        axes_removed = []
         for axis in axes:
-            if id(axis) not in self.axes_by_id: continue
+            if id(axis) not in self.axes_by_id:
+                warnings.warn(f"Trying to remove axis {axis.get_name()} which doesn't exist. Ignored.")
+                continue
             del self.axes_by_id[id(axis)]
             self.axes[axis.name].remove(axis)
             if len(self.axes[axis.name]) == 0:
@@ -326,8 +329,10 @@ class Track():
                 self.axes_below.remove(axis)
             except ValueError:
                 self.axes_above.remove(axis)
-        return axes
-    
+            axis._deregister_tracks(self)
+            axes_removed.append(axis)
+        return axes_removed
+    ## TODO change_anem and register/deregister_trakcs
     def count_axes(self):
         return len(self.axes)
     def count_lower_axes(self):
@@ -338,25 +343,6 @@ class Track():
     def has_axis(self, selector):
         return self.get_axis(selector) is not None
 
-    def render_style(self, style, lower_parent):
-        axes = [] # array of style dictionaries, not Axis()
-        for axis_position, axis in enumerate(self.get_lower_axes()):
-            axis_dict=axis.render_style(style)
-            style.set_axis_veritcal_position(
-                axis_dict,
-                -(axis_position+1),
-                lower_parent,
-            ) # modifies the dict
-            axes.append(axis_dict)
-        for axis_position, axis in enumerate(self.get_upper_axes()):
-            axis_dict=axis.render_style(style)
-            style.set_axis_vertical_position(
-                axis_dict,
-                axis_position+1,
-                lower_parent+self.count_lower_axes(),
-            ) # modifies the dict
-            axes.append(axis_dict)
-        return axes
 
     def get_named_tree(self):
         above = []
@@ -370,9 +356,8 @@ class Track():
 class Axis():
 
     def __init__(self, *args, **kwargs):
-        self._name = kwargs.get('name', None)
-        self._display_name = kwargs.get('display_name', self._name)
-        # Add Color TODO
+        self._name = kwargs.get('name', "")
+
         self._data = {}
         self._data_ordered = []
         self._data_by_id = {} # Could we just
@@ -380,10 +365,19 @@ class Axis():
         for ar in args:
             self.add_data(ar)
 
-    def add_data(self, *data):
-        data = flatten_array(data)
+    def get_name(self):
+        return self._name
+    def set_name(self, name):
+        self._name = name
+        
+    def has_data(self, *data):
+        result = False
         for datum in data:
-            if id(datum) in self._data_by_id:
+            result  = result and id(datum) in self._data_by_id
+
+    def add_data(self, *data):
+        for datum in data:
+            if self.has_data(datum):
                 warnings.warn(f"Trying to add data which is already present:  {datum.get_name()} {id(datum)}")
                 continue
             if isinstance(datum, Data):
@@ -464,7 +458,7 @@ class Axis():
         for el in self.data:
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
-
+q
 class Data():
     def __init__(self, index, values, **kwargs): # Default Index?
         if 'name' not in kwargs and 'mnemonic' not in kwargs:
@@ -485,16 +479,14 @@ class Data():
             _axes = make_iter(_axes)
             self._register_axes(_axes)
 
-    def _register_axes(self, axes):
-        axes = make_iter(axes)
+    def _register_axes(self, *axes):
         for axis in axes:
             if id(axis) in self._axes_by_id:
                 warnings.warn(f"Tried to add data to axes which already contains data. Ignored {self._name}")
                 continue
             self._axes_by_id[id(axis)] = axis
             
-    def _deregister_axes(self, axes):
-        axes = make_iter(axes)
+    def _deregister_axes(self, *axes):
         for axis in axes:
             if id(axis) not in self._axes_by_id:
                 warnings.warn("Tried to remove data from axes where it doesn't exist. Ignored.")
@@ -539,7 +531,7 @@ class Data():
     def get_mnemonic(self):
         return self._mnemonic
         
-    def set_color(self, color):
+    def set_color(self, color): # probably not
         self._color = color
 
     def get_named_tree(self):
@@ -550,6 +542,7 @@ class Data():
             'color': self._color,
         } }
 
+# Probably not how we'll do it, especially since color is not the only style attribute
 class Color(): ## TODO better default colors, in pozo.style
     def __init__(self, color=None):
         self.set_color(color)

@@ -25,3 +25,24 @@
                 name = datum.mnemonic, # probably needs to be better
             ))
         return all_traces
+
+
+    def render_style(self, style, lower_parent):
+        axes = [] # array of style dictionaries, not Axis()
+        for axis_position, axis in enumerate(self.get_lower_axes()):
+            axis_dict=axis.render_style(style)
+            style.set_axis_veritcal_position(
+                axis_dict,
+                -(axis_position+1),
+                lower_parent,
+            ) # modifies the dict
+            axes.append(axis_dict)
+        for axis_position, axis in enumerate(self.get_upper_axes()):
+            axis_dict=axis.render_style(style)
+            style.set_axis_vertical_position(
+                axis_dict,
+                axis_position+1,
+                lower_parent+self.count_lower_axes(),
+            ) # modifies the dict
+            axes.append(axis_dict)
+        return axes
