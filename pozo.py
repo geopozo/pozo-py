@@ -373,7 +373,8 @@ class Axis():
     def has_data(self, *data):
         result = False
         for datum in data:
-            result  = result and id(datum) in self._data_by_id
+            result = result or id(datum) in self._data_by_id
+        return result
 
     def add_data(self, *data):
         for datum in data:
@@ -389,7 +390,7 @@ class Axis():
                 self._data_by_id[id(datum)] = datum
                 datum._register_axes(self)
             elif isinstance(datum, Axis):
-                self.add_data(datum.get_data())
+                self.add_data(*datum.get_data())
             else:
                 raise TypeError("Axis.add_data() only excepts data, axis, and groups of those")
 
@@ -458,7 +459,7 @@ class Axis():
         for el in self.data:
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
-q
+
 class Data():
     def __init__(self, index, values, **kwargs): # Default Index?
         if 'name' not in kwargs and 'mnemonic' not in kwargs:

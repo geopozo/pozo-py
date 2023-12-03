@@ -33,9 +33,9 @@ def test_axis():
     assert b.get_datum("md1") == d1
     assert b.get_datum('astoasi') == None
     assert b.get_datum(5) == None
-    c = pozo.Axis([d1, d2])
-    d = pozo.Axis([d1, d2], d3)
-    e = pozo.Axis([d4, d5], d6)
+    c = pozo.Axis(*[d1, d2])
+    d = pozo.Axis(*[d1, d2], d3)
+    e = pozo.Axis(*[d4, d5], d6)
     assert e._len_dict() == 3
     assert len(e._data_ordered) == 3
     assert len(e._data_by_id) == 3
@@ -60,13 +60,13 @@ def test_axis():
     assert e._len_dict() == len(e._data_by_id)
     assert e._len_dict() == len(e.get_data())
     with pytest.warns(UserWarning):
-        e.add_data([d5, d1]) # d1 new
+        e.add_data(*[d5, d1]) # d1 new
     assert e._len_dict() == len(e._data_ordered)
     assert e._len_dict() == len(e._data_by_id)
     assert e._len_dict() == len(e.get_data())
     assert len(e.get_data()) == 4
     with pytest.warns(UserWarning):
-        e.add_data(d1, d8, [d2, d4]) #d2 d8 new
+        e.add_data(d1, d8, *[d2, d4]) #d2 d8 new
     assert e._len_dict() == len(e._data_ordered)
     assert e._len_dict() == len(e._data_by_id)
     assert e._len_dict() == len(e.get_data())
@@ -107,7 +107,7 @@ def test_axis():
     assert e._len_dict() == len(e.get_data())
     assert len(e.get_data()) == 0
     with pytest.warns(UserWarning):
-        e.add_data([d1,d2],[d3,d4],[d1,d4])
+        e.add_data(*[d1,d2],*[d3,d4],*[d1,d4])
     assert e._len_dict() == len(e._data_ordered)
     assert e._len_dict() == len(e._data_by_id)
     assert e._len_dict() == len(e.get_data())
