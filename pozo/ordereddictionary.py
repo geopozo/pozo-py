@@ -1,5 +1,5 @@
 from pozo.exceptions import SelectorTypeError, SelectorError
-import pozo.qselectors as s
+import pozo.extra_selectors as s
 # Not sure if I should inherit these two. Maybe `from _____` is sufficient.
 
 class ObservingOrderedDictionary():

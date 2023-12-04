@@ -1,5 +1,5 @@
 import pytest
-import pozo.qselectors as s
+import pozo.extra_selectors as s
 import pozo.ordereddictionary as od
 from pozo.exceptions import SelectorTypeError, SelectorError
 from pozo.ordereddictionary import ObservingOrderedDictionary as OOD
