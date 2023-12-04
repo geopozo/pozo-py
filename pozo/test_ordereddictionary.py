@@ -173,10 +173,11 @@ def test_init_ood_w_child():
 
     # get items
     assert len(parents[0].get_items()) == 4
-    assert parents[0].get_items("A", 1) == [children[0], clone_child, children[1]] # should this be sorted? yes. should it eliminate duplicates? yes. so stop here.
+    assert parents[0].get_items("A", 1) == [children[0], children[1], clone_child] 
     # okay, so _by_id can store the object number, not just the object, no need, we already have it.
     # then we can grab their position
     # Yeah, we have to do that and deep copy (copy your children and then reattach them, if you're being copied)
+    # We need to test sorting + strict
 
     # swap (gotta test gts first)
 
