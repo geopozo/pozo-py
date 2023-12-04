@@ -80,7 +80,7 @@ class ObservingOrderedDictionary():
         else:
             index = slice(None)
         self._enforce_key(name)
-        self._enforce_index(name[1], target = self._items_by_name[name])
+        self._enforce_index(index, target = self._items_by_name[name])
         res = self._items_by_name[name][index]
         if not isinstance(res, list):
             return [res]
@@ -103,8 +103,8 @@ class ObservingOrderedDictionary():
         skip_bad = kwargs.get('skip_bad', False)
         items = []
         if not selectors or selectors[0] is None:
-            ret = self._items_ordered
-            del selectors
+            items = self._items_ordered
+            selectors = []
         for selector in selectors:
             if cap and len(items) >= cap: break
             if isinstance(selector, str):

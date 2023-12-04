@@ -8,7 +8,9 @@ def assert_ood_sane(ood = OOD(), num = None):
     i = 0
     for item in ood:
         i += 1
-    assert len(ood._items_by_id) == len(ood._items_by_name) == ood._count_dictionary() ==  len(ood)
+    assert len(ood._items_by_id) == len(ood._items_ordered)
+    assert len(ood._items_by_id) == ood._count_dictionary()
+    assert len(ood._items_by_id) ==  len(ood)
     if num is not None:
         assert len(ood._items_by_id) == num
 
@@ -129,8 +131,52 @@ def test_init_ood_w_child():
     parents[1]._enforce_index(slice(0, 3))
     parents[1]._enforce_index(None)
 
-    # do enforce name
+    # _enforce_key
+
+    with pytest.raises(SelectorError):
+        parents[0]._enforce_key("")
+        parents[2]._enforce_key("B")
+    parents[0]._enforce_key("A")
+    parents[0]._enforce_key("B")
+    parents[0]._enforce_key("C")
+    parents[2]._enforce_key("A")
+
     # do _items_by_name
+    assert children[0] == parents[0]._get_items_by_name("A")[0]
+    assert children[1] == parents[0]._get_items_by_name("B")[0]
+    assert children[2] == parents[0]._get_items_by_name("C")[0]
+    assert len(parents[0]._get_items_by_name("A")) == 1
+    assert len(parents[0]._get_items_by_name("B")) == 1
+    assert len(parents[0]._get_items_by_name("C")) == 1
+
+    clone_child = OODChild(name="A")
+    parents[0].add_items(clone_child)
+    assert_ood_sane(parents[0], 4)
+    assert len(parents[0]._get_items_by_name("A")) == 2
+    assert len(parents[0]._get_items_by_name("B")) == 1
+    assert len(parents[0]._get_items_by_name("C")) == 1
+    assert children[0] == parents[0]._get_items_by_name("A")[0]
+    assert clone_child == parents[0]._get_items_by_name("A")[1]
+    assert clone_child == parents[0]._get_items_by_name(s.Key_I("A", 1))[0]
+    assert children[0] == parents[0]._get_items_by_name(s.Key_I("A", 0))[0]
+    assert len(parents[0]._get_items_by_name(s.Key_I("A", slice(None)))) == 2
+    # assert clone_child == parents[0]._get_items_by_name(s.Key_I("A", slice(None,-1)))
+    # So it turns out negatives aren't an implicit feature of slicing like I thought
+    # We'd have to support them (or allow them through the checker?)
+
+    # get items by slice
+    assert len(parents[0]._get_items_by_slice(slice(None))) == len(parents[0]) == 4
+    assert parents[0]._get_items_by_slice(slice(1, 2)) == children[1:2]
+
+    # get item by index
+    assert parents[0]._get_item_by_index(0) == children[0]
+
+    # get items
+    assert len(parents[0].get_items()) == 4
+    assert parents[0].get_items("A", 1) == [children[0], clone_child, children[1]] # should this be sorted? yes. should it eliminate duplicates? yes. so stop here.
+    # okay, so _by_id can store the object number, not just the object, no need, we already have it.
+    # then we can grab their position
+    # Yeah, we have to do that and deep copy (copy your children and then reattach them, if you're being copied)
 
     # swap (gotta test gts first)
 
