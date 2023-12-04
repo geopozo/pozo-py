@@ -1,18 +1,6 @@
-from collections import namedtuple
-
+from pozo.exceptions import SelectorTypeError, SelectorError
+import pozo.qselectors as s
 # Not sure if I should inherit these two. Maybe `from _____` is sufficient.
-class SelectorError(IndexError, KeyError): # We wrap errors so we can detect if we sent them 
-    pass
-class SelectorTypeError(TypeError): # We wrap errors so we can detect if we sent them 
-    pass
-
-_Key_I = namedtuple('Key_I', 'key index')
-class Key_I(_Key_I):
-    pass
-    def check_type(self):
-        return isinstance(self[0], str) and isinstance(self[1], int)
-    def enforce_type(self):
-        if not self.check_type(): raise SelectorTypeError("Supplied Key_I must be tuple of (str, int)")
 
 class ObservingOrderedDictionary():
 
@@ -23,6 +11,9 @@ class ObservingOrderedDictionary():
         self._items_by_id = {}
 
         super().__init__(*args, **kwargs)
+
+    def __len__(self):
+        return len(self._items_ordered)
 
     def __iter__(self):
         self._iterator_index = 0
@@ -53,7 +44,7 @@ class ObservingOrderedDictionary():
             raise SelectorError() from IndexError("The items to swap must be valid indices")
         self._items_ordered[item1], self._items_ordered[item2] = self._items_ordered[item2], self._items_ordered[item1]
 
-    # Will throw IndexErrors if any number is out of range 
+    # Will throw IndexErrors if any number is out of range
     def _enforce_index(self, index, target = None):
         if target is None:
             target = self._items_ordered
@@ -61,8 +52,10 @@ class ObservingOrderedDictionary():
             if index < 0 or index >= len(target):
                 raise SelectorError() from IndexError("The index supplied is out of range")
         elif isinstance(index, slice):
-            self._enforce_index(index.start, target)
-            self._enforce_index(index.stop, target)
+            if index.start is not None:
+                self._enforce_index(index.start, target)
+            if index.stop is not None:
+                self._enforce_index(index.stop-1, target)
         return True
 
     # Because we can't check to see if we've supplied a correct object type, we can only return true or false
@@ -75,18 +68,18 @@ class ObservingOrderedDictionary():
             return False
 
     # This should throw an error if name not in dictionary
-    def _enforce_name(self, name):
+    def _enforce_key(self, name):
         if name not in self._items_by_name:
             raise SelectorError(f"Name {name} does not seem to be valid.") from KeyError()
         return True
 
     # Throws key/index errors
     def _get_items_by_name(self, name):
-        if isinstance(name, Key_I):
+        if isinstance(name, s.Key_I):
             name, index = name[0], name[1]
         else:
             index = slice(None)
-        self._enforce_name(name)
+        self._enforce_key(name)
         self._enforce_index(name[1], target = self._items_by_name[name])
         res = self._items_by_name[name][index]
         if not isinstance(res, list):
@@ -120,7 +113,7 @@ class ObservingOrderedDictionary():
                 except SelectorError as e:
                     if skip_bad: pass
                     else: raise e
-            elif isinstance(selector, Key_I) and selector.check_type():
+            elif isinstance(selector, s.Key_I) and selector.check_type():
                 try:
                     items.extend(self._get_items_by_name(selector))
                 except SelectorError as e:
@@ -139,7 +132,7 @@ class ObservingOrderedDictionary():
                     if skip_bad: pass
                     else: raise e
             else:
-                raise SelectorTypeError("Selectors must of type: str, Key_I(str, int), int, slice.")
+                raise SelectorTypeError("Selectors must of type: str, int, slice or a class from package selectors.")
         if cap and len(items) > cap: items = items[0:cap]
         return items
 

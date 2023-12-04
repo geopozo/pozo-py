@@ -1,14 +1,23 @@
 import pytest
-import ordereddictionary as od
-from ordereddictionary import ObservingOrderedDictionary as OOD
+import pozo.qselectors as s
+import pozo.ordereddictionary as od
+from pozo.exceptions import SelectorTypeError, SelectorError
+from pozo.ordereddictionary import ObservingOrderedDictionary as OOD
 
 def assert_ood_sane(ood = OOD(), num = None):
     i = 0
     for item in ood:
         i += 1
-    assert len(ood._items_by_id) == len(ood._items_by_name) == ood._count_dictionary()
+    assert len(ood._items_by_id) == len(ood._items_by_name) == ood._count_dictionary() ==  len(ood)
     if num is not None:
         assert len(ood._items_by_id) == num
+
+def assert_child_has_parents(child, num, parents = None):
+    assert len(child._parents_by_id) == num
+    if parents is not None:
+        assert num == len(parents)
+        for parent in parents:
+            assert id(parent) in child._parents_by_id
 
 def test_init_ood():
     ood = OOD()
@@ -50,6 +59,7 @@ def test_init_ood_w_child():
 
     ## Unit tests
 
+    # test these elsewhere (these are selectors)
     # test key_I with correct values and instances of bad values
     # with pytest.raises(SelectorTypeError)
 
@@ -63,15 +73,25 @@ def test_init_ood_w_child():
 
     parents[0].add_items(children[0])
     assert_ood_sane(parents[0], 1)
+    assert_child_has_parents(children[0], 1, [parents[0]])
 
     parents[0].add_items(children[1], children[2])
     assert_ood_sane(parents[0], 3)
+    for child in children:
+        assert_child_has_parents(child, 1, [parents[0]])
 
     parents[1].add_items(*children)
     assert_ood_sane(parents[1], 3)
+    for child in children:
+        assert_child_has_parents(child, 2, [parents[0], parents[1]])
 
     parents[2].add_items(children[0])
     assert_ood_sane(parents[2], 1)
+    for i, child in enumerate(children):
+        if not i:
+            assert_child_has_parents(child, 3, [parents[0], parents[1], parents[2]])
+        else:
+            assert_child_has_parents(child, 2, [parents[0], parents[1]])
 
     with pytest.raises(ValueError):
         parents[0].add_items(*children)
@@ -81,16 +101,45 @@ def test_init_ood_w_child():
     assert_ood_sane(parents[0], 3)
     assert_ood_sane(parents[1], 3)
     assert_ood_sane(parents[2], 1)
+    for i, child in enumerate(children):
+        if not i:
+            assert_child_has_parents(child, 3, [parents[0], parents[1], parents[2]])
+        else:
+            assert_child_has_parents(child, 2, [parents[0], parents[1]])
 
     with pytest.raises(ValueError):
         parents[2].add_items(children[2], children[0])
 
     assert_ood_sane(parents[2], 1)
+    for i, child in enumerate(children):
+        if not i:
+            assert_child_has_parents(child, 3, [parents[0], parents[1], parents[2]])
+        else:
+            assert_child_has_parents(child, 2, [parents[0], parents[1]])
+
+    # test _enforce index
+    with pytest.raises(SelectorError):
+        parents[1]._enforce_index(-1)
+        parents[1]._enforce_index(10)
+        parents[1]._enforce_index(len(parents[1]))
+        parents[1]._enforce_index(slice(1,10))
+    parents[1]._enforce_index(0)
+    parents[1]._enforce_index(1)
+    parents[1]._enforce_index(2)
+    parents[1]._enforce_index(slice(0, 3))
+    parents[1]._enforce_index(None)
+
+    # do enforce name
+    # do _items_by_name
+
+    # swap (gotta test gts first)
 
     # reorder (gotta test gets first)
     # test list too small
     # test list too big
     # test list just right
+
+    # test has_item gotta do gets first
 
 
     ## Fuzzy Use Tests (randomly add, remove, and rename, check has, get, get_items w/ several different configurations, completely, and with random )
@@ -116,7 +165,7 @@ def test_init_ood_w_child():
         assert parent.has_item(0)
         assert parent.has_item("child1")
         assert parent.has_item(slice(None))
-        assert_get_item_equal(parent, 0, "child1", slice(None), od.Key_I("child1", 0))
+        assert_get_item_equal(parent, 0, "child1", slice(None), s.Key_I("child1", 0))
 
         #with pytest.raises(TypeError): # test errors as well w/ has item
         # Remove one child
