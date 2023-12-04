@@ -2,9 +2,13 @@ import pytest
 import ordereddictionary as od
 from ordereddictionary import ObservingOrderedDictionary as OOD
 
-def assert_ood_sane(ood = OOD()):
+def assert_ood_sane(ood = OOD(), num = None):
+    i = 0
+    for item in ood:
+        i += 1
     assert len(ood._items_by_id) == len(ood._items_by_name) == ood._count_dictionary()
-    return ood._count_dictionary()
+    if num is not None:
+        assert len(ood._items_by_id) == num
 
 def test_init_ood():
     ood = OOD()
@@ -37,17 +41,56 @@ def test_init_ood_w_child():
 
     ## Test basic initialization
     ood_child = OODChild()
-    assert assert_ood_sane(ood_child) == 0
+    assert_ood_sane(ood_child, 0)
     assert_child_name(ood_child, "")
 
     ood_child = OODChild(name="test")
-    assert assert_ood_sane(ood_child) == 0
+    assert_ood_sane(ood_child, 0)
     assert_child_name(ood_child, "test")
 
     ## Unit tests
 
     # test key_I with correct values and instances of bad values
     # with pytest.raises(SelectorTypeError)
+
+    # add_items
+    children = [OODChild(name="A"), OODChild(name="B"), OODChild(name="C")]
+    parents = [OODChild(name="Alphabet Parent"), OODChild(name="Alphabet Parent2"), OODChild(name="Alphabet Parent2")]
+    for child in children:
+        assert_ood_sane(child, 0)
+    for parent in parents:
+        assert_ood_sane(parent, 0)
+
+    parents[0].add_items(children[0])
+    assert_ood_sane(parents[0], 1)
+
+    parents[0].add_items(children[1], children[2])
+    assert_ood_sane(parents[0], 3)
+
+    parents[1].add_items(*children)
+    assert_ood_sane(parents[1], 3)
+
+    parents[2].add_items(children[0])
+    assert_ood_sane(parents[2], 1)
+
+    with pytest.raises(ValueError):
+        parents[0].add_items(*children)
+        parents[1].add_items(children[0])
+        parents[2].add_items(children[0])
+
+    assert_ood_sane(parents[0], 3)
+    assert_ood_sane(parents[1], 3)
+    assert_ood_sane(parents[2], 1)
+
+    with pytest.raises(ValueError):
+        parents[2].add_items(children[2], children[0])
+
+    assert_ood_sane(parents[2], 1)
+
+    # reorder (gotta test gets first)
+    # test list too small
+    # test list too big
+    # test list just right
 
 
     ## Fuzzy Use Tests (randomly add, remove, and rename, check has, get, get_items w/ several different configurations, completely, and with random )
@@ -56,7 +99,7 @@ def test_init_ood_w_child():
     for name in child_names:
         oods.append(OODChild(name=name))
     for i, ood in enumerate(oods):
-        assert assert_ood_sane(ood) == 0
+        assert_ood_sane(ood, 0)
         assert_child_name(ood, child_names[i])
 
     clones = []
@@ -67,7 +110,7 @@ def test_init_ood_w_child():
 
     for parent in parents:
         parent.add_items(oods[0])
-        assert assert_ood_sane(parent) == 1
+        assert_ood_sane(parent, 1)
         # should be testing get_items first
         assert parent.has_item(oods[0])
         assert parent.has_item(0)
