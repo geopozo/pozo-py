@@ -132,6 +132,12 @@ class ObservingOrderedDictionary(s.Selector):
         if not self._enforce_index(index, **kwargs): return
         return self._items_ordered[index]
 
+    def _check_exist(self, item, **kwargs):
+        strict_index = kwargs.get("strict_index", self._strict_index)
+        if not item or len(item) == 0:
+            if strict_index: raise SelectorError("strict_index is enabled and at least one index/key did not exist")
+            return False
+        return True
     # Can return an empty list if a) no selectors supplied or b) skip_bad=True.
     # If selector makes no sense (4.5), will still throw error.
     def get_items(self, *selectors, **kwargs):
@@ -142,16 +148,19 @@ class ObservingOrderedDictionary(s.Selector):
             selectors = []
         for selector in selectors:
             if cap and len(items) >= cap: break
-            if isinstance(selector, str):
-                items.extend(self._get_items_by_name(selector, **kwargs))
-            elif isinstance(selector, s.Selector):
-                items.extend(selector.process(self, **kwargs))
-            elif isinstance(selector, int):
-                items.append(self._get_item_by_index(selector, **kwargs))
+            new_items = None
+            if isinstance(selector, int):
+                new_items = [self._get_item_by_index(selector, **kwargs)]
             elif isinstance(selector, slice):
-                items.extend(self._get_items_by_slice(selector, **kwargs))
+                new_items = self._get_items_by_slice(selector, **kwargs)
+            elif isinstance(selector, str):
+                new_items = self._get_items_by_name(selector, **kwargs)
+            elif isinstance(selector, s.Selector):
+                new_items = selector.process(self, **kwargs)
             else:
                 raise SelectorTypeError("Selectors must of type: str, int, slice or a class from package selectors.")
+            if self._check_exist(new_items, **kwargs):
+                items.extend(new_items)
         if cap and len(items) > cap: items = items[0:cap]
         resulting_items_by_id = {}
         for item in items:
