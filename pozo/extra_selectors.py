@@ -1,11 +1,27 @@
 from pozo.exceptions import SelectorTypeError
-from collections import namedtuple
+from abc import ABC, abstractmethod
 
-# This is a selector, just like my modifiers for axis above/below, just like my has_axis
-_Key_I = namedtuple('Key_I', 'key index')
-class Key_I(_Key_I):
-    pass
-    def check_type(self):
-        return isinstance(self[0], str) and isinstance(self[1], int)
-    def enforce_type(self):
-        if not self.check_type(): raise SelectorTypeError("Supplied Key_I must be tuple of (str, int)")
+## Selectors use internal functions! They don't have to....
+
+
+class Selector(ABC):
+
+    @abstractmethod # this won't always throw an error!
+    def process(self, ood):
+        raise NotImplementedError("All classes that inherit Selector must implement process. If you're seeing this error, some selector you are using wasn't finished!")
+
+
+class Name_I(Selector):
+    def __init__(self, name, index):
+        self.name = name
+        self.index = index
+        self.enforce_self_type()
+
+    def check_self_type(self):
+        return isinstance(self.name, str) and isinstance(self.index, (int, slice))
+    def enforce_self_type(self):
+        if not self.check_self_type(): raise SelectorTypeError("Supplied Name_I must be tuple of (str, int)")
+
+    def process(self, ood, **kwargs):
+        self.enforce_self_type()
+        return ood.get_items(self.name, index = self.index, **kwargs)

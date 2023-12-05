@@ -1,4 +1,4 @@
 .PHONY: all
 
 all:
-	pytest test_ordereddictionary.py
+	pytest -s test_ordereddictionary.py

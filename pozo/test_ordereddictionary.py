@@ -8,6 +8,7 @@ def assert_ood_sane(ood = OOD(), num = None):
     i = 0
     for item in ood:
         i += 1
+    assert len(ood._items_by_id) == i
     assert len(ood._items_by_id) == len(ood._items_ordered)
     assert len(ood._items_by_id) == ood._count_dictionary()
     assert len(ood._items_by_id) ==  len(ood)
@@ -39,6 +40,11 @@ def test_init_child():
     child.set_name("test2")
     assert_child_name(child, "test2")
 
+def test_child():
+    ... # need to write unit tests for children TODO
+
+# TODO: write selectors tests, somewhere
+
 def assert_get_item_equal(parent, *args):
     assert len(args) > 1
     for i, arg in enumerate(args): # no zip here!
@@ -59,13 +65,9 @@ def test_init_ood_w_child():
     assert_ood_sane(ood_child, 0)
     assert_child_name(ood_child, "test")
 
-    ## Unit tests
-
-    # test these elsewhere (these are selectors)
-    # test key_I with correct values and instances of bad values
-    # with pytest.raises(SelectorTypeError)
 
     # add_items
+    od.strict_index = True
     children = [OODChild(name="A"), OODChild(name="B"), OODChild(name="C")]
     parents = [OODChild(name="Alphabet Parent"), OODChild(name="Alphabet Parent2"), OODChild(name="Alphabet Parent2")]
     for child in children:
@@ -74,8 +76,12 @@ def test_init_ood_w_child():
         assert_ood_sane(parent, 0)
 
     parents[0].add_items(children[0])
+    assert id(children[0]) in parents[0]._items_by_id
     assert_ood_sane(parents[0], 1)
     assert_child_has_parents(children[0], 1, [parents[0]])
+    assert parents[0].has_item("A")
+    assert parents[0].has_item(children[0].get_name())
+    assert parents[0].has_item(children[0])
 
     parents[0].add_items(children[1], children[2])
     assert_ood_sane(parents[0], 3)
@@ -96,8 +102,12 @@ def test_init_ood_w_child():
             assert_child_has_parents(child, 2, [parents[0], parents[1]])
 
     with pytest.raises(ValueError):
+        assert len(parents[0]) == 3
+        assert parents[0].has_item(children[0])
         parents[0].add_items(*children)
+    with pytest.raises(ValueError):
         parents[1].add_items(children[0])
+    with pytest.raises(ValueError):
         parents[2].add_items(children[0])
 
     assert_ood_sane(parents[0], 3)
@@ -157,12 +167,6 @@ def test_init_ood_w_child():
     assert len(parents[0]._get_items_by_name("C")) == 1
     assert children[0] == parents[0]._get_items_by_name("A")[0]
     assert clone_child == parents[0]._get_items_by_name("A")[1]
-    assert clone_child == parents[0]._get_items_by_name(s.Key_I("A", 1))[0]
-    assert children[0] == parents[0]._get_items_by_name(s.Key_I("A", 0))[0]
-    assert len(parents[0]._get_items_by_name(s.Key_I("A", slice(None)))) == 2
-    # assert clone_child == parents[0]._get_items_by_name(s.Key_I("A", slice(None,-1)))
-    # So it turns out negatives aren't an implicit feature of slicing like I thought
-    # We'd have to support them (or allow them through the checker?)
 
     # get items by slice
     assert len(parents[0]._get_items_by_slice(slice(None))) == len(parents[0]) == 4
@@ -173,11 +177,109 @@ def test_init_ood_w_child():
 
     # get items
     assert len(parents[0].get_items()) == 4
-    assert parents[0].get_items("A", 1) == [children[0], children[1], clone_child] 
-    # okay, so _by_id can store the object number, not just the object, no need, we already have it.
-    # then we can grab their position
-    # Yeah, we have to do that and deep copy (copy your children and then reattach them, if you're being copied)
-    # We need to test sorting + strict
+    assert parents[0].get_items() == children + [clone_child]
+    assert parents[0].get_items("A", 1) == [children[0], children[1], clone_child]
+    sel = s.Name_I("A", 1)
+    assert isinstance(sel, s.Selector)
+    assert clone_child == parents[0].get_items(s.Name_I("A", 1))[0]
+    assert children[0] == parents[0].get_items(s.Name_I("A", 0))[0]
+    assert len(parents[0].get_items(s.Name_I("A", slice(None)))) == 2
+    # assert clone_child == parents[0]._get_items_by_name(s.Name_I("A", slice(None,-1)))
+    # So it turns out negatives aren't an implicit feature of slicing like I thought
+    # We'd have to support them (or allow them through the checker?)
+
+    # testing strict_index
+    with pytest.raises(SelectorError):
+        parents[0].get_items("E")
+        parents[0].get_items(200)
+        parents[0].get_items(slice(1000, 1010))
+        parents[0].get_items(s.Name_I("E", 10))
+        parents[0].get_items(s.Name_I("A", 10))
+    parents[0].unset_strict()
+    assert parents[0].get_items("E") == []
+    assert parents[0].get_items(200) == []
+    assert parents[0].get_items(slice(1000, 1010)) == []
+    assert parents[0].get_items(s.Name_I("E", 10)) == []
+    assert parents[0].get_items(s.Name_I("A", 10)) == []
+    with pytest.raises(SelectorError):
+        parents[0].get_items("E", strict_index=True)
+        parents[0].get_items(200, strict_index=True)
+        parents[0].get_items(slice(1000, 1010), strict_index=True)
+        parents[0].get_items(s.Name_I("E", 10), strict_index=True)
+        parents[0].get_items(s.Name_I("A", 10), strict_index=True)
+    parents[0].set_strict()
+    with pytest.raises(SelectorError):
+        parents[0].get_items("E")
+        parents[0].get_items(200)
+        parents[0].get_items(slice(1000, 1010))
+        parents[0].get_items(s.Name_I("E", 10))
+        parents[0].get_items(s.Name_I("A", 10))
+    assert parents[0].get_items("E", strict_index=False) == []
+    assert parents[0].get_items(200, strict_index=False) == []
+    assert parents[0].get_items(slice(1000, 1010), strict_index=False) == []
+    assert parents[0].get_items(s.Name_I("E", 10), strict_index=False) == []
+    assert parents[0].get_items(s.Name_I("A", 10), strict_index=False) == []
+    assert parents[2].get_items(children[2], strict_index=False) == []
+
+    assert parents[0].get_items("A", s.Name_I("A", 0), s.Name_I("AA", 100), 1, strict_index=False) == [children[0], children[1], clone_child]
+
+    # testing type errors
+    with pytest.raises(SelectorTypeError):
+        parents[0].get_items(200.0)
+        parents[0].get_items(parents)
+        parents[0].get_items[{}]
+        parents[0].get_items((1,2,3))
+        parents[0].get_items(s.Name_I(1, 2))
+        parents[0].get_items(s.Name_I(1, "a"))
+        parents[0].get_items(s.Name_I("a", "a"))
+
+    # testing get_item()
+
+    assert parents[0].get_item("A") == children[0]
+    assert parents[0].get_item(1) == children[1]
+    assert parents[0].get_item(s.Name_I("A", 1)) == clone_child
+
+    with pytest.raises(SelectorTypeError):
+        parents[0].get_item(200.0)
+        parents[0].get_item(parents)
+        parents[0].get_item({})
+        parents[0].get_item((1,2,3))
+        parents[0].get_item(s.Name_I(1, 2))
+        parents[0].get_item(s.Name_I(1, "a"))
+        parents[0].get_item(s.Name_I("a", "a"))
+
+    with pytest.raises(SelectorError):
+        parents[0].get_item("E")
+        parents[0].get_item(200)
+        parents[0].get_item(slice(1000, 1010))
+        parents[0].get_item(s.Name_I("E", 10))
+        parents[0].get_item(s.Name_I("A", 10))
+
+    parents[0].unset_strict()
+    assert parents[0].get_item("E") == None
+    assert parents[0].get_item(200) == None
+    assert parents[0].get_item(slice(1000, 1010)) == None
+    assert parents[0].get_item(s.Name_I("E", 10)) == None
+    assert parents[0].get_item(s.Name_I("A", 10)) == None
+    parents[0].set_strict()
+
+
+    assert parents[0].has_item("E") == False
+    assert parents[0].has_item(200) == False
+    assert parents[0].has_item(slice(1000, 1010)) == False
+    assert parents[0].has_item(s.Name_I("E", 10)) == False
+    assert parents[0].has_item(s.Name_I("A", 10)) == False
+    assert parents[0].has_item(200.0) == False
+    assert parents[0].has_item(parents) == False
+    assert parents[0].has_item({}) == False
+    assert parents[0].has_item((1,2,3)) == False
+    #assert parents[0].has_item(s.Name_I(1, 2)) == False
+    #assert parents[0].has_item(s.Name_I(1, "a")) == False
+    #assert parents[0].has_item(s.Name_I("a", "a")) == False
+
+    assert parents[0].has_item("A")  == True
+    assert parents[0].has_item(1) == True
+    assert parents[0].has_item(s.Name_I("A", 1)) == True
 
     # swap (gotta test gts first)
 
@@ -186,9 +288,13 @@ def test_init_ood_w_child():
     # test list too big
     # test list just right
 
-    # test has_item gotta do gets first
+    # pop
 
-
+    # test adding (check state)
+    # test popping (check state)
+    # test renaming (check state)
+    # test swaping (check state)
+    # rest reordering (check state)
     ## Fuzzy Use Tests (randomly add, remove, and rename, check has, get, get_items w/ several different configurations, completely, and with random )
     child_names = ["child1", "child2", "child3", "child4"]
     oods = []
@@ -212,15 +318,5 @@ def test_init_ood_w_child():
         assert parent.has_item(0)
         assert parent.has_item("child1")
         assert parent.has_item(slice(None))
-        assert_get_item_equal(parent, 0, "child1", slice(None), s.Key_I("child1", 0))
+        assert_get_item_equal(parent, 0, "child1", slice(None), s.Name_I("child1", 0))
 
-        #with pytest.raises(TypeError): # test errors as well w/ has item
-        # Remove one child
-        # Add 3 children
-        # Remove two children
-        # Add a new child
-        # Change its name
-        # Try to remove its old name
-        # Try to remove its new name
-
-        # Add the clones

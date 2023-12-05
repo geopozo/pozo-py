@@ -1,6 +1,5 @@
 from pozo.exceptions import SelectorTypeError, SelectorError
 import pozo.extra_selectors as s
-# Not sure if I should inherit these two. Maybe `from _____` is sufficient.
 
 
 ## We need to keep track whether or not the output is sorted or not
@@ -8,16 +7,27 @@ import pozo.extra_selectors as s
 ## We need to start store _items_by_id w/ position
 ## Changing and swapping position needs to reflect their change
 
-class ObservingOrderedDictionary():
+strict_index = False
+
+class ObservingOrderedDictionary(s.Selector):
 
     # Needs to accept a custom indexer
     def __init__(self, *args, **kwargs):
-        self._strict_index = kwargs.pop('strict_index', "True")
+        global strict_index
+        self._strict_index = kwargs.pop('strict_index', strict_index)
         self._items_ordered = []
         self._items_by_name = {}
         self._items_by_id = {}
 
         super().__init__(*args, **kwargs)
+
+    ## Sort of an odd function here- could make a _get_item_by_id but it's overkill.
+    def process(self, parent, **kwargs):
+        strict_index = kwargs.get('strict_index', self._strict_index)
+        if id(self) in parent._items_by_id:
+            return [self]
+        if strict_index: raise SelectorError("Bad index supplied: item doesn't exist")
+        return []
 
     def set_strict(self):
         self._strict_index = True
@@ -104,12 +114,9 @@ class ObservingOrderedDictionary():
 
     # Throws key/index errors
     def _get_items_by_name(self, name, **kwargs):
-        if isinstance(name, s.Key_I):
-            name, index = name[0], name[1]
-        else:
-            index = slice(None)
-        self._enforce_key(name, **kwargs)
-        self._enforce_index(index, **kwargs)
+        index = kwargs.pop("index", slice(None))
+        if not self._enforce_key(name, **kwargs): return []
+        if not self._enforce_index(index, **kwargs): return []
         items = self._items_by_name[name][index]
         if not isinstance(items, list):
             return [items]
@@ -117,12 +124,12 @@ class ObservingOrderedDictionary():
 
     # Throws key/index errors
     def _get_items_by_slice(self, indices, **kwargs):
-        self._enforce_index(indices, **kwargs)
+        if not self._enforce_index(indices, **kwargs): return []
         return self._items_ordered[indices]
 
     # Throws key/index errors
     def _get_item_by_index(self, index, **kwargs):
-        self._enforce_index(index, **kwargs)
+        if not self._enforce_index(index, **kwargs): return
         return self._items_ordered[index]
 
     # Can return an empty list if a) no selectors supplied or b) skip_bad=True.
@@ -137,8 +144,8 @@ class ObservingOrderedDictionary():
             if cap and len(items) >= cap: break
             if isinstance(selector, str):
                 items.extend(self._get_items_by_name(selector, **kwargs))
-            elif isinstance(selector, s.Key_I) and selector.check_type():
-                items.extend(self._get_items_by_name(selector, **kwargs))
+            elif isinstance(selector, s.Selector):
+                items.extend(selector.process(self, **kwargs))
             elif isinstance(selector, int):
                 items.append(self._get_item_by_index(selector, **kwargs))
             elif isinstance(selector, slice):
@@ -156,45 +163,74 @@ class ObservingOrderedDictionary():
                 sorted_items.append(ref_item)
         return sorted_items
 
-    def get_item(self, selector, match = 0, return_none = False):
-        items = self.get_items(selector, _cap = match + 1, skip_bad = return_none)
+    def get_item(self, selector, match = 0, **kwargs):
+        match = kwargs.get('match', 0)
+        strict_index = kwargs.get('strict_index', self._strict_index)
+        if "_cap" in kwargs: kwargs.pop("_cap")
+        items = self.get_items(selector, _cap = match + 1, **kwargs)
         if len(items) <= match:
-            if not return_none:
+            if strict_index:
                 raise SelectorError(f"Supplied match ({match}) >= len(results) ({len(items)})") from IndexError()
             return None
         return items[match]
 
     # Because we can't check to see if we've supplied a correct object type, we can only return true or false
     def has_item(self, selector):
-        if id(selector) in self._items_by_id: return True
         try:
-            self.get_item(selector)
+            self.get_item(selector, strict_index=True)
             return True
         except (SelectorError, SelectorTypeError):
             return False
 
     # Can throw regular IndexError if one value of the keys is out of order
-    # Should it accept other selectors?
-    def reorder(self, order):
+    def reorder_items(self, order): # take other selectors
         if ( not isinstance(order, list) or
             len(order) != len(set(order)) != len(self._items_ordered) or
             max(order) >= len(self._items_ordered) or
             min(order) < 0 or
-            not all(isinstance(i, int) for i in order) ):
-            raise SelectorError() from IndexError("Some/All of the indices supplied do not exist")
+            not all( (
+                 isinstance(i, (int, str, s.Name_I))
+                 or id(i) in self._items_by_id
+                ) for i in order)):
+            raise SelectorError("You must list ALL objects present by index, name, Name_I or actual object") from IndexError()
+        for i, selector in enumerate(order):
+            item = None
+            if id(selector) in self._items_by_id: # Should be selector
+                item = selector
+            elif isinstance(item, (str, s.Name_I)):
+                item = self._get_items_by_name(selector, strict_index=True)
+            if item is None:
+                raise IndexError("One of your selectors didn't match an existing item")
+            elif len(item) != 1:
+                raise ValueError("One of your selectors returned more than one item. You can use selectors.Name_I to avoid this")
+            order[i] = self._items_ordered.index(item[0])
+
         self._items_ordered = [self._items_ordered[i] for i in order]
-        # TODO now we're recording order with the dictionary too
 
-    # Can throw regular IndexError if one value is out of error
-    # Should it accept other selectors
-    def swap(self, item1, item2):
-        if item1 < 0 or item1 >= len(self._items_ordered) or item2 < 0 or item1 >= len(self._items_ordered):
-            raise SelectorError() from IndexError("The items to swap must be valid indices")
-        self._items_ordered[item1], self._items_ordered[item2] = self._items_ordered[item2], self._items_ordered[item1]
-        # TODO now we're recording order with the dictionary too
+    def put_items(self, selector, position):
+        items = self.get_items(selector, strict_index=True)
+        if not isinstance(value, int):
+            raise TypeError("The position to move to must be an integer, follow array access syntax")
+        if position != len(self._get_items_by_slice):
+            self._enforce_index(position, strict_index=True)
+        for item in reversed(items):
+            original_index = self._items_ordered.index(item)
+            self._items_ordered[original_index] = None
+            self._items_ordered.insert(position, item) # TODO, can it take negatives?
+            self._items_ordered.remove(None)
 
-    def pop_items(self, *selectors):
-        items = self.get_items(*selectors)
+
+    def move_item(self, selector, value): # TODO, can it take negatives
+        items = self.get_items(selector, strict_index=True)
+        if not isinstance(value, int):
+            raise TypeError("The value to move to must be an integer, positive or negative")
+        for item in items:
+           new_position = min(max(self._items_ordered.index(item) + value, 0), len(self._items_ordered.index(item)))
+           self._put_items(item, new_position)
+
+
+    def pop_items(self, *selectors, **kwargs):
+        items = self.get_items(*selectors, **kwargs)
         for item in items:
            self._items_ordered.remove(item)
            self._remove_item_from_by_name(item)
