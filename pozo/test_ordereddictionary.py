@@ -129,27 +129,25 @@ def test_init_ood_w_child():
         else:
             assert_child_has_parents(child, 2, [parents[0], parents[1]])
 
-    # test _enforce index
-    with pytest.raises(SelectorError):
-        parents[1]._enforce_index(-1)
-        parents[1]._enforce_index(10)
-        parents[1]._enforce_index(len(parents[1]))
-        parents[1]._enforce_index(slice(1,10))
-    parents[1]._enforce_index(0)
-    parents[1]._enforce_index(1)
-    parents[1]._enforce_index(2)
-    parents[1]._enforce_index(slice(0, 3))
-    parents[1]._enforce_index(None)
+    # test _check index
+    assert not parents[1]._check_index(-1)
+    assert not parents[1]._check_index(10)
+    assert not parents[1]._check_index(len(parents[1]))
+    assert not parents[1]._check_index(slice(1,10))
+    assert parents[1]._check_index(0)
+    assert parents[1]._check_index(1)
+    assert parents[1]._check_index(2)
+    assert parents[1]._check_index(slice(0, 3))
+    assert parents[1]._check_index(None)
 
-    # _enforce_key
+    # _check_key
 
-    with pytest.raises(SelectorError):
-        parents[0]._enforce_key("")
-        parents[2]._enforce_key("B")
-    parents[0]._enforce_key("A")
-    parents[0]._enforce_key("B")
-    parents[0]._enforce_key("C")
-    parents[2]._enforce_key("A")
+    assert not parents[0]._check_key("")
+    assert not parents[2]._check_key("B")
+    assert parents[0]._check_key("A")
+    assert parents[0]._check_key("B")
+    assert parents[0]._check_key("C")
+    assert parents[2]._check_key("A")
 
     # do _items_by_name
     assert children[0] == parents[0]._get_items_by_name("A")[0]
@@ -181,6 +179,7 @@ def test_init_ood_w_child():
     assert parents[0].get_items("A", 1) == [children[0], children[1], clone_child]
     sel = s.Name_I("A", 1)
     assert isinstance(sel, s.Selector)
+    result = parents[0].get_items(s.Name_I("A", 1))
     assert clone_child == parents[0].get_items(s.Name_I("A", 1))[0]
     assert children[0] == parents[0].get_items(s.Name_I("A", 0))[0]
     assert len(parents[0].get_items(s.Name_I("A", slice(None)))) == 2
