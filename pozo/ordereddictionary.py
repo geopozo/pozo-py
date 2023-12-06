@@ -187,70 +187,69 @@ class ObservingOrderedDictionary(s.Selector):
             return False
 
     # Can throw regular IndexError if one value of the keys is out of order
-    def reorder_items(self, order): # take other selectors
+    def reorder_all_items(self, order): # take other selectors
         if not isinstance(order, list): raise TypeError("You must provide a list of selectors to reorder the items")
         positions_new = []
         for i, selector in enumerate(order):
-            positions_new.append(self._items_ordered.index(self.get_item(selector, strict_index=True)))
-        if ( len(positions_new) != len(set(positions_ordered)) != len(self) ):
+            if isinstance(selector, int):
+                positions_new.append(selector)
+            else:
+                positions_new.append(self._items_ordered.index(self.get_item(selector, strict_index=True)))
+        if not ( len(set(positions_new)) == len(order) == len(positions_new) == len(set(order)) == len(self) ):
             raise SelectorError("You must provide a list of all objects by some selector.") from ValueError()
-        self._items_ordered = [self._items_ordered[i] for i in order]
+        self._items_ordered = [self._items_ordered[i] for i in positions_new]
 
-    def put_items(self, *selectors, **kwargs):
+    def move_items(self, *selectors, **kwargs):
         position = kwargs.pop("position", None)
-        if not position:
-            raise ValueError("You must supply a position=")
-        if not isinstance(position, int):
-            raise TypeError("The position to move to must be an integer, follow array access syntax")
-        items = self.get_items(*selectors)
-        if not items or len(items) == 0: return
-        if position != len(self) and not self._check_index(position):
-            raise IndexError("Position must be a valid index")
-        for item in reversed(items):
-            original_index = self._items_ordered.index(item)
-            self._items_ordered[original_index] = None
-            self._items_ordered.insert(position, item) # TODO, can it take negatives?
-            self._items_ordered.remove(None)
-
-    def move_item(self, *selectors, **kwargs):
         distance = kwargs.pop("distance", None)
         before = kwargs.pop("before", None)
         after = kwargs.pop("after", None)
-        reference = None
-        if ( (1 if distance else 0) + (1 if before else 0) + (1 if after else 0) ) != 1:
-            raise SelectorError("You must set exactly one of value, before, or after.")
-        if distance:
-            if not isinstance(distance, int):
-                raise SelectorError("distance must be an integer (positive or negative)")
-        elif before:
-            reference = self._items_ordered.index(self.get_item(before, strict_index=True))
-        elif after:
-            reference = self._items_ordered.index(self.get_item(after, strict_index=True))
-        items = self.get_items(*selectors, **kwargs)
-        if distance > 0:
-            offset = 0
-            for item in reversed(items):
-                position = min(self._items_ordered.index(item) + distance, len(self))
-                if position == len(self): # maintain order
-                    position -= offset
-                    offset += 1
-                self._put_items(item, position)
-        elif distance < 0:
-            offset = 0
+
+        count_flags = bool(before) + bool(after) + bool(distance) + bool(position is not None)
+        if count_flags != 1:
+            raise ValueError("You must set ONE of 'position', 'distance', 'before', or 'after'")
+
+
+        items = self.get_items(*selectors)
+        if not items or len(items) == 0: return
+        if position is not None: # set position specifically
+            if not isinstance(position, int):
+                raise TypeError("The position to move to must be an integer, follow array access syntax.")
+            if position != len(self) and not self._check_index(position):
+                raise IndexError("Position must be a valid index")
+            if position != len(self): # except in the case of position = len(self) which is basically append():
+                # items are always inserted before the current item in the position, so insert last items first. to maintain order.
+                # the earlier items will be inserted in the same position, pushing them right
+                # unless position == len(self), which is basically append()
+                items = reversed(items)
             for item in items:
-                position = max(self._items_ordered.index(item) + distance, 0)
-                if position == 0:
-                    position += offset
-                    offset += 1
-                self._put_items(item, position)
-        elif before:
-            position = reference
-            for item in reversed(items):
-                self._put_items(item, position)
-        elif after:
-            position = reference+1
-            for item in reversed(items):
-                self._put_items(item, position)
+                original_index = self._items_ordered.index(item)
+                self._items_ordered[original_index] = None # Don't change structure of list while playing with positions!
+                self._items_ordered.insert(position, item) # TODO, can it take negatives?
+                self._items_ordered.remove(None)
+        elif isinstance(distance, int) and distance > 0: # Move to right
+            distance += 1 # gotta push back twice since you'll be inserted before
+            wall = len(self) # We're moving to the right, so:
+            for item in reversed(items): # Move rightmost items FIRST
+                position = min(self._items_ordered.index(item) + distance, len(self)) # They can't move greater than the length
+                if position > wall: position = wall # they shouldn't move farther right than something that started farther right
+                wall = position - 1
+                self.move_items(item, position=position)
+        elif isinstance(distance, int) and distance < 0: # Move to left
+            wall = 0 # We're moving to the left
+            for item in items: # move leftmost first
+                position = max(self._items_ordered.index(item) + distance, 0) # Can't move farther left than 0
+                if position < wall: position = wall # Shouldn't move father left than what started farther left
+                wall = position + 1
+                self.move_items(item, position=position)
+        elif distance: # so do nothing if distance = 0
+            raise TypeError("distance must be an integer")
+        elif before: # Move items just before some item (this is exactly the same as position, to be honest)
+            position = self._items_ordered.index(self.get_item(before, strict_index=True))
+            self.move_items(*items, position=position)
+        elif after: # It's before except +1
+            position = self._items_ordered.index(self.get_item(after, strict_index=True)) + 1
+            self.move_items(*items, position=position)
 
 
     def pop_items(self, *selectors, **kwargs):

@@ -280,42 +280,224 @@ def test_init_ood_w_child():
     assert parents[0].has_item(1) == True
     assert parents[0].has_item(s.Name_I("A", 1)) == True
 
-    # swap (gotta test gts first)
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    layer1, layer2, layer3 = [], [], []
+    for letter in alphabet:
+        layer1.append(OODChild(name = letter))
+        layer2.append(OODChild(name = letter))
+        layer3.append(OODChild(name = letter))
 
-    # reorder (gotta test gets first)
-    # test list too small
-    # test list too big
-    # test list just right
+    layer1[0].add_items(*layer2)
+    assert_ood_sane(layer1[0], len(alphabet))
+    for child in layer1[0]:
+        assert isinstance(child, OODChild)
+        assert_ood_sane(child, 0)
 
-    # pop
+    for letter, child in zip(alphabet, layer1[0]):
+        assert child.get_name() == letter
 
-    # test adding (check state)
-    # test popping (check state)
-    # test renaming (check state)
-    # test swaping (check state)
-    # rest reordering (check state)
-    ## Fuzzy Use Tests (randomly add, remove, and rename, check has, get, get_items w/ several different configurations, completely, and with random )
-    child_names = ["child1", "child2", "child3", "child4"]
-    oods = []
-    for name in child_names:
-        oods.append(OODChild(name=name))
-    for i, ood in enumerate(oods):
-        assert_ood_sane(ood, 0)
-        assert_child_name(ood, child_names[i])
+    layer1[1].add_items(*reversed(layer2))
 
-    clones = []
-    for i in range(0, 5):
-        clones.append(OODChild(name="clone"))
+    for letter, child in zip(reversed(alphabet), layer1[1]):
+        assert child.get_name() == letter
 
-    parents = [ OOD(), OODChild() ]
+    assert layer1[1].get_items() == list(reversed(layer2))
+    assert layer1[0].get_items() == layer2
 
-    for parent in parents:
-        parent.add_items(oods[0])
-        assert_ood_sane(parent, 1)
-        # should be testing get_items first
-        assert parent.has_item(oods[0])
-        assert parent.has_item(0)
-        assert parent.has_item("child1")
-        assert parent.has_item(slice(None))
-        assert_get_item_equal(parent, 0, "child1", slice(None), s.Name_I("child1", 0))
+    layer1[1].reorder_all_items(list(alphabet))
+    assert layer1[1].get_items() == layer2
 
+    import random
+    layer1[0].reorder_all_items(list(alphabet))
+    reorder = random.sample(range(0, len(alphabet)), len(alphabet))
+    layer1[0].reorder_all_items(reorder)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == alphabet[reorder[i]]
+
+    for __i in range(0, 200):
+        layer1[0].reorder_all_items(list(alphabet))
+        reorder = random.sample(range(0, len(alphabet)), len(alphabet))
+        layer1[0].reorder_all_items(reorder)
+        for i, child in enumerate(layer1[0]):
+            assert child.get_name() == alphabet[reorder[i]]
+
+    for __i in range(0, 200):
+        reorder = random.sample(alphabet, len(alphabet))
+        layer1[0].reorder_all_items(reorder)
+        layer1[1].reorder_all_items(reorder)
+        for i, child in enumerate(layer1[0]):
+            assert child.get_name() == reorder[i]
+        assert layer1[0].get_items() == layer1[1].get_items()
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+    with pytest.raises(TypeError):
+        layer1[0].reorder_all_items(1)
+    assert layer1[0].get_items() == layer2
+    assert len(layer1[0]) == len(alphabet) == len("abcdefghijklmnopqrstuvwxyz")
+    with pytest.raises(SelectorError):
+        layer1[0].reorder_all_items([1, 2, 3, 4])
+    assert layer1[0].get_items() == layer2
+    with pytest.raises(SelectorError):
+        layer1[0].reorder_all_items(list(alphabet + alphabet))
+    assert layer1[0].get_items() == layer2
+    with pytest.raises(SelectorError):
+        layer1[0].reorder_all_items(["othhh"] + list(alphabet)[1:])
+    assert layer1[0].get_items() == layer2
+    with pytest.raises(SelectorTypeError):
+        layer1[0].reorder_all_items([[]])
+    assert layer1[0].get_items() == layer2
+
+    #move_items
+    goal1 = "bcdefghijklamnopqrstuvwxyz"
+    layer1[0].move_items("a", after="l")
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items("a", before="m")
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items("a", position=12)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items("a", distance=+11)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("bcdefghijkl"), position=0)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("bcdefghijkl"), before="a")
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("bcdefghijkl"), distance=-1) #TODO what happens if we move multiples a distance
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("bcdefghijkl"), distance=-10) #TODO what happens if we move multiples a distance
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal1[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    goal2 = "abcdefghijklzmnopqrstuvwxy" # move "ab" to 26, move "ab" after z, move "ab" + 24 or more move "c-z" to position 0, before a
+
+    layer1[0].move_items("z", after="l")
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items("z", before="m")
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items("z", position=12)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items("z", distance=-13)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("mnopqrstuvwxy"), position=len(alphabet)) # this means append, but we want it in order
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("mnopqrstuvwxy"), after="z")
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("mnopqrstuvwxy"), distance=+1)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("mnopqrstuvwxy"), distance=+10)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal2[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+
+    goal3 = "cdefghijklmnopqrstuvwxyzab" # move "ab" to 26, move "ab" after z, move "ab" + 24 or more move "c-z" to position 0, before a
+    layer1[0].move_items(*list("ab"), position=26)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("ab"), after='z')
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("ab"), distance=25)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("ab"), distance=10000)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("cdefghijklmnopqrstuvwxyz"), position=0)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("cdefghijklmnopqrstuvwxyz"), before='a')
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("cdefghijklmnopqrstuvwxyz"), distance=-2)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    layer1[0].move_items(*list("cdefghijklmnopqrstuvwxyz"), distance=-26)
+    for i, child in enumerate(layer1[0]):
+        assert child.get_name() == goal3[i]
+    layer1[0].reorder_all_items(list(alphabet))
+    assert layer1[0].get_items() == layer2
+
+    # move consecutives a distance
+    # move random alternates a distance
+    # move random alternatevs a distance too far
+    # try positive and negative
