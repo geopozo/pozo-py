@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from pozo.exceptions import SelectorTypeError
+from ood.exceptions import SelectorTypeError
 
 class Selector(ABC):
 
@@ -30,7 +30,7 @@ class Has_Children(Selector): # untested
     def _process(self, ood):
         ret_items = []
         for item in ood.get_items():
-            breakpoint()
+            #breakpoint()
             if isinstance(item, od.ObservingOrderedDictionary):
                 for selector in self.sub_selectors:
                     if item.has_item(selector):

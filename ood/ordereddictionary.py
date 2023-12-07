@@ -1,5 +1,5 @@
-from pozo.exceptions import SelectorTypeError, SelectorError
-import pozo.extra_selectors as s
+from ood.exceptions import SelectorTypeError, SelectorError
+import ood.extra_selectors as s
 
 
 

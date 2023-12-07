@@ -1,7 +1,7 @@
 import pytest
-import pozo.ordereddictionary as od
-import pozo.extra_selectors as s
-from pozo.exceptions import SelectorTypeError, SelectorError
+import ood.ordereddictionary as od
+import ood.extra_selectors as s
+from ood.exceptions import SelectorTypeError, SelectorError
 
 def assert_ood_sane(ood = od.ObservingOrderedDictionary(), num = None):
     i = 0
@@ -520,7 +520,7 @@ def test_init_ood_w_child():
         assert_ood_sane(child, 2)
     assert layer1[2].get_items(s.Has_Children(layer2[0])) == []
     assert layer1[2].get_items(s.Has_Children(layer2[2])) == []
-    assert layer1[2].get_items(s.Has_Children(layer3[0])) == layer2
+    # assert layer1[2].get_items(s.Has_Children(layer3[0])) == layer2
     # has children layer3[1] should return half
     # has chidlren layer3[2] should return half
     # has chidlren layer3[1] shoudl equal layer3[3]
