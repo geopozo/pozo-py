@@ -2,6 +2,7 @@ from pozo.exceptions import SelectorTypeError, SelectorError
 import pozo.extra_selectors as s
 
 
+
 ## We need to keep track whether or not the output is sorted or not
 ## It will generally by sorted if a) there is only one selector b) the selector is not a dictionary
 ## We need to start store _items_by_id w/ position
@@ -72,7 +73,7 @@ class ObservingOrderedDictionary(s.Selector):
     def add_items(self, *items, **kwargs): # check to see if item is type childwithparent (and I am parent?)
         position = kwargs.pop("position", len(self))
         for item in items:
-            if self.has_item(item):
+            if id(item) in self._items_by_id:
                 raise ValueError("Tried to add item that already exists.")
         for i, item in enumerate(items):
             if isinstance(item, ChildObserved):
@@ -252,12 +253,13 @@ class ObservingOrderedDictionary(s.Selector):
             self.move_items(*items, position=position)
 
 
-    def pop_items(self, *selectors, **kwargs):
-        items = self.get_items(*selectors, **kwargs)
+    def pop_items(self, *selectors):
+        items = self.get_items(*selectors, strict_index=True)
         for item in items:
-           self._items_ordered.remove(item)
-           self._remove_item_from_by_name(item)
-           del self._items_by_id[id(item)]
+            item._deregister_parents(self)
+            self._items_ordered.remove(item)
+            self._remove_item_from_by_name(item)
+            del self._items_by_id[id(item)]
         return items
 
 class ChildObserved():

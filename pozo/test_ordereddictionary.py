@@ -1,10 +1,9 @@
 import pytest
-import pozo.extra_selectors as s
 import pozo.ordereddictionary as od
+import pozo.extra_selectors as s
 from pozo.exceptions import SelectorTypeError, SelectorError
-from pozo.ordereddictionary import ObservingOrderedDictionary as OOD
 
-def assert_ood_sane(ood = OOD(), num = None):
+def assert_ood_sane(ood = od.ObservingOrderedDictionary(), num = None):
     i = 0
     for item in ood:
         i += 1
@@ -23,7 +22,7 @@ def assert_child_has_parents(child, num, parents = None):
             assert id(parent) in child._parents_by_id
 
 def test_init_ood():
-    ood = OOD()
+    ood = od.ObservingOrderedDictionary()
     assert_ood_sane(ood)
 
 
@@ -40,11 +39,6 @@ def test_init_child():
     child.set_name("test2")
     assert_child_name(child, "test2")
 
-def test_child():
-    ... # need to write unit tests for children TODO
-
-# TODO: write selectors tests, somewhere
-
 def assert_get_item_equal(parent, *args):
     assert len(args) > 1
     for i, arg in enumerate(args): # no zip here!
@@ -52,7 +46,7 @@ def assert_get_item_equal(parent, *args):
         assert parent.get_item(args[i-1]) == parent.get_item(args[i])
 
 def test_init_ood_w_child():
-    class OODChild(OOD, od.ChildObserved):
+    class OODChild(od.ObservingOrderedDictionary, od.ChildObserved):
         def __init__(self, *args, **kwargs):
             super().__init__(**kwargs)
 
@@ -165,6 +159,7 @@ def test_init_ood_w_child():
     assert len(parents[0]._get_items_by_name("C")) == 1
     assert children[0] == parents[0]._get_items_by_name("A")[0]
     assert clone_child == parents[0]._get_items_by_name("A")[1]
+    assert parents[0].get_items("A", 1) == [children[0], children[1], clone_child]
 
     # get items by slice
     assert len(parents[0]._get_items_by_slice(slice(None))) == len(parents[0]) == 4
@@ -497,7 +492,36 @@ def test_init_ood_w_child():
     layer1[0].reorder_all_items(list(alphabet))
     assert layer1[0].get_items() == layer2
 
-    # move consecutives a distance
-    # move random alternates a distance
-    # move random alternatevs a distance too far
-    # try positive and negative
+    num_children_old = len(parents[0])
+    num_parents_old = len(clone_child._parents_by_id)
+    popped = parents[0].pop_items(s.Name_I("A", 1))
+    assert len(parents[0]) == num_children_old-1
+    assert parents[0] not in clone_child._parents_by_id
+    assert len(clone_child._parents_by_id) == num_parents_old - 1
+    assert popped == [clone_child]
+    assert_ood_sane(parents[0], 3)
+
+    parents[1].add_items(clone_child, position=0)
+    assert_ood_sane(parents[1], 4)
+    assert len(parents[1]._get_items_by_name("A")) == 2
+    assert len(parents[1]._get_items_by_name("B")) == 1
+    assert len(parents[1]._get_items_by_name("C")) == 1
+    assert children[0] == parents[1]._get_items_by_name("A")[0]
+    assert clone_child == parents[1]._get_items_by_name("A")[1]
+    assert parents[1].get_items("A", 1) == [clone_child, children[0]]
+    assert parents[1].get_items("A", 2) == [clone_child, children[0], children[1]]
+    parents[1].pop_items(*children)
+    assert parents[1].get_items() == [clone_child]
+
+    layer1[2].unset_strict()
+    layer1[2].add_items(*layer2)
+    for i, child in enumerate(layer1[2]):
+        child.add_items(layer3[0], layer3[i%2+1])
+        assert_ood_sane(child, 2)
+    assert layer1[2].get_items(s.Has_Children(layer2[0])) == []
+    assert layer1[2].get_items(s.Has_Children(layer2[2])) == []
+    assert layer1[2].get_items(s.Has_Children(layer3[0])) == layer2
+    # has children layer3[1] should return half
+    # has chidlren layer3[2] should return half
+    # has chidlren layer3[1] shoudl equal layer3[3]
+    # has children layer3[2] should equal layer3[4]
