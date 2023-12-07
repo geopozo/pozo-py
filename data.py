@@ -5,11 +5,11 @@ class Data(od.ChildObserved):
         if len(index) != len(values):
             raise ValueError("Index and values have different length")
         self._mnemonic = kwargs.pop('mnemonic', None)
-        if name not in kwargs:
+        if 'name' not in kwargs:
             if not self._mnemonic:
                 raise ValueError("You must supply 'name'. Or 'mnemonic' will be used as 'name' if 'name' absent...")
             kwargs['name'] = self._mnemonic
-        super().__init__(self, *args, **kwargs) #od.ChildObserved sets name
+        super().__init__(**kwargs) #od.ChildObserved sets name
         self._index = index
         self._values = values
 

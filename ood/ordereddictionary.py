@@ -10,6 +10,7 @@ import pozo.ood.extra_selectors as s
 
 strict_index = False
 allow_name_conflicts = False
+multiparent = False
 
 class ObservingOrderedDictionary(s.Selector):
 
@@ -67,12 +68,21 @@ class ObservingOrderedDictionary(s.Selector):
             if len(self._items_by_name[name]) == 0:
                 del self._items_by_name[name]
 
-    def _child_update(self, child, **kwargs):
-        oldname = kwargs.get('name', None)
-        if oldname is not None and oldname in self._items_by_name:
-            if not self._allow_name_conflicts and self._check_key(item.get_name()):
+    def _child_options(self, child, **kwargs):
+        old_name = kwargs.get('old_name', None)
+        if old_name is not None and old_name in self._items_by_name:
+            if not self._allow_name_conflicts and self._check_key(child.get_name()):
+                raise NameConflictError(f"Name taken by other item in parent {self.get_name()} of id {id(self)}")
                 return False
-            self._remove_item_from_by_name(child, name=oldname)
+            if not isinstance(child.get_name(), str):
+                raise TypeError(f"Parent {self.get_name()} will only accept children with string names")
+        return True
+        # TODO: check child name
+
+    def _child_update(self, child, **kwargs):
+        old_name = kwargs.get('old_name', None)
+        if old_name is not None:
+            self._remove_item_from_by_name(child, name=old_name)
             self._add_item_to_by_name(child)
         return True
         # if you change your name, you _have_ to tell your parent.
@@ -91,8 +101,10 @@ class ObservingOrderedDictionary(s.Selector):
                 raise ValueError("Tried to add item that already exists.")
             elif not hasattr(item, "get_name"):
                 raise TypeError("All elements added must have a get_name() function")
-            elif not self._allow_name_conflicts and item.get_name():
+            elif not self._allow_name_conflicts and item.get_name() in self._items_by_name:
                 raise NameConflictError(f"allow_name_conflict is False, this name already exists: {item.get_name()}")
+            item._register_parents(self)
+            item._deregister_parents(self) # testing! 1 2 3
         for i, item in enumerate(items):
             if isinstance(item, ChildObserved):
                 item._register_parents(self)
@@ -284,7 +296,11 @@ class ObservingOrderedDictionary(s.Selector):
 class ChildObserved():
 
     def __init__(self, *args, **kwargs):
-        self._name = kwargs.pop('name', "")
+        global multiparent
+        self._name = kwargs.pop('name', "unnamed")
+        if not isinstance(self._name, str):
+            raise TypeError("Name must be a string, please")
+        self._multiparent = kwargs.pop('multiparent', multiparent)
         self._parents_by_id = {}
 
         super().__init__(*args, **kwargs)
@@ -296,16 +312,21 @@ class ChildObserved():
         if self._name == name: return
         old_name = self._name
         self._name = name
-        if self._notify_parents(name=old_name):
+        try:
+            self._notify_parents(old_name=old_name)
+        except Exception as e:
             self._name = old_name
-            raise NameConflictError("Name taken by other item")
+            raise e
 
     def _register_parents(self, *parents):
+        if not self._multiparent and (bool(len(self._parents_by_id)) or len(parents)>1):
+            raise Exception("Tried to add child who already has a parent (or tried to add multiple parents). Set multiparent=True when creating children to override. Not recommended")
         for parent in parents:
             if id(parent) in self._parents_by_id: continue
             if not isinstance(parent, ObservingOrderedDictionary):
                 raise ValueError("All parents must inhert ObservingOrderedDictionary class")
             self._parents_by_id[id(parent)] = parent
+
 
     def _deregister_parents(self, *parents):
         for parent in parents:
@@ -315,6 +336,12 @@ class ChildObserved():
     def _get_parents(self):
         return list(self._parents_by_id.values())
 
-    def _notify_parents(self, **kwargs): # how do we get the return value for this TODO
-        map(lambda parent: parent._child_update(self, **kwargs), self._parents_by_id.values())
+    def _notify_parents(self, **kwargs):
+        for parent in self._parents_by_id.values():
+            if not parent._child_options(self, **kwargs):
+                return False
+        for parent in self._parents_by_id.values():
+            if not parent._child_update(self, **kwargs):
+                raise Exception("Fatal Error: Parent item changed mind about child update after giving permission. One of the parents of this item is unstable!")
+        return True
 

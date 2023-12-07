@@ -1,7 +1,7 @@
 import pytest
 import pozo.ood.ordereddictionary as od
 import pozo.ood.extra_selectors as s
-from pozo.ood.exceptions import SelectorTypeError, SelectorError
+from pozo.ood.exceptions import SelectorTypeError, SelectorError, NameConflictError
 
 class OODChild(od.ObservingOrderedDictionary, od.ChildObserved):
     def __init__(self, *args, **kwargs):
@@ -35,7 +35,7 @@ def assert_child_name(child, name):
 
 def test_init_child():
     child = od.ChildObserved()
-    assert_child_name(child, "")
+    assert_child_name(child, "unnamed")
 
     child = od.ChildObserved(name="test")
     assert_child_name(child, "test")
@@ -53,7 +53,7 @@ def test_init_ood_w_child():
     ## Test basic initialization
     ood_child = OODChild()
     assert_ood_sane(ood_child, 0)
-    assert_child_name(ood_child, "")
+    assert_child_name(ood_child, "unnamed")
 
     ood_child = OODChild(name="test")
     assert_ood_sane(ood_child, 0)
@@ -63,6 +63,7 @@ def test_init_ood_w_child():
     # add_items
     od.strict_index = True
     od.allow_name_conflicts = True
+    od.multiparent = True
     children = [OODChild(name="A"), OODChild(name="B"), OODChild(name="C")]
     parents = [OODChild(name="Alphabet Parent"), OODChild(name="Alphabet Parent2"), OODChild(name="Alphabet Parent2")]
     for child in children:
@@ -526,3 +527,47 @@ def test_init_ood_w_child():
     assert layer1[2].get_items(s.Has_Children(layer3[1], layer3[2])) == layer2
     assert len(layer1[2].get_items(s.Has_Children(layer3[1]))) == len(layer2)/2
     assert len(layer1[2].get_items(s.Has_Children(layer3[2]))) == len(layer2)/2
+
+    assert layer1[2].get_item("a") == layer2[0]
+    assert layer1[2].has_item("a")
+    assert layer1[2]._allow_name_conflicts
+    assert layer2[0].get_name() == "a"
+    layer2[0].set_name("ABC")
+    assert layer2[0].get_name() == "ABC"
+    assert layer1[2].has_item(layer2[0])
+    assert layer1[2].has_item("ABC")
+    assert not layer1[2].has_item("a")
+    layer2[0].set_name("b")
+    assert layer2[0].get_name() == "b"
+    assert layer1[2].has_item(layer2[0])
+    assert len(layer1[2].get_items("b")) == 2
+    assert not layer1[2].has_item("ABC")
+    strict_parent = OODChild(name="stricty", allow_name_conflicts=False)
+    assert_ood_sane(strict_parent, 0)
+    assert layer2[1].get_name() == "b"
+    assert layer2[2].get_name() == "c"
+    strict_parent.add_items(layer2[1], layer2[2])
+    assert layer2[0].get_name() == layer2[1].get_name()
+    with pytest.raises(NameConflictError):
+        strict_parent.add_items(layer2[0])
+    with pytest.raises(NameConflictError):
+        layer2[2].set_name("b")
+    assert layer2[2].get_name() == "c"
+    for parent in layer2[2]._get_parents():
+        assert len(parent.get_items(layer2[2].get_name())) == 1
+        assert parent.get_item(layer2[2]) == parent.get_item(layer2[2].get_name())
+    for parent in layer1[0:3]:
+        assert parent in layer2[2]._get_parents()
+    assert strict_parent.get_name() == "stricty"
+    assert strict_parent in layer2[2]._get_parents()
+
+    with pytest.raises(NameConflictError):
+        strict_parent.add_items(layer3[0], layer3[1], layer3[2])
+    assert len(strict_parent) == 2
+    with pytest.raises(TypeError):
+        OODChild(name=3)
+    one_parent_child = OODChild(name="one_parent", multiparent=False)
+    layer1[0].add_items(one_parent_child)
+    with pytest.raises(Exception):
+        layer1[1].add_items(one_parent_child)
+    assert one_parent_child._get_parents() == [layer1[0]]
