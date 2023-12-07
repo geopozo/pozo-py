@@ -521,7 +521,7 @@ def test_init_ood_w_child():
     assert layer1[2].get_items(s.Has_Children(layer2[0])) == []
     assert layer1[2].get_items(s.Has_Children(layer2[2])) == []
     assert layer1[2].get_items(s.Has_Children(layer3[0])) == layer2
-    # has children layer3[1] should return half
-    # has chidlren layer3[2] should return half
-    # has chidlren layer3[1] shoudl equal layer3[3]
-    # has children layer3[2] should equal layer3[4]
+    assert layer1[2].get_items(s.Has_Children(layer3[1], layer3[2])) == layer2
+    assert layer1[2].get_items(s.Has_Children(layer3[1], layer3[2])) == layer2
+    assert len(layer1[2].get_items(s.Has_Children(layer3[1]))) == len(layer2)/2
+    assert len(layer1[2].get_items(s.Has_Children(layer3[2]))) == len(layer2)/2
