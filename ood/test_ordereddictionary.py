@@ -1,7 +1,11 @@
 import pytest
-import ood.ordereddictionary as od
-import ood.extra_selectors as s
-from ood.exceptions import SelectorTypeError, SelectorError
+import pozo.ood.ordereddictionary as od
+import pozo.ood.extra_selectors as s
+from pozo.ood.exceptions import SelectorTypeError, SelectorError
+
+class OODChild(od.ObservingOrderedDictionary, od.ChildObserved):
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
 
 def assert_ood_sane(ood = od.ObservingOrderedDictionary(), num = None):
     i = 0
@@ -46,10 +50,6 @@ def assert_get_item_equal(parent, *args):
         assert parent.get_item(args[i-1]) == parent.get_item(args[i])
 
 def test_init_ood_w_child():
-    class OODChild(od.ObservingOrderedDictionary, od.ChildObserved):
-        def __init__(self, *args, **kwargs):
-            super().__init__(**kwargs)
-
     ## Test basic initialization
     ood_child = OODChild()
     assert_ood_sane(ood_child, 0)
@@ -520,7 +520,7 @@ def test_init_ood_w_child():
         assert_ood_sane(child, 2)
     assert layer1[2].get_items(s.Has_Children(layer2[0])) == []
     assert layer1[2].get_items(s.Has_Children(layer2[2])) == []
-    # assert layer1[2].get_items(s.Has_Children(layer3[0])) == layer2
+    assert layer1[2].get_items(s.Has_Children(layer3[0])) == layer2
     # has children layer3[1] should return half
     # has chidlren layer3[2] should return half
     # has chidlren layer3[1] shoudl equal layer3[3]

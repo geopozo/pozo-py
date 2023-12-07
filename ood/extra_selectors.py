@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from ood.exceptions import SelectorTypeError
+from pozo.ood.exceptions import SelectorTypeError
+import pozo.ood.ordereddictionary as od
 
 class Selector(ABC):
 
@@ -7,7 +8,6 @@ class Selector(ABC):
     def _process(self, ood):
         raise NotImplementedError("All classes that inherit Selector must implement process. If you're seeing this error, some selector you are using wasn't finished!")
 
-import ordereddictionary as od
 
 class Name_I(Selector): # untested
     def __init__(self, name, index):
@@ -30,7 +30,6 @@ class Has_Children(Selector): # untested
     def _process(self, ood):
         ret_items = []
         for item in ood.get_items():
-            #breakpoint()
             if isinstance(item, od.ObservingOrderedDictionary):
                 for selector in self.sub_selectors:
                     if item.has_item(selector):

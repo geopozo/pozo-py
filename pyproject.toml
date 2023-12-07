@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=65.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[project]
+name = "pozo"
+description = "A visualization library based on plotly to explore well log data"
+requires-python = ">=3.9"
+version = "0.0.0a"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+

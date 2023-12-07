@@ -20,3 +20,4 @@ gerbers/
 *.lck
 .ipynb_checkpoints/
 __pycache__/
+*.egg-info/
