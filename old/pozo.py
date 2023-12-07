@@ -44,7 +44,7 @@ class Graph():
 
 
         # Objects
-        self.tracks_ordered = [] 
+        self.tracks_ordered = []
         self.tracks_by_id = {}
 
         self.process_data(self, *args, **kwargs)
@@ -81,7 +81,7 @@ class Graph():
             if len(include) != 0 and curve.mnemonic not in include and mnemonic not in include: 
                 continue
             elif len(exclude) != 0 and curve.mnemonic in exclude or mnemonic in exclude:
-                continue 
+                continue
 
 
             data = Data(yaxis, curve.data, mnemonic)
@@ -89,11 +89,11 @@ class Graph():
 
             self.add_track(newTrack)
 
-    #### 
-    #### 
+    ####
+    ####
     #### Basic Add-Get(s)-Remove Track
-    #### 
-    #### 
+    ####
+    ####
 
     def add_track(self, track): #TODO allow it take axes and data
         if id(track) in self.tracks_by_id: return
@@ -149,7 +149,7 @@ class Graph():
         destination = self.get_track(destination)
         if destination is None: raise Exception("Destination track does not exist")
         tracks = self.get_tracks(tracks, ignore_orphans=False)
-        if tracks is None: return    
+        if tracks is None: return
         for track in tracks:
             if id(track) in self.tracks_by_id:
                 self.remove_tracks(track)
@@ -165,13 +165,13 @@ class Graph():
     ####
 
     def get_layout(self): # TODO will not be done this way
-        
+
         self.style.init_layout()
 
         num_tracks = len(self.tracks_ordered)
         if not num_tracks:
             raise Exception("There are no tracks, there is nothing to lay out")
-            
+
         max_axes_top = 0
         max_axes_bottom = 0
         for track in self.tracks_ordered:
@@ -195,7 +195,7 @@ class Graph():
         return self.style.get_layout()
 
     def get_traces(self):
-        traces = [] 
+        traces = []
         num_axes = 1
         for track in self.tracks_ordered:
             for axis in track.get_all_axes():
@@ -212,7 +212,7 @@ class Graph():
         fig.show() # TODO renderer will create figure so... Graph.Renderer.Render() probably
         display(self.style.javascript()) # This is going to be in layout, Display
 
- 
+
     ####
     ####
     #### Utility Functions
@@ -243,11 +243,11 @@ class Track():
             ## process Axes, [Data], Axis
             ## how do we indicate where to add the axis (top or bottom)
 
-    #### 
-    #### 
+    ####
+    ####
     #### Basic Add-Get(s)-Remove Axis
-    #### 
-    #### 
+    ####
+    ####
 
     def add_axis(self, axis, position=1): # add_axes?
         # should it also accept data, and [data] (and then process_data doesn't have to
@@ -261,7 +261,7 @@ class Track():
             self.axes[axis.name].append(axis)
         else:
             self.axes[axis.name] = [axis]
-        
+
         if position > 0:
             if position >= len(self.axes_above):
                 self.axes_above.append(axis)
@@ -273,7 +273,7 @@ class Track():
                 self.axes_below.append(axis)
             else:
                 self.axes_below.insert(position-1, axis)
-        
+
         self.axes_by_id[id(axis)] = axis
 
     def get_all_axes(self):
@@ -369,7 +369,7 @@ class Axis():
         return self._name
     def set_name(self, name):
         self._name = name
-        
+
     def has_data(self, *data):
         result = False
         for datum in data:
@@ -420,7 +420,7 @@ class Axis():
         if not len(data): return []
         if cap and len(data) > cap: data = data[0:cap]
         return data
-    
+
     def get_datum(self, selector=None, match=0):
         data = self.get_data(selector, _cap=match+1)
         if not data or match >= len(data): return None
@@ -442,7 +442,7 @@ class Axis():
             datum._deregister_axes(self)
             data_removed.append(datum)
         return data
-            
+
     def _change_data_name(self, datum, old_name, new_name):
         if old_name == new_name:
             return
@@ -475,7 +475,7 @@ class Data():
         self._color = kwargs.get('color', Color())
 
         self._axes_by_id = {}
-        
+
         if _axes is not None:
             _axes = make_iter(_axes)
             self._register_axes(_axes)
@@ -486,7 +486,7 @@ class Data():
                 warnings.warn(f"Tried to add data to axes which already contains data. Ignored {self._name}")
                 continue
             self._axes_by_id[id(axis)] = axis
-            
+
     def _deregister_axes(self, *axes):
         for axis in axes:
             if id(axis) not in self._axes_by_id:
@@ -504,7 +504,7 @@ class Data():
 
     def get_name(self):
         return self._name
-    
+
     def set_values(self, values):
         if len(values) != len(self._index):
             raise ValueError("Index and values have different length. Use set_index_values(index, values) to set both.")
@@ -524,14 +524,14 @@ class Data():
             raise ValueError("Index and values have different length")
         self._index = index
         self._values = values
-    
+
     ## TODO: if user changes set values/index, should we automatically update graph?
-        
+
     def set_mnemonic(self, mnemonic):
         self._mnemonic = mnemonic
     def get_mnemonic(self):
         return self._mnemonic
-        
+
     def set_color(self, color): # probably not
         self._color = color
 
@@ -548,7 +548,7 @@ class Color(): ## TODO better default colors, in pozo.style
     def __init__(self, color=None):
         self.set_color(color)
         self._i = 0
-    
+
     def set_color(self, color):
         if color:
             color = make_iter(color)
