@@ -62,6 +62,7 @@ def test_init_ood_w_child():
 
     # add_items
     od.strict_index = True
+    od.allow_name_conflicts = True
     children = [OODChild(name="A"), OODChild(name="B"), OODChild(name="C")]
     parents = [OODChild(name="Alphabet Parent"), OODChild(name="Alphabet Parent2"), OODChild(name="Alphabet Parent2")]
     for child in children:
@@ -124,9 +125,9 @@ def test_init_ood_w_child():
             assert_child_has_parents(child, 2, [parents[0], parents[1]])
 
     # test _check index
-    assert not parents[1]._check_index(-1)
+    assert not parents[1]._check_index(-1 * len(parents[1]))
     assert not parents[1]._check_index(10)
-    assert not parents[1]._check_index(len(parents[1]))
+    assert not parents[1]._check_index(len(parents[1])+1)
     assert not parents[1]._check_index(slice(1,10))
     assert parents[1]._check_index(0)
     assert parents[1]._check_index(1)

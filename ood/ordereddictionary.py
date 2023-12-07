@@ -1,4 +1,4 @@
-from pozo.ood.exceptions import SelectorTypeError, SelectorError
+from pozo.ood.exceptions import SelectorTypeError, SelectorError, NameConflictError
 import pozo.ood.extra_selectors as s
 
 
@@ -9,13 +9,16 @@ import pozo.ood.extra_selectors as s
 ## Changing and swapping position needs to reflect their change
 
 strict_index = False
+allow_name_conflicts = False
 
 class ObservingOrderedDictionary(s.Selector):
 
     # Needs to accept a custom indexer
     def __init__(self, *args, **kwargs):
         global strict_index
+        global allow_name_conflicts
         self._strict_index = kwargs.pop('strict_index', strict_index)
+        self._allow_name_conflicts = kwargs.pop('allow_name_conflicts', allow_name_conflicts)
         self._items_ordered = []
         self._items_by_name = {}
         self._items_by_id = {}
@@ -67,14 +70,29 @@ class ObservingOrderedDictionary(s.Selector):
     def _child_update(self, child, **kwargs):
         oldname = kwargs.get('name', None)
         if oldname is not None and oldname in self._items_by_name:
+            if not self._allow_name_conflicts and self._check_key(item.get_name()):
+                return False
             self._remove_item_from_by_name(child, name=oldname)
             self._add_item_to_by_name(child)
+        return True
+        # if you change your name, you _have_ to tell your parent.
+        # we could test every set_name() at runtime for calling this function
+        # we could only allow only ChildObserved inherited classes (they could still hack)
+        # we could also dig around to see if we have the child, and if our name matches the
+        # current name
 
-    def add_items(self, *items, **kwargs): # check to see if item is type childwithparent (and I am parent?)
+    def add_items(self, *items, **kwargs):
         position = kwargs.pop("position", len(self))
+        position = position if position >= 0 else len(self)+position
+        if not position == len(self) and not self._check_index(position):
+            raise IndexError("Cannot supply a index out of range")
         for item in items:
             if id(item) in self._items_by_id:
                 raise ValueError("Tried to add item that already exists.")
+            elif not hasattr(item, "get_name"):
+                raise TypeError("All elements added must have a get_name() function")
+            elif not self._allow_name_conflicts and item.get_name():
+                raise NameConflictError(f"allow_name_conflict is False, this name already exists: {item.get_name()}")
         for i, item in enumerate(items):
             if isinstance(item, ChildObserved):
                 item._register_parents(self)
@@ -87,7 +105,7 @@ class ObservingOrderedDictionary(s.Selector):
         if target is None:
             target = self._items_ordered
         if isinstance(index, int):
-            if index < 0 or index >= len(target):
+            if abs(index) >= len(target):
                 return False
         elif isinstance(index, slice):
             if index.start is not None:
@@ -96,7 +114,7 @@ class ObservingOrderedDictionary(s.Selector):
                 if not self._check_index(index.stop-1): return False
         return True
 
-    def _count_dictionary(self): #TODO, check to make sure no overlapping items
+    def _count_dictionary(self): 
         count = 0
         for v in self._items_by_name.values():
             count += len(v)
@@ -216,12 +234,13 @@ class ObservingOrderedDictionary(s.Selector):
         if position is not None: # set position specifically
             if not isinstance(position, int):
                 raise TypeError("The position to move to must be an integer, follow array access syntax.")
+            if position < 0: position = len(self) + position
             if position != len(self) and not self._check_index(position):
                 raise IndexError("Position must be a valid index")
-            if position != len(self): # except in the case of position = len(self) which is basically append():
-                # items are always inserted before the current item in the position, so insert last items first. to maintain order.
-                # the earlier items will be inserted in the same position, pushing them right
-                # unless position == len(self), which is basically append()
+            if position != len(self):
+                # rightmost items inserted first, they'll be pushed further right w/ each successive
+                # insertion.
+                # unless position == len(self), which is append()
                 items = reversed(items)
             for item in items:
                 original_index = self._items_ordered.index(item)
@@ -229,11 +248,11 @@ class ObservingOrderedDictionary(s.Selector):
                 self._items_ordered.insert(position, item) # TODO, can it take negatives?
                 self._items_ordered.remove(None)
         elif isinstance(distance, int) and distance > 0: # Move to right
-            distance += 1 # gotta push back twice since you'll be inserted before
+            distance += 1 # again, insert naturally puts you to the left of whatever was in the position you want
             wall = len(self) # We're moving to the right, so:
             for item in reversed(items): # Move rightmost items FIRST
-                position = min(self._items_ordered.index(item) + distance, len(self)) # They can't move greater than the length
-                if position > wall: position = wall # they shouldn't move farther right than something that started farther right
+                position = min(self._items_ordered.index(item) + distance, len(self)) # len is rightmost max
+                if position > wall: position = wall # don't move farther right than and item that started farther right
                 wall = position - 1
                 self.move_items(item, position=position)
         elif isinstance(distance, int) and distance < 0: # Move to left
@@ -277,7 +296,9 @@ class ChildObserved():
         if self._name == name: return
         old_name = self._name
         self._name = name
-        self._notify_parents(name=old_name)
+        if self._notify_parents(name=old_name):
+            self._name = old_name
+            raise NameConflictError("Name taken by other item")
 
     def _register_parents(self, *parents):
         for parent in parents:
