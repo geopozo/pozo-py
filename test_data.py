@@ -74,3 +74,4 @@ def test_two():
         pozo.data.Data([1,2], [1], name="what")
     with pytest.raises(Exception):
         pozo.data.Data([1,2], [1, 2])
+

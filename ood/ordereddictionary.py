@@ -12,7 +12,7 @@ strict_index = False
 allow_name_conflicts = False
 multiparent = False
 
-class ObservingOrderedDictionary(s.Selector):
+class ObservingOrderedDictionary():
 
     # Needs to accept a custom indexer
     def __init__(self, *args, **kwargs):
@@ -26,12 +26,6 @@ class ObservingOrderedDictionary(s.Selector):
 
 
         super().__init__(*args, **kwargs)
-
-    ## Sort of an odd function here- could make a _get_item_by_id but it's overkill.
-    def _process(self, parent):
-        if id(self) in parent._items_by_id:
-            return [self]
-        return []
 
     def set_strict(self):
         self._strict_index = True
@@ -96,6 +90,8 @@ class ObservingOrderedDictionary(s.Selector):
         position = position if position >= 0 else len(self)+position
         if not position == len(self) and not self._check_index(position):
             raise IndexError("Cannot supply a index out of range")
+        if len(items) != len(set(items)):
+            raise ValueError("Trying to add same item twice or more")
         for item in items:
             if id(item) in self._items_by_id:
                 raise ValueError("Tried to add item that already exists.")
@@ -211,10 +207,11 @@ class ObservingOrderedDictionary(s.Selector):
 
     # Because we can't check to see if we've supplied a correct object type, we can only return true or false
     def has_item(self, selector):
+        if selector is None: raise ValueError("has_item() not passed anything to check")
         try:
             self.get_item(selector, strict_index=True)
             return True
-        except (SelectorError, SelectorTypeError):
+        except (SelectorError):
             return False
 
     # Can throw regular IndexError if one value of the keys is out of order
@@ -282,8 +279,9 @@ class ObservingOrderedDictionary(s.Selector):
             position = self._items_ordered.index(self.get_item(after, strict_index=True)) + 1
             self.move_items(*items, position=position)
 
-    def pop_items(self, *selectors):
-        items = self.get_items(*selectors, strict_index=True)
+    def pop_items(self, *selectors, **kwargs):
+        if not selectors or len(selectors)==0: return []
+        items = self.get_items(*selectors, **kwargs)
         for item in items:
             item._deregister_parents(self)
             self._items_ordered.remove(item)
@@ -291,7 +289,7 @@ class ObservingOrderedDictionary(s.Selector):
             del self._items_by_id[id(item)]
         return items
 
-class ChildObserved():
+class ChildObserved(s.Selector):
 
     def __init__(self, *args, **kwargs):
         global multiparent
@@ -302,6 +300,12 @@ class ChildObserved():
         self._parents_by_id = {}
 
         super().__init__(*args, **kwargs)
+
+    ## Sort of an odd function here- could make a _get_item_by_id but it's overkill.
+    def _process(self, parent):
+        if id(self) in parent._items_by_id:
+            return [self]
+        return []
 
     def get_name(self):
         return self._name

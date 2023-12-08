@@ -268,10 +268,11 @@ def test_init_ood_w_child():
     assert parents[0].has_item(slice(1000, 1010)) == False
     assert parents[0].has_item(s.Name_I("E", 10)) == False
     assert parents[0].has_item(s.Name_I("A", 10)) == False
-    assert parents[0].has_item(200.0) == False
-    assert parents[0].has_item(parents) == False
-    assert parents[0].has_item({}) == False
-    assert parents[0].has_item((1,2,3)) == False
+    with pytest.raises(SelectorTypeError):
+        assert parents[0].has_item(200.0) == False
+        assert parents[0].has_item(parents) == False
+        assert parents[0].has_item({}) == False
+        assert parents[0].has_item((1,2,3)) == False
     #assert parents[0].has_item(s.Name_I(1, 2)) == False
     #assert parents[0].has_item(s.Name_I(1, "a")) == False
     #assert parents[0].has_item(s.Name_I("a", "a")) == False
