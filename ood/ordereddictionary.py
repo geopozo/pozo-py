@@ -198,11 +198,11 @@ class ObservingOrderedDictionary(s.Selector):
                 sorted_items.append(ref_item)
         return sorted_items
 
-    def get_item(self, selector, match = 0, **kwargs):
+    def get_item(self, selector, **kwargs):
         match = kwargs.get('match', 0)
         strict_index = kwargs.get('strict_index', self._strict_index)
         if "_cap" in kwargs: kwargs.pop("_cap")
-        items = self.get_items(selector, _cap = match + 1)
+        items = self.get_items(selector, _cap = match + 1, **kwargs)
         if len(items) <= match:
             if strict_index:
                 raise SelectorError(f"Supplied match ({match}) >= len(results) ({len(items)})") from IndexError()
@@ -239,7 +239,6 @@ class ObservingOrderedDictionary(s.Selector):
         count_flags = bool(before) + bool(after) + bool(distance) + bool(position is not None)
         if count_flags != 1:
             raise ValueError("You must set ONE of 'position', 'distance', 'before', or 'after'")
-
 
         items = self.get_items(*selectors)
         if not items or len(items) == 0: return
@@ -282,7 +281,6 @@ class ObservingOrderedDictionary(s.Selector):
         elif after: # It's before except +1
             position = self._items_ordered.index(self.get_item(after, strict_index=True)) + 1
             self.move_items(*items, position=position)
-
 
     def pop_items(self, *selectors):
         items = self.get_items(*selectors, strict_index=True)

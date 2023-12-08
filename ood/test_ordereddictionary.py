@@ -233,6 +233,9 @@ def test_init_ood_w_child():
 
     assert parents[0].get_item("A") == children[0]
     assert parents[0].get_item(1) == children[1]
+    assert not parents[0].get_item("alsdklaksd", strict_index=False)
+    assert not parents[0].get_item("A", match=2, strict_index=False)
+    assert parents[0].get_item("A", match=1) == clone_child
     assert parents[0].get_item(s.Name_I("A", 1)) == clone_child
 
     with pytest.raises(SelectorTypeError):
