@@ -1,9 +1,9 @@
 import copy
 from IPython.display import Javascript # Part of Hack #1
 
-# You can create your own dictionary like 'defaults' and 
+# You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
-# Specifying values that are marked as "generated" will 
+# Specifying values that are marked as "generated" will
 # lead to undefined behavior, probably be overwritten.
 # It may be better to inherit the Style() class and
 # define your own class that overrides the generators.
@@ -16,7 +16,7 @@ defaults = dict(
     track_margin = .004,    # margin between each track # TODO should be pixels
     track_start = .01,      # left-side margin on tracks # TODO should be pixels
     axis_label_height = 60, # size of each xaxis when stacked
-    
+
     # Plotly style values, structured like a plotly layout dictionary.
     # Important to know that `xaxes_template` will be used to create several `xaxis1`,`xaxis2`, `xaxisN` keys.
     # `xaxis_template` will not make it into the final layout dictionary passed to Plotly.
@@ -108,19 +108,19 @@ class Style:
         start = self.template["track_start"] + track_position*(whole_track_width)
         end = start + track_width
         return [start, end]
-    
+
     def get_layout(self):
         return self.layout_actual
-    
+
     def set_y_limits(self):
         self.layout_actual['yaxis']['maxallowed'] = self.ymax
         self.layout_actual['yaxis']['minallowed'] = self.ymin
         self.layout_actual['yaxis']['range'] = [self.ymax, self.ymin]
-        
+
     def set_axes(self, axes):
         for i, axis in enumerate(axes):
             self.layout_actual["xaxis" + str(i+1)] = axis
-            
+
     def set_axis_horizontal_position(self, axis, position):
         axis['domain'] = self.calculate_track_domain(position)
 
@@ -170,7 +170,7 @@ class Style:
     def set_min_max(self, ymin, ymax):
         self.ymin = ymin if self.ymin is None else min(self.ymin, ymin)
         self.ymax = ymax if self.ymax is None else max(self.ymax, ymax)
-    
+
     def randomColor(self, toNumber = 0):
         import random
         if toNumber != 0:
@@ -186,9 +186,9 @@ class Style:
                "#bcbd22",
                "#17becf"]
         return ops[random.randint(0, len(ops)-1)]
-    
-    
+ 
+
     def javascript(self): # TODO can we really not just display this directly form here?
         add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
-        
+
         return Javascript(add_scroll) # Part of Hack #1

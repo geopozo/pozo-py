@@ -236,45 +236,11 @@ class Track():
 
         self.add_axes(*args, **kwargs)
 
-    def add_axes(self, *args, **kwargs): # accept "upper" and "lower"
-        for ar in args:
-            if isinstance(ar, Data):
-                self.add_axis(Axis(ar))
-            ## process Axes, [Data], Axis
-            ## how do we indicate where to add the axis (top or bottom)
-
     ####
     ####
     #### Basic Add-Get(s)-Remove Axis
     ####
     ####
-
-    def add_axis(self, axis, position=1): # add_axes?
-        # should it also accept data, and [data] (and then process_data doesn't have to
-        if position == 0:
-            raise Exception("Position must be > or < 0")
-        if id(axis) in self.axes_by_id:
-            warnings.Warn("An axis was not added as it is already on the track")
-            return
-
-        if axis.name in self.axes: # Because more than one axis can have the same now
-            self.axes[axis.name].append(axis)
-        else:
-            self.axes[axis.name] = [axis]
-
-        if position > 0:
-            if position >= len(self.axes_above):
-                self.axes_above.append(axis)
-            else:
-                self.axes_above.insert(position-1, axis)
-        else:
-            position = -position
-            if position >= len(self.axes_below):
-                self.axes_below.append(axis)
-            else:
-                self.axes_below.insert(position-1, axis)
-
-        self.axes_by_id[id(axis)] = axis
 
     def get_all_axes(self):
         return list(itertools.chain(self.axes_below, self.axes_above)) 
@@ -283,55 +249,8 @@ class Track():
     def get_upper_axes(self):
         return self.axes_above
 
-    def get_axes(self, selectors, ignore_orphans=True, cap=0):
-        axes = []
-        try:
-            test = iter(selectors)
-        except Exception as e:
-            selectors = [selectors]
-        for selector in selectors:
-            if cap and len(axes) >= cap: break
-            if isinstance(selector, str): # axes by name
-                if selector in self.axes:
-                    axes.extend(self.axes[selector])
-            elif isinstance(selector, int): # axes by index # (amything but 0)
-                source = self.axes_below if selector < 0 else self.axes_above
-                index = abs(selector) - 1
-                if index >= len(source):
-                    raise KeyError("Invalid index in get_axes")
-                axes.append(source[index])
-            elif isinstance(select, axis): # just get by actual axis
-                if id(axis) in self.axes_by_id or not ignore_orphans:
-                    axes.append(axis)
-        if len(axes) == 0: return None
-        if cap and len(axes) > cap: axes = axes[0:cap]
-        return axes
 
-    def get_axis(self, selector, match=0):
-        axes = self.get_axes(selector, cap=1)
-        if axes is None or match >= len(axes):
-            return None
-        return axes[match]
 
-    def remove_axes(self, *axes):
-        axes = flatten_array(axes)
-        axes = self.get_axes(axes)
-        axes_removed = []
-        for axis in axes:
-            if id(axis) not in self.axes_by_id:
-                warnings.warn(f"Trying to remove axis {axis.get_name()} which doesn't exist. Ignored.")
-                continue
-            del self.axes_by_id[id(axis)]
-            self.axes[axis.name].remove(axis)
-            if len(self.axes[axis.name]) == 0:
-                del self.axes[axis.name]
-            try:
-                self.axes_below.remove(axis)
-            except ValueError:
-                self.axes_above.remove(axis)
-            axis._deregister_tracks(self)
-            axes_removed.append(axis)
-        return axes_removed
     ## TODO change_anem and register/deregister_trakcs
     def count_axes(self):
         return len(self.axes)
@@ -345,27 +264,6 @@ class Track():
 
 
     def get_named_tree(self):
-        above = []
-        below = []
-        for axis in reversed(self.axes_above):
-            above.append(axis.get_named_tree())
-        for axis in reversed(self.axes_below):
-            below.append(axis.get_named_tree())
-        return { "track": { self.name: { "above": above, "below": below } } }
+        return { "track": { self.name:i self.get_axes() } }
 
 
-# Probably not how we'll do it, especially since color is not the only style attribute
-class Color(): ## TODO better default colors, in pozo.style
-    def __init__(self, color=None):
-        self.set_color(color)
-        self._i = 0
-
-    def set_color(self, color):
-        if color:
-            color = make_iter(color)
-        ## TODO, verify colors
-        self._color = color
-
-    def get_color(self, i=0):
-        if not self._color or not len(self._color): return "#000000"
-        return self._color[i % len(self._color)]
