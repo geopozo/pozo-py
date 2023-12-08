@@ -1,6 +1,6 @@
 import pytest
 import pozo.ood.ordereddictionary as od
-import pozo.data, pozo.axis
+import pozo.data, pozo.axes
 
 index = [1, 2, 3, 4]
 values = [0, 1, 1, 0]
@@ -21,12 +21,12 @@ d8 = pozo.data.Data(index2, values2, mnemonic="md8")
 
 
 def test_axis():
-    a = pozo.axis.Axis()
-    assert isinstance(a, pozo.axis.Axis)
+    a = pozo.axes.Axis()
+    assert isinstance(a, pozo.axes.Axis)
     assert a.get_data() == []
     assert a.get_datum(None) == None
     assert a.pop_data() == []
-    b = pozo.axis.Axis(d1)
+    b = pozo.axes.Axis(d1)
     assert len(b.get_data()) ==1
     assert len(b) == 1
     assert b.get_datum(d1.get_name()) == d1
@@ -35,9 +35,9 @@ def test_axis():
     assert b.get_datum("md1") == d1
     assert b.get_datum('astoasi') == None
     assert b.get_datum(5) == None
-    c = pozo.axis.Axis(*[d1, d2])
-    d = pozo.axis.Axis(*[d1, d2], d3)
-    e = pozo.axis.Axis(*[d4, d5], d6)
+    c = pozo.axes.Axis(*[d1, d2])
+    d = pozo.axes.Axis(*[d1, d2], d3)
+    e = pozo.axes.Axis(*[d4, d5], d6)
     assert e._count_dictionary() == 3
     assert len(e.get_data()) == 3
     assert e._count_dictionary() == len(e.get_data())

@@ -6,7 +6,7 @@ import traceback
 
 
 
-class Axis(od.ObservingOrderedDictionary):
+class Axis(od.ObservingOrderedDictionary, od.ChildObserved):
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
@@ -53,7 +53,7 @@ class Axis(od.ObservingOrderedDictionary):
 
     def get_named_tree(self):
         result = []
-        for el in self.data:
+        for el in self.get_data():
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
 
