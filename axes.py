@@ -33,7 +33,7 @@ class Axis(od.ObservingOrderedDictionary, od.ChildObserved):
     def get_data(self, *selectors, **kwargs): # TODO get by name or by actual
         return super().get_items(*selectors, **kwargs)
 
-    # get_item 
+    # get_item
     def get_datum(self, selector, **kwargs):
         return super().get_item(selector, **kwargs)
 

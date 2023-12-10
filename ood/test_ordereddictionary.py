@@ -1,13 +1,15 @@
 import pytest
 import pozo.ood.ordereddictionary as od
 import pozo.ood.extra_selectors as s
+import pozo.ood.exceptions as e
+
 from pozo.ood.exceptions import SelectorTypeError, SelectorError, NameConflictError
 
 class OODChild(od.ObservingOrderedDictionary, od.ChildObserved):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
 
-def assert_ood_sane(ood = od.ObservingOrderedDictionary(), num = None):
+def assert_od_sane(ood = od.ObservingOrderedDictionary(), num = None):
     i = 0
     for item in ood:
         i += 1
@@ -17,6 +19,21 @@ def assert_ood_sane(ood = od.ObservingOrderedDictionary(), num = None):
     assert len(ood._items_by_id) ==  len(ood)
     if num is not None:
         assert len(ood._items_by_id) == num
+    all_items = {}
+    for name in ood._items_by_name:
+        for item in names:
+            if id(item) in all_items:
+                pytest.fail("Dictionary is inconsistent- same item has > 1 name")
+                all_items[id(item)] = True
+
+def assert_get_item_equal(parent, *args):
+    assert len(args) > 1
+    for i, arg in enumerate(args): 
+        if not i: continue
+        assert parent.get_item(args[i-1]) == parent.get_item(args[i])
+
+def assert_child_name(child, name):
+    assert child._name == child.get_name() == name
 
 def assert_child_has_parents(child, num, parents = None):
     assert len(child._parents_by_id) == num
@@ -29,10 +46,6 @@ def test_init_ood():
     ood = od.ObservingOrderedDictionary()
     assert_ood_sane(ood)
 
-
-def assert_child_name(child, name):
-    assert child._name == child.get_name() == name
-
 def test_init_child():
     child = od.ChildObserved()
     assert_child_name(child, "unnamed")
@@ -42,12 +55,6 @@ def test_init_child():
 
     child.set_name("test2")
     assert_child_name(child, "test2")
-
-def assert_get_item_equal(parent, *args):
-    assert len(args) > 1
-    for i, arg in enumerate(args): # no zip here!
-        if not i: continue
-        assert parent.get_item(args[i-1]) == parent.get_item(args[i])
 
 def test_init_ood_w_child():
     ## Test basic initialization
@@ -64,6 +71,7 @@ def test_init_ood_w_child():
     od.strict_index = True
     od.allow_name_conflicts = True
     od.multiparent = True
+    od.double_add = od.ErrorLevel.ERROR
     children = [OODChild(name="A"), OODChild(name="B"), OODChild(name="C")]
     parents = [OODChild(name="Alphabet Parent"), OODChild(name="Alphabet Parent2"), OODChild(name="Alphabet Parent2")]
     for child in children:

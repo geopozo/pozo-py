@@ -1,25 +1,15 @@
-from pozo.ood.exceptions import SelectorTypeError, SelectorError, NameConflictError
 import pozo.ood.extra_selectors as s
-
-
-
-## We need to keep track whether or not the output is sorted or not
-## It will generally by sorted if a) there is only one selector b) the selector is not a dictionary
-## We need to start store _items_by_id w/ position
-## Changing and swapping position needs to reflect their change
-
-strict_index = False
-allow_name_conflicts = False
-multiparent = False
+import pozo.ood.exceptions as e
 
 class ObservingOrderedDictionary():
-
+    _type="item"
+    _child_type="item"
     # Needs to accept a custom indexer
     def __init__(self, *args, **kwargs):
-        global strict_index
-        global allow_name_conflicts
-        self._strict_index = kwargs.pop('strict_index', strict_index)
-        self._allow_name_conflicts = kwargs.pop('allow_name_conflicts', allow_name_conflicts)
+        self._strict_index = kwargs.pop('strict_index', None)
+        self._name_conflict = kwargs.pop('name_conflict', None)
+        self._redundant_add = kwargs.pop('redundant_add', None)
+
         self._items_ordered = []
         self._items_by_name = {}
         self._items_by_id = {}
@@ -27,10 +17,12 @@ class ObservingOrderedDictionary():
 
         super().__init__(*args, **kwargs)
 
-    def set_strict(self):
-        self._strict_index = True
-    def unset_strict(self):
-        self._strict_index = False
+    def set_strict_index(self, level):
+        self._strict_index = level
+    def set_name_conflict(self, level):
+        self._name_conflict= level
+    def set_redundant_add(self, level):
+        self._redundant_add = level
 
     def __len__(self):
         return len(self._items_ordered)
@@ -65,20 +57,17 @@ class ObservingOrderedDictionary():
     def _child_options(self, child, **kwargs):
         old_name = kwargs.get('old_name', None)
         if old_name is not None and old_name in self._items_by_name:
-            if not self._allow_name_conflicts and self._check_key(child.get_name()):
-                raise NameConflictError(f"Name taken by other item in parent {self.get_name()} of id {id(self)}")
-                return False
             if not isinstance(child.get_name(), str):
-                raise TypeError(f"Parent {self.get_name()} will only accept children with string names")
-        return True
-        # TODO: check child name
+                raise TypeError(f"All {self._child_type} must have a get_name() function which returns a string.")
+            elif self._check_key(child.get_name()):
+                e.NameConflictException(self._type).notify(self._name_conflict)
 
     def _child_update(self, child, **kwargs):
+        self._child_options(self, child, **kwargs)
         old_name = kwargs.get('old_name', None)
         if old_name is not None:
             self._remove_item_from_by_name(child, name=old_name)
             self._add_item_to_by_name(child)
-        return True
         # if you change your name, you _have_ to tell your parent.
         # we could test every set_name() at runtime for calling this function
         # we could only allow only ChildObserved inherited classes (they could still hack)
@@ -91,19 +80,19 @@ class ObservingOrderedDictionary():
         if not position == len(self) and not self._check_index(position):
             raise IndexError("Cannot supply a index out of range")
         if len(items) != len(set(items)):
-            raise ValueError("Trying to add same item twice or more")
+            e.RedundantAddException(self._type, {"args":items}).notify(self._redundant_add)
+            items = list(dict.fromkeys(x for x in items).keys())
         for item in items:
-            if id(item) in self._items_by_id:
-                raise ValueError("Tried to add item that already exists.")
-            elif not hasattr(item, "get_name"):
-                raise TypeError("All elements added must have a get_name() function")
-            elif not self._allow_name_conflicts and item.get_name() in self._items_by_name:
-                raise NameConflictError(f"allow_name_conflict is False, this name already exists: {item.get_name()}")
+            if not hasattr(item, "get_name"):
+                raise TypeError(f"All {self._child_type} added must have a get_name() function.")
+            elif id(item) in self._items_by_id:
+                e.RedundantAddException(self._type, {self._type:item.get_name()}).notify(self._redundant_add)
+            elif self._check_key(item.get_name()):
+                e.NameConflictException(self._type, {self._type:item.get_name()}).notify(self._name_conflict) # Returns true if no exception
             item._register_parents(self)
             item._deregister_parents(self) # testing! 1 2 3
         for i, item in enumerate(items):
-            if isinstance(item, ChildObserved):
-                item._register_parents(self)
+            item._register_parents(self)
             self._items_ordered.insert(position+i, item)
             self._add_item_to_by_name(item)
             self._items_by_id[id(item)] = item
@@ -122,7 +111,7 @@ class ObservingOrderedDictionary():
                 if not self._check_index(index.stop-1): return False
         return True
 
-    def _count_dictionary(self): 
+    def _count_dictionary(self):
         count = 0
         for v in self._items_by_name.values():
             count += len(v)
@@ -157,7 +146,6 @@ class ObservingOrderedDictionary():
     # If selector makes no sense (4.5), will still throw error.
     def get_items(self, *selectors, **kwargs):
         cap = kwargs.get('_cap', 0)
-        index = kwargs.get('index', None)
         strict_index = kwargs.get('strict_index', self._strict_index)
         items = []
         if not selectors or selectors[0] is None:
@@ -171,18 +159,14 @@ class ObservingOrderedDictionary():
             elif isinstance(selector, slice):
                 new_items = self._get_items_by_slice(selector)
             elif isinstance(selector, str):
-                if index:
-                    new_items = self._get_items_by_name(selector, index)
-                else:
-                    new_items = self._get_items_by_name(selector)
+                new_items = self._get_items_by_name(selector)
             elif isinstance(selector, s.Selector):
                 new_items = selector._process(self)
             else:
-                raise SelectorTypeError("Selectors must of type: str, int, slice or a class from package selectors.")
+                raise SelectorTypeError(f"Selectors must be: str, int, slice, {self._child_type} or Selectors.")
             if new_items and len(new_items)>0:
                 items.extend(new_items)
-            elif strict_index:
-                raise SelectorError(f"Selector {i} did not return any values. You can set strict_index=False to receive [] instead")
+            e.StrictIndexException(self._type, f"(Selector {i})").notify(strict_index)
         if cap and len(items) > cap: items = items[0:cap]
         resulting_items_by_id = {}
         for item in items:
@@ -195,19 +179,19 @@ class ObservingOrderedDictionary():
         return sorted_items
 
     def get_item(self, selector, **kwargs):
+        if selector is None: raise ValueError(f"get_{self._type}() not passed selector")
         match = kwargs.get('match', 0)
         strict_index = kwargs.get('strict_index', self._strict_index)
         if "_cap" in kwargs: kwargs.pop("_cap")
         items = self.get_items(selector, _cap = match + 1, **kwargs)
         if len(items) <= match:
-            if strict_index:
-                raise SelectorError(f"Supplied match ({match}) >= len(results) ({len(items)})") from IndexError()
+            e.StrictIndexException(self._type).notify(strict_index)
             return None
         return items[match]
 
     # Because we can't check to see if we've supplied a correct object type, we can only return true or false
     def has_item(self, selector):
-        if selector is None: raise ValueError("has_item() not passed anything to check")
+        if selector is None: raise ValueError(f"has_{self._type}() not passed selector")
         try:
             self.get_item(selector, strict_index=True)
             return True
@@ -236,12 +220,14 @@ class ObservingOrderedDictionary():
         count_flags = bool(before) + bool(after) + bool(distance) + bool(position is not None)
         if count_flags != 1:
             raise ValueError("You must set ONE of 'position', 'distance', 'before', or 'after'")
-
-        items = self.get_items(*selectors)
+        temp = self._strict_index
+        if temp != e.ErrorLevel.ERROR or temp != True:
+            temp = e.ErrorLevel.WARN
+        items = self.get_items(*selectors, strict_index=temp)
         if not items or len(items) == 0: return
         if position is not None: # set position specifically
             if not isinstance(position, int):
-                raise TypeError("The position to move to must be an integer, follow array access syntax.")
+                raise TypeError("The position to move to must be an integer.")
             if position < 0: position = len(self) + position
             if position != len(self) and not self._check_index(position):
                 raise IndexError("Position must be a valid index")
@@ -280,6 +266,7 @@ class ObservingOrderedDictionary():
             self.move_items(*items, position=position)
 
     def pop_items(self, *selectors, **kwargs):
+        # strict index passed to get_items
         if not selectors or len(selectors)==0: return []
         items = self.get_items(*selectors, **kwargs)
         for item in items:
@@ -290,16 +277,18 @@ class ObservingOrderedDictionary():
         return items
 
 class ChildObserved(s.Selector):
-
+    _type="item"
     def __init__(self, *args, **kwargs):
-        global multiparent
         self._name = kwargs.pop('name', "unnamed")
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string, please")
-        self._multiparent = kwargs.pop('multiparent', multiparent)
+        self._multi_parent = kwargs.pop('multi_parent', None)
         self._parents_by_id = {}
 
         super().__init__(*args, **kwargs)
+
+    def set_multi_parent(self, level):
+        self._multi_parent = level
 
     ## Sort of an odd function here- could make a _get_item_by_id but it's overkill.
     def _process(self, parent):
@@ -315,18 +304,16 @@ class ChildObserved(s.Selector):
         old_name = self._name
         self._name = name
         try:
-            self._notify_parents(old_name=old_name)
+            self._notify_parents(old_name=old_name):
         except Exception as e:
             self._name = old_name
             raise e
 
-    def _register_parents(self, *parents):
-        if not self._multiparent and (bool(len(self._parents_by_id)) or len(parents)>1):
-            raise Exception("Tried to add child who already has a parent (or tried to add multiple parents). Set multiparent=True when creating children to override. Not recommended")
+    def _register_parents(self, parents):
+        if len(self._parents_by_id)>=1:
+            e.MultiParentException(self._type).notify(self._multi_parent)
         for parent in parents:
             if id(parent) in self._parents_by_id: continue
-            if not isinstance(parent, ObservingOrderedDictionary):
-                raise ValueError("All parents must inhert ObservingOrderedDictionary class")
             self._parents_by_id[id(parent)] = parent
 
 
@@ -340,10 +327,7 @@ class ChildObserved(s.Selector):
 
     def _notify_parents(self, **kwargs):
         for parent in self._parents_by_id.values():
-            if not parent._child_options(self, **kwargs):
-                return False
+            parent._child_options(self, **kwargs)
         for parent in self._parents_by_id.values():
-            if not parent._child_update(self, **kwargs):
-                raise Exception("Fatal Error: Parent item changed mind about child update after giving permission. One of the parents of this item is unstable!")
-        return True
+            parent._child_update(self, **kwargs)
 
