@@ -64,7 +64,7 @@ class ObservingOrderedDictionary():
                 if err: raise err
 
     def _child_update(self, child, **kwargs):
-        self._child_options(self, child, **kwargs)
+        self._child_options(child, **kwargs)
         old_name = kwargs.get('old_name', None)
         if old_name is not None:
             self._remove_item_from_by_name(child, name=old_name)
@@ -74,39 +74,52 @@ class ObservingOrderedDictionary():
         # we could only allow only ChildObserved inherited classes (they could still hack)
         # we could also dig around to see if we have the child, and if our name matches the
         # current name
+    def _abs_index(self, index):
+        return index if index >= 0 else len(self)+index
 
     def add_items(self, *items, **kwargs):
         position = kwargs.pop("position", len(self))
-        position = position if position >= 0 else len(self)+position
         if not position == len(self) and not self._check_index(position):
             raise IndexError("Cannot supply a index out of range")
+        position = self._abs_index(position)
+        # TODO: make sure we do this in Move
         if len(items) != len(set(items)):
             err = e.RedundantAddException({"args":items}, kind=self._type, level=self._redundant_add)
             if err: raise err
             items = list(dict.fromkeys(x for x in items).keys())
+        names = {}
         for item in items:
-            if not hasattr(item, "get_name"):
-                raise TypeError(f"All {self._child_type} added must have a get_name() function.")
+            if not isinstance(item, ChildObserved) or not hasattr(item, "get_name") or not hasattr(item, "_register_parent"):
+                raise TypeError(f"All items added must of type {self._child_type}.")
             elif id(item) in self._items_by_id:
                 err = e.RedundantAddException({self._type:item.get_name()}, kind=self._type, level=self._redundant_add)
                 if err: raise err
-            elif self._check_key(item.get_name()):
+                continue
+            elif not isinstance(item.get_name(), str):
+                raise TypeError(f"get_name() must always return a string")
+            elif self._check_key(item.get_name()) or item.get_name() in names:
                 err = e.NameConflictException({self._type:item.get_name()}, kind=self._type, level=self._name_conflict)
                 if err: raise err
-            item._register_parents(self)
-            item._deregister_parents(self) # testing! 1 2 3
+            item._register_parent(self)
+            item._deregister_parent(self) # testing! 1 2 3
+            names[item.get_name()] = True
         for i, item in enumerate(items):
-            item._register_parents(self)
+            if id(item) in self._items_by_id:
+                err = e.RedundantAddException({self._type:item.get_name()}, kind=self._type, level=self._redundant_add)
+                if err: raise err
+                continue
+            item._register_parent(self)
             self._items_ordered.insert(position+i, item)
             self._add_item_to_by_name(item)
             self._items_by_id[id(item)] = item
 
     # Will throw IndexErrors if any number is out of range
-    def _check_index(self, index, target = None): # TODO, this needs to allow negatives
+    def _check_index(self, index, target = None):
+        if not isinstance(index, (int, slice)): return False
         if target is None:
             target = self._items_ordered
         if isinstance(index, int):
-            if abs(index) >= len(target):
+            if not index == -len(target) and abs(index) >= len(target):
                 return False
         elif isinstance(index, slice):
             if index.start is not None:
@@ -149,14 +162,12 @@ class ObservingOrderedDictionary():
     # Can return an empty list if a) no selectors supplied or b) skip_bad=True.
     # If selector makes no sense (4.5), will still throw error.
     def get_items(self, *selectors, **kwargs):
-        cap = kwargs.get('_cap', 0)
         strict_index = kwargs.get('strict_index', self._strict_index)
         items = []
         if not selectors or selectors[0] is None:
             items = self._items_ordered
             selectors = []
         for i, selector in enumerate(selectors):
-            if cap and len(items) >= cap: break
             new_items = None
             if isinstance(selector, int):
                 new_items = [self._get_item_by_index(selector)]
@@ -167,12 +178,12 @@ class ObservingOrderedDictionary():
             elif isinstance(selector, s.Selector):
                 new_items = selector._process(self)
             else:
-                raise SelectorTypeError(f"Selectors must be: str, int, slice, {self._child_type} or Selectors.")
+                raise e.SelectorTypeError(f"Selectors must be: str, int, slice, {self._child_type} or Selectors. Not {type(selector)}")
             if new_items and len(new_items)>0:
                 items.extend(new_items)
-            err = e.StrictIndexException(f"(Selector {i})", kind=self._type, level=strict_index)
-            if err: raise err
-        if cap and len(items) > cap: items = items[0:cap]
+            else:
+                err = e.StrictIndexException(f"Selector {i}, {selector}.", kind=self._type, level=strict_index)
+                if err: raise err
         resulting_items_by_id = {}
         for item in items:
             if id(item) not in resulting_items_by_id:
@@ -187,8 +198,7 @@ class ObservingOrderedDictionary():
         if selector is None: raise ValueError(f"get_{self._type}() not passed selector")
         match = kwargs.get('match', 0)
         strict_index = kwargs.get('strict_index', self._strict_index)
-        if "_cap" in kwargs: kwargs.pop("_cap")
-        items = self.get_items(selector, _cap = match + 1, **kwargs)
+        items = self.get_items(selector, **kwargs)
         if len(items) <= match:
             err = e.StrictIndexException(kind=self._type, level=strict_index)
             if err: raise err
@@ -201,7 +211,7 @@ class ObservingOrderedDictionary():
         try:
             self.get_item(selector, strict_index=True)
             return True
-        except (SelectorError):
+        except (e.StrictIndexException):
             return False
 
     # Can throw regular IndexError if one value of the keys is out of order
@@ -214,7 +224,7 @@ class ObservingOrderedDictionary():
             else:
                 positions_new.append(self._items_ordered.index(self.get_item(selector, strict_index=True)))
         if not ( len(set(positions_new)) == len(order) == len(positions_new) == len(set(order)) == len(self) ):
-            raise SelectorError("You must provide a list of all objects by some selector.") from ValueError()
+            raise e.SelectorError("You must provide a list of all objects by some selector.") from ValueError()
         self._items_ordered = [self._items_ordered[i] for i in positions_new]
 
     def move_items(self, *selectors, **kwargs):
@@ -232,11 +242,9 @@ class ObservingOrderedDictionary():
         items = self.get_items(*selectors, strict_index=temp)
         if not items or len(items) == 0: return
         if position is not None: # set position specifically
-            if not isinstance(position, int):
-                raise TypeError("The position to move to must be an integer.")
-            if position < 0: position = len(self) + position
             if position != len(self) and not self._check_index(position):
                 raise IndexError("Position must be a valid index")
+            position = self._abs_index(position)
             if position != len(self):
                 # rightmost items inserted first, they'll be pushed further right w/ each successive
                 # insertion.
@@ -245,7 +253,7 @@ class ObservingOrderedDictionary():
             for item in items:
                 original_index = self._items_ordered.index(item)
                 self._items_ordered[original_index] = None # Don't change structure of list while playing with positions!
-                self._items_ordered.insert(position, item) 
+                self._items_ordered.insert(position, item)
                 self._items_ordered.remove(None)
         elif isinstance(distance, int) and distance > 0: # Move to right
             distance += 1 # again, insert naturally puts you to the left of whatever was in the position you want
@@ -276,7 +284,7 @@ class ObservingOrderedDictionary():
         if not selectors or len(selectors)==0: return []
         items = self.get_items(*selectors, **kwargs)
         for item in items:
-            item._deregister_parents(self)
+            item._deregister_parent(self)
             self._items_ordered.remove(item)
             self._remove_item_from_by_name(item)
             del self._items_by_id[id(item)]
@@ -315,16 +323,15 @@ class ChildObserved(s.Selector):
             self._name = old_name
             raise e
 
-    def _register_parents(self, parents):
+    def _register_parent(self, parent):
+        if id(parent) in self._parents_by_id: return # could raise redundand_add error here
         if len(self._parents_by_id)>=1:
             err = e.MultiParentException(kind=self._type, level=self._multi_parent)
             if err: raise err
-        for parent in parents:
-            if id(parent) in self._parents_by_id: continue
-            self._parents_by_id[id(parent)] = parent
+        self._parents_by_id[id(parent)] = parent
 
 
-    def _deregister_parents(self, *parents):
+    def _deregister_parent(self, *parents):
         for parent in parents:
             if id(parent) in self._parents_by_id:
                 del self._parents_by_id[id(parent)]

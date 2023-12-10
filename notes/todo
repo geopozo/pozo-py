@@ -1,13 +1,7 @@
-Produce Functions for Error Level Handling
-Go through and replace all error handling with said functions
-Make sure default's can be passed logically
-
-
 Bring toiletrees down
 Go Through All Documents and rename
 
-Better Error Handling
-Write Better Tests for ObservingOrderedDictionary? (which methods are we dependent on)
+Add index?
 Deal with Copys
 Deal with Serialization
 Finish Graph Object- generative tests best on observing ordered dictionary?
