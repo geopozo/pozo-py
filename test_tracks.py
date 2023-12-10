@@ -1,6 +1,7 @@
 import pytest
 import pozo.ood.ordereddictionary as od
 import pozo.ood.extra_selectors as s
+import pozo.ood.exceptions as e
 import pozo.data, pozo.axes, pozo.tracks
 
 index = [1, 2, 3, 4]
@@ -8,8 +9,8 @@ values = [0, 1, 1, 0]
 index2 = [5, 6, 7, 8]
 values2 = [2, 3, 4, 5]
 
-od.allow_name_conflicts = True
-od.multiparent = True
+e.NameConflictException.default_level = e.ErrorLevel.IGNORE
+e.MultiParentException.default_level = e.ErrorLevel.IGNORE
 
 d1 = pozo.data.Data(index, values, mnemonic="md1")
 d2 = pozo.data.Data(index, values, name="d2")
@@ -29,7 +30,7 @@ a7 = pozo.axes.Axis()
 a8 = pozo.axes.Axis()
 
 
-def test_axis():
+def test_user_simulation():
 
     wdata = pozo.tracks.Track(d1, d2, d3, d4, d5, d6, d7, d8, a1, a2, a3, a4)
     assert wdata.get_axes(a1) == [a1]
@@ -39,7 +40,8 @@ def test_axis():
     a = pozo.tracks.Track()
     assert isinstance(a, pozo.tracks.Track)
     assert a.get_axes() == []
-    assert a.get_axis(None) == None
+    with pytest.raises(ValueError):
+        a.get_axis(None)
     assert a.pop_axes() == []
     b = pozo.tracks.Track(a1)
     assert len(b.get_axes()) ==1
@@ -61,8 +63,6 @@ def test_axis():
     assert e.get_axis(a2) == None
     assert e.get_axis('astoasi') == None
     assert e.get_axis(5) == None
-
-
 
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_axes())

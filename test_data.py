@@ -6,17 +6,16 @@ values = [0, 1, 1, 0]
 index2 = [5, 6, 7, 8]
 values2 = [2, 3, 4, 5]
 
-def test_data_examples():
-    d1 = pozo.data.Data(index, values, mnemonic="md1")
-    d2 = pozo.data.Data(index, values, name="d2")
-    d3 = pozo.data.Data(index, values, name="d3", mnemonic="md3")
-    d4 = pozo.data.Data(index, values, mnemonic="md4")
-    d5 = pozo.data.Data(index, values, mnemonic="md5")
-    d6 = pozo.data.Data(index, values, mnemonic="md6")
-    d6 = pozo.data.Data(index, values, mnemonic="md7")
-    d7 = pozo.data.Data(index, values, mnemonic="md8")
+d1 = pozo.data.Data(index, values, mnemonic="md1")
+d2 = pozo.data.Data(index, values, name="d2")
+d3 = pozo.data.Data(index, values, name="d3", mnemonic="md3")
+d4 = pozo.data.Data(index, values, mnemonic="md4")
+d5 = pozo.data.Data(index, values, mnemonic="md5")
+d6 = pozo.data.Data(index, values, mnemonic="md6")
+d6 = pozo.data.Data(index, values, mnemonic="md7")
+d7 = pozo.data.Data(index, values, mnemonic="md8")
 
-def test_data():
+def test_user_simulation():
     x = pozo.data.Data(index, values, mnemonic="DHO")
     assert isinstance(x, pozo.data.Data)
     assert x.get_name() == "DHO"
@@ -41,12 +40,7 @@ def test_data():
     with pytest.raises(ValueError):
         x.set_index([1], values=[1,2])
 
-        # check setting both name and mnemonic
-        # check setting just name
-        # check setting color
-        # check sending in wrong types
-        # check changing name works on integration
-def test_two():
+def test_user_simulation2():
     ## Init
     first = pozo.data.Data([1], [2], name="test", mnemonic="test2")
     assert isinstance(first, pozo.data.Data)

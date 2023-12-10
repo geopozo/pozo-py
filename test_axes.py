@@ -1,5 +1,6 @@
 import pytest
 import pozo.ood.ordereddictionary as od
+import pozo.ood.exceptions as e
 import pozo.data, pozo.axes
 
 index = [1, 2, 3, 4]
@@ -7,8 +8,8 @@ values = [0, 1, 1, 0]
 index2 = [5, 6, 7, 8]
 values2 = [2, 3, 4, 5]
 
-od.allow_name_conflicts = True
-od.multiparent = True
+e.NameConflictException.default_level = e.ErrorLevel.IGNORE
+e.MultiParentException.default_level = e.ErrorLevel.IGNORE
 
 d1 = pozo.data.Data(index, values, mnemonic="md1")
 d2 = pozo.data.Data(index, values, name="d2")
@@ -24,7 +25,8 @@ def test_axis():
     a = pozo.axes.Axis()
     assert isinstance(a, pozo.axes.Axis)
     assert a.get_data() == []
-    assert a.get_datum(None) == None
+    with pytest.raises(ValueError):
+        assert a.get_datum(None)
     assert a.pop_data() == []
     b = pozo.axes.Axis(d1)
     assert len(b.get_data()) ==1
@@ -104,7 +106,6 @@ def test_axis():
     assert e.get_data(*[d1, d2, d3, d4]) == [d1, d2, d3, d4]
     assert e.get_data(*[d1, d2],*[ d3, d4, d5]) == [d1, d2, d3, d4]
     assert e.get_data(*["md1", d2, d3, d4]) == [d1, d2, d3, d4]
-    assert e.get_data(*[d1, d2, d3], *["md4"], _cap=2) == [d1, d2]
     assert e.get_datum(d1) == d1
     assert e.get_datum("md1") == d1
     d1.set_name("test")

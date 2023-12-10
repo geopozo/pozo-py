@@ -51,6 +51,8 @@ def test_levels(exception):
 
 
 def test_default_levels():
+    import importlib
+    importlib.reload(e)
     e.StrictIndexException()
 
     with pytest.raises(e.NameConflictException):

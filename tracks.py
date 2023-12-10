@@ -4,7 +4,8 @@ import pozo.axes, pozo.axes
 import traceback
 
 class Track(od.ObservingOrderedDictionary, od.ChildObserved):
-
+    _type="track"
+    _child_type="axis"
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         for ar in args:
@@ -12,17 +13,10 @@ class Track(od.ObservingOrderedDictionary, od.ChildObserved):
 
     # add_items
     def add_axes(self, *axes, **kwargs): # axis can take axes... and other axis?
-        warn_off = kwargs.pop("warn_off", False)
         good_axes = []
-        if len(axes) != len(set(axes)):
-            axes = list(dict.fromkeys(x for x in axes).keys())
-            if not warn_off: warnings.warn(f"Trying to add same axes twice or more, ignoring duplicated")
         for axis in axes:
             if not isinstance(axis, (pozo.axes.Axis, pozo.data.Data)):
                 raise TypeError("Axis.add_axes() only accepts axes")
-            elif self.has_axis(axis): #if if-elif reversed, user could, for example, pass None, has_axis is fine with that.
-                if not warn_off: warnings.warn(f"Trying to add axes which is already present:  {axis.get_name()} {id(axis)}")
-                continue
             if isinstance(axis, pozo.data.Data):
                 good_axes.append(pozo.axes.Axis(axis, name=axis.get_name()))
             else:

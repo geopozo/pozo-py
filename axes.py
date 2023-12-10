@@ -7,6 +7,8 @@ import traceback
 
 
 class Axis(od.ObservingOrderedDictionary, od.ChildObserved):
+    _type = "axis"
+    _child_type = "data"
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
@@ -15,19 +17,10 @@ class Axis(od.ObservingOrderedDictionary, od.ChildObserved):
 
     # add_items
     def add_data(self, *data, **kwargs): # axis can take data... and other axis?
-        warn_off = kwargs.pop("warn_off", False)
-        good_data = []
-        if len(data) != len(set(data)):
-            data = list(dict.fromkeys(x for x in data).keys())
-            if not warn_off: warnings.warn(f"Trying to add same data twice or more, ignoring duplicated")
         for datum in data:
             if not isinstance(datum, pozo.data.Data):
                 raise TypeError("Axis.add_data() only accepts data")
-            elif self.has_datum(datum): #if if-elif reversed, user could, for example, pass None, has_datum is fine with that.
-                if not warn_off: warnings.warn(f"Trying to add data which is already present:  {datum.get_name()} {id(datum)}")
-                continue
-            good_data.append(datum)
-        super().add_items(*good_data, **kwargs)
+        super().add_items(*data, **kwargs)
 
     # get_items
     def get_data(self, *selectors, **kwargs): # TODO get by name or by actual

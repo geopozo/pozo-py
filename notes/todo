@@ -1,10 +1,7 @@
 Bring toiletrees down
 Go Through All Documents and rename
 
-Add index?
-Deal with Copys
-Deal with Serialization
-Finish Graph Object- generative tests best on observing ordered dictionary?
+Finish Graph Object- Don't test 100% wrapped
 Create Main Style Renderer
 Create Mini Style Objects (Just use a dictionary)
 - font/size/hidden
@@ -21,8 +18,10 @@ Cash/Flights
 Recruitment video, 2 Explainer Videos (for lay people)
 Quick Start Document
 ? What comes after that. Advanced Styling? referencing?
+Deal with Copys
+Deal with Serialization
 
-Do internationalization
+Do internationalization on errors
 Publish with better __init__ and separate repo and rabbit
 Start reach out (send to everyone, work with laura, hubspot, swunderground)
 After talking to Welly, talk about Notes on Depths,Ranges of Depths
