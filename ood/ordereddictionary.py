@@ -60,7 +60,8 @@ class ObservingOrderedDictionary():
             if not isinstance(child.get_name(), str):
                 raise TypeError(f"All {self._child_type} must have a get_name() function which returns a string.")
             elif self._check_key(child.get_name()):
-                e.NameConflictException(self._type).notify(self._name_conflict)
+                err = e.NameConflictException(kind=self._type, level=self._name_conflict)
+                if err: raise err
 
     def _child_update(self, child, **kwargs):
         self._child_options(self, child, **kwargs)
@@ -80,15 +81,18 @@ class ObservingOrderedDictionary():
         if not position == len(self) and not self._check_index(position):
             raise IndexError("Cannot supply a index out of range")
         if len(items) != len(set(items)):
-            e.RedundantAddException(self._type, {"args":items}).notify(self._redundant_add)
+            err = e.RedundantAddException({"args":items}, kind=self._type, level=self._redundant_add)
+            if err: raise err
             items = list(dict.fromkeys(x for x in items).keys())
         for item in items:
             if not hasattr(item, "get_name"):
                 raise TypeError(f"All {self._child_type} added must have a get_name() function.")
             elif id(item) in self._items_by_id:
-                e.RedundantAddException(self._type, {self._type:item.get_name()}).notify(self._redundant_add)
+                err = e.RedundantAddException({self._type:item.get_name()}, kind=self._type, level=self._redundant_add)
+                if err: raise err
             elif self._check_key(item.get_name()):
-                e.NameConflictException(self._type, {self._type:item.get_name()}).notify(self._name_conflict) # Returns true if no exception
+                err = e.NameConflictException({self._type:item.get_name()}, kind=self._type, level=self._name_conflict)
+                if err: raise err
             item._register_parents(self)
             item._deregister_parents(self) # testing! 1 2 3
         for i, item in enumerate(items):
@@ -166,7 +170,8 @@ class ObservingOrderedDictionary():
                 raise SelectorTypeError(f"Selectors must be: str, int, slice, {self._child_type} or Selectors.")
             if new_items and len(new_items)>0:
                 items.extend(new_items)
-            e.StrictIndexException(self._type, f"(Selector {i})").notify(strict_index)
+            err = e.StrictIndexException(f"(Selector {i})", kind=self._type, level=strict_index)
+            if err: raise err
         if cap and len(items) > cap: items = items[0:cap]
         resulting_items_by_id = {}
         for item in items:
@@ -185,7 +190,8 @@ class ObservingOrderedDictionary():
         if "_cap" in kwargs: kwargs.pop("_cap")
         items = self.get_items(selector, _cap = match + 1, **kwargs)
         if len(items) <= match:
-            e.StrictIndexException(self._type).notify(strict_index)
+            err = e.StrictIndexException(kind=self._type, level=strict_index)
+            if err: raise err
             return None
         return items[match]
 
@@ -221,7 +227,7 @@ class ObservingOrderedDictionary():
         if count_flags != 1:
             raise ValueError("You must set ONE of 'position', 'distance', 'before', or 'after'")
         temp = self._strict_index
-        if temp != e.ErrorLevel.ERROR or temp != True:
+        if temp == e.ErrorLevel.IGNORE or not temp:
             temp = e.ErrorLevel.WARN
         items = self.get_items(*selectors, strict_index=temp)
         if not items or len(items) == 0: return
@@ -239,7 +245,7 @@ class ObservingOrderedDictionary():
             for item in items:
                 original_index = self._items_ordered.index(item)
                 self._items_ordered[original_index] = None # Don't change structure of list while playing with positions!
-                self._items_ordered.insert(position, item) # TODO, can it take negatives?
+                self._items_ordered.insert(position, item) 
                 self._items_ordered.remove(None)
         elif isinstance(distance, int) and distance > 0: # Move to right
             distance += 1 # again, insert naturally puts you to the left of whatever was in the position you want
@@ -304,14 +310,15 @@ class ChildObserved(s.Selector):
         old_name = self._name
         self._name = name
         try:
-            self._notify_parents(old_name=old_name):
+            self._notify_parents(old_name=old_name)
         except Exception as e:
             self._name = old_name
             raise e
 
     def _register_parents(self, parents):
         if len(self._parents_by_id)>=1:
-            e.MultiParentException(self._type).notify(self._multi_parent)
+            err = e.MultiParentException(kind=self._type, level=self._multi_parent)
+            if err: raise err
         for parent in parents:
             if id(parent) in self._parents_by_id: continue
             self._parents_by_id[id(parent)] = parent

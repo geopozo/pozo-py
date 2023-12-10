@@ -14,39 +14,50 @@ class ErrorLevel(Enum):
     WARN = 2
 
 class AdjustableException(Exception):
-    def __init__(self, thing="item", *args, **kwargs):
+
+    # This is good because we should pop these
+    # But its weird that we need this or subclasses
+    # won't accept keywords (even if __new__ has the
+    # right signature.
+    def __init__(self, *args, **kwargs):
+        level = kwargs.pop("level", None)
+        kind = kwargs.pop("kind", "item")
+        formatted_message = self.message.format(kind=kind)
+        super().__init__(formatted_message, *args, **kwargs)
+
+    def __new__(cls, *args, level=None, kind="item"):
         try:
-            self.formatted_message = self.message.format(thing=thing)
+            formatted_message = cls.message.format(kind=kind)
         except AttributeError:
             raise NotImplementedError("AdjustableException is a baseclass and must be inherited by a default class that specifies both default_level and message")
-        super().__init__(self.formatted_message, *args, **kwargs)
-
-    def notify(self, level=None):
         if level is None:
-            level = self.default_level
+            level = cls.default_level
         if level == ErrorLevel.IGNORE or not level:
-            pass
-        elif level == ErrorLevel.ERROR or level is True or hasattr(self, "no_warn"): #No_warn not tested
-            if hasattr(self, "no_warn"):
+            return None
+        elif level == ErrorLevel.ERROR or level is True or hasattr(cls, "no_warn"): #No_warn not tested
+            if hasattr(cls, "no_warn") and level == ErrorLevel.WARN:
                 warnings.warn("This level is set to WARN but the situation is 'yes' or 'no', so warn means no.") # Not tested
-            raise self
+            # is traceback caught raise or at declaration?
+            return super().__new__(cls, formatted_message, *args)
         elif level == ErrorLevel.WARN:
-            warnings.warn(self.formatted_message)
+            warnings.warn(formatted_message)
+            return None
+        return None
 
-class StrictIndexException(AdjustableException): 
+class StrictIndexException(AdjustableException):
     default_level = ErrorLevel.IGNORE
     message = "Invalid key or index."
 
 class NameConflictException(AdjustableException):
     default_level = ErrorLevel.ERROR
     no_warn = True # Not tested
-    message = "Can't add >1 {thing} with same name."
+    message = "Can't add >1 {kind} with same name."
 
 class MultiParentException(AdjustableException):
     default_level = ErrorLevel.ERROR
     no_warn = True # Not tested
-    message = "{thing} can only have one parent."
+    message = "{kind} can only have one parent."
 
 class RedundantAddException(AdjustableException):
     default_level = ErrorLevel.WARN
-    message = "Trying to add duplicate {thing}."
+    message = "Trying to add duplicate {kind}."

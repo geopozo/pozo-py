@@ -28,7 +28,7 @@ def assert_od_sane(ood = od.ObservingOrderedDictionary(), num = None):
 
 def assert_get_item_equal(parent, *args):
     assert len(args) > 1
-    for i, arg in enumerate(args): 
+    for i, arg in enumerate(args):
         if not i: continue
         assert parent.get_item(args[i-1]) == parent.get_item(args[i])
 
