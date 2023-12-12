@@ -20,6 +20,5 @@ jobs:
         python-version: "3.9"
     - run: python3 -m pip install --upgrade pip setuptools wheel build 
     - run: python3 -m build
-    - run: python3 -c "print(\"Hello World\")"
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
