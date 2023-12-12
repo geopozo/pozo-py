@@ -2,7 +2,7 @@ import warnings
 import pozo.data, pozo.axes, pozo.tracks
 import pozo.ood.ordereddictionary as od
 import pozo.ood.exceptions as od_errors
-import pozo.style
+import pozo.style.plotly
 LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work
 
 class Graph(od.ObservingOrderedDictionary):
