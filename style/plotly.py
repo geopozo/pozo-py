@@ -1,4 +1,5 @@
 import copy
+import pozo.style
 from IPython.display import Javascript # Part of Hack #1
 import pozo.data, pozo.axes, pozo.tracks, pozo.graphs
 
@@ -67,7 +68,9 @@ defaults = dict(
         ),
     ),
 )
-class Style:
+
+
+class PlotlyRenderer(pozo.style.Renderer):
     def __init__(self, template=defaults):
         self.template = copy.deepcopy(template)
         self.xaxis_template = copy.deepcopy(self.template["plotly"]["xaxis_template"])
@@ -213,8 +216,6 @@ class Style:
 #
 #
 
-# Clean up for commit
-# We have this style object (review it)
 # We need to "implant it" (use it)
 # It should fufill a couple abstracts to be valid (what is the basic API?) Something for a matlab version.
 # It should _obey overrides_ (can it be forced?)

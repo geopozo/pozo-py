@@ -2,8 +2,8 @@ import warnings
 import pozo.data, pozo.axes, pozo.tracks
 import pozo.ood.ordereddictionary as od
 import pozo.ood.exceptions as od_errors
-
-LAS_TYPE = "<class 'lasio.las.LASFile'>" # this isn't going to work
+import pozo.style
+LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work
 
 class Graph(od.ObservingOrderedDictionary):
     _type="graph"
@@ -11,6 +11,7 @@ class Graph(od.ObservingOrderedDictionary):
 
     def __init__(self, *args, **kwargs):
         self._name = kwargs.pop('name', 'unnamed')
+        self.renderer = kwargs.pop('renderer', pozo.style.plotly.PlotlyRenderer)
         my_kwargs = {}
         my_kwargs["include"] = kwargs.pop('include', None)
         my_kwargs["exclude"] = kwargs.pop('exclude', None)
