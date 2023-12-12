@@ -8,10 +8,9 @@ find = {namespaces = false}
 [project]
 name = "pozo"
 description = "A visualization library based on plotly to explore well log data"
-readme ="README.md"
-description-file ="README.md"
+readme = "README.md"
 requires-python = ">=3.9"
-version = "0.0.8c"
+version = "0.0.8d"
 
 [project.optional-dependencies]
 dev = ["pytest"]
