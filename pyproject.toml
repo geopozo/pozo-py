@@ -9,7 +9,7 @@ find = {namespaces = false}
 name = "pozo"
 description = "A visualization library based on plotly to explore well log data"
 requires-python = ">=3.9"
-version = "0.0.2a"
+version = "0.0.3a"
 
 [project.optional-dependencies]
 dev = ["pytest"]
