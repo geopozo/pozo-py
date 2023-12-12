@@ -11,7 +11,7 @@ class Graph(od.ObservingOrderedDictionary):
 
     def __init__(self, *args, **kwargs):
         self._name = kwargs.pop('name', 'unnamed')
-        self.renderer = kwargs.pop('renderer', pozo.style.plotly.PlotlyRenderer)
+        self.renderer = kwargs.pop('renderer', pozo.style.plotly.PlotlyRenderer())
         my_kwargs = {}
         my_kwargs["include"] = kwargs.pop('include', None)
         my_kwargs["exclude"] = kwargs.pop('exclude', None)
@@ -21,6 +21,9 @@ class Graph(od.ObservingOrderedDictionary):
 
         super().__init__(**kwargs)
         self.process_data(*args, **my_kwargs)
+
+    def render(self):
+        self.renderer.render(self)
 
     def get_name(self):
         return self._name
@@ -56,9 +59,9 @@ class Graph(od.ObservingOrderedDictionary):
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
             mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
-            if len(include) != 0 and curve.mnemonic not in include:
+            if include and len(include) != 0 and curve.mnemonic not in include:
                 continue
-            elif len(exclude) != 0 and curve.mnemonic in exclude:
+            elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
 
             if od_errors.NameConflictException(level=self._name_conflict) is None:
@@ -66,22 +69,22 @@ class Graph(od.ObservingOrderedDictionary):
             else:
                 name = curve.mnemonic
 
-            data = Data(yaxis, curve.data, mnemonic = mnemonic, name = name)
-            self.add_track(data)
+            data = pozo.data.Data(yaxis, curve.data, mnemonic = mnemonic, name = name)
+            self.add_tracks(data)
 
     # add_items
     def add_tracks(self, *tracks, **kwargs): # axis can take axes... and other axis?
         good_axes = []
-        for axis in axes:
-            if not isinstance(axis, (pozo.axes.Axis, pozo.data.Data, pozo.data.Track)):
+        for track in tracks:
+            if not isinstance(track, (pozo.axes.Axis, pozo.data.Data, pozo.tracks.Track)):
                 raise TypeError("Axis.add_axes() only accepts axes")
 
-            intermediate = axis
+            intermediate = track
             if isinstance(intermediate, pozo.data.Data):
                intermediate = pozo.axes.Axis(intermediate, name=intermediate.get_name())
-            if isinstance(intermediate, pozo.data.Axis):
+            if isinstance(intermediate, pozo.axes.Axis):
                 intermediate = pozo.tracks.Track(intermediate, name=intermediate.get_name())
-            if isinstance(intermediate, pozo.data.Track):
+            if isinstance(intermediate, pozo.tracks.Track):
                 good_axes.append(intermediate)
         super().add_items(*good_axes, **kwargs)
 

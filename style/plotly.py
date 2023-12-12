@@ -2,6 +2,7 @@ import copy
 import pozo.style
 from IPython.display import Javascript # Part of Hack #1
 import pozo.data, pozo.axes, pozo.tracks, pozo.graphs
+import plotly.graph_objects as go
 
 # You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
@@ -138,18 +139,18 @@ class PlotlyRenderer(pozo.style.Renderer):
         for track_pos, track in enumerate(graph.get_tracks()):
             anchor_axis = parent_axis_per_track[track_pos]
             for axis_pos, axis in enumerate(track.get_axes()):
-                for datum in self.data:
-                    ymin = min(datum.index[0], ymin)
-                    ymax = max(datum.index[-1],ymax)
+                for datum in axis:
+                    ymin = min(datum.get_index()[0], ymin)
+                    ymax = max(datum.get_index()[-1],ymax)
 
                 color='#AAAAAA' # TODO: fix everything about color
-                if mnemonic is not None:
-                    color=self.randomColor(mnemonic)
+                if datum.get_mnemonic() is not None:
+                    color=self.randomColor(datum.get_mnemonic())
 
                 axis_style = dict(
                     **self.xaxis_template
                 )
-                axis_style['title'] = dict(text=display_name,font=dict(color=color), standoff=0,)
+                axis_style['title'] = dict(text=axis.get_name(),font=dict(color=color), standoff=0,)
                 axis_style['linecolor'] = color
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
@@ -180,15 +181,15 @@ class PlotlyRenderer(pozo.style.Renderer):
         for track in graph:
             for axis in track:
                 all_traces = []
-                for datum in self.data:
+                for datum in axis:
                    all_traces.append(go.Scattergl(
-                        x=datum.values,
-                        y=datum.index,
+                        x=datum.get_values(),
+                        y=datum.get_index(),
                         mode='lines', # nope, based on data w/ default
                         line=dict(color='#000000'), # needs to be better, based on data
-                        xaxis='x' + str(axis_number),
+                        xaxis='x' + str(num_axes),
                         yaxis='y',
-                        name = datum.mnemonic, # probably needs to be better
+                        name = datum.get_name(),
                     ))
                 traces.extend(all_traces) # Big UGH
                 num_axes += 1
@@ -200,7 +201,7 @@ class PlotlyRenderer(pozo.style.Renderer):
         fig = go.Figure(data=traces, layout=layout)
         fig.show()
         if not javascript: return
-        display(self.style.javascript()) # This is going to be in layout, Display
+        display(self.javascript()) # This is going to be in layout, Display
 
     def javascript(self):
         add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
