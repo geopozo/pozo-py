@@ -1,4 +1,8 @@
 # .github/workflows/ci-cd.yml
+on:
+  push:
+    branchs:
+      - main
 jobs:
   pypi-publish:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
