@@ -15,6 +15,6 @@ Esta semana, se publicará estilo, defectos, y más documentación!
 ```python
 import pozo
 import lasio
-las = lasio.read("/your/las/file/here") #tu/archivo/acá
+las = lasio.read("/your/las/file/here") # "tu/archivo/acá"
 pozo.Graph(las).render()
 ```
