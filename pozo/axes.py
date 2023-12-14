@@ -1,6 +1,6 @@
 import warnings
 import ood
-import pozo.data
+import pozo
 import traceback
 
 
@@ -18,7 +18,7 @@ class Axis(ood.Item):
     # add_items
     def add_data(self, *data, **kwargs): # axis can take data... and other axis?
         for datum in data:
-            if not isinstance(datum, pozo.data.Data):
+            if not isinstance(datum, pozo.Data):
                 raise TypeError("Axis.add_data() only accepts data")
         super().add_items(*data, **kwargs)
 

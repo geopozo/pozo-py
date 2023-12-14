@@ -1,6 +1,6 @@
 import warnings
 import ood
-import pozo.axes, pozo.axes
+import pozo
 import traceback
 
 class Track(ood.Item):
@@ -15,10 +15,10 @@ class Track(ood.Item):
     def add_axes(self, *axes, **kwargs): # axis can take axes... and other axis?
         good_axes = []
         for axis in axes:
-            if not isinstance(axis, (pozo.axes.Axis, pozo.data.Data)):
-                raise TypeError("Axis.add_axes() only accepts axes")
-            if isinstance(axis, pozo.data.Data):
-                good_axes.append(pozo.axes.Axis(axis, name=axis.get_name()))
+            if not isinstance(axis, (pozo.Axis, pozo.Data)):
+                raise TypeError("Axis.add_axes() only accepts axes, and data: pozo objects")
+            if isinstance(axis, pozo.Data):
+                good_axes.append(pozo.Axis(axis, name=axis.get_name()))
             else:
                 good_axes.append(axis)
         super().add_items(*good_axes, **kwargs)

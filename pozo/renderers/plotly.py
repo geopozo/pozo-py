@@ -1,8 +1,10 @@
 import copy
-import pozo.style
 from IPython.display import Javascript # Part of Hack #1
-import pozo.data, pozo.axes, pozo.tracks, pozo.graphs
+
 import plotly.graph_objects as go
+
+import pozo
+import pozo.renderers as pzr
 
 # You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
@@ -71,7 +73,7 @@ defaults = dict(
 )
 
 
-class PlotlyRenderer(pozo.style.Renderer):
+class Plotly(pzr.Renderer):
     def __init__(self, template=defaults):
         self.template = copy.deepcopy(template)
         self.xaxis_template = copy.deepcopy(self.template["plotly"]["xaxis_template"])
@@ -107,7 +109,7 @@ class PlotlyRenderer(pozo.style.Renderer):
         return [start, end]
 
     def get_layout(self, graph):
-        if not isinstance(graph, pozo.graphs.Graph):
+        if not isinstance(graph, pozo.Graph):
             raise TypeError("Layout must be supplied a graph object.")
         num_tracks = len(graph)
         if not num_tracks:
