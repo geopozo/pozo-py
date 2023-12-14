@@ -13,8 +13,8 @@ Esta semana, se publicará estilo, defectos, y más documentación!
 ## Example/Ejemplo
 
 ```python
-from pozo.graphs import Graphs
+import pozo
 import lasio
 las = lasio.read("/your/las/file/here") #tu/archivo/acá
-Graph(las).render()
+pozo.Graph(las).render()
 ```
