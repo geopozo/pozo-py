@@ -1,6 +1,6 @@
 import pozo.data, pozo.axes, pozo.tracks, pozo.graphs
-import pozo.ood.ordereddictionary as od
-import pozo.ood.exceptions as e
+import ood
+import ood.exceptions as e
 
 
 def test_init():

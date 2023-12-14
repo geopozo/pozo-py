@@ -12,7 +12,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 version = "0.1.0"
 dependencies = [
- "ood >=1.0.1a",
+ "ood >=1.0.0",
  ]
 
 [project.optional-dependencies]

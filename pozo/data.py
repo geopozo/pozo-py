@@ -1,7 +1,6 @@
-import pozo.ood.ordereddictionary as od
-import pozo.ood.extra_selectors as s
+import ood
 
-class Data(od.ChildObserved):
+class Data(ood.Observed):
     def __init__(self, index, values, **kwargs): # Default Index?
         if len(index) != len(values):
             raise ValueError("Index and values have different length")

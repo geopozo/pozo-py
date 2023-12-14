@@ -1,6 +1,6 @@
 import pytest
-import pozo.ood.ordereddictionary as od
-import pozo.ood.exceptions as e
+import ood
+import ood.exceptions as e
 import pozo.data, pozo.axes
 
 index = [1, 2, 3, 4]

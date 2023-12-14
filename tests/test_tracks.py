@@ -1,7 +1,7 @@
 import pytest
-import pozo.ood.ordereddictionary as od
-import pozo.ood.extra_selectors as s
-import pozo.ood.exceptions as e
+import ood
+import ood.selectors as s
+import ood.exceptions as e
 import pozo.data, pozo.axes, pozo.tracks
 
 index = [1, 2, 3, 4]

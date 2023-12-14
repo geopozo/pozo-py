@@ -1,11 +1,11 @@
 import warnings
 import pozo.data, pozo.axes, pozo.tracks
-import pozo.ood.ordereddictionary as od
-import pozo.ood.exceptions as od_errors
+import ood
+import ood.exceptions as ooderr
 import pozo.style.plotly
 LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work
 
-class Graph(od.ObservingOrderedDictionary):
+class Graph(ood.Observer):
     _type="graph"
     _child_type="track"
 
@@ -64,7 +64,7 @@ class Graph(od.ObservingOrderedDictionary):
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
 
-            if od_errors.NameConflictException(level=self._name_conflict) is None:
+            if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
             else:
                 name = curve.mnemonic

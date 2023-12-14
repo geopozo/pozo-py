@@ -1,9 +1,9 @@
 import warnings
-import pozo.ood.ordereddictionary as od
+import ood
 import pozo.axes, pozo.axes
 import traceback
 
-class Track(od.ObservingOrderedDictionary, od.ChildObserved):
+class Track(ood.Item):
     _type="track"
     _child_type="axis"
     def __init__(self, *args, **kwargs):

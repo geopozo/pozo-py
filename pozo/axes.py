@@ -1,12 +1,12 @@
 import warnings
-import pozo.ood.ordereddictionary as od
+import ood
 import pozo.data
 import traceback
 
 
 
 
-class Axis(od.ObservingOrderedDictionary, od.ChildObserved):
+class Axis(ood.Item):
     _type = "axis"
     _child_type = "data"
 
