@@ -106,7 +106,7 @@ class Plotly(pzr.Renderer):
         whole_track_width = track_width + self.template["track_margin"]
         start = self.template["track_start"] + track_pos*(whole_track_width)
         end = start+track_width
-        return [start, end]
+        return [max(start, 0), min(end, 1)]
 
     def get_layout(self, graph):
         if not isinstance(graph, pozo.Graph):
@@ -131,7 +131,7 @@ class Plotly(pzr.Renderer):
         layout["width"] = len(graph) * self.template["width_per_track"]
         layout["yaxis"]["domain"] = [
             0, # Old(bottom axes): self.calculate_axes_height(max_axes_bottom)
-            1 - self._calc_axes_proportion(max_axes)
+            min(1 - self._calc_axes_proportion(max_axes), 1)
         ]
 
         ## second pass
