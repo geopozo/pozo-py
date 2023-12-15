@@ -1,12 +1,11 @@
 import warnings
 import ood
 import pozo
+import pozo.renderers as pzr
 import traceback
 
 
-
-
-class Axis(ood.Item):
+class Axis(ood.Item, pzr.Themer):
     _type = "axis"
     _child_type = "data"
 

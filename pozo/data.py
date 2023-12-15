@@ -1,6 +1,7 @@
 import ood
+import pozo.renderers as pzr
 
-class Data(ood.Observed):
+class Data(ood.Observed, pzr.Themer):
     def __init__(self, index, values, **kwargs): # Default Index?
         if len(index) != len(values):
             raise ValueError("Index and values have different length")

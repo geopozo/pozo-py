@@ -6,7 +6,7 @@ import ood.exceptions as ooderr
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work reliably
 
-class Graph(ood.Observer):
+class Graph(ood.Observer, pzr.Themer):
     _type="graph"
     _child_type="track"
 
@@ -70,7 +70,7 @@ class Graph(ood.Observer):
             else:
                 name = curve.mnemonic
 
-            data = pozo.data.Data(yaxis, curve.data, mnemonic = mnemonic, name = name)
+            data = pozo.Data(yaxis, curve.data, mnemonic = mnemonic, name = name)
             self.add_tracks(data)
 
     # add_items

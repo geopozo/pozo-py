@@ -72,7 +72,6 @@ defaults = dict(
     ),
 )
 
-
 class Plotly(pzr.Renderer):
     def __init__(self, template=defaults):
         self.template = copy.deepcopy(template)
@@ -83,16 +82,7 @@ class Plotly(pzr.Renderer):
         import random
         if toNumber != 0:
             random.seed(hash(toNumber))
-        ops = ["#1f77b4",
-               "#ff7f0e",
-               "#2ca02c",
-               "#d62728",
-               "#9467bd",
-               "#8c564b",
-               "#e377c2",
-               "#7f7f7f",
-               "#bcbd22",
-               "#17becf"]
+        ops = []
         return ops[random.randint(0, len(ops)-1)]
 
     def _calc_axes_proportion(self, num_axes):
@@ -138,17 +128,19 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
+
+        theme = pzr.ThemeList(pzr.default_theme)
+        theme.add_theme(graph.get_theme())
         for track_pos, track in enumerate(graph.get_tracks()):
+            theme.add_theme(track.get_theme())
             anchor_axis = parent_axis_per_track[track_pos]
             for axis_pos, axis in enumerate(track.get_axes()):
+                theme.add_theme(axis.get_theme())
                 for datum in axis:
                     ymin = min(datum.get_index()[0], ymin)
                     ymax = max(datum.get_index()[-1],ymax)
 
-                color='#AAAAAA' # TODO: fix everything about color
-                if datum.get_mnemonic() is not None:
-                    color=self.randomColor(datum.get_mnemonic())
-
+                color = theme.get_color()
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -169,6 +161,9 @@ class Plotly(pzr.Renderer):
 
                 axes_styles.append(axis_style)
 
+
+                theme.pop()
+            theme.pop()
         for i, axis in enumerate(axes_styles):
             layout["xaxis" + str(i+1)] = axis
         layout['yaxis']['maxallowed'] = ymax
@@ -180,15 +175,26 @@ class Plotly(pzr.Renderer):
     def get_traces(self, graph):
         traces = []
         num_axes = 1
+        theme = pzr.ThemeList(pzr.default_theme)
+        theme.add_theme(graph.get_theme())
         for track in graph:
+            theme.add_theme(track.get_theme())
             for axis in track:
+                theme.add_theme(axis.get_theme())
+                color = theme.get_color()
                 all_traces = []
                 for datum in axis:
-                   all_traces.append(go.Scattergl(
+                    theme.add_theme(datum.get_theme())
+                    # Don't call get_color() unless data has it's own- reuse axis color, don't let iterate
+                    my_color = color
+                    if theme[-1] is not None and "color" in theme[-1]:
+                        my_color = theme[-1].get_color()
+
+                    all_traces.append(go.Scattergl(
                         x=datum.get_values(),
                         y=datum.get_index(),
                         mode='lines', # nope, based on data w/ default
-                        line=dict(color='#000000'), # needs to be better, based on data
+                        line=dict(color=color), # needs to be better, based on data
                         xaxis='x' + str(num_axes),
                         yaxis='y',
                         name = datum.get_name(),
@@ -218,11 +224,6 @@ class Plotly(pzr.Renderer):
 #            proportion = abs(i-1) / (self.max_axes_bottom -1 )
 #
 #
-
-# We need to "implant it" (use it)
-# It should fufill a couple abstracts to be valid (what is the basic API?) Something for a matlab version.
-# It should _obey overrides_ (can it be forced?)
-# It needs to override colors/calculations
 
 
 
