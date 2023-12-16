@@ -23,8 +23,8 @@ class Graph(ood.Observer, pzr.Themer):
         super().__init__(**kwargs)
         self.process_data(*args, **my_kwargs)
 
-    def render(self):
-        self.renderer.render(self)
+    def render(self, **kwargs):
+        self.renderer.render(self, **kwargs)
 
     def get_name(self):
         return self._name

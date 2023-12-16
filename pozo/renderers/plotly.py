@@ -98,7 +98,9 @@ class Plotly(pzr.Renderer):
         end = start+track_width
         return [max(start, 0), min(end, 1)]
 
-    def get_layout(self, graph):
+    def get_layout(self, graph, **kwargs):
+        track_width = kwargs.get("track_width", self.template["width_per_track"])
+        height = kwargs.get("height", None)
         if not isinstance(graph, pozo.Graph):
             raise TypeError("Layout must be supplied a graph object.")
         num_tracks = len(graph)
@@ -106,7 +108,8 @@ class Plotly(pzr.Renderer):
             raise ValueError("There are no tracks, there is nothing to lay out.")
 
         layout = copy.deepcopy(self.template["plotly"])
-
+        if height is not None:
+            layout["height"] = height
 
         # first pass
         max_axes = 0
@@ -118,7 +121,7 @@ class Plotly(pzr.Renderer):
             parent_axis_per_track.append(total_axes)
             total_axes += num_axes
 
-        layout["width"] = len(graph) * self.template["width_per_track"]
+        layout["width"] = len(graph) * track_width
         layout["yaxis"]["domain"] = [
             0, # Old(bottom axes): self.calculate_axes_height(max_axes_bottom)
             min(1 - self._calc_axes_proportion(max_axes), 1)
@@ -172,7 +175,7 @@ class Plotly(pzr.Renderer):
 
         return layout
 
-    def get_traces(self, graph):
+    def get_traces(self, graph, **kwargs):
         traces = []
         num_axes = 1
         theme = pzr.ThemeList(pzr.default_theme)
@@ -203,9 +206,10 @@ class Plotly(pzr.Renderer):
                 num_axes += 1
         return traces
 
-    def render(self, graph, javascript=True):
-        layout = self.get_layout(graph)
-        traces = self.get_traces(graph)
+    def render(self, graph, **kwargs):
+        javascript = kwargs.pop("javascript", True)
+        layout = self.get_layout(graph, **kwargs)
+        traces = self.get_traces(graph, **kwargs)
         fig = go.Figure(data=traces, layout=layout)
         fig.show()
         if not javascript: return
