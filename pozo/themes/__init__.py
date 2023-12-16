@@ -26,7 +26,7 @@ class ColorWheel():
 # We could override the indexer but it's a lot of work and I'm the only one who would see it for now
 class ThemeList(list):
     def __init__(self, *iterable, **kwargs):
-        self._theme_override = self._process_theme(kwargs.pop('theme_override', {}).copy())
+        self._override_theme = self._process_theme(kwargs.pop('override_theme', {}).copy())
         super().__init__()
         for it in iterable:
             self.add_theme(it)
@@ -45,8 +45,8 @@ class ThemeList(list):
         super().append(theme)
 
     def get_key(self, key):
-        if self._theme_override is not None and key in self._theme_override:
-            return self._theme_override[key]
+        if self._override_theme is not None and key in self._override_theme:
+            return self._override_theme[key]
         for theme in reversed(self):
             if theme is not None and key in theme:
                 return theme[key]
