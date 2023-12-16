@@ -1,4 +1,4 @@
-default_color_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",]
+default_color_list = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
 default_theme = { "color": default_color_list, }
 
 class Themer():
@@ -21,13 +21,16 @@ class ColorWheel():
     def restart_counter(self):
         self._i = 0
     def get_color(self):
-        color = self._color_list[self._i % len(self.color_list)]
+        color = self._color_list[self._i % len(self._color_list)]
         self._i += 1
+        return color
 
 # We could override the indexer but it's a lot of work and I'm the only one who would see it for now
 class ThemeList(list):
     def __init__(self, *iterable):
-        super().__init__([default_theme, *iterable])
+        super().__init__()
+        for it in iterable:
+            self.add_theme(it)
     def add_theme(self, theme):
         if theme is not None:
             theme = theme.copy()
@@ -44,7 +47,7 @@ class ThemeList(list):
         color = self.get_key("color")
         if color is None:
             raise ValueError("Couldn't find color in theme list. A fallback is hardcoded into the package, how did this happen?")
-        if isinstance(color, str):
+        elif isinstance(color, str):
             return color
         elif isinstance(color, ColorWheel):
             return color.get_color()

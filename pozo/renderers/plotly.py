@@ -45,13 +45,13 @@ defaults = dict(
         xaxis_template = dict(
             showgrid=True,
             zeroline=False,
-            gridcolor="#f0f0f0",
+            gridcolor="#f0f0f0", # this needs to be generated
             showline=True,
             linewidth=2,
             ticks="outside",
             tickwidth=1,
             ticklen=6,
-            tickangle=0,
+            tickangle=55,
 #           side=['']              # generated
 #           tickcolor=='#???',     # generated
 #           linecolor='#???',      # generated
@@ -138,7 +138,6 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
-
         theme = pzr.ThemeList(pzr.default_theme)
         theme.add_theme(graph.get_theme())
         for track_pos, track in enumerate(graph.get_tracks()):
