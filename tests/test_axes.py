@@ -88,10 +88,10 @@ def test_axis():
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_data())
     assert n == len(e.get_data()) + 1
-    assert e.pop_data(d6) == []
+    # assert e.pop_data(d6) == [] # pop is by default strict now
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_data())
-    assert e.pop_data(d6, d6, d6) == []
+    #assert e.pop_data(d6, d6, d6) == [] #by default strict
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_data())
     e.pop_data(*e.get_data())

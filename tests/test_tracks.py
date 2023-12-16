@@ -93,10 +93,10 @@ def test_user_simulation():
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_axes())
     assert n == len(e.get_axes()) + 1
-    assert e.pop_axes(a6) == []
+    #assert e.pop_axes(a6) == [] # by default strict
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_axes())
-    assert e.pop_axes(a6, a6, a6) == []
+    #assert e.pop_axes(a6, a6, a6) == [] # by default strict
     assert e._count_dictionary() == len(e)
     assert e._count_dictionary() == len(e.get_axes())
     e.pop_axes(*e.get_axes())
