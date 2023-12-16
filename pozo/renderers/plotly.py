@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 
 import pozo
 import pozo.renderers as pzr
+import pozo.themes as pzt
 
 # You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
@@ -106,6 +107,7 @@ class Plotly(pzr.Renderer):
         return [max(start, 0), min(end, 1)]
 
     def get_layout(self, graph, **kwargs):
+        theme_override = kwargs.pop("theme_override", None)
         track_width = kwargs.get("track_width", self.template["width_per_track"])
         height = kwargs.get("height", None)
         if not isinstance(graph, pozo.Graph):
@@ -138,7 +140,7 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
-        theme = pzr.ThemeList(pzr.default_theme)
+        theme = pzt.ThemeList(pzt.default_theme, theme_override=theme_override)
         theme.add_theme(graph.get_theme())
         for track_pos, track in enumerate(graph.get_tracks()):
             theme.add_theme(track.get_theme())
@@ -182,9 +184,10 @@ class Plotly(pzr.Renderer):
         return layout
 
     def get_traces(self, graph, **kwargs):
+        theme_override = kwargs.pop("theme_override", None)
         traces = []
         num_axes = 1
-        theme = pzr.ThemeList(pzr.default_theme)
+        theme = pzt.ThemeList(pzt.default_theme, theme_override=theme_override)
         theme.add_theme(graph.get_theme())
         for track in graph:
             theme.add_theme(track.get_theme())

@@ -1,12 +1,13 @@
 import warnings
 import pozo
 import pozo.renderers as pzr
+import pozo.themes as pzt
 import ood
 import ood.exceptions as ooderr
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work reliably
 
-class Graph(ood.Observer, pzr.Themer):
+class Graph(ood.Observer, pzt.Themeable):
     _type="graph"
     _child_type="track"
 

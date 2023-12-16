@@ -2,9 +2,10 @@ import warnings
 import ood
 import pozo
 import pozo.renderers as pzr
+import pozo.themes as pzt
 import traceback
 
-class Track(ood.Item, pzr.Themer):
+class Track(ood.Item, pzt.Themeable):
     _type="track"
     _child_type="axis"
     def __init__(self, *args, **kwargs):
