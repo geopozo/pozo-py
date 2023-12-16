@@ -118,7 +118,7 @@ class Plotly(pzr.Renderer):
         for track in graph.get_tracks():
             num_axes = len(track)
             max_axes = max(max_axes, num_axes)
-            parent_axis_per_track.append(total_axes)
+            parent_axis_per_track.append(total_axes+1)
             total_axes += num_axes
 
         layout["width"] = len(graph) * track_width
@@ -156,7 +156,7 @@ class Plotly(pzr.Renderer):
                 if axis_pos:
                     axis_style['anchor'] = "free"
                     bottom = layout["yaxis"]["domain"][1]
-                    position_above_bottom = (1-bottom) * ((axis_pos-1) / (max_axes - 1))
+                    position_above_bottom = (1-bottom) * ((axis_pos) / (max_axes - 1))
                     axis_style['position'] = min(bottom + position_above_bottom, 1)
                     axis_style['overlaying'] = "x" + str(anchor_axis)
 
