@@ -17,7 +17,9 @@ class Axis(ood.Item, pzr.Themer):
     # add_items
     def add_data(self, *data, **kwargs): # axis can take data... and other axis?
         for datum in data:
-            if not isinstance(datum, pozo.Data):
+            if isinstance(datum, list) and all(isinstance(item, pozo.Data) for item in datum):
+                self.add_data(*datum, **kwargs)
+            elif not isinstance(datum, pozo.Data):
                 raise TypeError("Axis.add_data() only accepts data")
         super().add_items(*data, **kwargs)
 

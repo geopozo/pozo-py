@@ -77,12 +77,14 @@ class Graph(ood.Observer, pzr.Themer):
     def add_tracks(self, *tracks, **kwargs): # axis can take axes... and other axis?
         good_axes = []
         for track in tracks:
-            if not isinstance(track, (pozo.Axis, pozo.Data, pozo.Track)):
+            if isinstance(track, list) and all(isinstance(item, (pozo.Axis, pozo.Data, pozo.Track)) for item in track):
+                self.add_tracks(*track, **kwargs)
+            elif not isinstance(track, (pozo.Axis, pozo.Data, pozo.Track)):
                 raise TypeError("Axis.add_tracks() only accepts axes, tracks, and data: pozo objects")
 
             intermediate = track
             if isinstance(intermediate, pozo.Data):
-               intermediate = pozo.Axis(intermediate, name=intermediate.get_name())
+                intermediate = pozo.Axis(intermediate, name=intermediate.get_name())
             if isinstance(intermediate, pozo.Axis):
                 intermediate = pozo.Track(intermediate, name=intermediate.get_name())
             if isinstance(intermediate, pozo.Track):
