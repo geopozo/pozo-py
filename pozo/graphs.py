@@ -14,10 +14,12 @@ class Graph(ood.Observer, pzt.Themeable):
     def __init__(self, *args, **kwargs):
         self._name = kwargs.pop('name', 'unnamed')
         self.renderer = kwargs.pop('renderer', pzr.Plotly())
-        my_kwargs = {}
+        my_kwargs = {} # Don't pass these to super, but still pass them down as kwargs
         my_kwargs["include"] = kwargs.pop('include', None)
         my_kwargs["exclude"] = kwargs.pop('exclude', None)
         my_kwargs["compare"] = kwargs.pop('compare', False)
+        my_kwargs["yaxis"] = kwargs.pop('yaxis', None)
+        my_kwargs["yaxis_name"] = kwargs.pop('yaxis_name', None)
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string")
 
