@@ -12,6 +12,7 @@ class Graph(ood.Observer, pzt.Themeable):
     _child_type="track"
 
     def __init__(self, *args, **kwargs):
+        # Be cool if we could use include to specify things be on the same track TODO
         old_kwargs = kwargs.copy()
         self._name = kwargs.pop('name', 'unnamed')
         self.renderer = kwargs.pop('renderer', pzr.Plotly())
@@ -79,6 +80,8 @@ class Graph(ood.Observer, pzt.Themeable):
 
             data = pozo.Data(yaxis, curve.data, mnemonic = mnemonic, name = name)
             self.add_tracks(data)
+        if include and len(include) != 0:
+            self.reorder_all_tracks(include)
 
     # add_items
     def add_tracks(self, *tracks, **kwargs): # axis can take axes... and other axis?
