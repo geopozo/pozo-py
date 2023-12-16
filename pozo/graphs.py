@@ -52,6 +52,7 @@ class Graph(ood.Observer, pzt.Themeable):
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
         else:
+            warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=")
             yaxis = ar.index
             yaxis_name = None
         if len(yaxis) != len(ar.index):
