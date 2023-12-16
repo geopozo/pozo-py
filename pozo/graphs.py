@@ -12,6 +12,7 @@ class Graph(ood.Observer, pzt.Themeable):
     _child_type="track"
 
     def __init__(self, *args, **kwargs):
+        old_kwargs = kwargs.copy()
         self._name = kwargs.pop('name', 'unnamed')
         self.renderer = kwargs.pop('renderer', pzr.Plotly())
         my_kwargs = {} # Don't pass these to super, but still pass them down as kwargs
@@ -22,8 +23,10 @@ class Graph(ood.Observer, pzt.Themeable):
         my_kwargs["yaxis_name"] = kwargs.pop('yaxis_name', None)
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string")
-
-        super().__init__(**kwargs)
+        try:
+            super().__init__(**kwargs)
+        except TypeError as te:
+            raise TypeError(f"One of the arguments here isn't valid: {list(old_kwargs.keys())}.") from te
         self.process_data(*args, **my_kwargs)
 
     def render(self, **kwargs):
