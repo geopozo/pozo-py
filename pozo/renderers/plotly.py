@@ -18,8 +18,8 @@ import pozo.renderers as pzr
 defaults = dict(
     # Non-Plotly style values, used to generate Plotly layout values. These are all "required".
     width_per_track = 200,  # width of each track, used to calculate total width
-    track_margin = .004,    # margin between each track # TODO should be pixels
-    track_start = .01,      # left-side margin on tracks # TODO should be pixels
+    track_margin = 20,    # margin between each track
+    track_start = 75,      # left-side margin on tracks # (set axis to engineering notation)
     axis_label_height = 60, # size of each xaxis when stacked
 
     # Plotly style values, structured like a plotly layout dictionary.
@@ -91,11 +91,18 @@ class Plotly(pzr.Renderer):
         return num_axes * proportion_per_axis
 
     def _calc_track_domain(self, track_pos, num_tracks):
-        non_track_space = self.template["track_start"] + ((num_tracks-1)*self.template["track_margin"])
-        track_width = (1-non_track_space) / num_tracks
-        whole_track_width = track_width + self.template["track_margin"]
-        start = self.template["track_start"] + track_pos*(whole_track_width)
-        end = start+track_width
+        whole_width = (self.template["track_start"] +
+                       ((num_tracks-1) * self.template["track_margin"]) +
+                       (num_tracks * self.template["width_per_track"])
+                      )
+        track_start_proportion = self.template["track_start"] / whole_width
+        track_margin_proportion = self.template["track_margin"] / whole_width
+        non_track_proportion = track_start_proportion + ((num_tracks-1)*track_margin_proportion)
+
+        track_width_proportion = (1-non_track_proportion) / num_tracks
+        whole_track_proportion = track_width_proportion + track_margin_proportion
+        start = track_start_proportion + track_pos*(whole_track_proportion)
+        end = start+track_width_proportion
         return [max(start, 0), min(end, 1)]
 
     def get_layout(self, graph, **kwargs):
