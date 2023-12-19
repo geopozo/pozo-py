@@ -107,7 +107,7 @@ class Plotly(pzr.Renderer):
         return [max(start, 0), min(end, 1)]
 
     def get_layout(self, graph, **kwargs):
-        theme_override = kwargs.pop("theme_override", None)
+        override_theme = kwargs.pop("override_theme", None)
         track_width = kwargs.get("track_width", self.template["width_per_track"])
         height = kwargs.get("height", None)
         if not isinstance(graph, pozo.Graph):
@@ -140,18 +140,18 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
-        theme = pzt.ThemeList(pzt.default_theme, theme_override=theme_override)
-        theme.add_theme(graph.get_theme())
+        themes = pzt.ThemeLDict(pzt.default_theme, override=override_theme)
+        themes.append(graph.get_theme())
         for track_pos, track in enumerate(graph.get_tracks()):
-            theme.add_theme(track.get_theme())
+            themes.append(track.get_theme())
             anchor_axis = parent_axis_per_track[track_pos]
             for axis_pos, axis in enumerate(track.get_axes()):
-                theme.add_theme(axis.get_theme())
+                themes.append(axis.get_theme())
                 for datum in axis:
                     ymin = min(datum.get_index()[0], ymin)
                     ymax = max(datum.get_index()[-1],ymax)
 
-                color = theme.get_color()
+                color = themes.get_value("color")
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -173,8 +173,8 @@ class Plotly(pzr.Renderer):
                 axes_styles.append(axis_style)
 
 
-                theme.pop()
-            theme.pop()
+                themes.pop()
+            themes.pop()
         for i, axis in enumerate(axes_styles):
             layout["xaxis" + str(i+1)] = axis
         layout['yaxis']['maxallowed'] = ymax
@@ -184,24 +184,20 @@ class Plotly(pzr.Renderer):
         return layout
 
     def get_traces(self, graph, **kwargs):
-        theme_override = kwargs.pop("theme_override", None)
+        override_theme = kwargs.pop("override_theme", None)
         traces = []
         num_axes = 1
-        theme = pzt.ThemeList(pzt.default_theme, theme_override=theme_override)
-        theme.add_theme(graph.get_theme())
+        themes = pzt.ThemeLDict(pzt.default_theme, override = overrode_theme)
+        themes.add_theme(graph.get_themes())
         for track in graph:
-            theme.add_theme(track.get_theme())
+            themes.add_theme(track.get_themes())
             for axis in track:
-                theme.add_theme(axis.get_theme())
-                color = theme.get_color()
+                themes.add_theme(axis.get_themes())
+                color = theme.get_value("color")
                 all_traces = []
                 for datum in axis:
-                    theme.add_theme(datum.get_theme())
-                    # Don't call get_color() unless data has it's own- reuse axis color, don't let iterate
-                    my_color = color
-                    if theme[-1] is not None and "color" in theme[-1]:
-                        my_color = theme[-1].get_color()
-
+                    themes.add_theme(datum.get_themes())
+                    themes.get_value("color")
                     all_traces.append(go.Scattergl(
                         x=datum.get_values(),
                         y=datum.get_index(),

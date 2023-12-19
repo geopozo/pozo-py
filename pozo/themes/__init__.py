@@ -1,65 +1,125 @@
 import colour
 
-default_color_list = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
-default_theme = { "color": default_color_list, }
-
-class Themeable():
+class Theme(): # Meant to be inherited
     def __init__(self, *args, **kwargs):
-        self._theme = kwargs.pop("theme", None)
+        self._context = {}
         super().__init__(*args, **kwargs)
 
-    def get_theme(self):
-        return self._theme
+    def set_context(self, data):
+        if data is None: data = {}
+        if not isinstance(data, dict):
+            raise TypeError("Cannot assing context which is not a dict (or None)")
+        self._context = data
+
+    def get_context(self):
+        return self._context
+
+    def resolve(self, key, contexts):
+            raise NotImplementedError("Every Theme inheriter must supply a resolve(self, key, context)")
+
+class ThemeDict(Theme, dict): # Basically a dict
+    def resolve(self, key, contexts=None):
+        if key not in self:
+            return None
+        return self[key]
+
+class DynamicTheme(Theme): # Meant to be inherited
+    def resolve(self, key, contexts):
+        raise NotImplementedError("Dynamic themes must implement get_value(self, key, args)")
+
+# A themeable is something that stores a theme. It accepts either a theme or a dict. It sets its metadata on the theme
+# When
+class Themeable(): # Meant to be inherited by objects
+    def __init__(self, *args, **kwargs):
+        self.set_theme(kwargs.pop("theme", {}))
+        super().__init__(*args, **kwargs)
+
     def set_theme(self, theme):
-        self._theme = theme
+        if isinstance(theme, dict) and not isinstance(theme, ThemeDict):
+            self._theme = ThemeDict(theme)
+        elif isinstance(theme, Theme):
+            self._theme = theme
+        elif theme is None:
+            raise TypeError("Theme cannot be None. You can set an empty dict {} instead")
+        else:
+            raise TypeError(f"Theme was not a dict, ThemeDict, or DynamicTheme, was {type(theme)}")
 
-class ColorWheel():
-    def __init__(self, color_list=default_color_list.copy()):
-        self._color_list = color_list
-        self._i = 0
+    # You may override this
+    def get_theme(self):
+        my_context = {}
+        self._theme.set_context(my_context)
+        return self._theme
 
-    def get_color(self):
-        color = self._color_list[self._i % len(self._color_list)]
-        self._i += 1
-        return color
+# Above are inheritables
+from pozo.themes.themes import *
+# Below is implementations
 
-# We could override the indexer but it's a lot of work and I'm the only one who would see it for now
-class ThemeList(list):
-    def __init__(self, *iterable, **kwargs):
-        self._override_theme = self._process_theme(kwargs.pop('override_theme', {}).copy())
-        super().__init__()
-        for it in iterable:
-            self.add_theme(it)
+# ThemeList also has a theme, which is considered an override!
+class ThemeList(Themeable):
+    def __init__(self, *args, **kwargs):
+        self._contexts = []
+        self._list = []
+        self._shadow_objects = {}
+        for arg in args:
+            self.append(arg)
+        super().__init__(*args, **kwargs)
 
-    def _process_theme(self, theme):
-        if theme is None or (isinstance(theme, dict) and len(theme) == 0): return None
-        if theme is not None and not isinstance(theme, dict):
-            raise TypeError("Can't add theme that is not a dict or None")
-        if theme is not None and "color" in theme and isinstance(theme["color"], list):
-            theme["color"] = ColorWheel(theme["color"])
-        return theme
+    def append(self, theme):
+        if isinstance(theme, Theme):
+            self._list.append(theme)
+            self._contexts.append(theme.get_context())
+        else:
+            raise TypeError(f"Found a theme which isn't any type of valid theme: {type(theme)}")
 
-    def add_theme(self, theme):
-        if theme is not None:
-            theme = self._process_theme(theme.copy())
-        super().append(theme)
+    def pop(self, index = -1):
+        self._contexts.pop(index)
+        return self._list.pop(index)
 
-    def get_key(self, key):
-        if self._override_theme is not None and key in self._override_theme:
-            return self._override_theme[key]
-        for theme in reversed(self):
-            if theme is not None and key in theme:
-                return theme[key]
-        return None
+    def __getitem__(self, key):
+        if not isinstance(key, str):
+            raise TyperError("Key must be string")
 
-    def get_color(self):
-        color = self.get_key("color")
-        if color is None:
-            raise ValueError("Couldn't find color in theme list. A fallback is hardcoded into the package, how did this happen?")
-        elif isinstance(color, str):
-            return colour.Color(color).hex_l
-        elif isinstance(color, ColorWheel):
-            return colour.Color(color.get_color()).hex_l
-        elif isinstance(color, colour.Color):
-            return color.hex_l
+        eventual_value = self.get_theme()
+        while True: # do-while loop using break
+            context = eventual_value.get_context()
+            eventual_value = eventual_value.resolve(key, self._contexts)
+            eventual_value = self._check_shortcut(eventual_value, key, context) #always context of top level theme in resolve list
+            if not isinstance(eventual_value, Theme):
+                break
+        if eventual_value is None:
+            for eventual_value in reversed(self._list):
+                while True:# do-while loop using break
+                    context = eventual_value.get_context()
+                    eventual_value = eventual_value.resolve(key, self._contexts)
+                    eventual_value = self._check_shortcut(eventual_value, key, context)
+                    if not isinstance(eventual_value, Theme):
+                        break
+                if eventual_value is not None:
+                   break
+        return self._process_output(eventual_value, key)
+
+    def _check_shortcut(self, value, key, context): # Do not take Theme. Must return Theme. Shortcuts can't be dicts! Those are converted to themes.
+        if value is None:
+            return None
+        may_be_key = (id(value), id(context))
+        if may_be_key in self._shadow_objects:
+            return self._shadow_objects[may_be_key]
+        elif key == "color" and isinstance(value, list):
+            value = ColorWheel(value, context=context)
+        elif key == "place_holder" and isinstance(value, "placeholder"): # never happen, put other shortcuts here
+            value = "place_holder"
+        else:
+            return value # just send back what we got, do nothing
+        self._shadow_objects[may_be_key] = value
+        return value
+
+    def _process_output(self, value, key):
+        if value is None:
+            return None # default should supply all values. Grep "How did this happen" to find other error. TODO
+        if key == "color":
+            if not isinstance(value, colour.Color):
+                return colour.Color(value).hex_l
+            else:
+                return value.hex_l
+        return value
 
