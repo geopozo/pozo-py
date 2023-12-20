@@ -44,12 +44,12 @@ class Themeable(): # Meant to be inherited by objects
         else:
             raise TypeError(f"Theme was not a dict, ThemeDict, or DynamicTheme, was {type(theme)}")
 
-    def _get_theme(self):
+    def _get_theme(self, context={}):
+        self._theme.set_context(context)
         return self._theme
+
     # You may override this
     def get_theme(self):
-        my_context = {}
-        self._theme.set_context(my_context)
         return self._get_theme()
 
 # Above are inheritables

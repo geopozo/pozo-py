@@ -55,4 +55,8 @@ class Track(ood.Item, pzt.Themeable):
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
 
-
+    def get_theme(self):
+        context = { "type":"track",
+                   "name": self._name,
+                   }
+        return self._get_theme(context=context)

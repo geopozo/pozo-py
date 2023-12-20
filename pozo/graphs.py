@@ -129,3 +129,9 @@ class Graph(ood.Observer, pzt.Themeable):
             result.append(track.get_named_tree())
         return { 'graph': result }
 
+
+    def get_theme(self):
+        context = { "type":"graph",
+                   "name": self._name,
+                   }
+        return self._get_theme(context=context)

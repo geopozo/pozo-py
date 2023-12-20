@@ -47,3 +47,10 @@ class Data(ood.Observed, pzt.Themeable):
             'mnemonic': self._mnemonic,
             'length': len(self._values),
         } }
+    def get_theme(self):
+        context = { "type":"data",
+                   "name": self._name,
+                   "mnemonic": self._mnemonic,
+                   }
+        return self._get_theme(context=context)
+

@@ -52,3 +52,12 @@ class Axis(ood.Item, pzt.Themeable):
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
 
+    def get_theme(self):
+        mnemonics = []
+        for d in self.get_data():
+            mnemonics.append(d.get_mnemonic())
+        context = { "type":"axis",
+                   "name": self._name,
+                   "mnemonics": mnemonics,
+                   }
+        return self._get_theme(context=context)
