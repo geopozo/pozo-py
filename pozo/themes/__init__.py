@@ -40,7 +40,7 @@ class Themeable(): # Meant to be inherited by objects
         elif isinstance(theme, Theme):
             self._theme = theme
         elif theme is None:
-            raise TypeError("Theme cannot be None. You can set an empty dict {} instead")
+            self._theme = ThemeDict({})
         else:
             raise TypeError(f"Theme was not a dict, ThemeDict, or DynamicTheme, was {type(theme)}")
 
