@@ -57,7 +57,7 @@ from pozo.themes.themes import *
 # Below is implementations
 
 # ThemeList also has a theme, which is considered an override!
-class ThemeList(Themeable):
+class ThemeStack(Themeable):
     def __init__(self, *args, **kwargs):
         self._contexts_vertical = []
         self._list = []

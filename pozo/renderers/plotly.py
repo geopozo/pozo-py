@@ -140,7 +140,7 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
-        themes = pzt.ThemeLDict(pzt.default_theme, override=override_theme)
+        themes = pzt.ThemeStack(pzt.default_theme, override=override_theme)
         themes.append(graph.get_theme())
         for track_pos, track in enumerate(graph.get_tracks()):
             themes.append(track.get_theme())
@@ -187,7 +187,7 @@ class Plotly(pzr.Renderer):
         override_theme = kwargs.pop("override_theme", None)
         traces = []
         num_axes = 1
-        themes = pzt.ThemeLDict(pzt.default_theme, override = overrode_theme)
+        themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.add_theme(graph.get_themes())
         for track in graph:
             themes.add_theme(track.get_themes())

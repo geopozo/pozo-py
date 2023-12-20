@@ -62,7 +62,7 @@ def test_Themeable():
     assert theme5.get_context() == {}
     assert theme5.resolve('key') == 'value'
 
-def test_ThemeList():
+def test_ThemeStack():
     theme1 = pzt.ThemeDict({
         "a": "theme1",
         })
@@ -99,7 +99,7 @@ def test_ThemeList():
         "d": theme4,
         "e": theme4,
         })
-    list_no_override = pzt.ThemeList()
+    list_no_override = pzt.ThemeStack()
     assert len(list_no_override._list) == 0
     assert list_no_override["a"] == None
     assert list_no_override["b"] == None
@@ -187,7 +187,7 @@ def test_ThemeList():
     assert list_no_override["d"] == None
     assert list_no_override["e"] == None
     assert list_no_override["f"] == None
-    list_override = pzt.ThemeList(theme=override)
+    list_override = pzt.ThemeStack(theme=override)
     assert len(list_no_override._list) == 0
     assert list_override["a"] == "theme1"
     assert list_override["b"] == "theme2"
@@ -216,7 +216,7 @@ def test_ThemeList():
 def test_ColorWheel():
     wheel = pzt.ColorWheel()
     assert wheel._per == "axis"
-    themeL = pzt.ThemeList()
+    themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":["red", "green", "blue"]})
     theme.set_context({"type":"not_axis"})
     themeL.append(theme)
@@ -228,7 +228,7 @@ def test_ColorWheel():
     assert themeL["color"] == "#ff0000"
     assert themeL["color"] == "#ff0000"
 
-    themeL = pzt.ThemeList()
+    themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":["red", "green", "blue"]})
     theme.set_context({"type":"track"})
     themeL.append(theme)
@@ -242,7 +242,7 @@ def test_ColorWheel():
     assert themeL["color"] == "#008000"
     assert themeL["color"] == "#0000ff"
 
-    themeL = pzt.ThemeList()
+    themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":["red", "green", "blue"]})
     theme.set_context({"type":"track"})
     themeL.append(theme)
@@ -254,13 +254,13 @@ def test_ColorWheel():
     assert themeL["color"] == "#000000"
     assert themeL["color"] == "#000000"
 
-    themeL = pzt.ThemeList()
+    themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":["red", "green", "blue"]})
     themeL.append(theme)
     with pytest.raises(ValueError):
         assert themeL["color"] == "#ff0000"
 
-    themeL = pzt.ThemeList()
+    themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":pzt.ColorWheel(["red", "green", "blue"], each=True)})
     themeL.append(theme)
     assert themeL["color"] == "#ff0000"
