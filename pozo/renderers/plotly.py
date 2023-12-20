@@ -151,7 +151,7 @@ class Plotly(pzr.Renderer):
                     ymin = min(datum.get_index()[0], ymin)
                     ymax = max(datum.get_index()[-1],ymax)
 
-                color = themes.get_value("color")
+                color = themes["color"]
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -188,16 +188,15 @@ class Plotly(pzr.Renderer):
         traces = []
         num_axes = 1
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
-        themes.add_theme(graph.get_themes())
+        themes.append(graph.get_themes())
         for track in graph:
-            themes.add_theme(track.get_themes())
+            themes.append(track.get_themes())
             for axis in track:
-                themes.add_theme(axis.get_themes())
-                color = theme.get_value("color")
+                themes.append(axis.get_themes())
                 all_traces = []
                 for datum in axis:
-                    themes.add_theme(datum.get_themes())
-                    themes.get_value("color")
+                    themes.append(datum.get_themes())
+                    themes["color"] # TODO, this isn't gonna work
                     all_traces.append(go.Scattergl(
                         x=datum.get_values(),
                         y=datum.get_index(),
@@ -207,7 +206,7 @@ class Plotly(pzr.Renderer):
                         yaxis='y',
                         name = datum.get_name(),
                     ))
-                traces.extend(all_traces) # Big UGH
+                traces.extend(all_traces) 
                 num_axes += 1
         return traces
 

@@ -18,24 +18,29 @@ class ColorWheel(pzt.DynamicTheme):
         else:
             self._per = per
         self._current_color = color_list[0]
+        self._current_context = None
         self._i = 0
         super().__init__()
 
     def get_current_color(self):
         return self._current_color
 
+    # ColorWheel is really married to graphs. Think about this during documentation.
     def resolve(self, key, contexts):
-        if len(contexts) >= 1 and "type" in contexts[-1]: # so, it has no context, and it just wrotes
-            if isinstance(self._per, str) and contexts[-1]["type"] == self._per:
-                pass
-            elif isinstance(self._per, tuple) and contexts[-1]["type"] in self._per:
-                pass
-            else:
-                return self._current_color
-        elif not self._each:
-            raise ValueError("ColorWheel doesn't know whether not to iterate because it lacks context information. Please set each=True in constructor to just iterate freely")
-        color = self._color_list[self._i % len(self._color_list)]
-        self._current_color = color
-        self._i += 1
-        return color
+        if not self._each:
+            for context in contexts:
+                if "type" in context and (context["type"] == self._per or context["type"] in self._per):
+                    if self._current_context is None:
+                        self._current_context = id(context)
+                    elif id(context) != self._current_context: # why use id?
+                        self._current_context = id(context)
+                        color = self._color_list[self._i % len(self._color_list)]
+                        self._current_color = color
+                    self._i += 1
+                    break
+        else:
+            color = self._color_list[self._i % len(self._color_list)]
+            self._current_color = color
+            self._i += 1
+        return self._current_color
 

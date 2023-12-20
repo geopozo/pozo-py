@@ -236,10 +236,25 @@ def test_ColorWheel():
     theme2.set_context({"type":"axis"})
     themeL.append(theme2)
     assert themeL["color"] == "#ff0000"
+    themeL.pop()
+    theme2.set_context({"type":"axis"})
+    themeL.append(theme2)
     assert themeL["color"] == "#008000"
+    themeL.pop()
+    theme2.set_context({"type":"axis"})
+    themeL.append(theme2)
     assert themeL["color"] == "#0000ff"
+    themeL.pop()
+    theme2.set_context({"type":"axis"})
+    themeL.append(theme2)
     assert themeL["color"] == "#ff0000"
+    themeL.pop()
+    theme2.set_context({"type":"axis"})
+    themeL.append(theme2)
     assert themeL["color"] == "#008000"
+    themeL.pop()
+    theme2.set_context({"type":"axis"})
+    themeL.append(theme2)
     assert themeL["color"] == "#0000ff"
 
     themeL = pzt.ThemeStack()
@@ -257,8 +272,7 @@ def test_ColorWheel():
     themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":["red", "green", "blue"]})
     themeL.append(theme)
-    with pytest.raises(ValueError):
-        assert themeL["color"] == "#ff0000"
+    assert themeL["color"] == "#ff0000"
 
     themeL = pzt.ThemeStack()
     theme = pzt.ThemeDict({"color":pzt.ColorWheel(["red", "green", "blue"], each=True)})
