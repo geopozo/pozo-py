@@ -44,11 +44,13 @@ class Themeable(): # Meant to be inherited by objects
         else:
             raise TypeError(f"Theme was not a dict, ThemeDict, or DynamicTheme, was {type(theme)}")
 
+    def _get_theme(self):
+        return self._theme
     # You may override this
     def get_theme(self):
         my_context = {}
         self._theme.set_context(my_context)
-        return self._theme
+        return self._get_theme()
 
 # Above are inheritables
 from pozo.themes.themes import *
@@ -57,7 +59,7 @@ from pozo.themes.themes import *
 # ThemeList also has a theme, which is considered an override!
 class ThemeList(Themeable):
     def __init__(self, *args, **kwargs):
-        self._contexts = []
+        self._contexts_vertical = []
         self._list = []
         self._shadow_objects = {}
         for arg in args:
@@ -67,38 +69,42 @@ class ThemeList(Themeable):
     def append(self, theme):
         if isinstance(theme, Theme):
             self._list.append(theme)
-            self._contexts.append(theme.get_context())
+            self._contexts_vertical.append(theme.get_context())
         else:
             raise TypeError(f"Found a theme which isn't any type of valid theme: {type(theme)}")
 
     def pop(self, index = -1):
-        self._contexts.pop(index)
+        self._contexts_vertical.pop(index)
         return self._list.pop(index)
 
     def __getitem__(self, key):
         if not isinstance(key, str):
             raise TyperError("Key must be string")
 
+        contexts_horizontal = []
         eventual_value = self.get_theme()
         while True: # do-while loop using break
-            context = eventual_value.get_context()
-            eventual_value = eventual_value.resolve(key, self._contexts)
-            eventual_value = self._check_shortcut(eventual_value, key, context) #always context of top level theme in resolve list
+            contexts_horizontal.append(eventual_value.get_context())
+            eventual_value = eventual_value.resolve(key, self._contexts_vertical)
+            eventual_value = self._check_shortcut(eventual_value, key, contexts_horizontal) #always context of top level theme in resolve list
             if not isinstance(eventual_value, Theme):
                 break
         if eventual_value is None:
+            contexts_horizontal.clear()
             for eventual_value in reversed(self._list):
                 while True:# do-while loop using break
-                    context = eventual_value.get_context()
-                    eventual_value = eventual_value.resolve(key, self._contexts)
-                    eventual_value = self._check_shortcut(eventual_value, key, context)
+                    contexts_horizontal.append(eventual_value.get_context())
+                    eventual_value = eventual_value.resolve(key, self._contexts_vertical)
+                    eventual_value = self._check_shortcut(eventual_value, key, contexts_horizontal)
                     if not isinstance(eventual_value, Theme):
                         break
                 if eventual_value is not None:
                    break
         return self._process_output(eventual_value, key)
 
-    def _check_shortcut(self, value, key, context): # Do not take Theme. Must return Theme. Shortcuts can't be dicts! Those are converted to themes.
+    # Take not-themes and return themes. Can't take a regular dict, which is sorta problematic.
+    def _check_shortcut(self, value, key, contexts):
+        context = contexts[-1] # me
         if value is None:
             return None
         may_be_key = (id(value), id(context))

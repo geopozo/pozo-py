@@ -24,11 +24,11 @@ class ColorWheel(pzt.DynamicTheme):
     def get_current_color(self):
         return self._current_color
 
-    def resolve(self, key, context_stack):
-        if len(context_stack) >= 1 and "type" in context_stack[-1]: # so, it has no context, and it just wrotes
-            if isinstance(self._per, str) and context_stack[-1]["type"] == self._per:
+    def resolve(self, key, contexts):
+        if len(contexts) >= 1 and "type" in contexts[-1]: # so, it has no context, and it just wrotes
+            if isinstance(self._per, str) and contexts[-1]["type"] == self._per:
                 pass
-            elif isinstance(self._per, tuple) and context_stack[-1]["type"] in self._per:
+            elif isinstance(self._per, tuple) and contexts[-1]["type"] in self._per:
                 pass
             else:
                 return self._current_color
