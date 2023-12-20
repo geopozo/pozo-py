@@ -206,8 +206,11 @@ class Plotly(pzr.Renderer):
                         yaxis='y',
                         name = datum.get_name(),
                     ))
+                    themes.pop()
                 traces.extend(all_traces)
                 num_axes += 1
+                themes.pop()
+            themes.pop()
         return traces
 
     def render(self, graph, **kwargs):

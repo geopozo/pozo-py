@@ -32,7 +32,7 @@ class ColorWheel(pzt.DynamicTheme):
                 if "type" in context and (context["type"] == self._per or context["type"] in self._per):
                     if self._current_context is None:
                         self._current_context = id(context)
-                    elif id(context) != self._current_context: # why use id?
+                    elif id(context) != self._current_context:
                         self._current_context = id(context)
                         color = self._color_list[self._i % len(self._color_list)]
                         self._current_color = color
