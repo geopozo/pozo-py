@@ -64,14 +64,14 @@ class ThemeStack(Themeable):
         self._shadow_objects = {}
         for arg in args:
             self.append(arg)
-        super().__init__(*args, **kwargs)
+        super().__init__(*[], **kwargs)
 
     def append(self, theme):
         if isinstance(theme, Theme):
             self._list.append(theme)
             self._contexts_vertical.append(theme.get_context())
         else:
-            raise TypeError(f"Found a theme which isn't any type of valid theme: {type(theme)}")
+            raise TypeError(f"Found a theme which isn't any type of valid theme: {type(theme)} {theme}")
 
     def pop(self, index = -1):
         self._contexts_vertical.pop(index)

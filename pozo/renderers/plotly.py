@@ -140,7 +140,7 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
-        themes = pzt.ThemeStack(pzt.default_theme, override=override_theme)
+        themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
         for track_pos, track in enumerate(graph.get_tracks()):
             themes.append(track.get_theme())
@@ -188,14 +188,14 @@ class Plotly(pzr.Renderer):
         traces = []
         num_axes = 1
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
-        themes.append(graph.get_themes())
+        themes.append(graph.get_theme())
         for track in graph:
-            themes.append(track.get_themes())
+            themes.append(track.get_theme())
             for axis in track:
-                themes.append(axis.get_themes())
+                themes.append(axis.get_theme())
                 all_traces = []
                 for datum in axis:
-                    themes.append(datum.get_themes())
+                    themes.append(datum.get_theme())
                     color = themes["color"]
                     all_traces.append(go.Scattergl(
                         x=datum.get_values(),

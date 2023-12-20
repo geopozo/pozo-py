@@ -2,7 +2,7 @@ import pozo.themes as pzt
 
 
 default_color_list = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
-default_theme = { "color": default_color_list, }
+default_theme = pzt.ThemeDict({ "color": default_color_list, })
 
 class ColorWheel(pzt.DynamicTheme):
     def __init__(self, color_list=default_color_list, per=None, context=None, each=False):
