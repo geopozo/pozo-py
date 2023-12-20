@@ -196,7 +196,7 @@ class Plotly(pzr.Renderer):
                 all_traces = []
                 for datum in axis:
                     themes.append(datum.get_themes())
-                    themes["color"] # TODO, this isn't gonna work
+                    color = themes["color"]
                     all_traces.append(go.Scattergl(
                         x=datum.get_values(),
                         y=datum.get_index(),
@@ -206,7 +206,7 @@ class Plotly(pzr.Renderer):
                         yaxis='y',
                         name = datum.get_name(),
                     ))
-                traces.extend(all_traces) 
+                traces.extend(all_traces)
                 num_axes += 1
         return traces
 
