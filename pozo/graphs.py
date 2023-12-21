@@ -99,8 +99,8 @@ class Graph(ood.Observer, pzt.Themeable):
             if isinstance(intermediate, pozo.Axis):
                 intermediate = pozo.Track(intermediate, name=intermediate.get_name())
             if isinstance(intermediate, pozo.Track):
-                good_axes.append(intermediate)
-        super().add_items(*good_axes, **kwargs)
+                good_tracks.append(intermediate)
+        super().add_items(*good_tracks, **kwargs)
 
     # get_items
     def get_tracks(self, *selectors, **kwargs):
