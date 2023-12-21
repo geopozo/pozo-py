@@ -180,7 +180,6 @@ class Plotly(pzr.Renderer):
         layout['yaxis']['maxallowed'] = ymax
         layout['yaxis']['minallowed'] = ymin
         layout['yaxis']['range'] = [ymax, ymin]
-
         return layout
 
     def get_traces(self, graph, **kwargs):
@@ -206,11 +205,13 @@ class Plotly(pzr.Renderer):
                         yaxis='y',
                         name = datum.get_name(),
                     ))
+                    import numpy as np
                     themes.pop()
-                traces.extend(all_traces)
                 num_axes += 1
+                traces.extend(all_traces)
                 themes.pop()
             themes.pop()
+        print(len(traces))
         return traces
 
     def render(self, graph, **kwargs):

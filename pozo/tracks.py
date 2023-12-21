@@ -15,11 +15,12 @@ class Track(ood.Item, pzt.Themeable):
 
     # add_items
     def add_axes(self, *axes, **kwargs): # axis can take axes... and other axis?
+        accepted_types = (pozo.Axis, pozo.Data)
         good_axes = []
         for axis in axes:
-            if isinstance(axis, list) and all(isinstance(item, (pozo.Axis, pozo.Data)) for item in axis):
-                self.add_axes(*axis, **kwargs)
-            elif not isinstance(axis, (pozo.Axis, pozo.Data)):
+            if isinstance(axis, list) and all(isinstance(item, accepted_types) for item in axis):
+                good_axes.extend(axis)
+            elif not isinstance(axis, accepted_types):
                 raise TypeError("Axis.add_axes() only accepts axes, and data: pozo objects")
             elif isinstance(axis, pozo.Data):
                 good_axes.append(pozo.Axis(axis, name=axis.get_name()))
