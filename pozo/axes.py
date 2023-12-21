@@ -22,7 +22,7 @@ class Axis(ood.Item, pzt.Themeable):
         for datum in data:
             if isinstance(datum, list) and all(isinstance(item, accepted_types) for item in datum):
                 good_data.extend(datum)
-            if not isinstance(datum, pozo.Data):
+            elif not isinstance(datum, pozo.Data):
                 raise TypeError("Axis.add_data() only accepts pozo.Data, or a single list of pozo.Data")
             else:
                 good_data.append(datum)
