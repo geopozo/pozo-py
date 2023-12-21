@@ -211,7 +211,6 @@ class Plotly(pzr.Renderer):
                 traces.extend(all_traces)
                 themes.pop()
             themes.pop()
-        print(len(traces))
         return traces
 
     def render(self, graph, **kwargs):
