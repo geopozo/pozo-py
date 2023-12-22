@@ -13,10 +13,12 @@ class MnemonicDictionary(pzt.DynamicTheme):
         for context in contexts:
             if "mnemonic" in context:
                 mnemonic = context["mnemonic"]
+            elif "mnemonics" in context and len(context["mnemonics"]) == 1:
+                    mnemonic = context["mnemonics"][0]
         if mnemonic is None or mnemonic not in self._lut:
             return None
         if key in self._lut[mnemonic]:
-            return self._lut[mnemonic]
+            return self._lut[mnemonic][key]
         return None
 
 class ColorWheel(pzt.DynamicTheme):
