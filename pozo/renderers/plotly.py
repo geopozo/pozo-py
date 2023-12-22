@@ -73,6 +73,10 @@ defaults = dict(
     ),
 )
 
+TRACK_WIDTH_MIN = 65
+GRAPH_HEIGHT_MIN = 125
+AXIS_PROPORTION_MAX = .6
+
 class Plotly(pzr.Renderer):
     def __init__(self, template=defaults):
         self.template = copy.deepcopy(template)
@@ -86,15 +90,18 @@ class Plotly(pzr.Renderer):
         ops = []
         return ops[random.randint(0, len(ops)-1)]
 
-    def _calc_axes_proportion(self, num_axes):
-        num_axes = 0 if num_axes <= 1 else num_axes  # first axis is free!
-        proportion_per_axis = self.template["axis_label_height"] / self.template["plotly"]["height"]
-        return num_axes * proportion_per_axis
+    def _calc_axes_proportion(self, num_axes, height):
+        num_axes_adjusted = 0 if num_axes <= 1 else num_axes  # first axis is free!
+        proportion_per_axis = self.template["axis_label_height"] / height
+        raw_value =  num_axes_adjusted * proportion_per_axis
+        if raw_value > AXIS_PROPORTION_MAX:
+            raise ValueError(f"To display the {num_axes} stack axes, please use a height greater than {self.template['axis_label_height'] * num_axes_adjusted/.6}")
+        return raw_value
 
-    def _calc_track_domain(self, track_pos, num_tracks):
+    def _calc_track_domain(self, track_pos, num_tracks, width_per_track):
         whole_width = (self.template["track_start"] +
                        ((num_tracks-1) * self.template["track_margin"]) +
-                       (num_tracks * self.template["width_per_track"])
+                       (num_tracks * width_per_track)
                       )
         track_start_proportion = self.template["track_start"] / whole_width
         track_margin_proportion = self.template["track_margin"] / whole_width
@@ -109,6 +116,8 @@ class Plotly(pzr.Renderer):
     def get_layout(self, graph, **kwargs):
         override_theme = kwargs.pop("override_theme", None)
         track_width = kwargs.get("track_width", self.template["width_per_track"])
+        if track_width < TRACK_WIDTH_MIN:
+            raise ValueError("65px is minimum track width")
         height = kwargs.get("height", None)
         if not isinstance(graph, pozo.Graph):
             raise TypeError("Layout must be supplied a graph object.")
@@ -119,6 +128,9 @@ class Plotly(pzr.Renderer):
         layout = copy.deepcopy(self.template["plotly"])
         if height is not None:
             layout["height"] = height
+
+        if layout["height"] < GRAPH_HEIGHT_MIN:
+            raise ValueError("125px is the minimum total height")
 
         # first pass
         max_axes = 0
@@ -133,7 +145,7 @@ class Plotly(pzr.Renderer):
         layout["width"] = len(graph) * track_width
         layout["yaxis"]["domain"] = [
             0, # Old(bottom axes): self.calculate_axes_height(max_axes_bottom)
-            min(1 - self._calc_axes_proportion(max_axes), 1)
+            min(1 - self._calc_axes_proportion(max_axes, layout["height"]), 1)
         ]
 
         ## second pass
@@ -168,7 +180,7 @@ class Plotly(pzr.Renderer):
                     axis_style['position'] = min(bottom + position_above_bottom, 1)
                     axis_style['overlaying'] = "x" + str(anchor_axis)
 
-                axis_style['domain'] = self._calc_track_domain(track_pos, num_tracks)
+                axis_style['domain'] = self._calc_track_domain(track_pos, num_tracks, track_width)
 
                 axes_styles.append(axis_style)
 
