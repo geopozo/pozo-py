@@ -3,6 +3,21 @@ import pozo.themes as pzt
 
 default_color_list = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
 default_theme = pzt.ThemeDict({ "color": default_color_list, })
+ # So we gotta
+class MnemonicDictionary(pzt.DynamicTheme):
+    def __init__(self, mnemonic_table):
+        self._lut = mnemonic_table
+
+    def resolve(self, key, contexts):
+        mnemonic = None
+        for context in contexts:
+            if "mnemonic" in context:
+                mnemonic = context["mnemonic"]
+        if mnemonic is None or mnemonic not in self._lut:
+            return None
+        if key in self._lut[mnemonic]:
+            return self._lut[mnemonic]
+        return None
 
 class ColorWheel(pzt.DynamicTheme):
     def __init__(self, color_list=default_color_list, per=None, context=None, each=False):

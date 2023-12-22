@@ -83,13 +83,6 @@ class Plotly(pzr.Renderer):
         self.xaxis_template = copy.deepcopy(self.template["plotly"]["xaxis_template"])
         del self.template["plotly"]["xaxis_template"]
 
-    def randomColor(self, toNumber = 0): # gots to go
-        import random
-        if toNumber != 0:
-            random.seed(hash(toNumber))
-        ops = []
-        return ops[random.randint(0, len(ops)-1)]
-
     def _calc_axes_proportion(self, num_axes, height):
         num_axes_adjusted = 0 if num_axes <= 1 else num_axes  # first axis is free!
         proportion_per_axis = self.template["axis_label_height"] / height
@@ -164,6 +157,7 @@ class Plotly(pzr.Renderer):
                     ymax = max(datum.get_index()[-1],ymax)
 
                 color = themes["color"]
+                xrange = themes["range"]
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -171,6 +165,8 @@ class Plotly(pzr.Renderer):
                 axis_style['linecolor'] = color
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
+                if xrange != None:
+                    axis_style['range'] = xrange
 
                 axis_style['side'] = "top" # Old(bottom axes): if position>0 else "bottom"
                 if axis_pos:
@@ -217,7 +213,6 @@ class Plotly(pzr.Renderer):
                         yaxis='y',
                         name = datum.get_name(),
                     ))
-                    import numpy as np
                     themes.pop()
                 num_axes += 1
                 traces.extend(all_traces)
