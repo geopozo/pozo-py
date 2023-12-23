@@ -216,7 +216,7 @@ class Plotly(pzr.Renderer):
                         x=datum.get_values(),
                         y=datum.get_index(),
                         mode='lines', # nope, based on data w/ default
-                        line=dict(color=color), # needs to be better, based on data
+                        line=dict(color=color, width=1), # needs to be better, based on data
                         xaxis='x' + str(num_axes),
                         yaxis='y',
                         name = datum.get_name(),
