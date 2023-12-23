@@ -1,6 +1,7 @@
 import copy
-from IPython.display import Javascript # Part of Hack #1
+import math
 
+from IPython.display import Javascript # Part of Hack #1
 import plotly.graph_objects as go
 
 import pozo
@@ -155,9 +156,11 @@ class Plotly(pzr.Renderer):
                 for datum in axis:
                     ymin = min(datum.get_index()[0], ymin)
                     ymax = max(datum.get_index()[-1],ymax)
+                    # probably get xmin, max too
 
                 color = themes["color"]
                 xrange = themes["range"]
+                scale_type = themes["scale"]
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -165,7 +168,12 @@ class Plotly(pzr.Renderer):
                 axis_style['linecolor'] = color
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
-                if xrange != None:
+
+                if axis_style is not None:
+                    axis_style['type'] = scale_type
+                    if scale_type == "log":
+                        xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
+                if xrange is not None:
                     axis_style['range'] = xrange
 
                 axis_style['side'] = "top" # Old(bottom axes): if position>0 else "bottom"
