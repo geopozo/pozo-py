@@ -124,12 +124,17 @@ class Graph(ood.Observer, pzt.Themeable):
     def move_tracks(self, *selectors, **kwargs):
         super().move_items(*selectors, **kwargs)
 
-    def get_named_tree(self):
-        result = []
+    def all_data():
+        all_data = []
         for track in self.get_tracks():
-            result.append(track.get_named_tree())
-        return { 'graph': result }
+            all_data.extend(track.all_data())
+        return all_data
 
+    def all_axes():
+        all_axes = []
+        for track in self.get_tracks():
+            all_axes.extend(track.get_axes())
+        return all_axes
 
     def get_theme(self):
         context = { "type":"graph",
