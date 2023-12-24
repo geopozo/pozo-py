@@ -17,6 +17,7 @@ dependencies = [
  "colour >= 0.1.5",
  "pint >= 0.23",
  "pandas >= 2.0.0",
+ "numpy >= 1.26.0",
  ]
 
 [project.optional-dependencies]

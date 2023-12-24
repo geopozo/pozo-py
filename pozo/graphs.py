@@ -1,7 +1,7 @@
 import warnings
-import pint
 
 import pozo
+import pozo.units as pzu
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import ood
@@ -76,7 +76,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
 
-            mnemonic = pozo.deLASio(curve)
+            mnemonic = pozo.deLASio(curve.mnemonic)
             if include and len(include) != 0 and curve.mnemonic not in include:
                 continue
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
@@ -84,7 +84,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if curve.unit is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
-            units = pozo.units.las_parse(mnemonic, curve.unit)
+            units = pzu.las_parse(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
