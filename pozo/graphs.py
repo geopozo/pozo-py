@@ -1,4 +1,6 @@
 import warnings
+import pint
+
 import pozo
 import pozo.renderers as pzr
 import pozo.themes as pzt
@@ -52,33 +54,44 @@ class Graph(ood.Observer, pzt.Themeable):
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-
+        yaxis_units = None
         if yaxis is not None:
             yaxis_name = None
+            if hasattr(yaxis, "unit"):
+                yaxis_units = yaxis.unit
+            else:
+                warnings.warn("Not sure what yaxis units are.") # TODO
+            if len(yaxis) != len(ar.index):
+                raise ValueError(f"Length of supplied yaxis ({len(yaxis)}) does not match length of LAS File index ({len(ar.index)})")
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
+            yaxis_units = ar.curves[yaxis_name].unit # TODO not used
         else:
-            warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=")
+            warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
             yaxis = ar.index
             yaxis_name = None
-        if len(yaxis) != len(ar.index):
-            raise ValueError(f"Length of supplied yaxis ({len(yaxis)}) does not match length of LAS File index ({len(ar.index)})")
+
 
         for curve in ar.curves:
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
-            mnemonic = curve.mnemonic.split(":", 1)[0] if ":" in curve.mnemonic else curve.mnemonic
+
+            mnemonic = pozo.deLASio(curve)
             if include and len(include) != 0 and curve.mnemonic not in include:
                 continue
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
+
+            if curve.unit is None:
+                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
+            units = pozo.units.las_parse(mnemonic, curve.unit)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
             else:
                 name = curve.mnemonic
 
-            data = pozo.Data(yaxis, curve.data, mnemonic = mnemonic, name = name)
+            data = pozo.Data(yaxis, curve.data, mnemonic=mnemonic, name=name, units=units)
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)

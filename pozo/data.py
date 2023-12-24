@@ -4,6 +4,7 @@ import pozo.themes as pzt
 
 class Data(ood.Observed, pzt.Themeable):
     def __init__(self, index, values, **kwargs): # Default Index?
+        self._units = kwargs.pop('units', None)
         if len(index) != len(values):
             raise ValueError("Index and values have different length")
         self._mnemonic = kwargs.pop('mnemonic', None)
@@ -14,6 +15,14 @@ class Data(ood.Observed, pzt.Themeable):
         super().__init__(**kwargs) #od.ChildObserved sets name
         self._index = index
         self._values = values
+
+    def set_units(self, units):
+        if isinstance(units, str):
+            units = pozo.ureg.parse_units(units)
+        self._units = units
+
+    def get_units(self):
+        return self._units
 
 
     def set_values(self, values, index=None):
