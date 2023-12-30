@@ -1,12 +1,14 @@
-import pint
+import os
+os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy documentation
 import warnings
 from io import StringIO
 
 from IPython.core.display import HTML
-import lasio
 import pandas as pd
 import numpy as np
+import pint
 
+import lasio
 import pozo
 class MissingRangeError(pint.UndefinedUnitError):
     pass
