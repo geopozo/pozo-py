@@ -26,6 +26,9 @@ class LasMapEntry():
             return True
         return False
 
+# Namespace would be nicer and I could hide registries if this wasn't overriden
+# But would the map be global?
+# Or would we just use a default registery like in init
 class LasRegistry(pint.UnitRegistry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,7 +48,7 @@ class LasRegistry(pint.UnitRegistry):
             self._mnemonic_units[mnemonic] = {}
         self._mnemonic_units[mnemonic][unit] = ranges
 
-    def resolve_las_map(self, curve):
+    def resolve_las_unit(self, curve):
         mnemonic = pozo.deLASio(curve.mnemonic)
         unit = curve.unit
         max_val = np.nanmax(curve.data)
@@ -58,10 +61,10 @@ class LasRegistry(pint.UnitRegistry):
             raise MissingRangeError(f"{unit} for {mnemonic} found but not in range: {ranges}.")
         return None
 
-    def las_parse(self, curve): # this just gives you a result
+    def parse_unit_from_las(self, curve): # this just gives you a result
         resolved = None
         try:
-            resolved = self.resolve_las_map(curve)
+            resolved = self.resolve_las_unit(curve)
         except MissingRangeError as e:
             warnings.warn(str(e))
         if resolved is not None:
@@ -71,6 +74,6 @@ class LasRegistry(pint.UnitRegistry):
                 if not curve.unit or curve.unit == "": raise pint.UndefinedUnitError("Empty unit not allowed- please map it")
                 return self.parse_units(curve.unit)
             except pint.UndefinedUnitError as e:
-                raise pint.UndefinedUnitError(f"{curve.unit} for {pozo.deLASio(cruve.mnemonic)} not found. {str(e)}")
+                raise pint.UndefinedUnitError(f"{curve.unit} for {pozo.deLASio(curve.mnemonic)} not found. {str(e)}")
 
 # we now don't get confidence from string

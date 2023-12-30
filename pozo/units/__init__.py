@@ -25,9 +25,9 @@ registry.add_las_map('DRHO', 'G/C3', 'gram / centimeter ** 3'  , "HIGH")
 registry.add_las_map('RHOB', 'G/C3', 'gram / centimeter ** 3'  , "HIGH")
 registry.add_las_map('DT'  , 'US/F', 'microsecond / foot'      , "HIGH")
 registry.add_las_map('ILD' , 'OHMM', 'ohm * meter'             , "HIGH")
-registry.add_las_map('LLD' , 'OHMM', 'ohm * meter'             , "HIGH")
-registry.add_las_map('ILM' , 'OHMM', 'ohm * meter'             , "HIGH")
 registry.add_las_map('LLS' , 'OHMM', 'ohm * meter'             , "HIGH")
+registry.add_las_map('ILM' , 'OHMM', 'ohm * meter'             , "HIGH")
+registry.add_las_map('LLD' , 'OHMM', 'ohm * meter'             , "HIGH")
 registry.add_las_map('SFL' , 'OHMM', 'ohm * meter'             , "HIGH")
 registry.add_las_map('SGR' , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('SP'  , 'MV'  , 'millivolt'               , "HIGH")
@@ -43,7 +43,7 @@ registry.add_las_map('URAN', ''    , percent_general)
 # mnemonics, synonyms (resolve- matching in theme,
 # matching in recipe, matching for unit determination)
 # relationships between mnemonics? tolerances? tools?
-# annotating LAS files w/ corrections that the file doesn't support
+# annotating reg files w/ corrections that the file doesn't support
 # versioning, searching
 # also want it to point to posts
 
@@ -57,11 +57,11 @@ def check_las(las, registry=registry):
         pozo_match = None
         confidence = None
         try:
-            resolved = registry.resolve_las_map(curve)
+            resolved = registry.resolve_las_unit(curve)
             if resolved is not None:
                 pozo_match = resolved.unit
                 confidence = resolved.confidence
-            parsed = registry.las_parse(curve)
+            parsed = registry.parse_unit_from_las(curve)
         except (pint.UndefinedUnitError, MissingRangeError) as e:
             confidence = " - " + str(e) + " - NONE"
         result.append(d.join([n0(x) for x in [pozo.deLASio(curve.mnemonic),
@@ -76,3 +76,7 @@ def check_las(las, registry=registry):
     except Exception as e:
         display(str(e))
         display(HTML("<br>".join(result)))
+
+# Just a shorcut to make the API nice
+def parse_unit_from_las(curve, registry=registry):
+    return registry.parse_unit_from_las(curve)
