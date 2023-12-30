@@ -14,7 +14,7 @@ class Track(ood.Item, pzt.Themeable):
             self.add_axes(ar)
 
     # add_items
-    def add_axes(self, *axes, **kwargs): # axis can take axes... and other axis?
+    def add_axes(self, *axes, **kwargs):
         accepted_types = (pozo.Axis, pozo.Data)
         good_axes = []
         for axis in axes:
@@ -29,7 +29,7 @@ class Track(ood.Item, pzt.Themeable):
         super().add_items(*good_axes, **kwargs)
 
     # get_items
-    def get_axes(self, *selectors, **kwargs): # TODO get by name or by actual
+    def get_axes(self, *selectors, **kwargs):
         return super().get_items(*selectors, **kwargs)
 
     # get_item

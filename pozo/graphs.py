@@ -40,7 +40,7 @@ class Graph(ood.Observer, pzt.Themeable):
     def set_name(self, name):
         self._name = name
 
-    def process_data(self, *args, **kwargs):
+    def process_data(self, *args, **kwargs): # Add ways to add data
         for i, ar in enumerate(args):
             if str(type(ar)) == LAS_TYPE:
                 self.add_las_object(ar, **kwargs)

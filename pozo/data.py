@@ -6,6 +6,7 @@ import pozo.themes as pzt
 import pozo.units as pzu
 
 class Data(ood.Observed, pzt.Themeable):
+
     def __init__(self, index, values, **kwargs): # Default Index?
         units = kwargs.pop('units', None)
         if len(index) != len(values):
@@ -18,8 +19,8 @@ class Data(ood.Observed, pzt.Themeable):
         self.set_values(values, units = units, index=index)
         super().__init__(**kwargs) #od.ChildObserved sets name
 
-        #are units being sent down propertly TODO
-    def set_units(self, units): # TODO what do we do if units are not all same on axis # fail, ask user to put on separate axes
+    # In render, check units
+    def set_units(self, units):
         if units is None: return
         if isinstance(units, str):
             units = pozo.ureg.parse_units(units)
