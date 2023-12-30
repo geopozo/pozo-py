@@ -8,7 +8,7 @@ import pozo.units as pzu
 class Data(ood.Observed, pzt.Themeable):
 
     def __init__(self, index, values, **kwargs): # Default Index?
-        units = kwargs.pop('units', None)
+        unit = kwargs.pop('unit', None)
         if len(index) != len(values):
             raise ValueError("Index and values have different length")
         self._mnemonic = kwargs.pop('mnemonic', None)
@@ -16,32 +16,31 @@ class Data(ood.Observed, pzt.Themeable):
             if not self._mnemonic:
                 raise ValueError("You must supply 'name'. Or 'mnemonic' will be used as 'name' if 'name' absent...")
             kwargs['name'] = self._mnemonic
-        self.set_values(values, units = units, index=index)
+        self.set_values(values, unit = unit, index=index)
         super().__init__(**kwargs) #od.ChildObserved sets name
 
-    # In render, check units
-    def set_units(self, units):
-        if units is None: return
-        if isinstance(units, str):
-            units = pozo.ureg.parse_units(units)
-        self._units = units
-        self._values = pzu.Q(self._values)
+    # In render, check unit
+    def set_unit(self, unit):
+        if unit is None: return
+        if isinstance(unit, str):
+            unit = pozo.ureg.parse_units(unit)
+        self._unit = unit
 
-    def get_units(self):
-        return self._units
+    def get_unit(self):
+        return self._unit
 
 
-    def set_values(self, values, units=None, index=None, index_units=None):
-        index_len = len(self._index) if not index else len(index)
+    def set_values(self, values, unit=None, index=None, index_unit=None):
+        index_len = len(index) if index is not None else len(self._index)
         if index_len != len(values):
             raise ValueError("Index and values have different length.")
         self._values = values
-        if units is not None: self._set_units(units)
+        if unit is not None: self.set_unit(unit)
         elif isinstance(values, pint.Quantity):
-            self.set_units(values.units)
+            self.set_unit(values.unit)
         if index is not None:
             self.set_index(index)
-            #if index_units is not None: # TODO
+            #if index_unit is not None: # TODO
             #refactor depth first
 
     def get_values(self):

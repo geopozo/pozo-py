@@ -1,12 +1,15 @@
 import copy
 import math
+import warnings
 
 from IPython.display import Javascript # Part of Hack #1
 import plotly.graph_objects as go
+import pint
 
 import pozo
 import pozo.renderers as pzr
 import pozo.themes as pzt
+import pozo.units as pzu
 
 # You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
@@ -155,13 +158,34 @@ class Plotly(pzr.Renderer):
             anchor_axis = parent_axis_per_track[track_pos]
             for axis_pos, axis in enumerate(track.get_axes()):
                 themes.append(axis.get_theme())
+                if themes["range_unit"] is not None:
+                    range_unit = pzu.registry.parse_units(themes["range_unit"])
+                else:
+                    range_unit = None
+                data_unit = None
+                print("\n")
                 for datum in axis:
+                    if data_unit is not None and data_unit != datum.get_unit():
+                        raise pint.UnitException(data_unit, datum.get_unit(), extra_msg="Data being displayied on  one axis must be exactly the same unit.")
+                    else:
+                        data_unit = datum.get_unit()
+                        if not (data_unit is None or range_unit is None or range_unit.is_compatible_with(data_unit)):
+                            raise pint.UnitException(range_unit, data_unit, extra_msg="range_unit set by theme is not compatible with data units")
+                    print(f"range: {range_unit}")
+                    print(f"data: {data_unit}")
                     ymin = min(datum.get_index()[0], ymin)
                     ymax = max(datum.get_index()[-1],ymax)
-                    # probably get xmin, max too
 
+                if data_unit is None: data_unit = range_unit
+                if range_unit is None: range_unit = data_unit # both None, or both whatever wasn't None
+                if data_unit != range_unit:
+                    print("Transforming units")
+                    xrange = pzu.Q(themes["range"], range_unit).m_as(data_unit)
+                else:
+                    print("Units not transforming")
+                    xrange = themes["range"]
                 color = themes["color"]
-                xrange = themes["range"]
+
                 scale_type = themes["scale"]
                 axis_style = dict(
                     **self.xaxis_template
@@ -214,15 +238,17 @@ class Plotly(pzr.Renderer):
                 for datum in axis:
                     themes.append(datum.get_theme())
                     color = themes["color"]
-                    all_traces.append(go.Scattergl(
-                        x=datum.get_values(),
-                        y=datum.get_index(),
-                        mode='lines', # nope, based on data w/ default
-                        line=dict(color=color, width=1), # needs to be better, based on data
-                        xaxis='x' + str(num_axes),
-                        yaxis='y',
-                        name = datum.get_name(),
-                    ))
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
+                        all_traces.append(go.Scattergl(
+                            x=datum.get_values(),
+                            y=datum.get_index(),
+                            mode='lines', # nope, based on data w/ default
+                            line=dict(color=color, width=1), # needs to be better, based on data
+                            xaxis='x' + str(num_axes),
+                            yaxis='y',
+                            name = datum.get_name(),
+                        ))
                     themes.pop()
                 num_axes += 1
                 traces.extend(all_traces)

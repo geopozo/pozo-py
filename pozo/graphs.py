@@ -84,14 +84,14 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if curve.unit is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
-            units = pzu.parse_unit_from_las(curve)
+            unit = pzu.parse_unit_from_las(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
             else:
                 name = curve.mnemonic
 
-            data = pozo.Data(yaxis, curve.data, mnemonic=mnemonic, name=name, units=units)
+            data = pozo.Data(yaxis, curve.data, mnemonic=mnemonic, name=name, unit=unit)
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)

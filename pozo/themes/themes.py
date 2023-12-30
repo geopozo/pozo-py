@@ -9,7 +9,7 @@ class MnemonicDictionary(pzt.DynamicTheme):
     def __init__(self, mnemonic_table, registry=pzu.registry):
         for key, value in mnemonic_table.items():
             if "range_unit" in value:
-                value['_range_unit'] = registry.parse_units(value["range_unit"])
+                pzu.registry.parse_units(value["range_unit"]) # just checking to see if its working
         self._lut = mnemonic_table # renderer will have to do conversons
 
     def resolve(self, key, contexts):
