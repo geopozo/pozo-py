@@ -1,12 +1,16 @@
 import pozo.themes as pzt
+import pozo.units as pzu
 
 
 default_color_list = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
 default_theme = pzt.ThemeDict({ "color": default_color_list, })
- # So we gotta
+#
 class MnemonicDictionary(pzt.DynamicTheme):
-    def __init__(self, mnemonic_table):
-        self._lut = mnemonic_table
+    def __init__(self, mnemonic_table, registry=pzu.registry):
+        for key, value in mnemonic_table.items():
+            if "range_unit" in value:
+                value['_range_unit'] = registry.parse_units(value["range_unit"])
+        self._lut = mnemonic_table # renderer will have to do conversons
 
     def resolve(self, key, contexts):
         mnemonic = None
