@@ -241,14 +241,14 @@ class Plotly(pzr.Renderer):
         if _hidden(themes): return []
         for track in graph:
             themes.append(track.get_theme())
-            _hidden(themes): continue
+            if _hidden(themes): continue
             for axis in track:
                 themes.append(axis.get_theme())
-                _hidden(themes): continue
+                if _hidden(themes): continue
                 all_traces = []
                 for datum in axis:
                     themes.append(datum.get_theme())
-                    _hidden(themes): continue
+                    if _hidden(themes): continue
                     color = themes["color"]
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
