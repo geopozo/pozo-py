@@ -112,7 +112,7 @@ class Plotly(pzr.Renderer):
         end = start+track_width_proportion
         return [max(start, 0), min(end, 1)]
 
-    def _hidden(themes):
+    def _hidden(self, themes):
         hidden = themes["hidden"]
         if hidden: themes.pop()
         return hidden
@@ -159,14 +159,14 @@ class Plotly(pzr.Renderer):
 
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
-        if _hidden(themes): return {}
+        if self._hidden(themes): return {}
         for track_pos, track in enumerate(graph.get_tracks()):
             anchor_axis = parent_axis_per_track[track_pos]
             themes.append(track.get_theme())
-            if _hidden(themes): continue
+            if self._hidden(themes): continue
             for axis_pos, axis in enumerate(track.get_axes()):
                 themes.append(axis.get_theme())
-                if _hidden(themes): continue
+                if self._hidden(themes): continue
                 if themes["range_unit"] is not None:
                     range_unit = pzu.registry.parse_units(themes["range_unit"])
                 else:
@@ -174,7 +174,7 @@ class Plotly(pzr.Renderer):
                 data_unit = None
                 for datum in axis:
                     themes.append(datum.get_theme())
-                    if _hidden(themes): continue
+                    if self._hidden(themes): continue
 
                     if data_unit is not None and data_unit != datum.get_unit():
                         raise pint.UnitException(data_unit, datum.get_unit(), extra_msg="Data being displayied on one axis must be exactly the same unit.")
@@ -238,17 +238,17 @@ class Plotly(pzr.Renderer):
         num_axes = 1
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
-        if _hidden(themes): return []
+        if self._hidden(themes): return []
         for track in graph:
             themes.append(track.get_theme())
-            if _hidden(themes): continue
+            if self._hidden(themes): continue
             for axis in track:
                 themes.append(axis.get_theme())
-                if _hidden(themes): continue
+                if self._hidden(themes): continue
                 all_traces = []
                 for datum in axis:
                     themes.append(datum.get_theme())
-                    if _hidden(themes): continue
+                    if self._hidden(themes): continue
                     color = themes["color"]
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
