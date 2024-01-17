@@ -2,7 +2,7 @@ import pozo.renderers as pzr
 from IPython.core.display import HTML
 import html
 
-class GraphSVG(pzr.Renderer):
+class TreeTable(pzr.Renderer):
     def _get_basic(self, item):
         name = item.get_name() # dict
         theme = item.get_theme() # dict
