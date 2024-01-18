@@ -50,7 +50,7 @@ class Track(ood.Item, pzt.Themeable):
     def move_axes(self, *selectors, **kwargs):
         super().move_items(*selectors, **kwargs)
 
-    def all_data():
+    def all_data(self):
         all_data = []
         for axis in self.get_axes():
             all_data.extend(axis.get_data())

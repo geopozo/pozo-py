@@ -178,18 +178,18 @@ class Plotly(pzr.Renderer):
                     if self._hidden(themes): continue
 
                     if data_unit is not None and data_unit != datum.get_unit():
-                        raise pint.UnitException(data_unit, datum.get_unit(), extra_msg="Data being displayied on one axis must be exactly the same unit.")
+                        raise ValueError(f"Data being displayed on one axis must be exactly the same unit. {data_unit} is not {datum.get_unit()}")
                     else:
                         data_unit = datum.get_unit()
                         if not (data_unit is None or range_unit is None or range_unit.is_compatible_with(data_unit)):
-                            raise pint.UnitException(range_unit, data_unit, extra_msg="range_unit set by theme is not compatible with data units")
+                            raise pint.DimensionalityError(range_unit, data_unit, extra_msg="range_unit set by theme is not compatible with data units")
                     themes.pop()
-                    ymin = min(datum.get_depth()[0], ymin)
-                    ymax = max(datum.get_depth()[-1],ymax)
-                    if yUnit is not None:
-                        if yUnit != datum.get_depth_unit():
-                            raise pint.UnitException(yUnit, datum.get_depth_unit(), extra_msg="All depth axis must have the same unit. You must transform the data. TODO: Add note")
-                    yUnit = datum.get_depth_unit()
+                    if y_unit is not None:
+                        if y_unit != datum.get_depth_unit():
+                            raise ValueError(f"All depth axis must have the same unit. You must transform the data. {y_unit} is not {datum.get_depth_unit()}")
+                    y_unit = datum.get_depth_unit()
+                    ymin = min(pzu.Q(datum.get_depth()[0], y_unit), pzu.Q(ymin, y_unit)).magnitude
+                    ymax = max(pzu.Q(datum.get_depth()[-1], y_unit), pzu.Q(ymax, y_unit)).magnitude
 
                 if data_unit is None: data_unit = range_unit
                 if range_unit is None: range_unit = data_unit # both None, or both whatever wasn't None

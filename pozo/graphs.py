@@ -45,7 +45,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if str(type(ar)) == LAS_TYPE:
                 self.add_las_object(ar, **kwargs)
             elif isinstance(ar, (pozo.Data, pozo.Axis, pozo.Track)):
-                self.add_track(ar)
+                self.add_tracks(ar)
             else:
                 warnings.warn("Unknown argument type passed: argument {i}, {type(ar)}. Ignored")
 
@@ -137,13 +137,13 @@ class Graph(ood.Observer, pzt.Themeable):
     def move_tracks(self, *selectors, **kwargs):
         super().move_items(*selectors, **kwargs)
 
-    def all_data():
+    def all_data(self):
         all_data = []
         for track in self.get_tracks():
             all_data.extend(track.all_data())
         return all_data
 
-    def all_axes():
+    def all_axes(self):
         all_axes = []
         for track in self.get_tracks():
             all_axes.extend(track.get_axes())

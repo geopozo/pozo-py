@@ -90,6 +90,25 @@ class Data(ood.Observed, pzt.Themeable):
     def get_depth_unit(self):
         return self._depth_unit
 
+    def convert_depth_unit(self, unit):
+        unit = self._check_unit(unit)
+        if unit == self.get_depth_unit() or unit is None or self.get_depth_unit() is None: return
+        if isinstance(self.get_depth(), pint.Quantity):
+            self.set_depth(self.get_depth().to(unit)) # This would be another version
+        else:
+            self.set_depth(pzu.Q(self.get_depth(), self.get_depth_unit()).to(unit).magnitude) # This would be another version
+        self.set_depth_unit(unit)
+
+    # not tested
+    def convert_unit(self, unit):
+        unit = self._check_unit(unit)
+        if unit == self.get_unit() or unit is None or self.get_unit() is None: return
+        if isinstance(self.get_data(), pint.Quantity):
+            self.set_data(self.get_data().to(unit)) # This would be another version
+        else:
+            self.set_data(pzu.Q(self.get_data(), self.get_unit()).to(unit).magnitude) # This would be another version
+        self.set_unit(unit)
+
     def set_mnemonic(self, mnemonic):
         self._mnemonic = mnemonic
     def get_mnemonic(self):
