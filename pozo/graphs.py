@@ -127,6 +127,13 @@ class Graph(ood.Observer, pzt.Themeable):
     def pop_tracks(self,  *selectors):
         return super().pop_items(*selectors)
 
+    def combine_tracks(self, selector, *selectors):
+        sink = self.get_track(selector)
+        source = self.pop_tracks(*selectors)
+        for track in source:
+            axes = track.pop_axes()
+            sink.add_axes(axes)
+
     # what about whitelabelling all the other stuff
     def has_track(self, selector):
         return super().has_item(selector)
