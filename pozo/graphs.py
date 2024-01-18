@@ -55,7 +55,7 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = None
-        if yaxis is not None:
+        if yaxis is not None: # this is a manually added y axis, don't parse it with LAS
             yaxis_name = None
             if hasattr(yaxis, "unit"):
                 yaxis_unit = yaxis.unit
@@ -65,7 +65,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 raise ValueError(f"Length of supplied yaxis ({len(yaxis)}) does not match length of LAS File index ({len(ar.index)})")
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
-            yaxis_unit = ar.curves[yaxis_name].unit # TODO not used
+            yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name])
         else:
             warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
             yaxis = ar.index
