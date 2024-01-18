@@ -260,7 +260,7 @@ class Plotly(pzr.Renderer):
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         all_traces.append(go.Scattergl(
-                            x=datum.get_values(),
+                            x=datum.get_data(),
                             y=datum.get_depth(),
                             mode='lines', # nope, based on data w/ default
                             line=dict(color=color, width=1), # needs to be better, based on data

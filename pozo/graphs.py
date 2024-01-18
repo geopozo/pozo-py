@@ -54,18 +54,18 @@ class Graph(ood.Observer, pzt.Themeable):
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-        yaxis_units = None
+        yaxis_unit = None
         if yaxis is not None:
             yaxis_name = None
             if hasattr(yaxis, "unit"):
-                yaxis_units = yaxis.unit
+                yaxis_unit = yaxis.unit
             else:
                 warnings.warn("Not sure what yaxis units are.") # TODO
             if len(yaxis) != len(ar.index):
                 raise ValueError(f"Length of supplied yaxis ({len(yaxis)}) does not match length of LAS File index ({len(ar.index)})")
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
-            yaxis_units = ar.curves[yaxis_name].unit # TODO not used
+            yaxis_unit = ar.curves[yaxis_name].unit # TODO not used
         else:
             warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
             yaxis = ar.index
@@ -91,7 +91,7 @@ class Graph(ood.Observer, pzt.Themeable):
             else:
                 name = curve.mnemonic
 
-            data = pozo.Data(yaxis, curve.data, mnemonic=mnemonic, name=name, unit=unit)
+            data = pozo.Data(curve.data, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)

@@ -30,13 +30,15 @@ class TreeTable(pzr.Renderer):
 
     def _get_datum_dict(self, datum):
         mnemonic = datum.get_mnemonic()
-        values_t = type(datum.get_values())
+        values_t = type(datum.get_data())
         depth_t = type(datum.get_depth())
-        length = len(datum.get_values())
+        length = len(datum.get_data())
         datum = self._get_basic(datum)
         datum["mnemonic"] = mnemonic
-        datum["values_type"] = values_t
+        datum["data_type"] = values_t
         datum["depth_type"] = depth_t
+        datum["data_unit"] = datum.get_unit()
+        datum["depth_unit"] = datum.get_depth_unit()
         datum["length"] = length
         return datum
 
