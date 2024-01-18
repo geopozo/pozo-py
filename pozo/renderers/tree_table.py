@@ -33,14 +33,14 @@ class TreeTable(pzr.Renderer):
         values_t = type(datum.get_data())
         depth_t = type(datum.get_depth())
         length = len(datum.get_data())
-        datum = self._get_basic(datum)
-        datum["mnemonic"] = mnemonic
-        datum["data_type"] = values_t
-        datum["depth_type"] = depth_t
-        datum["data_unit"] = datum.get_unit()
-        datum["depth_unit"] = datum.get_depth_unit()
-        datum["length"] = length
-        return datum
+        datum_dict = self._get_basic(datum)
+        datum_dict["mnemonic"] = mnemonic
+        datum_dict["data_type"] = values_t
+        datum_dict["depth_type"] = depth_t
+        datum_dict["data_unit"] = datum.get_unit()
+        datum_dict["depth_unit"] = datum.get_depth_unit()
+        datum_dict["length"] = length
+        return datum_dict
 
     def render(self, graph, **kwargs):
         graph_node = self._get_graph_dict(graph)
