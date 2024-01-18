@@ -11,7 +11,7 @@ def test_renderer():
     data_extra = pozo.Data([3], depth=[3], depth_unit="centimeters", name="extra")
     graph = pozo.Graph(data1, data2, data_extra)
     assert len(graph) == 3
-    assert len(graph.all_data()) == 3
+    assert len(graph.get_data()) == 3
 
     renderer = pzr.Plotly()
     with pytest.raises(ValueError):
@@ -26,7 +26,7 @@ def test_renderer():
     renderer.get_layout(graph2)
 
     # lets see if we can make the data homogenous
-    for data in graph.all_data():
+    for data in graph.get_data():
         data.convert_depth_unit("inches")
         if data.get_name() != "extra":
             assert isinstance(data.get_depth(), pint.Quantity)
