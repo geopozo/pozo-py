@@ -37,7 +37,7 @@ class Data(ood.Observed, pzt.Themeable):
         self._data = data
         if unit is not None: self.set_unit(unit)
         elif isinstance(data, pint.Quantity):
-            self.set_unit(data.unit)
+            self.set_unit(data.units)
         # otherwise keeps old unit
 
         if depth is not None:
@@ -54,7 +54,7 @@ class Data(ood.Observed, pzt.Themeable):
         self._depth = depth
         if depth_unit is not None: self.set_depth_unit(depth_unit)
         elif isinstance(depth, pint.Quantity):
-            self.set_depth_unit(depth.unit)
+            self.set_depth_unit(depth.units)
         # else, keep old units
 
     def get_depth(self):
@@ -62,7 +62,7 @@ class Data(ood.Observed, pzt.Themeable):
 
     def _check_unit(self, unit): # Call this early, in set_data, in set_depth, in init()
         if isinstance(unit, str):
-            return pzu.registry.parse_units(units)
+            return pzu.registry.parse_units(unit)
         elif not isinstance(unit, pint.Unit) and unit is not None:
             raise pint.UndefinedUnitError(str(type(unit))) from TypeError(f"Unrecognized unit type: {unit}")
         return unit
@@ -87,7 +87,7 @@ class Data(ood.Observed, pzt.Themeable):
             raise pint.UndefinedUnitError(str(type(unit))) from TypeError(f"Unrecognized unit type: {unit}")
         self._depth_unit = unit
 
-    def get_depth_unit(self, unit):
+    def get_depth_unit(self):
         return self._depth_unit
 
     def set_mnemonic(self, mnemonic):
