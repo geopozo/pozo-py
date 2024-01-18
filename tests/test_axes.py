@@ -11,14 +11,14 @@ values2 = [2, 3, 4, 5]
 e.NameConflictException.default_level = e.ErrorLevel.IGNORE
 e.MultiParentException.default_level = e.ErrorLevel.IGNORE
 
-d1 = pozo.data.Data(index, values, mnemonic="md1")
-d2 = pozo.data.Data(index, values, name="d2")
-d3 = pozo.data.Data(index, values2, name="d3", mnemonic="md3")
-d4 = pozo.data.Data(index, values2, mnemonic="md4")
-d5 = pozo.data.Data(index2, values, mnemonic="md5")
-d6 = pozo.data.Data(index2, values, mnemonic="md6")
-d7 = pozo.data.Data(index2, values2, mnemonic="md7")
-d8 = pozo.data.Data(index2, values2, mnemonic="md8")
+d1 = pozo.data.Data(values, depth=index, mnemonic="md1")
+d2 = pozo.data.Data(values, depth=index, name="d2")
+d3 = pozo.data.Data(values2, depth=index, name="d3", mnemonic="md3")
+d4 = pozo.data.Data(values2, depth=index, mnemonic="md4")
+d5 = pozo.data.Data(values, depth=index2, mnemonic="md5")
+d6 = pozo.data.Data(values, depth=index2, mnemonic="md6")
+d7 = pozo.data.Data(values2, depth=index2, mnemonic="md7")
+d8 = pozo.data.Data(values2, depth=index2, mnemonic="md8")
 
 
 def test_axis():

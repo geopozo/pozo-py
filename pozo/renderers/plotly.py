@@ -156,6 +156,7 @@ class Plotly(pzr.Renderer):
         axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
+        y_unit = None
 
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
@@ -183,8 +184,12 @@ class Plotly(pzr.Renderer):
                         if not (data_unit is None or range_unit is None or range_unit.is_compatible_with(data_unit)):
                             raise pint.UnitException(range_unit, data_unit, extra_msg="range_unit set by theme is not compatible with data units")
                     themes.pop()
-                    ymin = min(datum.get_index()[0], ymin)
-                    ymax = max(datum.get_index()[-1],ymax)
+                    ymin = min(datum.get_depth()[0], ymin)
+                    ymax = max(datum.get_depth()[-1],ymax)
+                    if yUnit is not None:
+                        if yUnit != datum.get_depth_unit():
+                            raise pint.UnitException(yUnit, datum.get_depth_unit(), extra_msg="All depth axis must have the same unit. You must transform the data. TODO: Add note")
+                    yUnit = datum.get_depth_unit()
 
                 if data_unit is None: data_unit = range_unit
                 if range_unit is None: range_unit = data_unit # both None, or both whatever wasn't None
@@ -192,6 +197,8 @@ class Plotly(pzr.Renderer):
                     xrange = pzu.Q(themes["range"], range_unit).m_as(data_unit)
                 else:
                     xrange = themes["range"]
+                # So we've just created xrange which is the data_unit
+                # But here we'd want to override ticks and such to the range unit
                 color = themes["color"]
 
                 scale_type = themes["scale"]
@@ -254,7 +261,7 @@ class Plotly(pzr.Renderer):
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         all_traces.append(go.Scattergl(
                             x=datum.get_values(),
-                            y=datum.get_index(),
+                            y=datum.get_depth(),
                             mode='lines', # nope, based on data w/ default
                             line=dict(color=color, width=1), # needs to be better, based on data
                             xaxis='x' + str(num_axes),
