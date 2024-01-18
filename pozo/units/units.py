@@ -1,5 +1,5 @@
 import os
-os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy documentation
+os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
 import warnings
 from io import StringIO
 
@@ -63,7 +63,7 @@ class LasRegistry(pint.UnitRegistry):
             raise MissingRangeError(f"{unit} for {mnemonic} found but not in range: {ranges}.")
         return None
 
-    def parse_unit_from_las(self, curve): # this just gives you a result
+    def parse_unit_from_curve(self, curve): # this just gives you a result
         resolved = None
         try:
             resolved = self.resolve_las_unit(curve)

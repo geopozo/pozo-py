@@ -2,6 +2,7 @@ from .units import *
 
 registry = LasRegistry()
 Q = registry.Quantity # Overriding the registry and all this is a little weird
+
 registry.define('gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI')
 registry.define("porosity_unit = percent = pu")
 registry.define("of_1 = 100 * percent")
@@ -79,5 +80,5 @@ def check_las(las, registry=registry):
         display(HTML("<br>".join(result)))
 
 # Just a shorcut to make the API nice
-def parse_unit_from_las(curve, registry=registry):
-    return registry.parse_unit_from_las(curve)
+def parse_unit_from_curve(curve, registry=registry):
+    return registry.parse_unit_from_curve(curve)

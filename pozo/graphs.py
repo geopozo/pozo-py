@@ -84,7 +84,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if curve.unit is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
-            unit = pzu.parse_unit_from_las(curve)
+            unit = pzu.parse_unit_from_curve(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
@@ -102,7 +102,7 @@ class Graph(ood.Observer, pzt.Themeable):
         good_tracks = []
         for track in tracks:
             if isinstance(track, list) and all(isinstance(item, accepted_types) for item in track):
-                good_tracks.extend(track)
+                good_tracks.extend(track) # it'll be out of order
             elif not isinstance(track, accepted_types):
                 raise TypeError("Axis.add_tracks() only accepts axes, tracks, and data: pozo objects")
 
