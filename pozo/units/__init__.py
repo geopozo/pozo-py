@@ -63,7 +63,7 @@ def check_las(las, registry=registry):
             if resolved is not None:
                 pozo_match = resolved.unit
                 confidence = resolved.confidence
-            parsed = registry.parse_unit_from_las(curve)
+            parsed = registry.parse_unit_from_curve(curve)
         except (pint.UndefinedUnitError, MissingRangeError) as e:
             confidence = " - " + str(e) + " - NONE"
         result.append(d.join([n0(x) for x in [pozo.deLASio(curve.mnemonic),
