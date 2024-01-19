@@ -25,6 +25,7 @@ defaults = dict(
     width_per_track = 200,  # width of each track, used to calculate total width
     track_margin = 20,      # margin between each track
     track_start = 0,        # left-side margin on tracks # (set axis to engineering notation)
+    depth_axis_width = 35,  # size of depth axis if it's not the first thing
     axis_label_height = 60, # size of each xaxis when stacked
 
     # Plotly style values, structured like a plotly layout dictionary.
@@ -38,14 +39,11 @@ defaults = dict(
 #       width=?                # generated
 
         yaxis = dict(
-                visible=True, # Make false, while showing gridelines while hiding axis, and expanding
+                visible=True, # Would hdie gridelines too, so hide ticks and labels instead of axis.
                 showgrid=True,
                 zeroline=False,
                 showline=False,
                 position=0,
-                #showticklabel=False,
-                #linecolor='black',
-                #linewidth=3,
                 gridcolor="#f0f0f0",
 #               domain=[?,?],  # generated
 #               maxallowed=,   # generated
@@ -103,19 +101,28 @@ class Plotly(pzr.Renderer):
             raise ValueError(f"To display the {num_axes} stack axes, please use a height greater than {self.template['axis_label_height'] * num_axes_adjusted/.6}")
         return raw_value
 
-    def _calc_track_domain(self, track_pos, num_tracks, width_per_track):
+    # We also use this to get depth axis position if > 0
+    def _calc_track_domain(self, track_pos, num_tracks, width_per_track, depth_axis_pos=0):
         whole_width = (self.template["track_start"] +
                        ((num_tracks-1) * self.template["track_margin"]) +
                        (num_tracks * width_per_track)
                       )
+        if depth_axis_pos: whole_width += self.template["depth_axis_width"]
+        depth_axis_proportion = self.template["depth_axis_width"] / whole_width if depth_axis_pos else 0
+
         track_start_proportion = self.template["track_start"] / whole_width
         track_margin_proportion = self.template["track_margin"] / whole_width
-        non_track_proportion = track_start_proportion + ((num_tracks-1)*track_margin_proportion)
+        non_track_proportion = track_start_proportion + ((num_tracks-1)*track_margin_proportion) + depth_axis_proportion
 
         track_width_proportion = (1-non_track_proportion) / num_tracks
         whole_track_proportion = track_width_proportion + track_margin_proportion
         start = track_start_proportion + track_pos*(whole_track_proportion)
-        end = start+track_width_proportion
+        # We're assuming here track_pos is a number 0 or higher
+        if depth_axis_pos != 0 and track_pos == num_tracks and track_pos == depth_axis_pos:
+            return [1, 1]
+        if track_pos >= depth_axis_pos:
+            start += depth_axis_proportion
+        end = start + track_width_proportion
         return [max(start, 0), min(end, 1)]
 
     def _hidden(self, themes):
@@ -130,6 +137,7 @@ class Plotly(pzr.Renderer):
 
 
     def get_layout(self, graph, **kwargs):
+        depth_axis_pos = kwargs.pop("depth_position", 0)
         override_theme = kwargs.pop("override_theme", None)
         track_width = kwargs.get("track_width", self.template["width_per_track"])
         if track_width < TRACK_WIDTH_MIN:
@@ -140,6 +148,7 @@ class Plotly(pzr.Renderer):
         num_tracks = len(graph)
         if not num_tracks:
             raise ValueError("There are no tracks, there is nothing to lay out.")
+        depth_axis_pos = min(num_tracks, depth_axis_pos)
 
         layout = copy.deepcopy(self.template["plotly"])
         if height is not None:
@@ -237,7 +246,7 @@ class Plotly(pzr.Renderer):
                     axis_style['position'] = min(bottom + position_above_bottom, 1)
                     axis_style['overlaying'] = "x" + str(anchor_axis)
 
-                axis_style['domain'] = self._calc_track_domain(track_pos, num_tracks, track_width)
+                axis_style['domain'] = self._calc_track_domain(track_pos, num_tracks, track_width, depth_axis_pos)
 
                 axes_styles.append(axis_style)
 
@@ -246,6 +255,8 @@ class Plotly(pzr.Renderer):
             themes.pop()
         for i, axis in enumerate(axes_styles):
             layout["xaxis" + str(i+1)] = axis
+        if depth_axis_pos != 0:
+            layout['yaxis']['position'] = self._calc_track_domain(depth_axis_pos, num_tracks, track_width, depth_axis_pos)[0]
         layout['yaxis']['maxallowed'] = ymax
         layout['yaxis']['minallowed'] = ymin
         layout['yaxis']['range'] = [ymax, ymin]
