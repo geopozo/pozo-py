@@ -5,7 +5,7 @@ Q = registry.Quantity # Overriding the registry and all this is a little weird
 
 registry.define('gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI')
 registry.define("porosity_unit = percent = pu")
-registry.define("of_1 = 100 * percent")
+registry.define("of_1 = 100 * percent = fraction")
 registry.define("legacy_api_porosity_unit = [Legacy_API_Porosity_Unit] = puAPI")
 
 PU = [

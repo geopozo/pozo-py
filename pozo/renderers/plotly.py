@@ -23,8 +23,8 @@ import pozo.units as pzu
 defaults = dict(
     # Non-Plotly style values, used to generate Plotly layout values. These are all "required".
     width_per_track = 200,  # width of each track, used to calculate total width
-    track_margin = 20,    # margin between each track
-    track_start = 75,      # left-side margin on tracks # (set axis to engineering notation)
+    track_margin = 20,      # margin between each track
+    track_start = 0,        # left-side margin on tracks # (set axis to engineering notation)
     axis_label_height = 60, # size of each xaxis when stacked
 
     # Plotly style values, structured like a plotly layout dictionary.
@@ -38,8 +38,14 @@ defaults = dict(
 #       width=?                # generated
 
         yaxis = dict(
+                visible=True, # Make false, while showing gridelines while hiding axis, and expanding
                 showgrid=True,
                 zeroline=False,
+                showline=False,
+                position=0,
+                #showticklabel=False,
+                #linecolor='black',
+                #linewidth=3,
                 gridcolor="#f0f0f0",
 #               domain=[?,?],  # generated
 #               maxallowed=,   # generated
@@ -48,7 +54,7 @@ defaults = dict(
         ),
 
         xaxis_template = dict(
-            showgrid=True,
+            showgrid=False, # TODO this is tough, grid where?
             zeroline=False,
             gridcolor="#f0f0f0", # this needs to be generated
             showline=True,
@@ -116,6 +122,12 @@ class Plotly(pzr.Renderer):
         hidden = themes["hidden"]
         if hidden: themes.pop()
         return hidden
+
+    def _create_depthline_trace(self, y_min, y_max):
+        return go.Scatter(x=[0,0], y=[y_min, y_max], mode='markers', marker_size=0)
+
+    # so, the first track should be the first track
+
 
     def get_layout(self, graph, **kwargs):
         override_theme = kwargs.pop("override_theme", None)
