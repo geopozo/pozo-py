@@ -131,10 +131,8 @@ class Plotly(pzr.Renderer):
         height = kwargs.get("height", None)
         if not isinstance(graph, pozo.Graph):
             raise TypeError("Layout must be supplied a graph object.")
-        num_tracks = len(graph)
-        if not num_tracks:
+        if not len(graph):
             raise ValueError("There are no tracks, there is nothing to lay out.")
-        depth_axis_pos = min(num_tracks, depth_axis_pos)
 
         layout = copy.deepcopy(self.template["plotly"])
         if height is not None:
@@ -143,12 +141,17 @@ class Plotly(pzr.Renderer):
         if layout["height"] < GRAPH_HEIGHT_MIN:
             raise ValueError("125px is the minimum total height")
 
-        # first pass
+        # first pass # work with hidden
+        # print("***First pass:")
         max_axes = 0
         total_axes = 0
         parent_axis_per_track = []
         for track in graph.get_tracks():
-            num_axes = len(track)
+            if pzt.ThemeStack(track.get_theme())['hidden']: continue
+            num_axes = 0
+            for axis in track.get_axes(): # track.get_axes(matchesTheme({hidden:true}))
+                if not pzt.ThemeStack(track.get_theme())['hidden']: num_axes += 1
+
             max_axes = max(max_axes, num_axes)
             parent_axis_per_track.append(total_axes+1)
             total_axes += num_axes
@@ -158,6 +161,7 @@ class Plotly(pzr.Renderer):
             min(1 - self._calc_axes_proportion(max_axes, layout["height"]), 1)
         ]
 
+        # print("***Second pass:")
         ## second pass
         axes_styles = []
         ymin = float('inf')
@@ -168,13 +172,17 @@ class Plotly(pzr.Renderer):
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
         if self._hidden(themes): return {}
-        for track_pos, track in enumerate(graph.get_tracks()):
-            anchor_axis = parent_axis_per_track[track_pos]
+        track_pos = -1
+        for track in graph.get_tracks():
             themes.append(track.get_theme())
             if self._hidden(themes): continue
-            for axis_pos, axis in enumerate(track.get_axes()):
+            track_pos += 1
+            anchor_axis = parent_axis_per_track[track_pos]
+            axis_pos = -1
+            for axis in track.get_axes():
                 themes.append(axis.get_theme())
                 if self._hidden(themes): continue
+                axis_pos += 1
                 if themes["range_unit"] is not None:
                     range_unit = pzu.registry.parse_units(themes["range_unit"])
                 else:
@@ -244,7 +252,7 @@ class Plotly(pzr.Renderer):
 
                 themes.pop()
             themes.pop()
-
+        num_tracks = track_pos + 1
         # all stuff dependent on position could go here
         last_end = 0
         layout["width"] = self._calc_total_width(num_tracks, total_track_width, depth_axis_pos)

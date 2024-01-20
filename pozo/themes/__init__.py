@@ -78,7 +78,6 @@ class ThemeStack(Themeable):
         return self._list.pop(index)
 
     def __getitem__(self, key):
-        if key == 'hidden': return None
         if not isinstance(key, str):
             raise TyperError("Key must be string")
         # print(f'\ngetitem() Trying to get theme: {key}')
