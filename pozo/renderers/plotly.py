@@ -220,7 +220,7 @@ class Plotly(pzr.Renderer):
                 axis_style = dict(
                     **self.xaxis_template
                 )
-                axis_style['title'] = dict(text=axis.get_name(),font=dict(color=color), standoff=0,)
+                axis_style['title'] = dict(text=axis.get_name() + " (" + format(data_unit, '~') + ")",font=dict(color=color), standoff=0,)
                 axis_style['linecolor'] = color
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
