@@ -59,9 +59,9 @@ from pozo.themes.themes import *
 # ThemeList also has a theme, which is considered an override!
 class ThemeStack(Themeable):
     def __init__(self, *args, **kwargs):
-        self._contexts_vertical = []
-        self._list = []
-        self._shadow_objects = {}
+        self._contexts_vertical = [] # parallel con _list
+        self._list = [] # the themes
+        self._shadow_objects = {} # if themes have things that are initialized when they're added
         for arg in args:
             self.append(arg)
         super().__init__(*[], **kwargs)
@@ -69,7 +69,7 @@ class ThemeStack(Themeable):
     def append(self, theme):
         if isinstance(theme, Theme):
             self._list.append(theme)
-            self._contexts_vertical.append(theme.get_context())
+            self._contexts_vertical.append(theme.get_context()) # but why not just traverse this at get time
         else:
             raise TypeError(f"Found a theme which isn't any type of valid theme: {type(theme)} {theme}")
 
@@ -78,28 +78,37 @@ class ThemeStack(Themeable):
         return self._list.pop(index)
 
     def __getitem__(self, key):
+        if key == 'hidden': return None
         if not isinstance(key, str):
             raise TyperError("Key must be string")
+        # print(f'\ngetitem() Trying to get theme: {key}')
 
         contexts_horizontal = []
-        eventual_value = self.get_theme()
+        eventual_value = self.get_theme() # Self-theme, override
+        # print(f'Override: {eventual_value}')
         while True: # do-while loop using break
             contexts_horizontal.append(eventual_value.get_context())
             eventual_value = eventual_value.resolve(key, self._contexts_vertical)
-            eventual_value = self._check_shortcut(eventual_value, key, contexts_horizontal) #always context of top level theme in resolve list
+            # print(f'Override resolved to: {eventual_value}')
+            eventual_value = self._check_shortcut(eventual_value, key, contexts_horizontal) # something that translates to themelike
+            # print(f'Above shortcutted to: {eventual_value}')
             if not isinstance(eventual_value, Theme):
                 break
         if eventual_value is None:
             contexts_horizontal.clear()
             for eventual_value in reversed(self._list):
+                # print(f'Value from list of length {len(self._list)}: {eventual_value}')
                 while True:# do-while loop using break
                     contexts_horizontal.append(eventual_value.get_context())
                     eventual_value = eventual_value.resolve(key, self._contexts_vertical)
+                    # print(f'Override resolved to: {eventual_value}')
                     eventual_value = self._check_shortcut(eventual_value, key, contexts_horizontal)
+                    # print(f'Above shortcutted to: {eventual_value}')
                     if not isinstance(eventual_value, Theme):
                         break
                 if eventual_value is not None:
                    break
+        # print(f'Final result: {eventual_value}')
         return self._process_output(eventual_value, key)
 
     # Take not-themes and return themes. Can't take a regular dict, which is sorta problematic.
