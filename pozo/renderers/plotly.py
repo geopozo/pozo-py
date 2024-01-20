@@ -22,10 +22,10 @@ import pozo.units as pzu
 
 defaults = dict(
     # Non-Plotly style values, used to generate Plotly layout values. These are all "required".
-    width_per_track = 200,  # width of each track, used to calculate total width
-    track_margin = 20,      # margin between each track
+    track_margin = 15,      # margin between each track
     track_start = 0,        # left-side margin on tracks # (set axis to engineering notation)
-    depth_axis_width = 35,  # size of depth axis if it's not the first thing
+    depth_axis_width = 30,  # size of depth axis if it's not the first thing
+    depth_axis_left_shift = 5,
     axis_label_height = 60, # size of each xaxis when stacked
 
     # Plotly style values, structured like a plotly layout dictionary.
@@ -83,7 +83,6 @@ defaults = dict(
     ),
 )
 
-TRACK_WIDTH_MIN = 65
 GRAPH_HEIGHT_MIN = 125
 AXIS_PROPORTION_MAX = .6
 
@@ -101,28 +100,19 @@ class Plotly(pzr.Renderer):
             raise ValueError(f"To display the {num_axes} stack axes, please use a height greater than {self.template['axis_label_height'] * num_axes_adjusted/.6}")
         return raw_value
 
-    # We also use this to get depth axis position if > 0
-    def _calc_track_domain(self, track_pos, num_tracks, width_per_track, depth_axis_pos=0):
+    def _calc_total_width(self, num_tracks, total_track_width, add_depth_axis):
         whole_width = (self.template["track_start"] +
                        ((num_tracks-1) * self.template["track_margin"]) +
-                       (num_tracks * width_per_track)
-                      )
-        if depth_axis_pos: whole_width += self.template["depth_axis_width"]
-        depth_axis_proportion = self.template["depth_axis_width"] / whole_width if depth_axis_pos else 0
+                       total_track_width)
+        if add_depth_axis: whole_width += self.template["depth_axis_width"]
+        return whole_width
 
-        track_start_proportion = self.template["track_start"] / whole_width
-        track_margin_proportion = self.template["track_margin"] / whole_width
-        non_track_proportion = track_start_proportion + ((num_tracks-1)*track_margin_proportion) + depth_axis_proportion
+    def _calc_track_domain(self, last_end, track_width, whole_width):
+        # Calculating whole width is not possible
+        start = (self.template["track_margin"]/whole_width) if last_end > 0 else (self.template["track_start"]/whole_width)
+        start += last_end
+        end = start + (track_width/whole_width)
 
-        track_width_proportion = (1-non_track_proportion) / num_tracks
-        whole_track_proportion = track_width_proportion + track_margin_proportion
-        start = track_start_proportion + track_pos*(whole_track_proportion)
-        # We're assuming here track_pos is a number 0 or higher
-        if depth_axis_pos != 0 and track_pos == num_tracks and track_pos == depth_axis_pos:
-            return [1, 1]
-        if track_pos >= depth_axis_pos:
-            start += depth_axis_proportion
-        end = start + track_width_proportion
         return [max(start, 0), min(end, 1)]
 
     def _hidden(self, themes):
@@ -130,18 +120,14 @@ class Plotly(pzr.Renderer):
         if hidden: themes.pop()
         return hidden
 
-    def _create_depthline_trace(self, y_min, y_max):
-        return go.Scatter(x=[0,0], y=[y_min, y_max], mode='markers', marker_size=0)
-
-    # so, the first track should be the first track
-
-
     def get_layout(self, graph, **kwargs):
+        depth = kwargs.pop("depth", True)
         depth_axis_pos = kwargs.pop("depth_position", 0)
+        depth_axis_pos_prop = 0
+        if depth == False:
+            depth_axis_pos = 0
         override_theme = kwargs.pop("override_theme", None)
-        track_width = kwargs.get("track_width", self.template["width_per_track"])
-        if track_width < TRACK_WIDTH_MIN:
-            raise ValueError("65px is minimum track width")
+        override_theme = kwargs.pop("theme_override", override_theme)
         height = kwargs.get("height", None)
         if not isinstance(graph, pozo.Graph):
             raise TypeError("Layout must be supplied a graph object.")
@@ -167,7 +153,6 @@ class Plotly(pzr.Renderer):
             parent_axis_per_track.append(total_axes+1)
             total_axes += num_axes
 
-        layout["width"] = len(graph) * track_width
         layout["yaxis"]["domain"] = [
             0, # Old(bottom axes): self.calculate_axes_height(max_axes_bottom)
             min(1 - self._calc_axes_proportion(max_axes, layout["height"]), 1)
@@ -178,6 +163,7 @@ class Plotly(pzr.Renderer):
         ymin = float('inf')
         ymax = float('-inf')
         y_unit = None
+        total_track_width = 0
 
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
@@ -245,18 +231,48 @@ class Plotly(pzr.Renderer):
                     position_above_bottom = (1-bottom) * ((axis_pos) / (max_axes - 1))
                     axis_style['position'] = min(bottom + position_above_bottom, 1)
                     axis_style['overlaying'] = "x" + str(anchor_axis)
+                else:
+                    # All pozo-keys should not be delivered to plotly
+                    axis_style['pozo-width'] = themes["track_width"]
+                    total_track_width += themes["track_width"]
+                    if depth_axis_pos == (track_pos+1):
+                        axis_style['pozo-yaxis-end'] = True
 
-                axis_style['domain'] = self._calc_track_domain(track_pos, num_tracks, track_width, depth_axis_pos)
 
                 axes_styles.append(axis_style)
 
 
                 themes.pop()
             themes.pop()
+
+        # all stuff dependent on position could go here
+        last_end = 0
+        layout["width"] = self._calc_total_width(num_tracks, total_track_width, depth_axis_pos)
+        track = 0
+        if depth_axis_pos == 0:
+            layout["width"] += self.template["depth_axis_left_shift"]
+            last_end += self.template["depth_axis_left_shift"]/layout["width"]
         for i, axis in enumerate(axes_styles):
+            if 'overlaying' in axis:
+                axis['domain'] = axes_styles[i-1]['domain']
+            else:
+                axis['domain'] = self._calc_track_domain(last_end, axis['pozo-width'], layout["width"])
+                last_end = axis['domain'][1]
+                del axis['pozo-width']
+                if 'pozo-yaxis-end' in axis:
+                    depth_axis_pos_prop = axis['domain'][1] + self.template["depth_axis_width"] / layout["width"] - self.template["depth_axis_left_shift"] / layout["width"]
+                    last_end += self.template["depth_axis_width"] / layout["width"]
+                    del axis['pozo-yaxis-end']
+                track+1
             layout["xaxis" + str(i+1)] = axis
-        if depth_axis_pos != 0:
-            layout['yaxis']['position'] = self._calc_track_domain(depth_axis_pos, num_tracks, track_width, depth_axis_pos)[0]
+        if depth == False:
+            layout['yaxis']['showticklabels'] = False
+            layout['yaxis']['ticklen'] = 0
+        elif depth_axis_pos >= num_tracks:
+            layout['yaxis']['position'] = 1
+        elif depth_axis_pos:
+            layout['yaxis']['position'] = depth_axis_pos_prop + self.template['track_margin']/layout['width']
+            # todo, extra margin isn't working
         layout['yaxis']['maxallowed'] = ymax
         layout['yaxis']['minallowed'] = ymin
         layout['yaxis']['range'] = [ymax, ymin]
