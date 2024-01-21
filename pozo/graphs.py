@@ -18,11 +18,11 @@ class Graph(ood.Observer, pzt.Themeable):
         _depth_ = kwargs.pop('depth', None)
         if _depth_ is not None: self._render['depth'] = _depth_
         _depth_position_ = kwargs.pop('depth_position', None)
-        if is _depth_position_ not None: self._render['depth_position'] = _depth_position_
+        if _depth_position_ is not None: self._render['depth_position'] = _depth_position_
         _height_ = kwargs.pop('height', None)
-        if is _height_ not None: self._render['height']: self._render['height'] = _height_
+        if _height_ is not None: self._render['height']: self._render['height'] = _height_
         _javascript_ = kwargs.pop('javascript', None)
-        if is _javascript_ not None: self._render['javascript']: self._render['javascript'] = _javascript_
+        if _javascript_ is not None: self._render['javascript']: self._render['javascript'] = _javascript_
         # Be cool if we could use include to specify things be on the same track TODO
         old_kwargs = kwargs.copy()
         self._name = kwargs.pop('name', 'unnamed')
