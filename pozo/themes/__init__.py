@@ -84,6 +84,7 @@ class ThemeStack(Themeable):
 
         contexts_horizontal = []
         eventual_value = self.get_theme() # Self-theme, override
+        eventual_value = self._check_shortcut(eventual_value, key, contexts_horizontal) # something that translates to themelike
         # print(f'Override: {eventual_value}')
         while True: # do-while loop using break
             contexts_horizontal.append(eventual_value.get_context())
@@ -112,7 +113,7 @@ class ThemeStack(Themeable):
 
     # Take not-themes and return themes. Can't take a regular dict, which is sorta problematic.
     def _check_shortcut(self, value, key, contexts):
-        context = contexts[-1] # me
+        context = contexts[-1] if len(contexts) else []
         if value is None:
             return None
         may_be_key = (id(value), id(context))

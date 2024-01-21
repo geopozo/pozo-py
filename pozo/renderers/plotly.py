@@ -220,7 +220,10 @@ class Plotly(pzr.Renderer):
                 axis_style = dict(
                     **self.xaxis_template
                 )
-                axis_style['title'] = dict(text=axis.get_name() + " (" + format(data_unit, '~') + ")",font=dict(color=color), standoff=0,)
+                append_unit = ""
+                if data_unit is not None:
+                    append_unit = " (" + format(data_unit, '~') + ")"
+                axis_style['title'] = dict(text=axis.get_name() + append_unit, font=dict(color=color), standoff=0,)
                 axis_style['linecolor'] = color
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
@@ -288,6 +291,7 @@ class Plotly(pzr.Renderer):
 
     def get_traces(self, graph, **kwargs):
         override_theme = kwargs.pop("override_theme", None)
+        override_theme = kwargs.pop("theme_override", override_theme)
         traces = []
         num_axes = 1
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
