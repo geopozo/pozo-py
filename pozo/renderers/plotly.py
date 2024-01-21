@@ -23,7 +23,7 @@ import pozo.units as pzu
 defaults = dict(
     # Non-Plotly style values, used to generate Plotly layout values. These are all "required".
     track_margin = 15,      # margin between each track
-    track_start = 0,        # left-side margin on tracks # (set axis to engineering notation)
+    track_start = 35,        # left-side margin on tracks # (set axis to engineering notation) (helps with hover)
     depth_axis_width = 30,  # size of depth axis if it's not the first thing
     depth_axis_left_shift = 5,
     axis_label_height = 60, # size of each xaxis when stacked
