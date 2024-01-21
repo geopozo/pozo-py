@@ -8,6 +8,7 @@ Or see below for modifying the depth axis, themes don't affect the depth axis.
 The simplest theme is a dictionary:
 
 ```python
+# All current possible properties:
 graph.set_theme(
 	{
 		"hidden":        False      # default
@@ -129,7 +130,7 @@ Not all visual attributes are set with *themes*.
 
 Depth axis attributes are generally set by `graph()` or `render()` arguments. The possible attributes include:
 ```python
-# depth=[True|False]      # turn depth on or off
+# depth=[True|False]      # turn depth axis on or off
 # depth_position=1,2...   # 1: left-most, # 2: before second track, etc ...
 # height=900              # height of graph
 # javascript=[True|False] # If true, we will post process rendering to add scrollbars to big graphs
@@ -141,28 +142,43 @@ graph1.render(depth_pos=2, height=900) # render() takes precedence
 
 # Renderers
 
-When you create a `graphy`, it sets a default `pozo.themes.Plotly` renderer:
+`pozo.renderers.Plotly` is the default renderer, but there is also `pozo.renderes.TreeGraph`, which is meant for development.
+
+When you create a `graph`, it sets a default `pozo.themes.Plotly` renderer:
 
 ```
+# These two statements are equivalent:
 graph1 = pozo.graph(las_object, renderer=pozo.themes.Plotly())
-graph1.render() # graph1.renderer.render(graph1) <-- equivelenet
+graph1 = pozo.graph(las_object)
+
+# These three statements are equivalent
+graph1.render()
+graph1.renderer.render(graph1)
+pozo.renderers.Plotly().render(graph1)
 ```
 
-If you need more fine-grained control over the renderer, one way would be to dive into the source code of the `Plotly` renderer and modify it or make your own (not worth it).
+## More Control
+
+If you need more fine-grained control over the renderer, one way would be to dive into the source code of the `Plotly` renderer and modify it or make your own. However, you get even more fine-grained control and learn about an awesome library if you do this:
 
 **[TODO: source of plotly renderer] Developer: [Do it]**
 
+## Most Control
+
 It may be better to learn how to use `Plotly`, and then do this:
 
-``` [fix]
-import plotly # TODO does this work
-layout = graph1.renderer.get_layout()
-traces = graph2.renderer.get_traces()
+``` 
+import pozo
+import plotly.graph_objects as go
+graph1 = pozo.Graph(las_object) # pozo API
+layout = graph1.renderer.get_layout() # pozo API
+traces = graph2.renderer.get_traces() # pozo API
 ... # your modifications here
 
-graph1 = plotly.draw(layout, traces) # plotly API
-
-graph1.update_layout(...) # more plotly API
+fig = go.Figure(data=traces, layout=layout) # plotly API
+fig.update_layout(...) # more plotly API
+fig.add_trace(...) # more plotly API
+fig.show() # plotly API
 ```
 
 However, since `Plotly` isn't perfect, we do use javascript to modify the plot after it's drawn. The function that does that is [insert function here]. If you use `graph1.render()` it's called automatically. But if you draw the plotly plot yourself, you may need to call it yourself: [insert function called here].
