@@ -1,6 +1,6 @@
 [para español]()
 
-# Pozo
+# Pozo 🐰
 
 Pozo is an open source, intuitive api for visualizing well logs. It accepts las objects from [lasio](https://github.com/kinverarity1/lasio), and uses [plotly](https://github.com/plotly/plotly-py) to render interactive graphs.
 
@@ -20,8 +20,11 @@ myGraph = pozo.Graph(las)
 myGraph.set_theme("cangrejo") # recommended
 myGraph.render()
 ```
+<p align="center"><img src="docs/log_example.png" /> </p>
 
-See [this example](https://github.com/geopozo/pozo-py/tree/main/docs/en/users/saladin) for more involved usage, but note that github will not render the graphs because they are too big. You must open it in binder or your own environment for that.
+See [this example](https://github.com/geopozo/pozo-py/tree/main/docs/en/users/saladin) for more involved usage, but note that github will not render the graphs because they are too big. You must open it in binder or your own environment for that. 
+
+*⚠️Warning⚠️ Plotly requires you `pip install ipywidgets plotly nbformat` to your jupyter lab instance but will fail silently if you don't! You will need them in your kernel if it's different than your lab, but if you don't know what that means, you're probably fine!*
 
 ## Quick Reference
 
