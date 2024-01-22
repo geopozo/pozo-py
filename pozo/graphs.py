@@ -133,12 +133,12 @@ class Graph(ood.Observer, pzt.Themeable):
         return super().get_item(selector, **kwargs)
 
     # pop items
-    def pop_tracks(self,  *selectors):
-        return super().pop_items(*selectors)
+    def pop_tracks(self,  *selectors, **kwargs):
+        return super().pop_items(*selectors, **kwargs)
 
     def combine_tracks(self, selector, *selectors):
         sink = self.get_track(selector)
-        source = self.pop_tracks(*selectors)
+        source = self.pop_tracks(*selectors, sort=False)
         for track in source:
             axes = track.pop_axes()
             sink.add_axes(axes)

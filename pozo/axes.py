@@ -37,8 +37,8 @@ class Axis(ood.Item, pzt.Themeable):
         return super().get_item(selector, **kwargs)
 
     # pop items
-    def pop_data(self,  *selectors):
-        return super().pop_items(*selectors)
+    def pop_data(self,  *selectors, **kwargs):
+        return super().pop_items(*selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
     def has_datum(self, selector):
