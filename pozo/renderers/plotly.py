@@ -35,7 +35,8 @@ defaults = dict(
         height = 900,          # required
         showlegend = False,
         margin = dict(l=15, r=15, t=5, b=5),
-        plot_bgcolor = "#FFFFFF",
+        plot_bgcolor = '#FFFFFF',
+        paper_bgcolor = '#FFFFFF',
 #       width=?                # generated
 
         yaxis = dict(
