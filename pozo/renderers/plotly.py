@@ -286,9 +286,8 @@ class Plotly(pzr.Renderer):
             layout['yaxis']['position'] = 1
         elif depth_axis_pos:
             layout['yaxis']['position'] = depth_axis_pos_prop + self.template['track_margin']/layout['width']
-            # todo, extra margin isn't working
         layout['yaxis']['maxallowed'] = ymax
-        layout['yaxis']['minallowed'] = ymin
+        layout['yaxis']['minallowed'] = ymin # not changing with depth_range
         if depth_range is not None:
             layout['yaxis']['range'] = [depth_range[1], depth_range[0]]
         else:
