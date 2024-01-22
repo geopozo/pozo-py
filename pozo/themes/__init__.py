@@ -1,5 +1,7 @@
 import colour
 
+import pozo.themes.mnemonic_tables as tables
+
 class Theme(): # Meant to be inherited
     def __init__(self, *args, **kwargs):
         self._context = {}
@@ -53,8 +55,9 @@ class Themeable(): # Meant to be inherited by objects
         return self._get_theme()
 
 # Above are inheritables
-from pozo.themes.themes import *
+from pozo.themes.themes import * # should it be relative?
 # Below is implementations
+cangrejo = MnemonicDictionary(tables.cangrejo)
 
 # ThemeList also has a theme, which is considered an override!
 class ThemeStack(Themeable):
