@@ -37,6 +37,10 @@ class Themeable(): # Meant to be inherited by objects
         super().__init__(*args, **kwargs)
 
     def set_theme(self, theme):
+        if isinstance(theme, str):
+            if theme not in themes:
+                raise ValueError(f"{theme} is not a built-in theme, options are: {', '.join(list(themes.keys()))}")
+            theme = themes[theme]
         if isinstance(theme, dict) and not isinstance(theme, ThemeDict):
             self._theme = ThemeDict(theme)
         elif isinstance(theme, Theme):
@@ -55,9 +59,9 @@ class Themeable(): # Meant to be inherited by objects
         return self._get_theme()
 
 # Above are inheritables
-from pozo.themes.themes import * # should it be relative?
+from pozo.themes.theme_tools import * # should it be relative?
 # Below is implementations
-cangrejo = MnemonicDictionary(tables.cangrejo)
+themes = {'cangrejo': MnemonicDictionary(tables.cangrejo)}
 
 # ThemeList also has a theme, which is considered an override!
 class ThemeStack(Themeable):
