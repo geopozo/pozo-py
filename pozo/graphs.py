@@ -15,16 +15,12 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
         self._render = {}
-        _depth_ = kwargs.pop('depth', None)
-        if _depth_ is not None: self._render['depth'] = _depth_
-        _depth_position_ = kwargs.pop('depth_position', None)
-        if _depth_position_ is not None: self._render['depth_position'] = _depth_position_
-        _height_ = kwargs.pop('height', None)
-        if _height_ is not None: self._render['height']: self._render['height'] = _height_
-        _javascript_ = kwargs.pop('javascript', None)
-        if _javascript_ is not None: self._render['javascript']: self._render['javascript'] = _javascript_
+        render_keys = ['depth', 'depth_position', 'height', 'javascript', 'depth_range']
+        for key in render_keys:
+            temporary = kwargs.pop(key, None)
+            if temporary is not None: self._render[key] = temporary
+
         # Be cool if we could use include to specify things be on the same track TODO
-        old_kwargs = kwargs.copy()
         self._name = kwargs.pop('name', 'unnamed')
         self.renderer = kwargs.pop('renderer', pzr.Plotly())
         my_kwargs = {} # Don't pass these to super, but still pass them down as kwargs
@@ -33,6 +29,7 @@ class Graph(ood.Observer, pzt.Themeable):
         my_kwargs["compare"] = kwargs.pop('compare', False)
         my_kwargs["yaxis"] = kwargs.pop('yaxis', None)
         my_kwargs["yaxis_name"] = kwargs.pop('yaxis_name', None)
+        old_kwargs = kwargs.copy()
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string")
         try:
@@ -42,12 +39,34 @@ class Graph(ood.Observer, pzt.Themeable):
         self.process_data(*args, **my_kwargs)
 
     def render(self, **kwargs):
-        self.renderer.render(self, **kwargs)
+        render_options = self._render.copy()
+        for key in kwargs.keys():
+            if key in render_options: del render_options[key]
+        self.renderer.render(self, **kwargs, **render_options)
 
     def get_name(self):
         return self._name
     def set_name(self, name):
         self._name = name
+
+    def set_render_setting(self, key, value):
+        self._render[key] = value
+        self = ['depth', 'depth_position', 'height', 'javascript', 'depth_range']
+
+    def show_depth(self, boolean):
+        self.set_render_setting('depth', boolean)
+
+    def set_depth_position(self, position):
+        self.set_render_setting('depth_position', position)
+
+    def set_height(self, height):
+        self.set_render_setting('height', height)
+
+    def set_depth(self, depth_range):
+        self.set_render_setting('depth_range', depth_range)
+
+    def get_render_settings(self):
+        return self._render
 
     def process_data(self, *args, **kwargs): # Add ways to add data
         for i, ar in enumerate(args):

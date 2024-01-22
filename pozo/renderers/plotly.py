@@ -129,6 +129,9 @@ class Plotly(pzr.Renderer):
         override_theme = kwargs.pop("override_theme", None)
         override_theme = kwargs.pop("theme_override", override_theme)
         height = kwargs.get("height", None)
+        depth_range = kwargs.get("depth_range", None)
+        if depth_range is not None and ( not isinstance(depth_range, (tuple, list)) or len(depth_range) != 2 ):
+            raise TypeError(f"Depth range must be a list or tuple of length two, not {depth_range}")
         if not isinstance(graph, pozo.Graph):
             raise TypeError("Layout must be supplied a graph object.")
         if not len(graph):
@@ -286,7 +289,10 @@ class Plotly(pzr.Renderer):
             # todo, extra margin isn't working
         layout['yaxis']['maxallowed'] = ymax
         layout['yaxis']['minallowed'] = ymin
-        layout['yaxis']['range'] = [ymax, ymin]
+        if depth_range is not None:
+            layout['yaxis']['range'] = [depth_range[1], depth_range[0]]
+        else:
+            layout['yaxis']['range'] = [ymax, ymin]
         return layout
 
     def get_traces(self, graph, **kwargs):
