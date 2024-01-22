@@ -7,6 +7,7 @@ default_theme = pzt.ThemeDict({ "color": default_color_list, "track_width": 200 
 #
 class MnemonicDictionary(pzt.DynamicTheme):
     def __init__(self, mnemonic_table, registry=pzu.registry):
+        if not isinstance(mnemonic_table, dict): raise ValueError("menmonic_table must be dictionary")
         for key, value in mnemonic_table.items():
             if "range_unit" in value:
                 pzu.registry.parse_units(value["range_unit"]) # just checking to see if its working
@@ -17,13 +18,32 @@ class MnemonicDictionary(pzt.DynamicTheme):
         for context in contexts:
             if "mnemonic" in context:
                 mnemonic = context["mnemonic"]
-            elif "mnemonics" in context and len(context["mnemonics"]) == 1:
+            elif "mnemonics" in context and len(context["mnemonics"]) >= 1:
                     mnemonic = context["mnemonics"][0]
         if mnemonic is None or mnemonic not in self._lut:
+            if '-' in self._lut and key in self._lut['-']: return self._lut['-'][key]
             return None
         if key in self._lut[mnemonic]:
             return self._lut[mnemonic][key]
+        if '-' in self._lut and key in self._lut['-']: return self._lut['-'][key]
         return None
+
+    def get_dictionary(self):
+        return self._lut
+
+    def set_mnemonic(self, mnemonic, dictionary):
+        self._lut[mnemonic] = dictionary
+
+    def get_mnemonic(self, mnemonic):
+        if mnemonic not in self._lut: return None
+        return self._lut[mnemonic]
+
+    def set_value(self, mnemonic, key, value):
+        if mnemonic not in self._lut: self._lut[mnemonic] = {}
+        self._lut[mnemonic][key] = value
+
+    def set_fallback(self, key, value):
+        self.set_value('-', key, value)
 
 class ColorWheel(pzt.DynamicTheme):
     def __init__(self, color_list=default_color_list, per=None, context=None, each=False):
