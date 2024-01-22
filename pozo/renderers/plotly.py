@@ -126,15 +126,15 @@ class Plotly(pzr.Renderer):
         return hidden
 
     def get_layout(self, graph, **kwargs):
-        depth = kwargs.pop("depth", True)
+        show_depth = kwargs.pop("show_depth", True)
         depth_axis_pos = kwargs.pop("depth_position", 0)
         depth_axis_pos_prop = 0
-        if depth == False:
+        if show_depth == False:
             depth_axis_pos = 0
         override_theme = kwargs.pop("override_theme", None)
         override_theme = kwargs.pop("theme_override", override_theme)
         height = kwargs.get("height", None)
-        depth_range = kwargs.get("depth_range", None)
+        depth_range = kwargs.get("depth", None)
         if depth_range is not None and ( not isinstance(depth_range, (tuple, list)) or len(depth_range) != 2 ):
             raise TypeError(f"Depth range must be a list or tuple of length two, not {depth_range}")
         if not isinstance(graph, pozo.Graph):
@@ -284,7 +284,7 @@ class Plotly(pzr.Renderer):
                     del axis['pozo-yaxis-end']
                 track+1
             layout["xaxis" + str(i+1)] = axis
-        if depth == False:
+        if show_depth == False:
             layout['yaxis']['showticklabels'] = False
             layout['yaxis']['ticklen'] = 0
         elif depth_axis_pos >= num_tracks:

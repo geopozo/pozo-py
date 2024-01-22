@@ -1,0 +1,3 @@
+v0.9.1:
+ - Add README.md
+ - Change `depth` to `show_depth` and `depth_range` to `depth` in interface

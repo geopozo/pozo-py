@@ -15,7 +15,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
         self._render = {}
-        render_keys = ['depth', 'depth_position', 'height', 'javascript', 'depth_range']
+        render_keys = ['show_depth', 'depth_position', 'height', 'javascript', 'depth']
         for key in render_keys:
             temporary = kwargs.pop(key, None)
             if temporary is not None: self._render[key] = temporary
@@ -51,10 +51,9 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def set_render_setting(self, key, value):
         self._render[key] = value
-        self = ['depth', 'depth_position', 'height', 'javascript', 'depth_range']
 
     def show_depth(self, boolean):
-        self.set_render_setting('depth', boolean)
+        self.set_render_setting('show_depth', boolean)
 
     def set_depth_position(self, position):
         self.set_render_setting('depth_position', position)
@@ -63,7 +62,7 @@ class Graph(ood.Observer, pzt.Themeable):
         self.set_render_setting('height', height)
 
     def set_depth(self, depth_range):
-        self.set_render_setting('depth_range', depth_range)
+        self.set_render_setting('depth', depth_range)
 
     def get_render_settings(self):
         return self._render
