@@ -83,6 +83,10 @@ defaults = dict(
         ),
     ),
 )
+# different hover breaks sometimes
+# different date stuff break sometimes (wasn't showing me august?)
+
+default_hovertemplate = 'Depth: %{y}, Value: %{x}' # how to get this to be the name
 
 GRAPH_HEIGHT_MIN = 125
 AXIS_PROPORTION_MAX = .6
@@ -324,6 +328,7 @@ class Plotly(pzr.Renderer):
                             xaxis='x' + str(num_axes),
                             yaxis='y',
                             name = datum.get_name(),
+                            hovertemplate = default_hovertemplate,
                         ))
                     themes.pop()
                 num_axes += 1
