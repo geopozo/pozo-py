@@ -27,7 +27,7 @@ class Track(ood.Item, pzt.Themeable):
             else:
                 good_axes.append(axis)
         super().add_items(*good_axes, **kwargs)
-        return add_axes
+        return good_axes
 
     # get_items
     def get_axes(self, *selectors, **kwargs):

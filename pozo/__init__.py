@@ -1,3 +1,7 @@
+import ood
+
+ood.exceptions.NameConflictException.default_level = ood.exceptions.ErrorLevel.IGNORE
+ood.exceptions.MultiParentException.default_level = ood.exceptions.ErrorLevel.IGNORE
 from .data import Data
 from .axes import Axis
 from .tracks import Track
@@ -6,7 +10,6 @@ from .graphs import Graph
 import pozo.themes as themes
 import pozo.renderers as renderers
 import pozo.units as units
-import ood
 
 def deLASio(mnemonic):
     return mnemonic.split(":", 1)[0] if ":" in mnemonic else mnemonic
