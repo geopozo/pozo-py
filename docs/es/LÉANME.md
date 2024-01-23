@@ -8,6 +8,15 @@ $ pip install pozo
 
 No olviden `pip install lasio` si se usa lasio! Si se usa jupyter, `pip install ipywidgets plotly nbformat` también.
 
+## Glosario de palabras raras e importantes
+
+```
+- Track               --> Vía
+- Axis (plural: Axes) --> Eje
+- Pop                 --> Quitar (más como echar)
+- Fallback            --> Respaldo
+```
+
 ## Uso Sencillo
 
 ```python
