@@ -18,7 +18,7 @@ import lasio
 las = lasio.read("SALADIN.LAS")
 
 # You can specify the data you are interested in
-myGraph = pozo.Graph(las, include=["CALI", "CGR", "LLS", "ILM" "ILD" "LLD", "NPH", "RHOB"])
+myGraph = pozo.Graph(las, include=["CALI", "CGR", "LLS", "ILD", "LLD", "NPH", "RHOB"])
 
 # This is a good theme
 myGraph.set_theme("cangrejo") # recommended theme!
@@ -39,7 +39,7 @@ Notice the tracks are in the same order as your list `include=[...]`.
 
 graph1.combine_tracks("CGR", "CALI") # Also maintains order!
 
-graph1.combine_tracks("LLD","ILD","ILM","LLS") 
+graph1.combine_tracks("LLD","ILD","LLS") 
 
 graph1.combine_tracks("RHOB", "NPHI")
 
