@@ -1,4 +1,4 @@
-[para español]()
+[para español](https://github.com/geopozo/pozo-py/blob/main/docs/es/L%C3%89ANME.md)
 
 # 🐰 Pozo Well Visualizer
 
@@ -114,7 +114,7 @@ graph.add_tracks(new_track)
 
 *TODO: common geology-only units*
 
-## Common Operations (Recipes)
+## Common Operations
 
 ### Common Derived Data
 
