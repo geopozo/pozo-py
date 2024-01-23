@@ -28,7 +28,8 @@ myGraph.render(height=800, depth=[1080, 1180])
 ```
 <p align="center"><img src="docs/log_example2.png" /> </p>
 
-<br>
+<br />
+
 Notice the tracks are in the same order as your list `include=[...]`.
 
 
