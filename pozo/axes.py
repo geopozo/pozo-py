@@ -27,6 +27,7 @@ class Axis(ood.Item, pzt.Themeable):
             else:
                 good_data.append(datum)
         super().add_items(*good_data, **kwargs)
+        return good_data
 
     # get_items
     def get_data(self, *selectors, **kwargs):

@@ -141,6 +141,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if isinstance(intermediate, pozo.Track):
                 good_tracks.append(intermediate)
         super().add_items(*good_tracks, **kwargs)
+        return good_tracks
 
     # get_items
     def get_tracks(self, *selectors, **kwargs):

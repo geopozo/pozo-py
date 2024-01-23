@@ -207,7 +207,7 @@ class Plotly(pzr.Renderer):
                         if not (data_unit is None or range_unit is None or range_unit.is_compatible_with(data_unit)):
                             raise pint.DimensionalityError(range_unit, data_unit, extra_msg="range_unit set by theme is not compatible with data units")
                     themes.pop()
-                    if y_unit is not None:
+                    if y_unit is not None and datum.get_depth_unit() is not None:
                         if y_unit != datum.get_depth_unit():
                             raise ValueError(f"All depth axis must have the same unit. You must transform the data. {y_unit} is not {datum.get_depth_unit()}")
                     y_unit = datum.get_depth_unit()
