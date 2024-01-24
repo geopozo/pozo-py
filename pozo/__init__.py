@@ -19,9 +19,8 @@ def deLASio(mnemonic):
 
 
 class HasLog(ood.selectors.Selector):
-    def __init__(self, mnemonic, prefix=''):
+    def __init__(self, mnemonic):
         self.mnemonic = mnemonic
-        self.prefix = prefix
     def _process(self, parent):
         ret_items = []
         for item in parent.get_items():
@@ -30,7 +29,7 @@ class HasLog(ood.selectors.Selector):
                     ret_items.append(item)
                     break
             if isinstance(item, ood.Observer):
-                if item.has_item(HasLog(self.mnemonic, prefix='-' + self.prefix)):
+                if item.has_item(self):
                     ret_items.append(item)
                     break
         return ret_items
