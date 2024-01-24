@@ -157,10 +157,12 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def combine_tracks(self, selector, *selectors):
         sink = self.get_track(selector, strict_index=False)
-        if sink is None and isinstance(selector, (pozo.Data, pozo.Axis, pozo.Track)):
-            self.add_tracks(selector)
-        else:
-            raise TypeError("The first argument must be a track that exists or a new track track/axes/data to add")
+        if sink is None:
+            if isinstance(selector, (pozo.Data, pozo.Axis, pozo.Track)):
+                self.add_tracks(selector)
+                sink = selector
+            else:
+                raise TypeError("The first argument must be a track that exists or a new track track/axes/data to add")
         for sel in selectors:
             if not self.has_track(sel) and isinstance(sel, Track):
                 self.add_tracks(sel)

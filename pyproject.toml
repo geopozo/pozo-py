@@ -10,7 +10,7 @@ name = "pozo"
 description = "Help visualizing well log data - Herramienta para visualizar registros de pozos"
 readme = "README.md"
 requires-python = ">=3.9"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "ood >=1.0.6",
  "plotly >=5.18.0",
