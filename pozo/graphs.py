@@ -157,6 +157,9 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def combine_tracks(self, selector, *selectors):
         sink = self.get_track(selector)
+        for sel in selectors:
+            if not self.has_track(sel) and isinstance(sel, (Data, Axis, Track)):
+                self.add_tracks(sel)
         source = self.pop_tracks(*selectors, sort=False)
         for track in source:
             axes = track.pop_axes()
