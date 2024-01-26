@@ -103,6 +103,10 @@ Very good.
 
 `someGraph.render()`: Try to print out your graph. It takes the same extra arguments as `pozo.Graph()`
 
+### Specials:
+
+`someGraph.get_axes()` and `someGraph.get_data()` function too.
+
 ## `Track()`
 
 ### Create New:
@@ -156,3 +160,16 @@ Same.
 `someData.convert_unit()`: takes a new unit, and if it can figure out the conversion, does it
 
 `someData.convert_depth_unit()` takes a new unit, and if it can figure out the conversion, does it
+
+## Special Selectors
+
+Normally, a selector is a number (position) or a name. There are others:
+
+* Every pozo object is a selector for itself:
+```
+track1 = pozo.Track()
+track2 = pozo.Track()
+graph1.add_tracks(track1)
+len(graph1.get_tracks(track1, track2)) == 1
+```
+* `pozo.HasLog("MNEMONIC")` will search every data for a particular object and return the pozo Object your looking for if it finds it.
