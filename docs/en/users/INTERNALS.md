@@ -9,7 +9,7 @@ myGraph = pozo.Graph()
 
 This is what you have:
 
-<p align=center><img src=../../images/trees/1.png /></p>
+<p align=center><img src=../../images/internal/1.png /></p>
 
 
 And if you call `myGraph.render()`... you'll get nothing because you haven't added any data yet.
@@ -25,7 +25,7 @@ myGraph.add_tracks(
 
 Those don't have data, but now our internal data structure looks like this:
 
-<p align=center><img src=../../images/trees/2.png /></p>
+<p align=center><img src=../../images/internal/2.png /></p>
 
 `myGraph.render()` still would do nothing, so let's add some data.
 
@@ -43,7 +43,7 @@ track1.add_axes(new_data)
 
 Voilà:
 
-<p align=center><img src=../../images/trees/3.png /></p>
+<p align=center><img src=../../images/internal/3.png /></p>
 
 WAIT! Where did the "Axis" box come from?
 
@@ -68,7 +68,7 @@ anAxis.add_data(aData)
 ### Render
 Anyway, now if we `myGraph.render()`, we get this:
 
-<p align=center><img src=../../images/trees/simple_pozo.png /></p>
+<p align=center><img src=../../images/internal/simple_pozo.png /></p>
 
 Very good.
 
