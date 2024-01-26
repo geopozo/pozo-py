@@ -26,7 +26,7 @@ myGraph.set_theme("cangrejo") # recommended theme!
 myGraph.render(height=800, depth=[1080, 1180])
 
 ```
-<p align="center"><img src="docs/log_example2.png" /> </p>
+<p align="center"><img src="docs/images/log_example2.png" /> </p>
 
 <br />
 
@@ -46,7 +46,7 @@ graph1.combine_tracks("RHOB", "NPHI")
 # Notice we change position of depth axis with `depth_position=1`
 graph1.render(height=800, depth_position=1, depth=[1080, 1180])
 ```
-<p align="center"><img src="docs/log_example.png" /> </p>
+<p align="center"><img src="docs/images/log_example.png" /> </p>
 
 #### Theming
 The `"cangrejo"` theme above is built-in. It uses the `mnemonic` of the data to determine what the color, range, and unit might be. However, it doesn't cover all cases, so you have two options:
