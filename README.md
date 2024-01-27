@@ -92,18 +92,17 @@ data = [1, 2, 3]
 depth = [1010, 1020, 1030]
 
 new_data=Data(data, depth=depth, mnemonic="LOL!")
-
+graph.add_tracks(new_data)
 # all data must have either a mnemonic or a name
 
 ```
 You can now call `graph.add_tracks(new_data)`
 
-But maybe you want to theme it first. Theming a `Data` object doesn't do much:
+But maybe you want to theme it first. Don't theme the "Data" directly, it won't impact much:
 
 ```
-new_track=Track(new_data)
-new_track.set_theme({"color":"red", range=[0, 1], range_unit="fraction"})
-graph.add_tracks(new_track)
+new_tracks = graph.add_tracks(new_data)
+new_tracks[0].set_theme({"color":"red", range=[0, 1], range_unit="fraction"})
 ```
 
 *TODO: learn more about the pozo internal data structure*

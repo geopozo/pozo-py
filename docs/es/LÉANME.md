@@ -98,9 +98,10 @@ popped_tracks2 = graph1.pop_tracks(pozo.HasLog("CGR")) # pozo.HasLog( "MNEMONIC"
 data = [1, 2, 3]
 depth = [1010, 1020, 1030]
 
-new_data=Data(data, depth=depth, mnemonic="LOL!")
-
 # todo Data requiere o un `mnemonic` o un `name`
+new_data=Data(data, depth=depth, mnemonic="LOL!")
+graph.add_tracks(new_data)
+# Renderizalo....
 
 ```
 Ya se puede llamar `graph.add_tracks(new_data)`
@@ -108,9 +109,10 @@ Ya se puede llamar `graph.add_tracks(new_data)`
 Pero si se quiere un tema primero. Un objeto tipo `Data` no va bien con temas (solo se cambia el color de la linea):
 
 ```
-new_track=Track(new_data)
-new_track.set_theme({"color":"red", range=[0, 1], range_unit="fraction"})
+new_tracks = graph.add_tracks(new_data)
+new_tracks[0].set_theme({"color":"red", range=[0, 1], range_unit="fraction"})
 graph.add_tracks(new_track)
+# Renderizalo....
 ```
 
 *TODO: para saber más de la estructura interna de un gráfico de pozo*
