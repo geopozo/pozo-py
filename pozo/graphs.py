@@ -164,7 +164,7 @@ class Graph(ood.Observer, pzt.Themeable):
             else:
                 raise TypeError("The first argument must be a track that exists or a new track track/axes/data to add")
         for sel in selectors:
-            if not self.has_track(sel) and isinstance(sel, Track):
+            if not self.has_track(sel) and isinstance(sel, pozo.Track):
                 self.add_tracks(sel)
         source = self.pop_tracks(*selectors, sort=False)
         for track in source:

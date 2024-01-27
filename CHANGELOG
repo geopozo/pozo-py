@@ -1,3 +1,7 @@
+v0.9.5:
+ - fix typo bug in combine_graphs()
+v0.9.4:
+ - fix typo bug in combine_graphs()
 v0.9.3:
  - combine_tracks() now allows you to use new tracks and functions like add_tracks
    (only the first argument can be a Data or Axis as well)
