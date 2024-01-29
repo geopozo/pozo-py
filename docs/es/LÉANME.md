@@ -33,7 +33,7 @@ myGraph.set_theme("cangrejo") # recomendado!
 myGraph.render(height=800, depth=[1080, 1180])
 
 ```
-<p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/log_example2.png" /> </p>
+<p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/images/log_example2.png" /> </p>
 
 <br />
 
@@ -53,7 +53,7 @@ graph1.combine_tracks("RHOB", "NPHI")
 # Se nota que cambiamos la posición del eje de la profunidad con `depth_position=1`
 graph1.render(height=800, depth_position=1, depth=[1080, 1180])
 ```
-<p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/log_example.png" /> </p>
+<p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/images/log_example.png" /> </p>
 
 #### Temas
 El tema `"cangrejo"` está incluido. Se usa el `mnemonic` de los datos para determinar el color, rango, and unidad. Pero no sabe todo, así que hay dos opciones:
