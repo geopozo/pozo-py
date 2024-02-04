@@ -48,6 +48,8 @@ registry.add_las_map('URAN', ''    , percent_general)
 # annotating reg files w/ corrections that the file doesn't support
 # versioning, searching
 # also want it to point to posts
+import re
+desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
 
 def check_las(las, registry=registry):
     def n0(s): # If None, convert to ""
@@ -66,12 +68,14 @@ def check_las(las, registry=registry):
             parsed = registry.parse_unit_from_curve(curve)
         except (pint.UndefinedUnitError, MissingRangeError) as e:
             confidence = " - " + str(e) + " - NONE"
+        find_desc = desc_wo_num.findall(curve.descr)
+        desc = find_desc[0] if len(find_desc) > 0 else curve.descr
         result.append(d.join([n0(x) for x in [pozo.deLASio(curve.mnemonic),
                                              curve.unit,
                                              pozo_match,
                                              confidence,
                                              parsed,
-                                             curve.descr]
+                                             desc]
                               ]))
     try:
         display(HTML(pd.read_csv(StringIO("\n".join(result)), delimiter=d, na_filter=False).to_html()))
