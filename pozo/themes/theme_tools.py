@@ -77,6 +77,8 @@ class ColorWheel(pzt.DynamicTheme):
                         self._current_context = id(context)
                         color = self._color_list[self._i % len(self._color_list)]
                         self._current_color = color
+                    else: # same context, do nothing
+                        continue
                     self._i += 1
                     break
         else:
