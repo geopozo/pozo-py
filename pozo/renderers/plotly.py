@@ -344,6 +344,11 @@ class Plotly(pzr.Renderer):
             themes.pop()
         return traces
 
+    def get_figure(self, graph, **kwargs):
+        layout = self.get_layout(graph, **kwargs)
+        traces = self.get_traces(graph, **kwargs)
+        return go.Figure(data=traces, layout=layout)
+
     def render(self, graph, **kwargs):
         javascript = kwargs.pop("javascript", True)
         layout = self.get_layout(graph, **kwargs)
