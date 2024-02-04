@@ -16,13 +16,14 @@ class Axis(ood.Item, pzt.Themeable):
             self.add_data(ar)
 
     def _check_types(self, *data):
+        print(data)
         accepted_types = (pozo.Data)
         raw_return = []
         for datum in data:
             if isinstance(datum, list):
-                raw_return.extend(self._check_types(self, *datum))
+                raw_return.extend(self._check_types(*datum))
             elif not isinstance(datum, accepted_types):
-                raise TypeError("Axis.add_data() only accepts pozo.Data, or a single list of pozo.Data")
+                raise TypeError(f"Axis.add_data() only accepts pozo.Data, or a single list of pozo.Data, not {type(datum)}")
             else:
                 raw_return.append(datum)
         return raw_return
