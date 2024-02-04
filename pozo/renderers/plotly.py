@@ -1,6 +1,7 @@
 import copy
 import math
 import warnings
+import re
 
 from IPython.display import Javascript # Part of Hack #1
 import plotly.graph_objects as go
@@ -10,6 +11,9 @@ import pozo
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
+
+re_space = re.compile(' ')
+re_power = re.compile('\*\*')
 
 # You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
@@ -230,7 +234,10 @@ class Plotly(pzr.Renderer):
                 )
                 append_unit = ""
                 if data_unit is not None:
-                    append_unit = " (" + format(data_unit, '~') + ")"
+                    unit = format(data_unit, '~')
+                    unit = re_space.sub('', unit)
+                    unit = re_power.sub('^', unit)
+                    append_unit = " (" + unit + ")"
                 axis_style['title'] = dict(text=axis.get_name() + append_unit, font=dict(color=color), standoff=0,)
                 axis_style['linecolor'] = color
                 axis_style['tickcolor'] = color
