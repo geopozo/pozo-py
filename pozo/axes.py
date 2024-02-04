@@ -15,17 +15,21 @@ class Axis(ood.Item, pzt.Themeable):
         for ar in args:
             self.add_data(ar)
 
-    # add_items
-    def add_data(self, *data, **kwargs):
+    def _check_types(self, *data):
         accepted_types = (pozo.Data)
-        good_data = []
+        raw_return = []
         for datum in data:
-            if isinstance(datum, list) and all(isinstance(item, accepted_types) for item in datum):
-                good_data.extend(datum)
+            if isinstance(datum, list):
+                raw_return.extend(self._check_types(self, *datum))
             elif not isinstance(datum, accepted_types):
                 raise TypeError("Axis.add_data() only accepts pozo.Data, or a single list of pozo.Data")
             else:
-                good_data.append(datum)
+                raw_return.append(datum)
+        return raw_return
+
+    # add_items
+    def add_data(self, *data, **kwargs):
+        good_data = self._check_types(*data)
         super().add_items(*good_data, **kwargs)
         return good_data
 

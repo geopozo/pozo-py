@@ -123,23 +123,31 @@ class Graph(ood.Observer, pzt.Themeable):
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
 
-    # add_items
-    def add_tracks(self, *tracks, **kwargs): # axis can take axes... and other axis?
+    def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
-        good_tracks = []
+        raw_return = []
         for track in tracks:
-            if isinstance(track, list) and all(isinstance(item, accepted_types) for item in track):
-                good_tracks.extend(track) # it'll be out of order
+            if isinstance(track, (list)):
+                raw_return.extend(self._check_types(*tracks))
             elif not isinstance(track, accepted_types):
                 raise TypeError("Axis.add_tracks() only accepts axes, tracks, and data: pozo objects")
-
             intermediate = track
             if isinstance(intermediate, pozo.Data):
                 intermediate = pozo.Axis(intermediate, name=intermediate.get_name())
             if isinstance(intermediate, pozo.Axis):
                 intermediate = pozo.Track(intermediate, name=intermediate.get_name())
             if isinstance(intermediate, pozo.Track):
-                good_tracks.append(intermediate)
+                raw_return.append(intermediate)
+        return raw_return
+
+    # add_items
+    def add_axes(self, *axes, **kwargs):
+        good_axes = self._check_types(*axes)
+        super().add_items(*good_axes, **kwargs)
+        return good_axes
+    # add_items
+    def add_tracks(self, *tracks, **kwargs): # axis can take axes... and other axis?
+        good_tracks = self._check_types(*tracks)
         super().add_items(*good_tracks, **kwargs)
         return good_tracks
 
@@ -167,8 +175,11 @@ class Graph(ood.Observer, pzt.Themeable):
             if not self.has_track(sel) and isinstance(sel, pozo.Track):
                 self.add_tracks(sel)
         source = self.pop_tracks(*selectors, sort=False)
+        print(f"For {selector}")
         for track in source:
+            print(f"Popping track: {track.get_name()}")
             axes = track.pop_axes()
+            print(f"Adding: {axes}")
             sink.add_axes(axes)
 
     # what about whitelabelling all the other stuff
