@@ -56,7 +56,7 @@ cangrejo  = {
         "range_unit": "gram/centimeter**3",
     },
     "DT" : {
-        "color" : "black",
+        "color" : "red",
         "range": [30, 200],
         "range_unit": "microsecond/foot",
     },
