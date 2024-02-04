@@ -175,11 +175,8 @@ class Graph(ood.Observer, pzt.Themeable):
             if not self.has_track(sel) and isinstance(sel, pozo.Track):
                 self.add_tracks(sel)
         source = self.pop_tracks(*selectors, sort=False)
-        print(f"For {selector}")
         for track in source:
-            print(f"Popping track: {track.get_name()}")
             axes = track.pop_axes()
-            print(f"Adding: {axes}")
             sink.add_axes(axes)
 
     # what about whitelabelling all the other stuff

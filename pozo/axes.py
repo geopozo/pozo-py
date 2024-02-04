@@ -16,7 +16,6 @@ class Axis(ood.Item, pzt.Themeable):
             self.add_data(ar)
 
     def _check_types(self, *data):
-        print(data)
         accepted_types = (pozo.Data)
         raw_return = []
         for datum in data:
