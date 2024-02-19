@@ -8,6 +8,9 @@ import ood
 import ood.exceptions as ooderr
 
 LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work reliably
+WELLY_WELL_TYPE = "<class 'welly.well.Well'>"
+WELLY_PROJECT_TYPE = "<class 'welly.project.Project'>"
+WELLY_CURVE_TYPE = "<class 'welly.curve.Curve'>"
 
 class Graph(ood.Observer, pzt.Themeable):
     _type="graph"
