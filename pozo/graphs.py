@@ -74,6 +74,10 @@ class Graph(ood.Observer, pzt.Themeable):
         for i, ar in enumerate(args):
             if str(type(ar)) == LAS_TYPE:
                 self.add_las_object(ar, **kwargs)
+            if str(type(ar)) == WELLY_WELL_TYPE:
+                raise Exception("We do not accept welly types")
+            elif str(type(ar)) == WELLY_PROJECT_TYPE:
+                raise Exception("We do not accept welly types")
             elif isinstance(ar, (pozo.Data, pozo.Axis, pozo.Track)):
                 self.add_tracks(ar)
             else:
@@ -125,6 +129,7 @@ class Graph(ood.Observer, pzt.Themeable):
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
+            
 
     def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
