@@ -1,5 +1,5 @@
 import warnings
-
+import numpy as np
 import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
@@ -76,8 +76,10 @@ class Graph(ood.Observer, pzt.Themeable):
             elif str(type(ar)) == WELLY_PROJECT_TYPE:
                 if len(ar.get_wells()) > 1:
                     raise ValueError("This project contains more than one well, please process them separately")
+                else:
+                    self.add_welly_object(ar, **kwargs)
             elif str(type(ar)) == WELLY_WELL_TYPE:
-                raise Exception("We do not accept welly types")
+                self.add_welly_object(ar, **kwargs)
             elif isinstance(ar, (pozo.Data, pozo.Axis, pozo.Track)):
                 self.add_tracks(ar)
             else:
@@ -129,7 +131,22 @@ class Graph(ood.Observer, pzt.Themeable):
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
+ 
+    def add_welly_object(self, ar, **kwargs):
+        include = kwargs.get('include', [])
+        exclude = kwargs.get('exclude', [])
+        yaxis = kwargs.get('yaxis', None)
+        yaxis_name = kwargs.get('yaxis_name',"DEPTH")
+        yaxis_unit = None
+        
+        if str(type(ar)) == WELLY_PROJECT_TYPE: ar = ar.get_wells()[0]
             
+        print(f"The max depth is: {np.nanmax(ar.data[yaxis_name].values)}")
+        print(f"The unit for depth is: {ar.data[yaxis_name].index_units}")
+        
+        warnings.filterwarnings("ignore", message="Index.is_numeric is deprecated.")
+        for curve in ar.data.values():
+            print(f"{curve.mnemonic} w/ units: {curve.units} w/ shape {curve.values.shape}")        
 
     def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
