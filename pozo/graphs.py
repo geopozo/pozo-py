@@ -74,7 +74,7 @@ class Graph(ood.Observer, pzt.Themeable):
             elif isinstance(ar, (pozo.Data, pozo.Axis, pozo.Track)):
                 self.add_tracks(ar)
             else:
-                warnings.warn("Unknown argument type passed: argument {i}, {type(ar)}. Ignored")
+                warnings.warn(f"Unknown argument type passed: argument {i}, {type(ar)}. Ignored")
 
     def add_las_object(self, ar, **kwargs):
         include = kwargs.get('include', [])
