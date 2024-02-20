@@ -77,7 +77,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 if len(ar.get_wells()) != 1:
                     raise ValueError(f"If you use welly, you must supply a well (or a project that has exactly one well). This project has {len(ar.get_wells())} wells.")
                 else:
-                    self.add_welly_object(ar, **kwargs)
+                    self.add_welly_object(ar[0], **kwargs)
             elif str(type(ar)) == WELLY_WELL_TYPE:
                 self.add_welly_object(ar, **kwargs)
             elif isinstance(ar, (pozo.Data, pozo.Axis, pozo.Track)):
@@ -138,8 +138,6 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = None
-        
-        if str(type(ar)) == WELLY_PROJECT_TYPE: ar = ar.get_wells()[0]
             
         print(f"The max depth is: {np.nanmax(ar.data[yaxis_name].values)}")
         print(f"The unit for depth is: {ar.data[yaxis_name].index_units}")
