@@ -174,6 +174,11 @@ class Graph(ood.Observer, pzt.Themeable):
                 name = mnemonic
             else:
                 name = curve.mnemonic
+
+            data = pozo.Data(curve.data, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
+            self.add_tracks(data)
+        if include and len(include) != 0:
+            self.reorder_all_tracks(include)
     
 
     def _check_types(self, *tracks):
