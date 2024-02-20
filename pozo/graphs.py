@@ -137,14 +137,26 @@ class Graph(ood.Observer, pzt.Themeable):
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
-        yaxis_unit = None
+        yaxis_unit = kwargs.get('yaxis_unit', None)
             
         print(f"The max depth is: {np.nanmax(ar.data[yaxis_name].values)}")
         print(f"The unit for depth is: {ar.data[yaxis_name].index_units}")
         
         warnings.filterwarnings("ignore", message="Index.is_numeric is deprecated.")
         for curve in ar.data.values():
-            print(f"{curve.mnemonic} w/ units: {curve.units} w/ shape {curve.values.shape}")        
+            print(f"{curve.mnemonic} w/ units: {curve.units} w/ shape {curve.values.shape}")
+            
+        if yaxis is not None:
+            yaxis_name = None
+            if hasattr(yaxis, "units"):
+                yaxis_unit = yaxis.units
+            else:
+                warnings.warn("Not sure what yaxis units are.") # TODO
+        elif yaxis_name in ar.data.keys():
+            yaxis = ar.data[yaxis_name]
+            yaxis_unit = pzu.parse_unit_from_curve(ar.data[yaxis_name])
+        else:
+            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")      
 
     def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
