@@ -74,8 +74,8 @@ class Graph(ood.Observer, pzt.Themeable):
             if str(type(ar)) == LAS_TYPE:
                 self.add_las_object(ar, **kwargs)
             elif str(type(ar)) == WELLY_PROJECT_TYPE:
-                if len(ar.get_wells()) > 1:
-                    raise ValueError("This project contains more than one well, please process them separately")
+                if len(ar.get_wells()) != 1:
+                    raise ValueError(f"If you use welly, you must supply a well (or a project that has exactly one well). This project has {len(ar.get_wells())} wells.")
                 else:
                     self.add_welly_object(ar, **kwargs)
             elif str(type(ar)) == WELLY_WELL_TYPE:
