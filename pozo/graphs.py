@@ -156,7 +156,25 @@ class Graph(ood.Observer, pzt.Themeable):
             yaxis = ar.data[yaxis_name]
             yaxis_unit = pzu.parse_unit_from_curve(ar.data[yaxis_name])
         else:
-            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")      
+            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")  
+        
+        for curve in ar:
+
+            mnemonic = pozo.deLASio(curve.mnemonic)
+            if include and len(include) != 0 and curve.mnemonic not in include:
+                continue
+            elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
+                continue
+
+            if curve.units is None:
+                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
+            unit = pzu.parse_unit_from_curve(curve)
+
+            if ooderr.NameConflictException(level=self._name_conflict) is None:
+                name = mnemonic
+            else:
+                name = curve.mnemonic
+    
 
     def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
