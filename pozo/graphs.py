@@ -158,7 +158,7 @@ class Graph(ood.Observer, pzt.Themeable):
         else:
             raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")  
         
-        for curve in ar:
+        for curve in ar.data.values():
 
             mnemonic = pozo.deLASio(curve.mnemonic)
             if include and len(include) != 0 and curve.mnemonic not in include:
@@ -175,7 +175,7 @@ class Graph(ood.Observer, pzt.Themeable):
             else:
                 name = curve.mnemonic
 
-            data = pozo.Data(curve.data, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
+            data = pozo.Data(curve.values, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
