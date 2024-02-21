@@ -138,9 +138,6 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = kwargs.get('yaxis_unit', None)
-            
-        print(f"The max depth is: {np.nanmax(ar.data[yaxis_name].values)}")
-        print(f"The unit for depth is: {ar.data[yaxis_name].index_units}")
         
         warnings.filterwarnings("ignore", message="Index.is_numeric is deprecated.")
         for curve in ar.data.values():
