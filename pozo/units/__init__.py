@@ -61,11 +61,11 @@ def check_las(las, registry=registry):
         pozo_match = None
         confidence = None
         try:
-            resolved = registry.resolve_las_unit(curve)
+            resolved = registry.resolve_las_unit(curve.mnemonic, curve.unit, curve.data)
             if resolved is not None:
                 pozo_match = resolved.unit
                 confidence = resolved.confidence
-            parsed = registry.parse_unit_from_curve(curve)
+            parsed = registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
         except (pint.UndefinedUnitError, MissingRangeError) as e:
             confidence = " - " + str(e) + " - NONE"
         find_desc = desc_wo_num.findall(curve.descr)
@@ -85,4 +85,4 @@ def check_las(las, registry=registry):
 
 # Just a shorcut to make the API nice
 def parse_unit_from_curve(curve, registry=registry):
-    return registry.parse_unit_from_curve(curve)
+    return registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
