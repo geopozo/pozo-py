@@ -138,10 +138,6 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = kwargs.get('yaxis_unit', None)
-        
-        warnings.filterwarnings("ignore", message="Index.is_numeric is deprecated.")
-        for curve in ar.data.values():
-            print(f"{curve.mnemonic} w/ units: {curve.units} w/ shape {curve.values.shape}")
             
         if yaxis is not None:
             yaxis_name = None
