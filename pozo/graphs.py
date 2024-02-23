@@ -143,12 +143,12 @@ class Graph(ood.Observer, pzt.Themeable):
         if yaxis is not None:
             yaxis_name = None
             if hasattr(yaxis, "units"):
-                yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis)
+                yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values)
             else:
                 warnings.warn("Not sure what yaxis units are.") # TODO
         elif yaxis_name in ar.data.keys():
             yaxis = ar.data[yaxis_name]
-            yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis)
+            yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values)
         else:
             raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
         for curve in ar.data.values():
@@ -160,8 +160,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 continue
 
             if curve.units is None:
-                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
-            unit = pzu.registry.parse_unit_from_context(mnemonic, curve.units, curve)
+                warnings.warn(f"No units found for mnemonic {mnemonic}")
+            unit = pzu.registry.parse_unit_from_context(mnemonic, curve.units, curve.values) # TODO is curve correct?
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
