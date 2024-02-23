@@ -111,18 +111,17 @@ class Graph(ood.Observer, pzt.Themeable):
 
 
         for curve in ar.curves:
-            if yaxis_name is not None and curve.mnemonic == yaxis_name:
-                continue
+            if yaxis_name is not None and curve.mnemonic == yaxis_name: continue
 
             mnemonic = pozo.deLASio(curve.mnemonic)
             if include and len(include) != 0 and curve.mnemonic not in include:
                 continue
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
-
+            unit = None
             if curve.unit is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
-            unit = pzu.parse_unit_from_curve(curve)
+            else: unit = pzu.parse_unit_from_curve(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
