@@ -92,11 +92,13 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = None
         if yaxis is not None: # this is a manually added y axis, don't parse it with LAS
-            yaxis_name = None
+            if yaxis_name is None and hasattr(yaxis, "mnemonic"): yaxis_name = yaxis.mnemonic
             if hasattr(yaxis, "unit"):
                 yaxis_unit = yaxis.unit
             else:
-                warnings.warn("Not sure what yaxis units are.") # TODO
+                warnings.warn("Not sure what yaxis units are.")
+            if hasattr(yaxis, "data"):
+                yaxis = yaxis.data
             if len(yaxis) != len(ar.index):
                 raise ValueError(f"Length of supplied yaxis ({len(yaxis)}) does not match length of LAS File index ({len(ar.index)})")
         elif yaxis_name in ar.curves.keys():
@@ -104,8 +106,8 @@ class Graph(ood.Observer, pzt.Themeable):
             yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name])
         else:
             warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
-            yaxis = ar.index
-            yaxis_name = None
+            yaxis = ar.depth_m
+            yaxis_unit = pzu.parse_units("meter")
 
 
         for curve in ar.curves:
@@ -131,14 +133,14 @@ class Graph(ood.Observer, pzt.Themeable):
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
- 
+
     def add_welly_object(self, ar, **kwargs):
         include = kwargs.get('include', [])
         exclude = kwargs.get('exclude', [])
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = kwargs.get('yaxis_unit', None)
-            
+
         if yaxis is not None:
             yaxis_name = None
             if hasattr(yaxis, "units"):
@@ -149,8 +151,7 @@ class Graph(ood.Observer, pzt.Themeable):
             yaxis = ar.data[yaxis_name]
             yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis)
         else:
-            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")  
-        
+            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
         for curve in ar.data.values():
 
             mnemonic = pozo.deLASio(curve.mnemonic)
