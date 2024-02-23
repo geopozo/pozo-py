@@ -141,16 +141,17 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis_unit = kwargs.get('yaxis_unit', None)
 
         if yaxis is not None:
-            yaxis_name = None
+            if yaxis_name and hasattr(yaxis, "mnemonic"): yaxis_name = yaxis.mnemonic
             if hasattr(yaxis, "units"):
                 yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values)
             else:
                 warnings.warn("Not sure what yaxis units are.") # TODO
+            if hasattr(yaxis, "values"): yaxis = yaxis.values
         elif yaxis_name in ar.data.keys():
             yaxis = ar.data[yaxis_name]
             yaxis_unit = pzu.registry.parse_unit_from_context(pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values)
         else:
-            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
+            raise ValueError("No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=.")
         for curve in ar.data.values():
 
             mnemonic = pozo.deLASio(curve.mnemonic)
