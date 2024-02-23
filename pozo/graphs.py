@@ -161,9 +161,10 @@ class Graph(ood.Observer, pzt.Themeable):
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
 
+            unit = None
             if curve.units is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}")
-            unit = pzu.registry.parse_unit_from_context(mnemonic, curve.units, curve.values) # TODO is curve correct?
+            else: unit = pzu.registry.parse_unit_from_context(mnemonic, curve.units, curve.values) # TODO is curve correct?
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
                 name = mnemonic
