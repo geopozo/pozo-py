@@ -170,12 +170,20 @@ class Graph(ood.Observer, pzt.Themeable):
                 name = mnemonic
             else:
                 name = curve.mnemonic
+            depth = None
+            depth_unit = None
+            if yaxis is not None:
+                depth = yaxis
+                depth_unit = yaxis_unit
+            else:
+                depth = curve.index
+                depth_unit = pzu.parse_unit_from_context(pozo.deLASio(curve.index_name), curve.index_name, curve.index)
 
-            data = pozo.Data(curve.values, depth=yaxis.values, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
+            data = pozo.Data(curve.values, depth=depth, mnemonic=mnemonic, name=name, unit=unit, depth_unit=depth_unit)
             self.add_tracks(data)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
-    
+
 
     def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
