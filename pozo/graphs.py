@@ -107,7 +107,7 @@ class Graph(ood.Observer, pzt.Themeable):
         else:
             warnings.warn("No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.")
             yaxis = ar.depth_m
-            yaxis_unit = pzu.parse_units("meter")
+            yaxis_unit = pzu.registry.parse_units("meter")
 
 
         for curve in ar.curves:
