@@ -50,11 +50,11 @@ class LasRegistry(pint.UnitRegistry):
             self._mnemonic_units[mnemonic] = {}
         self._mnemonic_units[mnemonic][unit] = ranges
 
-    def resolve_las_unit(self, curve):
-        mnemonic = pozo.deLASio(curve.mnemonic)
-        unit = curve.unit
-        max_val = np.nanmax(curve.data)
-        min_val = np.nanmin(curve.data)
+    def resolve_las_unit(self, mnemonic, unit, data):
+        mnemonic = pozo.deLASio(mnemonic)
+        unit = unit
+        max_val = np.nanmax(data)
+        min_val = np.nanmin(data)
         if mnemonic in self._mnemonic_units and unit in self._mnemonic_units[mnemonic]:
             ranges = self._mnemonic_units[mnemonic][unit]
             for ra in ranges:
@@ -63,19 +63,19 @@ class LasRegistry(pint.UnitRegistry):
             raise MissingRangeError(f"{unit} for {mnemonic} found but not in range: {ranges}.")
         return None
 
-    def parse_unit_from_curve(self, curve): # this just gives you a result
+    def parse_unit_from_context(self, mnemonic, unit, data): # this just gives you a result
         resolved = None
         try:
-            resolved = self.resolve_las_unit(curve)
+            resolved = self.resolve_las_unit(mnemonic, unit, data)
         except MissingRangeError as e:
             warnings.warn(str(e))
         if resolved is not None:
             return self.parse_units(resolved.unit)
         else:
             try:
-                if not curve.unit or curve.unit == "": raise pint.UndefinedUnitError("Empty unit not allowed- please map it")
-                return self.parse_units(curve.unit)
+                if not unit or unit == "": raise pint.UndefinedUnitError("Empty unit not allowed- please map it")
+                return self.parse_units(unit)
             except pint.UndefinedUnitError as e:
-                raise pint.UndefinedUnitError(f"{curve.unit} for {pozo.deLASio(curve.mnemonic)} not found. {str(e)}")
+                raise pint.UndefinedUnitError(f"{unit} for {pozo.deLASio(mnemonic)} not found. {str(e)}")
 
 # we now don't get confidence from string
