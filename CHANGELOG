@@ -1,3 +1,6 @@
+v0.9.10:
+ - add crossplot function to plotly renderer
+ - unify depths and add depth index to Graph (incoming)
 v0.9.9:
  - support welly objects in initialization
 v0.9.5:
