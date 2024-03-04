@@ -363,14 +363,107 @@ class Plotly(pzr.Renderer):
 
         return Javascript(add_scroll) # Part of Hack #1
 
-# Old(bottom axes):
-#        elif i < 0:
-#            print("Below")
-#            bottom = domain[0]
-#            total_axis_space = -domain[0]
-#            proportion = abs(i-1) / (self.max_axes_bottom -1 )
-#
-#
+def is_array(value):
+    if isinstance(value, str): return False
+    if hasattr(value, "magnitude"):
+        return is_array(value.magnitude)
+    return hasattr(value, "__len__")
 
 
+# Could change size too
+# Could better integrate with graph, accept a "depth"
+class CrossPlot(go.FigureWidget):
+    _marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
+    _default_marker = {
+            "opacity": .8,
+            "size": 5
+            }
+    def _get_marker_no_color(self):
+        marker = self._default_marker.copy()
+        marker["symbol"] = self._marker_symbols[len(self._marker_symbols) % self._marker_symbol_index]
+        self._marker_symbol_index += 1
+        return marker
+
+    def _get_marker_with_color(self, array, title, colorscale="Viridis_r"):
+        marker = self._get_marker_no_color()
+        marker["color"] = array
+        marker["showscale"] = True
+        marker["colorscale"] = colorscale
+        marker["colorbar"] = dict(
+                title=title,
+                orientation='h',
+                thickness=20,
+            thicknessmode='pixels')
+        return marker
+
+    def _get_array_and_title(self, selector, title, depth_range):
+        POZO_OBJS = (pozo.Graph, pozo.Track, pozo.Axis)
+        if isinstance(selector, POZO_OBJS):
+           data = selector.get_data()
+           if len(data) == 0:
+               raise ValueError(f"{selector} has no data")
+           selector = data[0] # we process it in the following
+        if isinstance(selector, pozo.Data):
+            if title is None: title = selector.get_name()
+            return (selector.get_data()[slice(*depth_range)], title)
+        elif is_array(selector):
+            return (selector, title)
+
+    def __init__(self, x, y, **kwargs):
+        size        = kwargs.pop("size", 500)
+        title       = kwargs.pop("title", None)
+        self._depth_range = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
+        x_range = kwargs.pop("xrange", None)
+        y_range = kwargs.pop("yrange", None)
+        x_title = kwargs.pop("xtitle", None)
+        y_title = kwargs.pop("ytitle", None)
+        color = kwargs.pop("color", None)
+        self._x, x_title = self._get_array_and_title(x, x_title, self._depth_range)
+        self._y, y_title = self._get_array_and_title(y, y_title, self._depth_range)
+        if len(self._x) != len(self._y): raise ValueError(f"The two axis do match in length: {len(self._x)} {len(self._y)}")
+        self._len = len(self._x)
+
+        self._base_trace = dict(
+            x=self._x,
+            y=self._y,
+            mode='markers',
+            name=title
+        )
+        trace = self._base_trace.copy()
+        self._marker_symbol_index = 1
+        if color is not None:
+            color, color_title = self._get_array_and_title(color, title, self._depth_range)
+            trace['marker'] = self._get_marker_with_color(color, color_title)
+            trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
+        else:
+            trace['marker'] = self._get_marker_no_color()
+        if self._len != len(color): raise ValueError("The color axis has a different length than the other data")
+
+        super().__init__(data=[go.Scattergl(trace)],
+             layout=dict(
+                        width       = size,
+                        height      = size,
+                        xaxis       = dict(
+                                        title = x_title,
+                                        range = x_range,
+                        ),
+                        yaxis       = dict(
+                                        title = y_title,
+                                        range = y_range,
+                        ),
+                        title       = "Crossplot",
+                        showlegend  = True
+                    # TODO can we do a range slider on the color axes?
+                    )
+             )
+    def add_color(self, color, title):
+        color, color_title = self._get_array_and_title(color, title, self._depth_range)
+        trace = self._base_trace.copy()
+        trace['name'] = title
+        trace['marker'] = self._get_marker_with_color(color, color_title)
+        trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
+        trace['visible'] = 'legendonly'
+        if self._len != len(color): raise ValueError("The color axis has a different length than the other data.")
+        self.add_trace(go.Scattergl(trace))
+        pass
 
