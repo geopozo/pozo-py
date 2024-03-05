@@ -3,6 +3,7 @@ import math
 import warnings
 import re
 
+import numpy as np
 from IPython.display import Javascript # Part of Hack #1
 import plotly.graph_objects as go
 import pint
@@ -384,7 +385,7 @@ class CrossPlot(go.FigureWidget):
         self._marker_symbol_index += 1
         return marker
 
-    def _get_marker_with_color(self, array, title, colorscale="Viridis_r"):
+    def _get_marker_with_color(self, array, title=None, colorscale="Viridis_r"):
         marker = self._get_marker_no_color()
         marker["color"] = array
         marker["showscale"] = True
@@ -396,18 +397,16 @@ class CrossPlot(go.FigureWidget):
             thicknessmode='pixels')
         return marker
 
-    def _get_array_and_title(self, selector, title, depth_range):
+    def _resolve_selector_to_data(self, selector): # So far we're not checking to see if it's definitely a member, how will affect the side graph
         POZO_OBJS = (pozo.Graph, pozo.Track, pozo.Axis)
         if isinstance(selector, POZO_OBJS):
            data = selector.get_data()
            if len(data) == 0:
                raise ValueError(f"{selector} has no data")
-           selector = data[0] # we process it in the following
-        if isinstance(selector, pozo.Data):
-            if title is None: title = selector.get_name()
-            return (selector.get_data()[slice(*depth_range)], title)
-        elif is_array(selector):
-            return (selector, title)
+           return data[0] # we process it in the following
+        elif isinstance(selector, pozo.Data):
+            return selector
+        raise TypeError(f"{selector} does not appear to be a pozo object")
 
     def __init__(self, x, y, **kwargs):
         size        = kwargs.pop("size", 500)
@@ -418,26 +417,38 @@ class CrossPlot(go.FigureWidget):
         x_title = kwargs.pop("xtitle", None)
         y_title = kwargs.pop("ytitle", None)
         color = kwargs.pop("color", None)
-        self._x, x_title = self._get_array_and_title(x, x_title, self._depth_range)
-        self._y, y_title = self._get_array_and_title(y, y_title, self._depth_range)
-        if len(self._x) != len(self._y): raise ValueError(f"The two axis do match in length: {len(self._x)} {len(self._y)}")
-        self._len = len(self._x)
+        x_depth = kwargs.pop("x_depth", False)
+        y_depth = kwargs.pop("y_depth", False)
+        color_depth = kwargs.pop("color_depth", False)
+        self._x = self._resolve_selector_to_data(x)
+        self._y = self._resolve_selector_to_data(y)
+
+        if x_title is None: x_title = self._x.get_name()
+        if y_title is None: y_title = self._y.get_name()
+        x_data = self._x.get_data(slice_by_depth=self._depth_range) if x_depth is False else self._x.get_depth(slice_by_depth=self._depth_range)
+        y_data = self._y.get_data(slice_by_depth=self._depth_range) if y_depth is False else self._y.get_depth(slice_by_depth=self._depth_range)
+        if len(x_data) != len(y_data): raise ValueError(f"The two axis do not match in length: {len(x_data)} {len(y_data)}")
+        self._len = len(x_data)
+        missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
+        display(f"Number of unplottable values: {missing} ({(100 * missing/self._len):.1f}%)")
 
         self._base_trace = dict(
-            x=self._x,
-            y=self._y,
+            x = x_data,
+            y = y_data,
             mode='markers',
             name=title
         )
         trace = self._base_trace.copy()
         self._marker_symbol_index = 1
         if color is not None:
-            color, color_title = self._get_array_and_title(color, title, self._depth_range)
-            trace['marker'] = self._get_marker_with_color(color, color_title)
+            color_data = self._resolve_selector_to_data(color)
+            color_title = color_data.get_name() if title is None else title
+            color_data = color_data.get_data(slice_by_depth=self._depth_range) if color_depth is False else color_data.get_depth(slice_by_depth=self._depth_range)
+            trace['marker'] = self._get_marker_with_color(color_data, color_title)
             trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
+            if self._len != len(color_data): raise ValueError(f"The color data doesn't match in length: {self._len} vs color {len(color_data)}")
         else:
             trace['marker'] = self._get_marker_no_color()
-        if self._len != len(color): raise ValueError("The color axis has a different length than the other data")
 
         super().__init__(data=[go.Scattergl(trace)],
              layout=dict(
@@ -453,17 +464,18 @@ class CrossPlot(go.FigureWidget):
                         ),
                         title       = "Crossplot",
                         showlegend  = True
-                    # TODO can we do a range slider on the color axes?
                     )
              )
-    def add_color(self, color, title):
-        color, color_title = self._get_array_and_title(color, title, self._depth_range)
+    def add_color(self, color, title=None, color_depth=False):
         trace = self._base_trace.copy()
-        trace['name'] = title
-        trace['marker'] = self._get_marker_with_color(color, color_title)
+        color_data = self._resolve_selector_to_data(color)
+        color_title = color_data.get_name() if title is None else title
+        color_data = color_data.get_data(slice_by_depth=self._depth_range) if color_depth is False else color_data.get_depth(slice_by_depth=self._depth_range)
+        trace['name'] = color_title
+        trace['marker'] = self._get_marker_with_color(color_data, color_title)
         trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
         trace['visible'] = 'legendonly'
-        if self._len != len(color): raise ValueError("The color axis has a different length than the other data.")
+        if self._len != len(color_data): raise ValueError(f"The color axis has a different length than the other data {self._len} vs color {len(color_data)}.")
         self.add_trace(go.Scattergl(trace))
         pass
 
