@@ -373,15 +373,15 @@ def is_array(value):
 
 # Could change size too
 # Could better integrate with graph, accept a "depth"
-class CrossPlot(go.FigureWidget):
-    _marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
-    _default_marker = {
+class CrossPlot():
+    marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
+    default_marker = {
             "opacity": .8,
             "size": 5
             }
     def _get_marker_no_color(self):
-        marker = self._default_marker.copy()
-        marker["symbol"] = self._marker_symbols[len(self._marker_symbols) % self._marker_symbol_index]
+        marker = self.default_marker.copy()
+        marker["symbol"] = self.marker_symbols[len(self.marker_symbols) % self._marker_symbol_index]
         self._marker_symbol_index += 1
         return marker
 
@@ -408,74 +408,86 @@ class CrossPlot(go.FigureWidget):
             return selector
         raise TypeError(f"{selector} does not appear to be a pozo object")
 
-    def __init__(self, x, y, **kwargs):
-        size        = kwargs.pop("size", 500)
-        title       = kwargs.pop("title", None)
-        self._depth_range = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
-        x_range = kwargs.pop("xrange", None)
-        y_range = kwargs.pop("yrange", None)
-        x_title = kwargs.pop("xtitle", None)
-        y_title = kwargs.pop("ytitle", None)
-        color = kwargs.pop("color", None)
-        x_depth = kwargs.pop("x_depth", False)
-        y_depth = kwargs.pop("y_depth", False)
-        color_depth = kwargs.pop("color_depth", False)
-        self._x = self._resolve_selector_to_data(x)
-        self._y = self._resolve_selector_to_data(y)
+    def _get_array(self, data, depth_range):
+        return data.get_data(slice_by_depth=depth_range) # check to see if we're out of range
 
-        if x_title is None: x_title = self._x.get_name()
-        if y_title is None: y_title = self._y.get_name()
-        x_data = self._x.get_data(slice_by_depth=self._depth_range) if x_depth is False else self._x.get_depth(slice_by_depth=self._depth_range)
-        y_data = self._y.get_data(slice_by_depth=self._depth_range) if y_depth is False else self._y.get_depth(slice_by_depth=self._depth_range)
-        if len(x_data) != len(y_data): raise ValueError(f"The two axis do not match in length: {len(x_data)} {len(y_data)}")
-        self._len = len(x_data)
+    def __init__(self, x, y, colors, **kwargs):
+        self.size                = kwargs.pop("size", 500)
+        self.depth_range         = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
+        self.x_range             = kwargs.pop("xrange", None)
+        self.y_range             = kwargs.pop("yrange", None)
+        if len(colors) == 0: colors = [None]
+        if not is_array(colors): colors = [colors]
+        self.colors = []
+        for color in colors:
+            if color is None:
+                self.colors.append(None)
+            elif isinstance(color, str) and color.lower() == "depth":
+                self.colors.append("depth")
+            else:
+                self.colors.append(self._resolve_selector_to_data(color))
+
+        self.x = self._resolve_selector_to_data(x)
+        self.y = self._resolve_selector_to_data(y)
+
+        self._marker_symbol_index = 1
+
+    def create_layout(self):
+        return dict(
+            width       = self.size,
+            height      = self.size,
+            xaxis       = dict(
+                            title = self.x.get_name(),
+                            range = self.x_range
+            ),
+            yaxis       = dict(
+                            title = self.y.get_name(),
+                            range = self.y_range
+            ),
+            showlegend  = True
+        )
+
+    def create_traces(self, **kwargs): # god each color needs a name
+        depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
+        x_data = self._get_array(self.x, depth_range)
+        y_data = self._get_array(self.y, depth_range)
         missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
-        display(f"Number of unplottable values: {missing} ({(100 * missing/self._len):.1f}%)")
-
+        display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
+        # what if one is longer than the other 
         self._base_trace = dict(
             x = x_data,
             y = y_data,
             mode='markers',
-            name=title
         )
+        traces = []
+        for color in self.colors:
+            traces.append(self.create_trace(color, depth_range=depth_range))
+        if len(color) >= 1: del traces[0]['visible']
+        # TODO check all lengths
+        return traces
+
+    def render(self, **kwargs):
+        layout = self.create_layout()
+        traces = self.create_traces(**kwargs)
+        fig = go.Figure(data=traces, layout=layout)
+        fig.show()
+
+    def create_trace(self, color, **kwargs):
+        depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
         trace = self._base_trace.copy()
-        self._marker_symbol_index = 1
         if color is not None:
-            color_data = self._resolve_selector_to_data(color)
-            color_title = color_data.get_name() if title is None else title
-            color_data = color_data.get_data(slice_by_depth=self._depth_range) if color_depth is False else color_data.get_depth(slice_by_depth=self._depth_range)
-            trace['marker'] = self._get_marker_with_color(color_data, color_title)
+            if isinstance(color, str) and color.lower() == "depth":
+                color_array = self.x.get_depth(slice_by_depth=self.depth_range)
+            else:
+                color_data = self._resolve_selector_to_data(color)
+                color_array = color_data.get_data(slice_by_depth=self.depth_range)
+            name = color_data.get_name() if color != "depth" else "depth"
+            trace['name'] = name
+            trace['marker'] = self._get_marker_with_color(color_array, name)
             trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
-            if self._len != len(color_data): raise ValueError(f"The color data doesn't match in length: {self._len} vs color {len(color_data)}")
+            trace['visible'] = 'legendonly'
         else:
             trace['marker'] = self._get_marker_no_color()
-
-        super().__init__(data=[go.Scattergl(trace)],
-             layout=dict(
-                        width       = size,
-                        height      = size,
-                        xaxis       = dict(
-                                        title = x_title,
-                                        range = x_range,
-                        ),
-                        yaxis       = dict(
-                                        title = y_title,
-                                        range = y_range,
-                        ),
-                        title       = "Crossplot",
-                        showlegend  = True
-                    )
-             )
-    def add_color(self, color, title=None, color_depth=False):
-        trace = self._base_trace.copy()
-        color_data = self._resolve_selector_to_data(color)
-        color_title = color_data.get_name() if title is None else title
-        color_data = color_data.get_data(slice_by_depth=self._depth_range) if color_depth is False else color_data.get_depth(slice_by_depth=self._depth_range)
-        trace['name'] = color_title
-        trace['marker'] = self._get_marker_with_color(color_data, color_title)
-        trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
-        trace['visible'] = 'legendonly'
-        if self._len != len(color_data): raise ValueError(f"The color axis has a different length than the other data {self._len} vs color {len(color_data)}.")
-        self.add_trace(go.Scattergl(trace))
-        pass
+            trace['name'] = "x"
+        return trace
 
