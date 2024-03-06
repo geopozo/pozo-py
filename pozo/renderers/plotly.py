@@ -472,6 +472,7 @@ class CrossPlot():
         self.cb_position = None
         if len(colors) == 0: colors = [None]
         if not is_array(colors): colors = [colors]
+        self.phi_to_rho_references = kwargs.pop("phi_to_rho_references", [])
         self.colors = []
         for color in colors:
             if color is None:
@@ -524,6 +525,8 @@ class CrossPlot():
             traces.append(self.create_trace(color, depth_range=depth_range))
         if len(color) >= 1: del traces[0]['visible']
         # TODO check all lengths
+        for ref in self.phi_to_rho_references:
+            traces.append(self.create_phi_to_rho_reference(**ref))
         return traces
 
     def render(self, **kwargs):
@@ -550,4 +553,12 @@ class CrossPlot():
             trace['marker'] = self._get_marker_no_color()
             trace['name'] = "x"
         return trace
+
+    def create_phi_to_rho_reference(self, density, title):
+        return dict(
+            x = [0, 100],
+            y = density,
+            mode='lines',
+            name=title,
+            )
 
