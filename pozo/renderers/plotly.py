@@ -533,7 +533,7 @@ class CrossPlot():
         layout = self.create_layout()
         traces = self.create_traces(**kwargs)
         fig = go.FigureWidget(data=traces, layout=layout)
-        fig.show()
+        return fig
 
     def create_trace(self, color, **kwargs):
         depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
