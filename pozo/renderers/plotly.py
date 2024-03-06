@@ -302,6 +302,7 @@ class Plotly(pzr.Renderer):
             layout["yaxis"] = xp_layout["yaxis"]
             layout["xaxis"] = xp_layout["xaxis"]
             layout["xaxis"]["domain"] = (0, colorbar_pos - 80/layout["width"]) # add some extra marign for text
+            layout["legend"]["x"] = colorbar_pos * .8
             xp.cb_position=colorbar_pos
         last_end = shift_for_xp
         track = 0
