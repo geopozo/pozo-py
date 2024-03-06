@@ -388,7 +388,7 @@ class Plotly(pzr.Renderer):
     def get_figure(self, graph, **kwargs):
         layout = self.get_layout(graph, **kwargs)
         traces = self.get_traces(graph, **kwargs)
-        return go.Figure(data=traces, layout=layout)
+        return go.FigureWidget(data=traces, layout=layout)
 
     def render(self, graph, **kwargs):
         javascript = kwargs.pop("javascript", True)
@@ -396,6 +396,7 @@ class Plotly(pzr.Renderer):
         fig.show()
         if not javascript: return
         display(self.javascript()) # This is going to be in layout, Display
+        return fig
 
     def javascript(self):
         add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
@@ -528,7 +529,7 @@ class CrossPlot():
     def render(self, **kwargs):
         layout = self.create_layout()
         traces = self.create_traces(**kwargs)
-        fig = go.Figure(data=traces, layout=layout)
+        fig = go.FigureWidget(data=traces, layout=layout)
         fig.show()
 
     def create_trace(self, color, **kwargs):
