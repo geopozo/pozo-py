@@ -386,11 +386,48 @@ class Plotly(pzr.Renderer):
             traces.extend(xp.create_traces())
         return traces
 
-    # NOTE: calling these directly doesn't pass the graph's render options
-    def get_figure(self, graph, **kwargs):
+    def _get_figure(self, graph, **kwargs):
         layout = self.get_layout(graph, **kwargs)
         traces = self.get_traces(graph, **kwargs)
         return go.FigureWidget(data=traces, layout=layout)
+
+    # should this be in graph? the graph is the figure, or the graph is the range
+    def _update_xp(self, layout, new_depth_range):
+        new_depth_range = sorted(new_depth_range)
+        with self.last_fig.batch_update():
+            for trace in self._xp_traces:
+                trace.x = self._xp.x.get_data(slice_by_depth=new_depth_range)
+                trace.y = self._xp.y.get_data(slice_by_depth=new_depth_range)
+                if 'is_depth' in trace.meta:
+                    trace.marker.color = self._xp.x.get_depth(slice_by_depth=(new_depth_range))
+                elif len(trace.meta) == 2:
+                    trace.marker.color = self._xp.colors_by_id[trace.meta[1]].get_data(slice_by_depth=new_depth_range)
+
+    # i think this misplacement all comes down to figure out how we deal with cross plots, can we deal with them better
+    # i think we need a cross plot renderer
+    # and the graph should store its cross plot and should store it's xp and it's figure
+    # we could store weak references to all figures and cross plots
+    # we could also use a copy/etc
+    def fix_xp_range(self, **kwargs):
+        name = kwargs.pop("name", None)
+        cmin = kwargs.pop("cmin", None)
+        cmax = kwargs.pop("cmax", None)
+        auto = kwargs.pop("auto", None)
+        count = 0
+        with self.last_fig.batch_update():
+            for trace in self._xp_traces:
+                if name is not None and trace["name"] != name: continue
+                count += 1
+                if auto is True:
+                    trace.marker.cauto = True
+                if cmax is None and auto is None and cmin is None:
+                    array = trace.marker.color
+                    trace.marker.cmin = np.nanmin(array)
+                    trace.marker.cmax = np.nanmax(array)
+                if cmax is not None:
+                    trace.marker.cmax=cmax
+                if cmin is not None:
+                    trace.marker.cmin=cmin
 
     def render(self, graph, **kwargs):
         fig = self._get_figure(graph, **kwargs)
