@@ -528,7 +528,6 @@ class CrossPlot():
         self.x = self._resolve_selector_to_data(x)
         self.y = self._resolve_selector_to_data(y)
 
-        self._marker_symbol_index = 1
 
     def create_layout(self):
         margin = (120) / self.size if self.container_width is not None else 0
@@ -552,6 +551,7 @@ class CrossPlot():
         )
 
     def create_traces(self, **kwargs): # god each color needs a name
+        self._marker_symbol_index = 1
         depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
         x_data = self._get_array(self.x, depth_range)
         y_data = self._get_array(self.y, depth_range)
