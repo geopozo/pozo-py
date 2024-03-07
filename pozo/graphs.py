@@ -47,7 +47,10 @@ class Graph(ood.Observer, pzt.Themeable):
         render_options = self._render.copy()
         for key in kwargs.keys():
             if key in render_options: del render_options[key]
-        return self.renderer.render(self, **kwargs, **render_options)
+        self.fig = self.renderer.render(self, **kwargs, **render_options)
+        return self.fig
+    def javascript(self):
+        self.renderer.javascript()
 
     def get_name(self):
         return self._name

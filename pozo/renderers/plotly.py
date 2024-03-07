@@ -138,6 +138,7 @@ class Plotly(pzr.Renderer):
 
     def get_layout(self, graph, **kwargs):
         xp = kwargs.pop("xp", None)
+        self._xp = xp
         main_y_axis = "yaxis"
         if xp is not None:
             main_y_axis = "yaxis2"
@@ -344,6 +345,7 @@ class Plotly(pzr.Renderer):
 
     def get_traces(self, graph, **kwargs):
         xp = kwargs.pop("xp", None)
+        self._xp = xp
         override_theme = kwargs.pop("override_theme", None)
         override_theme = kwargs.pop("theme_override", override_theme)
         traces = []
@@ -391,11 +393,14 @@ class Plotly(pzr.Renderer):
         return go.FigureWidget(data=traces, layout=layout)
 
     def render(self, graph, **kwargs):
-        javascript = kwargs.pop("javascript", True)
-        fig = self.get_figure(graph, **kwargs)
-        fig.show()
-        if not javascript: return
-        display(self.javascript()) # This is going to be in layout, Display
+        fig = self._get_figure(graph, **kwargs)
+        if self._xp is not None:
+            self._xp_traces = []
+            for trace in fig['data']:
+                if trace.meta is not None and ('with_depth' in trace.meta or 'is_depth' in trace.meta):
+                    self._xp_traces.append(trace)
+            fig.layout.on_change(self._update_xp, 'yaxis2.range')
+        self.last_fig = fig
         return fig
 
     def javascript(self):
@@ -473,6 +478,7 @@ class CrossPlot():
         if len(colors) == 0: colors = [None]
         if not is_array(colors): colors = [colors]
         self.phi_to_rho_references = kwargs.pop("phi_to_rho_references", [])
+        self.colors_by_id = {}
         self.colors = []
         for color in colors:
             if color is None:
@@ -519,15 +525,19 @@ class CrossPlot():
             x = x_data,
             y = y_data,
             mode='markers',
+            meta=['with_depth']
         )
         traces = []
+        scattergl_traces = []
         for color in self.colors:
             traces.append(self.create_trace(color, depth_range=depth_range))
-        if len(color) >= 1: del traces[0]['visible']
-        # TODO check all lengths
+        if len(traces) >= 1 and 'visible' in traces[0]: del traces[0]['visible']
+        for trace in traces:
+            scattergl_traces.append(go.Scattergl(trace))
+        self.traces_with_depth = scattergl_traces.copy()
         for ref in self.phi_to_rho_references:
-            traces.append(self.create_phi_to_rho_reference(**ref))
-        return traces
+            scattergl_traces.append(go.Scattergl(self.create_phi_to_rho_reference(**ref)))
+        return scattergl_traces
 
     def render(self, **kwargs):
         layout = self.create_layout()
@@ -540,15 +550,19 @@ class CrossPlot():
         trace = self._base_trace.copy()
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
+                trace['meta'] = ['is_depth']
                 color_array = self.x.get_depth(slice_by_depth=self.depth_range)
             else:
                 color_data = self._resolve_selector_to_data(color)
                 color_array = color_data.get_data(slice_by_depth=self.depth_range)
+                trace['meta'].append(id(color))
+                self.colors_by_id[id(color)] = color
             name = color_data.get_name() if color != "depth" else "depth"
             trace['name'] = name
             trace['marker'] = self._get_marker_with_color(color_array, name)
             trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
             trace['visible'] = 'legendonly'
+
         else:
             trace['marker'] = self._get_marker_no_color()
             trace['name'] = "x"
