@@ -491,7 +491,7 @@ class CrossPlot():
                     thicknessmode='pixels')
         return marker
 
-    def _resolve_selector_to_data(self, selector): # So far we're not checking to see if it's definitely a member, how will affect the side graph
+    def _resolve_selector_to_data(self, selector):
         POZO_OBJS = (pozo.Graph, pozo.Track, pozo.Axis)
         if isinstance(selector, POZO_OBJS):
            data = selector.get_data()
@@ -505,7 +505,7 @@ class CrossPlot():
     def _get_array(self, data, depth_range):
         return data.get_data(slice_by_depth=depth_range) # check to see if we're out of range
 
-    def __init__(self, x, y, colors, **kwargs):
+    def __init__(self, x, y, colors=[None], **kwargs):
         self.container_width = None
         self.size                = kwargs.pop("size", 500)
         self.depth_range         = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
