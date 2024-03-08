@@ -1,11 +1,13 @@
 import pint
-
+import numpy as np
 import ood
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
 
 class Data(ood.Observed, pzt.Themeable):
+    def __len__(self):
+        return len(self.get_data())
 
     def __init__(self, data, **kwargs):
         unit = kwargs.pop('unit', None)
@@ -43,8 +45,17 @@ class Data(ood.Observed, pzt.Themeable):
         if depth is not None:
             self.set_depth(depth, depth_unit=depth_unit) # this will set the depth unit
 
-    def get_data(self):
-        return self._data
+    def _find_nearest(self, value):
+        # TODO: align units
+        array = np.asarray(self.get_depth());
+        idx = np.nanargmin((np.abs(array - value)))
+        #if array[idx] != value:
+        #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
+        return idx;
+
+    def get_data(self, slice_by_depth=None):
+        if slice_by_depth is None: return self._data
+        return self._data[slice(*[self._find_nearest(val) for val in slice_by_depth])]
 
     def set_depth(self, depth, depth_unit=None):
         depth_unit = self._check_unit(depth_unit)
@@ -57,8 +68,10 @@ class Data(ood.Observed, pzt.Themeable):
             self.set_depth_unit(depth.units)
         # else, keep old units
 
-    def get_depth(self):
-        return self._depth
+    def get_depth(self, slice_by_depth=None):
+        if slice_by_depth is None: return self._depth
+        return self._depth[slice(*[self._find_nearest(val) for val in slice_by_depth])]
+
 
     def _check_unit(self, unit): # Call this early, in set_data, in set_depth, in init()
         if isinstance(unit, str):

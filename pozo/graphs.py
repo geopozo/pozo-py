@@ -11,6 +11,7 @@ LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work reliabl
 WELLY_WELL_TYPE = "<class 'welly.well.Well'>"
 WELLY_PROJECT_TYPE = "<class 'welly.project.Project'>"
 
+# TODO we want to make sure that your depth has no NAN values (and warn user)
 class Graph(ood.Observer, pzt.Themeable):
     _type="graph"
     _child_type="track"
@@ -44,7 +45,10 @@ class Graph(ood.Observer, pzt.Themeable):
         render_options = self._render.copy()
         for key in kwargs.keys():
             if key in render_options: del render_options[key]
-        self.renderer.render(self, **kwargs, **render_options)
+        self.fig = self.renderer.render(self, **kwargs, **render_options)
+        return self.fig
+    def javascript(self):
+        self.renderer.javascript()
 
     def get_name(self):
         return self._name

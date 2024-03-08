@@ -1,3 +1,6 @@
+v0.9.10:
+ - add crossplot function to plotly renderer
+ - get_data and get_depth now take an optional second argument to slice_by_depth
 v0.9.9:
  - support welly objects in initialization
 v0.9.5:
