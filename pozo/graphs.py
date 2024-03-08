@@ -11,9 +11,7 @@ LAS_TYPE = "<class 'lasio.las.LASFile'>" # TODO this isn't going to work reliabl
 WELLY_WELL_TYPE = "<class 'welly.well.Well'>"
 WELLY_PROJECT_TYPE = "<class 'welly.project.Project'>"
 
-# TODO we want to make sure graph always accepts the same depth AND creates an index for it
-# TODO we want to make sure that your depth has no NAN values
-# TODO we need to report to parent if we change depth or add data
+# TODO we want to make sure that your depth has no NAN values (and warn user)
 class Graph(ood.Observer, pzt.Themeable):
     _type="graph"
     _child_type="track"
