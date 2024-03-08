@@ -243,6 +243,11 @@ class Plotly(pzr.Renderer):
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
 
+                if themes["axis_line"] == False and axis_pos:
+                    axis_style['showline'] = False
+                    axis_style['showticklabels'] = False
+                    axis_style['ticklen'] = 0
+
                 if axis_style is not None:
                     axis_style['type'] = scale_type
                     if scale_type == "log":
@@ -325,6 +330,7 @@ class Plotly(pzr.Renderer):
                     themes.append(datum.get_theme())
                     if self._hidden(themes): continue
                     color = themes["color"]
+                    # To get this, in this example, it will go back to the track, and then it sees a track?
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         all_traces.append(go.Scattergl(
