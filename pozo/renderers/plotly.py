@@ -5,6 +5,7 @@ import re
 
 import numpy as np
 from IPython.display import Javascript # Part of Hack #1
+import plotly as plotly
 import plotly.graph_objects as go
 import pint
 
@@ -300,7 +301,6 @@ class Plotly(pzr.Renderer):
             colorbar_pos = (xp.size)/layout["width"]
             xp_layout = xp.create_layout(container_width = layout["width"])
             layout["yaxis"] = xp_layout["yaxis"]
-            display(xp_layout["yaxis"])
             layout["xaxis"] = xp_layout["xaxis"]
             layout["xaxis"]["domain"] = (0, colorbar_pos - 80/layout["width"]) # add some extra marign for text
             layout["legend"]["x"] = colorbar_pos * .8
@@ -328,8 +328,6 @@ class Plotly(pzr.Renderer):
         elif depth_axis_pos >= num_tracks:
             layout[main_y_axis]['position'] = 1
         elif depth_axis_pos:
-            display(depth_axis_pos_prop)
-            display(self.template['track_margin']/layout['width'])
             layout[main_y_axis]['position'] = depth_axis_pos_prop + self.template['track_margin']/layout['width']
         elif xp is not None:
             layout[main_y_axis]['position'] = shift_for_xp
@@ -505,6 +503,7 @@ class CrossPlot():
         self.depth_range         = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
         self.x_range             = kwargs.pop("xrange", None)
         self.y_range             = kwargs.pop("yrange", None)
+        self.annotations         = kwargs.pop("annotations", [])
         if len(colors) == 0: colors = [None]
         if not is_array(colors): colors = [colors]
         self.colors_by_id = {}
@@ -549,7 +548,7 @@ class CrossPlot():
         y_data = self.y.get_data(slice_by_depth=depth_range)
         missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
         display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
-        # what if one is longer than the other 
+        # what if one is longer than the other
         self._base_trace = dict(
             x = x_data,
             y = y_data,
@@ -557,7 +556,7 @@ class CrossPlot():
             meta=['with_depth']
         )
         traces = []
-        scattergl_traces = []
+        scattergl_traces = [] # these aren't just scattergl traces anymore TODO
         for color in self.colors:
             traces.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
         if len(traces) >= 1 and 'visible' in traces[0]: del traces[0]['visible']
@@ -565,9 +564,12 @@ class CrossPlot():
             scattergl_traces.append(go.Scattergl(trace))
         self.traces_with_depth = scattergl_traces.copy()
 
-        #for ref in self.phi_to_rho_references:
-        #    scattergl_traces.append(go.Scattergl(self.create_phi_to_rho_reference(**ref)))
-        return scattergl_traces
+        for a in self.annotations:
+            # check to see if it's a trace type?
+            # can fill
+            if isinstance(a, plotly.basedatatypes.BaseTraceType):
+                scattergl_traces.append(a)
+        return scattergl_traces #TODO are the same before and after rendering
 
     def render(self, **kwargs):
         layout = self.create_layout(**kwargs)
