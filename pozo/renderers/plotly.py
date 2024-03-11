@@ -136,9 +136,7 @@ class Plotly(pzr.Renderer):
         if hidden: themes.pop()
         return hidden
 
-    def get_layout(self, graph, **kwargs):
-        xp = kwargs.pop("xp", None)
-        self._xp = xp
+    def get_layout(self, graph, xp=None, **kwargs):
         main_y_axis = "yaxis"
         if xp is not None:
             main_y_axis = "yaxis2"
@@ -294,22 +292,20 @@ class Plotly(pzr.Renderer):
         layout["width"] = self._calc_total_width(num_tracks, total_track_width, depth_axis_pos)
         shift_for_xp = 0
         colorbar_size = 0
+        depth_axis_left_shift = self.template["depth_axis_left_shift"] if depth_axis_pos == 0 else 0 # this doesn't seem well calculated
+        layout["width"] += depth_axis_left_shift
         if xp is not None:
             layout["width"] += xp.size + colorbar_size
             shift_for_xp = (colorbar_size+xp.size) / (layout["width"])
             colorbar_pos = (xp.size)/layout["width"]
-            xp.container_width = layout["width"]
-            xp_layout = xp.create_layout()
+            xp_layout = xp.create_layout(container_width = layout["width"])
             layout["yaxis"] = xp_layout["yaxis"]
+            display(xp_layout["yaxis"])
             layout["xaxis"] = xp_layout["xaxis"]
             layout["xaxis"]["domain"] = (0, colorbar_pos - 80/layout["width"]) # add some extra marign for text
             layout["legend"]["x"] = colorbar_pos * .8
-            xp.cb_position=colorbar_pos
-        last_end = shift_for_xp
+        last_end = shift_for_xp + depth_axis_left_shift/layout["width"]
         track = 0
-        if depth_axis_pos == 0:
-            layout["width"] += self.template["depth_axis_left_shift"] # Apparently we need some extra margin in this case
-            last_end += self.template["depth_axis_left_shift"]/layout["width"]
         for i, axis in enumerate(axes_styles):
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
@@ -332,7 +328,9 @@ class Plotly(pzr.Renderer):
         elif depth_axis_pos >= num_tracks:
             layout[main_y_axis]['position'] = 1
         elif depth_axis_pos:
-            layout[main_y_axis]['position'] = depth_axis_pos_prop + self.template['track_margin']/layout['width'] + shift_for_xp
+            display(depth_axis_pos_prop)
+            display(self.template['track_margin']/layout['width'])
+            layout[main_y_axis]['position'] = depth_axis_pos_prop + self.template['track_margin']/layout['width']
         elif xp is not None:
             layout[main_y_axis]['position'] = shift_for_xp
         layout[main_y_axis]['maxallowed'] = ymax
@@ -343,9 +341,8 @@ class Plotly(pzr.Renderer):
             layout[main_y_axis]['range'] = [ymax, ymin]
         return layout
 
-    def get_traces(self, graph, **kwargs):
-        xp = kwargs.pop("xp", None)
-        self._xp = xp
+    def get_traces(self, graph, xp=None, **kwargs):
+        container_width = kwargs.get("container_width", None)
         override_theme = kwargs.pop("override_theme", None)
         override_theme = kwargs.pop("theme_override", override_theme)
         traces = []
@@ -383,16 +380,31 @@ class Plotly(pzr.Renderer):
                 themes.pop()
             themes.pop()
         if xp is not None:
-            traces.extend(xp.create_traces())
+            traces.extend(xp.create_traces(container_width=container_width))
         return traces
 
-    def _get_figure(self, graph, **kwargs):
-        layout = self.get_layout(graph, **kwargs)
-        traces = self.get_traces(graph, **kwargs)
-        return go.FigureWidget(data=traces, layout=layout)
+    def render(self, graph, **kwargs): # really, what gets passed in with kwargs TODO
+        xp = kwargs.pop("xp", None)
+        layout = self.get_layout(graph, xp=xp, **kwargs)
+        container_width = layout["width"] if xp is not None else 0
+        traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
+        fig = go.FigureWidget(data=traces, layout=layout) # TODO wrap the figure
+        if xp is not None: # this is going to be on the figure, not the renderer TODO
+            self._xp_traces = []
+            for trace in fig['data']:
+                if trace.meta is not None and ('with_depth' in trace.meta or 'is_depth' in trace.meta):
+                    self._xp_traces.append(trace)
+            fig.layout.on_change(self._update_xp, 'yaxis2.range')
+        self.last_fig = fig
+        return fig
+
+    def javascript(self):
+        add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
+
+        return Javascript(add_scroll) # Part of Hack #1
 
     # should this be in graph? the graph is the figure, or the graph is the range
-    def _update_xp(self, layout, new_depth_range):
+    def _update_xp(self, layout, new_depth_range): # this should be on the figure
         new_depth_range = sorted(new_depth_range)
         with self.last_fig.batch_update():
             for trace in self._xp_traces:
@@ -429,21 +441,6 @@ class Plotly(pzr.Renderer):
                 if cmin is not None:
                     trace.marker.cmin=cmin
 
-    def render(self, graph, **kwargs):
-        fig = self._get_figure(graph, **kwargs)
-        if self._xp is not None:
-            self._xp_traces = []
-            for trace in fig['data']:
-                if trace.meta is not None and ('with_depth' in trace.meta or 'is_depth' in trace.meta):
-                    self._xp_traces.append(trace)
-            fig.layout.on_change(self._update_xp, 'yaxis2.range')
-        self.last_fig = fig
-        return fig
-
-    def javascript(self):
-        add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
-
-        return Javascript(add_scroll) # Part of Hack #1
 
 def is_array(value):
     if isinstance(value, str): return False
@@ -466,20 +463,20 @@ class CrossPlot():
         self._marker_symbol_index += 1
         return marker
 
-    def _get_marker_with_color(self, array, title=None, colorscale="Viridis_r"):
+    def _get_marker_with_color(self, array, title=None, colorscale="Viridis_r", container_width=None):
         marker = self._get_marker_no_color()
         marker["color"] = array
         marker["showscale"] = True
         marker["colorscale"] = colorscale
-        if self.container_width is not None:
+        if container_width is not None:
             marker["colorbar"] = dict(
                     title=title,
                     orientation='h',
                     thickness=20,
                     thicknessmode='pixels',
-                    x=(self.size/(2.00)-45)/self.container_width,
+                    x=(self.size/(2.00)-45)/container_width,
                     xref='paper',
-                    y=10/self.size,
+                    y=10/self.size, # 10% margin, does this really work for all sizes?
                     yref='paper',
                     len=self.size*.9,
                     lenmode='pixels')
@@ -502,19 +499,14 @@ class CrossPlot():
             return selector
         raise TypeError(f"{selector} does not appear to be a pozo object")
 
-    def _get_array(self, data, depth_range):
-        return data.get_data(slice_by_depth=depth_range) # check to see if we're out of range
-
     def __init__(self, x, y, colors=[None], **kwargs):
-        self.container_width = None
+        # rendering defaults
         self.size                = kwargs.pop("size", 500)
         self.depth_range         = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
         self.x_range             = kwargs.pop("xrange", None)
         self.y_range             = kwargs.pop("yrange", None)
-        self.cb_position = None
         if len(colors) == 0: colors = [None]
         if not is_array(colors): colors = [colors]
-        self.phi_to_rho_references = kwargs.pop("phi_to_rho_references", [])
         self.colors_by_id = {}
         self.colors = []
         for color in colors:
@@ -529,8 +521,8 @@ class CrossPlot():
         self.y = self._resolve_selector_to_data(y)
 
 
-    def create_layout(self):
-        margin = (120) / self.size if self.container_width is not None else 0
+    def create_layout(self, container_width=None):
+        margin = (120) / self.size if container_width is not None else 0
         return dict(
             width       = self.size,
             height      = self.size,
@@ -550,11 +542,11 @@ class CrossPlot():
             showlegend  = True
         )
 
-    def create_traces(self, **kwargs): # god each color needs a name
+    def create_traces(self, container_width=None, **kwargs):
         self._marker_symbol_index = 1
-        depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
-        x_data = self._get_array(self.x, depth_range)
-        y_data = self._get_array(self.y, depth_range)
+        depth_range = kwargs.pop("depth_range", self.depth_range)
+        x_data = self.x.get_data(slice_by_depth=depth_range)
+        y_data = self.y.get_data(slice_by_depth=depth_range)
         missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
         display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
         # what if one is longer than the other 
@@ -567,23 +559,25 @@ class CrossPlot():
         traces = []
         scattergl_traces = []
         for color in self.colors:
-            traces.append(self.create_trace(color, depth_range=depth_range))
+            traces.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
         if len(traces) >= 1 and 'visible' in traces[0]: del traces[0]['visible']
         for trace in traces:
             scattergl_traces.append(go.Scattergl(trace))
         self.traces_with_depth = scattergl_traces.copy()
-        for ref in self.phi_to_rho_references:
-            scattergl_traces.append(go.Scattergl(self.create_phi_to_rho_reference(**ref)))
+
+        #for ref in self.phi_to_rho_references:
+        #    scattergl_traces.append(go.Scattergl(self.create_phi_to_rho_reference(**ref)))
         return scattergl_traces
 
     def render(self, **kwargs):
-        layout = self.create_layout()
+        layout = self.create_layout(**kwargs)
         traces = self.create_traces(**kwargs)
         fig = go.FigureWidget(data=traces, layout=layout)
         return fig
 
     def create_trace(self, color, **kwargs):
         depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
+        container_width = kwargs.get("container_width", None)
         trace = self._base_trace.copy()
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
@@ -596,7 +590,7 @@ class CrossPlot():
                 self.colors_by_id[id(color)] = color
             name = color_data.get_name() if color != "depth" else "depth"
             trace['name'] = name
-            trace['marker'] = self._get_marker_with_color(color_array, name)
+            trace['marker'] = self._get_marker_with_color(color_array, name, container_width=container_width)
             trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
             trace['visible'] = 'legendonly'
 
@@ -604,12 +598,3 @@ class CrossPlot():
             trace['marker'] = self._get_marker_no_color()
             trace['name'] = "x"
         return trace
-
-    def create_phi_to_rho_reference(self, density, title):
-        return dict(
-            x = [0, 100],
-            y = density,
-            mode='lines',
-            name=title,
-            )
-
