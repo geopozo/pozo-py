@@ -547,42 +547,6 @@ class CrossPlot():
             showlegend  = True
         )
 
-    def create_traces(self, container_width=None, **kwargs):
-        self._marker_symbol_index = 1
-        depth_range = kwargs.pop("depth_range", self.depth_range)
-        x_data = self.x.get_data(slice_by_depth=depth_range)
-        y_data = self.y.get_data(slice_by_depth=depth_range)
-        missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
-        display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
-        # what if one is longer than the other
-        self._base_trace = dict(
-            x = x_data,
-            y = y_data,
-            mode='markers',
-            meta={'filter':'depth'}
-        )
-        traces = []
-        scattergl_traces = [] # these aren't just scattergl traces anymore TODO
-        for color in self.colors:
-            traces.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
-        if len(traces) >= 1 and 'visible' in traces[0]: del traces[0]['visible']
-        for trace in traces:
-            scattergl_traces.append(go.Scattergl(trace))
-        self.traces_with_depth = scattergl_traces.copy()
-
-        for a in self.annotations:
-            # check to see if it's a trace type?
-            # can fill
-            if isinstance(a, plotly.basedatatypes.BaseTraceType):
-                scattergl_traces.append(a)
-        return scattergl_traces #TODO are the same before and after rendering
-
-    def render(self, **kwargs):
-        layout = self.create_layout(**kwargs)
-        traces = self.create_traces(**kwargs)
-        fig = go.FigureWidget(data=traces, layout=layout)
-        return fig
-
     def create_trace(self, color, **kwargs):
         depth_range = kwargs.pop("depth_range", self.depth_range)
         container_width = kwargs.get("container_width", None)
@@ -608,3 +572,41 @@ class CrossPlot():
             trace['marker'] = self._get_marker_no_color()
             trace['name'] = "x"
         return trace
+
+    def create_traces(self, container_width=None, **kwargs):
+        depth_range = kwargs.pop("depth_range", self.depth_range)
+        x_data = self.x.get_data(slice_by_depth=depth_range)
+        y_data = self.y.get_data(slice_by_depth=depth_range)
+        self._marker_symbol_index = 1
+
+        # Doing some stats
+        missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
+        display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
+
+        self._base_trace = dict(
+            x = x_data,
+            y = y_data,
+            mode='markers',
+            meta={'filter':'depth'}
+        )
+
+        # Make Traces
+        trace_definitions = []
+        plotly_traces     = []
+        for color in self.colors:
+            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
+        if trace_definitions: del trace_definitions[0]['visible']
+
+        for trace in trace_definitions:
+            plotly_traces.append(go.Scattergl(trace))
+        self.traces_with_depth = plotly_traces.copy() # why do we have to copy TODO
+
+        return plotly_traces # TODO are the same before and after rendering
+
+    def render(self, **kwargs):
+        layout = self.create_layout(**kwargs)
+        traces = self.create_traces(**kwargs)
+        fig = go.FigureWidget(data=traces, layout=layout)
+
+        self.last_fig = fig
+        return fig
