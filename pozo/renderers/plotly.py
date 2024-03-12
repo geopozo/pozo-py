@@ -2,6 +2,7 @@ import copy
 import math
 import warnings
 import re
+import weakref #unused? TODO
 
 import numpy as np
 from IPython.display import Javascript # Part of Hack #1
@@ -427,7 +428,7 @@ class Plotly(pzr.Renderer):
         auto = kwargs.pop("auto", None)
         count = 0
         with self.last_fig.batch_update():
-            for trace in self._xp_traces:
+            for trace in self._xp_traces: # TODO we will need to make sure it has color
                 if name is not None and trace["name"] != name: continue
                 count += 1
                 if auto is True:
@@ -583,7 +584,7 @@ class CrossPlot():
         return fig
 
     def create_trace(self, color, **kwargs):
-        depth_range = kwargs.pop("depth_range", self.depth_range) # if an array, you must slice it yourself
+        depth_range = kwargs.pop("depth_range", self.depth_range)
         container_width = kwargs.get("container_width", None)
         trace = self._base_trace.copy()
         if color is not None:
@@ -595,6 +596,8 @@ class CrossPlot():
                 color_array = color_data.get_data(slice_by_depth=self.depth_range)
                 trace['meta']['color_data'] = id(color)
                 self.colors_by_id[id(color)] = color
+                # maybe i could do a weakref hashmap, trace to data #check it out
+                # traces change ID tho
             name = color_data.get_name() if color != "depth" else "depth"
             trace['name'] = name
             trace['marker'] = self._get_marker_with_color(color_array, name, container_width=container_width)
