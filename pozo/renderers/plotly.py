@@ -502,13 +502,13 @@ class CrossPlot():
     def __init__(self, x, y, colors=[None], **kwargs):
         # rendering defaults
         self.size                = kwargs.pop("size", 500)
-        self.depth_range         = kwargs.pop("depth_range", [None]) # if an array, you must slice it yourself
+        self.depth_range         = kwargs.pop("depth_range", [None])
         self.x_range             = kwargs.pop("xrange", None)
         self.y_range             = kwargs.pop("yrange", None)
         self.annotations         = kwargs.pop("annotations", [])
-        if len(colors) == 0: colors = [None]
+        if not colors: colors = [None]
         if not is_array(colors): colors = [colors]
-        self.colors_by_id = {}
+
         self.colors = []
         for color in colors:
             if color is None:
@@ -518,9 +518,12 @@ class CrossPlot():
             else:
                 self.colors.append(self._resolve_selector_to_data(color))
 
+
         self.x = self._resolve_selector_to_data(x)
         self.y = self._resolve_selector_to_data(y)
 
+        self.colors_by_id = {}
+        # TODO check how this is used
 
     def create_layout(self, container_width=None):
         margin = (120) / self.size if container_width is not None else 0
