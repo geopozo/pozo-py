@@ -390,7 +390,7 @@ class Plotly(pzr.Renderer):
         if xp is not None: # this is going to be on the figure, not the renderer TODO
             self._xp_traces = []
             for trace in fig['data']:
-                if trace.meta is not None and ('with_depth' in trace.meta or 'is_depth' in trace.meta):
+                if trace.meta and trace.meta.get("filter", None) == 'depth':
                     self._xp_traces.append(trace)
             fig.layout.on_change(self._update_xp, 'yaxis2.range')
         self.last_fig = fig
@@ -408,10 +408,12 @@ class Plotly(pzr.Renderer):
             for trace in self._xp_traces:
                 trace.x = self._xp.x.get_data(slice_by_depth=new_depth_range)
                 trace.y = self._xp.y.get_data(slice_by_depth=new_depth_range)
-                if 'is_depth' in trace.meta:
+                color_data = trace.meta.get('color_data', None)
+                if color_data == 'depth':
                     trace.marker.color = self._xp.x.get_depth(slice_by_depth=(new_depth_range))
-                elif len(trace.meta) == 2:
-                    trace.marker.color = self._xp.colors_by_id[trace.meta[1]].get_data(slice_by_depth=new_depth_range)
+                elif isinstance(color_data, pozo.Data):
+                    trace.marker.color = self._xp.colors_by_id[color_data].get_data(slice_by_depth=new_depth_range)
+
 
     # i think this misplacement all comes down to figure out how we deal with cross plots, can we deal with them better
     # i think we need a cross plot renderer
@@ -553,7 +555,7 @@ class CrossPlot():
             x = x_data,
             y = y_data,
             mode='markers',
-            meta=['with_depth']
+            meta={'filter':'depth'}
         )
         traces = []
         scattergl_traces = [] # these aren't just scattergl traces anymore TODO
@@ -583,12 +585,12 @@ class CrossPlot():
         trace = self._base_trace.copy()
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
-                trace['meta'] = ['is_depth']
+                trace['meta']['color_data'] = 'depth'
                 color_array = self.x.get_depth(slice_by_depth=self.depth_range)
             else:
                 color_data = self._resolve_selector_to_data(color)
                 color_array = color_data.get_data(slice_by_depth=self.depth_range)
-                trace['meta'].append(id(color))
+                trace['meta']['color_data'] = id(color)
                 self.colors_by_id[id(color)] = color
             name = color_data.get_name() if color != "depth" else "depth"
             trace['name'] = name
