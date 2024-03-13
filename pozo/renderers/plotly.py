@@ -500,11 +500,14 @@ class CrossPlot():
         if isinstance(selector, POZO_OBJS):
            data = selector.get_data()
            if len(data) == 0:
-               raise ValueError(f"{selector} has no data")
+               raise ValueError(f"{selector} has no pozo.Data object")
            return data[0] # we process it in the following
         elif isinstance(selector, pozo.Data):
+            if not is_array(selector.get_data()): raise TypeError(f"{selector}'s data seems weird: {selector.get_data()}")
+            if not is_array(selector.get_depth()):raise TypeError(f"{selector}'s depth seems weird: {selector.get_depth()}")
+
             return selector
-        raise TypeError(f"{selector} does not appear to be a pozo object")
+        raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector})")
 
     def __init__(self, x, y, colors=[None], **kwargs):
         # rendering defaults
