@@ -388,17 +388,15 @@ class Plotly(pzr.Renderer):
         layout = self.get_layout(graph, xp=xp, **kwargs)
         container_width = layout["width"] if xp is not None else 0
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
-        #### TODO
         if xp is None:
-            self.last_fig = go.FigureWidget(data=traces, layout=layout) # TODO wrap the figure
+            self.last_fig = go.FigureWidget(data=traces, layout=layout) 
         else:
-            self.last_fig = xpFigureWidget(data=traces, layout=layout)
+            self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range)
             #    self._xp_traces = []
             #    for trace in fig['data']:
             #        if trace.meta and trace.meta.get("filter", None) == 'depth':
             #            self._xp_traces.append(trace)
             #    fig.layout.on_change(self._update_xp, 'yaxis2.range')
-            #### TODO
         return self.last_fig
 
     def javascript(self):
@@ -415,6 +413,8 @@ def is_array(value):
 
 class xpFigureWidget(go.FigureWidget):
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
+        self._depth_range = kwargs.pop("depth_range", [None])
+        # you can set depth_range at init, render, and trace
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
 
 class CrossPlot():
@@ -578,7 +578,7 @@ class CrossPlot():
         traces = self.create_traces(**kwargs)
 
         # if none, it it is min and max
-        fig = xpFigureWidget(data=traces, layout=layout) # how do we set depth range here
+        fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range) # how do we set depth range here
 
         self.last_fig = fig
         self._figures_by_id[id(fig)] = fig
