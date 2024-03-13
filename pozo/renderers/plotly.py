@@ -109,6 +109,7 @@ class Plotly(pzr.Renderer):
         self.template = copy.deepcopy(template)
         self.xaxis_template = copy.deepcopy(self.template["plotly"]["xaxis_template"])
         del self.template["plotly"]["xaxis_template"]
+        self.last_fig = None
 
     def _calc_axes_proportion(self, num_axes, height):
         num_axes_adjusted = 0 if num_axes <= 1 else num_axes  # first axis is free!
@@ -387,78 +388,36 @@ class Plotly(pzr.Renderer):
         layout = self.get_layout(graph, xp=xp, **kwargs)
         container_width = layout["width"] if xp is not None else 0
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
-        fig = go.FigureWidget(data=traces, layout=layout) # TODO wrap the figure
-        if xp is not None: # this is going to be on the figure, not the renderer TODO
-            self._xp_traces = []
-            for trace in fig['data']:
-                if trace.meta and trace.meta.get("filter", None) == 'depth':
-                    self._xp_traces.append(trace)
-            fig.layout.on_change(self._update_xp, 'yaxis2.range')
-        self.last_fig = fig
-        return fig
+        #### TODO
+        if xp is None:
+            self.last_fig = go.FigureWidget(data=traces, layout=layout) # TODO wrap the figure
+        else:
+            self.last_fig = xpFigureWidget(data=traces, layout=layout)
+            #    self._xp_traces = []
+            #    for trace in fig['data']:
+            #        if trace.meta and trace.meta.get("filter", None) == 'depth':
+            #            self._xp_traces.append(trace)
+            #    fig.layout.on_change(self._update_xp, 'yaxis2.range')
+            #### TODO
+        return self.last_fig
 
     def javascript(self):
         add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
 
         return Javascript(add_scroll) # Part of Hack #1
 
-    # should this be in graph? the graph is the figure, or the graph is the range
-    def _update_xp(self, layout, new_depth_range): # this should be on the figure
-        new_depth_range = sorted(new_depth_range)
-        with self.last_fig.batch_update():
-            for trace in self._xp_traces:
-                trace.x = self._xp.x.get_data(slice_by_depth=new_depth_range)
-                trace.y = self._xp.y.get_data(slice_by_depth=new_depth_range)
-                color_data = trace.meta.get('color_data', None)
-                if color_data == 'depth': # if xp were to change x or y, this would be wrong
-                    trace.marker.color = self._xp.x.get_depth(slice_by_depth=(new_depth_range))
-                elif isinstance(color_data, pozo.Data):
-                    trace.marker.color = self._xp._colors_by_id[color_data].get_data(slice_by_depth=new_depth_range)
-
-
-    # i think this misplacement all comes down to figure out how we deal with cross plots, can we deal with them better
-    # i think we need a cross plot renderer
-    # and the graph should store its cross plot and should store it's xp and it's figure
-    # we could store weak references to all figures and cross plots
-    # we could also use a copy/etc
-    def fix_xp_range(self, **kwargs):
-        name = kwargs.pop("name", None)
-        cmin = kwargs.pop("cmin", None)
-        cmax = kwargs.pop("cmax", None)
-        auto = kwargs.pop("auto", None)
-        count = 0
-        with self.last_fig.batch_update():
-            for trace in self._xp_traces: # TODO we will need to make sure it has color
-                if name is not None and trace["name"] != name: continue
-                count += 1
-                if auto is True:
-                    trace.marker.cauto = True
-                if cmax is None and auto is None and cmin is None:
-                    array = trace.marker.color
-                    trace.marker.cmin = np.nanmin(array)
-                    trace.marker.cmax = np.nanmax(array)
-                if cmax is not None:
-                    trace.marker.cmax=cmax
-                if cmin is not None:
-                    trace.marker.cmin=cmin
-
-
+# TODO: we probably have to accept None in depth range, what about changing depth range of render vs figure
 def is_array(value):
     if isinstance(value, str): return False
     if hasattr(value, "magnitude"):
         return is_array(value.magnitude)
     return hasattr(value, "__len__")
 
+class xpFigureWidget(go.FigureWidget):
+    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
+        super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
 
-# Could change size too
-# Could better integrate with graph, accept a "depth"
 class CrossPlot():
-    ## figures could contains references to their renderer
-    ## figures could also return a list of traces filtered by depth
-    ## figures could also return a list of traces w/ colors
-    ## figures could return a list of colors being used (but don't need figures to add color to color list
-    ## so not good enough for garbage collection
-
     marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
     default_marker = {
             "opacity": .8,
@@ -507,7 +466,7 @@ class CrossPlot():
             if not is_array(selector.get_depth()):raise TypeError(f"{selector}'s depth seems weird: {selector.get_depth()}")
 
             return selector
-        raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector})")
+        raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector)}")
 
     def __init__(self, x, y, colors=[None], **kwargs):
         # rendering defaults
@@ -614,9 +573,12 @@ class CrossPlot():
         return plotly_traces
 
     def render(self, **kwargs):
+        depth_range = kwargs.get("depth_range", self.depth_range)
         layout = self.create_layout(**kwargs)
         traces = self.create_traces(**kwargs)
-        fig = go.FigureWidget(data=traces, layout=layout)
+
+        # if none, it it is min and max
+        fig = xpFigureWidget(data=traces, layout=layout) # how do we set depth range here
 
         self.last_fig = fig
         self._figures_by_id[id(fig)] = fig
