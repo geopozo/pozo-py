@@ -410,10 +410,10 @@ class Plotly(pzr.Renderer):
                 trace.x = self._xp.x.get_data(slice_by_depth=new_depth_range)
                 trace.y = self._xp.y.get_data(slice_by_depth=new_depth_range)
                 color_data = trace.meta.get('color_data', None)
-                if color_data == 'depth':
+                if color_data == 'depth': # if xp were to change x or y, this would be wrong
                     trace.marker.color = self._xp.x.get_depth(slice_by_depth=(new_depth_range))
                 elif isinstance(color_data, pozo.Data):
-                    trace.marker.color = self._xp.colors_by_id[color_data].get_data(slice_by_depth=new_depth_range)
+                    trace.marker.color = self._xp._colors_by_id[color_data].get_data(slice_by_depth=new_depth_range)
 
 
     # i think this misplacement all comes down to figure out how we deal with cross plots, can we deal with them better
@@ -453,6 +453,12 @@ def is_array(value):
 # Could change size too
 # Could better integrate with graph, accept a "depth"
 class CrossPlot():
+    ## figures could contains references to their renderer
+    ## figures could also return a list of traces filtered by depth
+    ## figures could also return a list of traces w/ colors
+    ## figures could return a list of colors being used (but don't need figures to add color to color list
+    ## so not good enough for garbage collection
+
     marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
     default_marker = {
             "opacity": .8,
@@ -523,8 +529,11 @@ class CrossPlot():
         self.x = self._resolve_selector_to_data(x)
         self.y = self._resolve_selector_to_data(y)
 
-        self.colors_by_id = {}
-        # TODO check how this is used
+        self._colors_by_id = {}
+        self._figures_by_id = weakref.WeakValueDictionary()
+        # figures will contain all the colors currently be used, if we ever have a need to audit
+        # and eliminate colors_by_id that are nto necessary TODO
+
 
     def create_layout(self, container_width=None):
         margin = (120) / self.size if container_width is not None else 0
@@ -559,9 +568,8 @@ class CrossPlot():
                 color_data = self._resolve_selector_to_data(color)
                 color_array = color_data.get_data(slice_by_depth=self.depth_range)
                 trace['meta']['color_data'] = id(color)
-                self.colors_by_id[id(color)] = color
-                # maybe i could do a weakref hashmap, trace to data #check it out
-                # traces change ID tho
+                self._colors_by_id[id(color)] = color
+
             name = color_data.get_name() if color != "depth" else "depth"
             trace['name'] = name
             trace['marker'] = self._get_marker_with_color(color_array, name, container_width=container_width)
@@ -599,9 +607,8 @@ class CrossPlot():
 
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
-        self.traces_with_depth = plotly_traces.copy() # why do we have to copy TODO
 
-        return plotly_traces # TODO are the same before and after rendering
+        return plotly_traces
 
     def render(self, **kwargs):
         layout = self.create_layout(**kwargs)
@@ -609,4 +616,5 @@ class CrossPlot():
         fig = go.FigureWidget(data=traces, layout=layout)
 
         self.last_fig = fig
+        self._figures_by_id[id(fig)] = fig
         return fig
