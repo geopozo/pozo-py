@@ -391,7 +391,7 @@ class Plotly(pzr.Renderer):
         if xp is None:
             self.last_fig = go.FigureWidget(data=traces, layout=layout)
         else:
-            self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range)
+            self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range, renderer=xp)
             self.last_fig.layout.on_change(self.last_fig._depth_change_cb, 'yaxis2.range')
             xp.add_figure(self.last_fig)
         return self.last_fig
@@ -411,14 +411,39 @@ def is_array(value):
 class xpFigureWidget(go.FigureWidget):
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
         self._depth_range = kwargs.pop("depth_range", [None])
-        # you can set depth_range at init, render, and trace
+        self._xp_renderer = kwargs.pop("renderer", None)
+        if self._xp_renderer is None: raise ValueError("Don't call xpFigureWidget directly, let a renderer call it so it has all it's info")
+        self._depth_lock = False
+
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
+
     def _depth_change_cb(self, layout, new_range):
-        print(new_range)
-            #    self._xp_traces = []
-            #    for trace in fig['data']:
-            #        if trace.meta and trace.meta.get("filter", None) == 'depth':
-            #            self._xp_traces.append(trace)
+        if not self._depth_lock:
+            self.set_depth_range(new_range)
+        self._tracks_depth_range = new_range
+
+    def lock_depth_range(self):
+        self._depth_lock = True
+
+    def unlock_depth_range(self):
+        self._depth_lock = False
+        self.match_depth_range()
+
+    def match_depth_range(self):
+        self.set_depth_range(depth_range=self._tracks_depth_range)
+
+    def set_depth_range(self, depth_range=None):
+        self._depth_range = sorted(depth_range) if depth_range else None
+        with self.batch_update():
+            for trace in self['data']:
+                if not trace.meta or trace.meta.get("filter", None) != 'depth': continue
+                trace.x = self._xp_renderer.x.get_data(slice_by_depth=self._depth_range)
+                trace.y = self._xp_renderer.y.get_data(slice_by_depth=self._depth_range)
+                color_data = trace.meta.get('color_data', None)
+                if color_data == 'depth': # if xp were to change x or y, this would be wrong in renderer
+                    trace.marker.color = self._xp_renderer.x.get_depth(slice_by_depth=(self._depth_range))
+                elif isinstance(color_data, pozo.Data):
+                    trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=self._depth_range)
 
 class CrossPlot():
     marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
@@ -584,8 +609,7 @@ class CrossPlot():
         traces = self.create_traces(**kwargs)
 
         # if none, it it is min and max
-        fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range) # how do we set depth range here
-
+        fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range, renderer=self) # how do we set depth range here
         self.add_figure(fig)
         self.last_fig = fig
 
