@@ -46,7 +46,7 @@ class Data(ood.Observed, pzt.Themeable):
             self.set_depth(depth, depth_unit=depth_unit) # this will set the depth unit
 
     def _find_nearest(self, value):
-        # TODO: align units
+        # TODO: align units depth_range, assume same units, but check if pint
         array = np.asarray(self.get_depth());
         idx = np.nanargmin((np.abs(array - value)))
         #if array[idx] != value:
