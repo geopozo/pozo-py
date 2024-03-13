@@ -393,6 +393,7 @@ class Plotly(pzr.Renderer):
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range)
             self.last_fig.layout.on_change(self.last_fig._depth_change_cb, 'yaxis2.range')
+            xp.add_figure(self.last_fig)
         return self.last_fig
 
     def javascript(self):
@@ -574,6 +575,9 @@ class CrossPlot():
 
         return plotly_traces
 
+    def add_figure(self, fig):
+        self._figures_by_id[id(fig)] = fig
+
     def render(self, **kwargs):
         depth_range = kwargs.get("depth_range", self.depth_range)
         layout = self.create_layout(**kwargs)
@@ -582,6 +586,7 @@ class CrossPlot():
         # if none, it it is min and max
         fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range) # how do we set depth range here
 
+        self.add_figure(fig)
         self.last_fig = fig
-        self._figures_by_id[id(fig)] = fig
+
         return fig
