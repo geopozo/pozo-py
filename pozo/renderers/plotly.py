@@ -389,7 +389,7 @@ class Plotly(pzr.Renderer):
         container_width = layout["width"] if xp is not None else 0
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
         if xp is None:
-            self.last_fig = go.FigureWidget(data=traces, layout=layout) 
+            self.last_fig = go.FigureWidget(data=traces, layout=layout)
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range)
             #    self._xp_traces = []
