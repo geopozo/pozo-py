@@ -525,10 +525,10 @@ class CrossPlot():
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
                 trace['meta']['color_data'] = 'depth'
-                color_array = self.x.get_depth(slice_by_depth=self.depth_range)
+                color_array = self.x.get_depth(slice_by_depth=depth_range)
             else:
                 color_data = self._resolve_selector_to_data(color)
-                color_array = color_data.get_data(slice_by_depth=self.depth_range)
+                color_array = color_data.get_data(slice_by_depth=depth_range)
                 trace['meta']['color_data'] = id(color)
                 self._colors_by_id[id(color)] = color
 
