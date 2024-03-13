@@ -392,11 +392,7 @@ class Plotly(pzr.Renderer):
             self.last_fig = go.FigureWidget(data=traces, layout=layout)
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range)
-            #    self._xp_traces = []
-            #    for trace in fig['data']:
-            #        if trace.meta and trace.meta.get("filter", None) == 'depth':
-            #            self._xp_traces.append(trace)
-            #    fig.layout.on_change(self._update_xp, 'yaxis2.range')
+            self.last_fig.layout.on_change(self.last_fig._depth_change_cb, 'yaxis2.range')
         return self.last_fig
 
     def javascript(self):
@@ -416,6 +412,12 @@ class xpFigureWidget(go.FigureWidget):
         self._depth_range = kwargs.pop("depth_range", [None])
         # you can set depth_range at init, render, and trace
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
+    def _depth_change_cb(self, layout, new_range):
+        print(new_range)
+            #    self._xp_traces = []
+            #    for trace in fig['data']:
+            #        if trace.meta and trace.meta.get("filter", None) == 'depth':
+            #            self._xp_traces.append(trace)
 
 class CrossPlot():
     marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
