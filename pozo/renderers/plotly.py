@@ -442,7 +442,7 @@ class xpFigureWidget(go.FigureWidget):
                 color_data = trace.meta.get('color_data', None)
                 if color_data == 'depth': # if xp were to change x or y, this would be wrong in renderer
                     trace.marker.color = self._xp_renderer.x.get_depth(slice_by_depth=(self._depth_range))
-                elif isinstance(color_data, pozo.Data):
+                elif color_data in self._xp_renderer._colors_by_id:
                     trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=self._depth_range)
 
 class CrossPlot():
