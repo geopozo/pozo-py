@@ -688,7 +688,8 @@ class CrossPlot():
         plotly_traces     = []
         for color in self.colors:
             trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
-        if trace_definitions: del trace_definitions[0]['visible']
+        if trace_definitions and 'visible' in trace_definitions[0]: del trace_definitions[0]['visible']
+
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
         return plotly_traces
