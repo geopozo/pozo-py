@@ -550,6 +550,7 @@ class CrossPlot():
         depth_range = kwargs.pop("depth_range", self.depth_range)
         container_width = kwargs.get("container_width", None)
         trace = self._base_trace.copy()
+        trace['meta']={'filter':'depth'}
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
                 trace['meta']['color_data'] = 'depth'
@@ -585,7 +586,6 @@ class CrossPlot():
             x = x_data,
             y = y_data,
             mode='markers',
-            meta={'filter':'depth'}
         )
 
         # Make Traces
