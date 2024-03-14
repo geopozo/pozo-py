@@ -445,6 +445,95 @@ class xpFigureWidget(go.FigureWidget):
                 elif color_data in self._xp_renderer._colors_by_id:
                     trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=self._depth_range)
 
+    # we have to set self._color_range so that can recalculate it when depth changes
+    def set_color_range(self, name, color_range=(None), auto=False, lock=False):
+        for trace in self['data']:
+            if trace.meta and 'color_data' in trace.meta:
+                if trace.name != name: continue
+                if color_range: color_range = list(sorted(color_range))
+                calc_key = 'colorscale_calculated'
+                select_key = 'colorscale_selected'
+
+                # if we never calculated or what we have is different than what we calculaed
+                if (calc_key not in trace.meta
+                    or trace.meta[calc_key] != trace.marker.colorscale
+                    ):
+                    trace.meta[select_key] = trace.marker.colorscale # its a tuple maybe it is hashable
+
+                colorscale_selected = trace.meta[select_key]
+                if auto==True or color_range==[None]:
+                    trace.meta['color_range'] = (None)
+                    if calc_key in trace.meta: del trace.meta[calc_key]
+                    if select_key in trace.meta: del trace.meta[select_key]
+                    trace.marker.colorscale = colorscale_selected
+                    return
+
+                data_min = np.nanmin(trace.marker.color)
+                data_max = np.nanmax(trace.marker.color)
+                if lock == True:
+                    color_range = [data_min, data_max]
+                trace.meta['color_range'] = color_range
+                if color_range[0] is None: color_range[0] = data_min
+                if color_range[1] is None: color_range[1] = data_max
+
+                distance = data_max - data_min
+                normalized_color_range = np.round((color_range - data_min) / distance, 2)
+                norm_distance = normalized_color_range[1] - normalized_color_range[0]
+
+                normalized_pairs = [] # lets create normalized pairs
+                for pair in colorscale_selected:
+                    normalized_pairs.append(((pair[0]*norm_distance)+normalized_color_range[0], pair[1]))
+                if normalized_pairs[0][0] > 1: normalized_pairs = [(0, normalized_pairs[0][1]), (1,normalized_pairs[0][1]) ]
+                elif normalized_pairs[-1][0] < 0: normalized_pairs = [(0, normalized_pairs[-1][1]), (1,normalized_pairs[-1][1]) ]
+                else:
+                    # can bottom be extended
+                    if normalized_pairs[0][0] > 0: normalized_pairs.insert(0, (0, normalized_pairs[0][1]))
+                    elif normalized_pairs[0][0] < 0:
+                        lb = normalized_pairs[0]
+                        ub = None
+                        old_pairs = normalized_pairs.copy()
+                        for pair in old_pairs:
+                            if pair[0] > 0:
+                                if ub == None:
+                                    ub = pair
+                                    #print(lb)
+                                    new_color = plotly.colors.label_rgb(
+                                        plotly.colors.find_intermediate_color(
+                                            plotly.colors.hex_to_rgb(lb[1]),
+                                            plotly.colors.hex_to_rgb(ub[1]),
+                                            (-lb[0])/(ub[0]-lb[0]) # distance from 0
+                                            ))
+                                    #print(ub)
+                                    normalized_pairs = [(0, new_color)]
+                                normalized_pairs.append(pair)
+                            else:
+                                lb = pair
+                    if normalized_pairs[-1][0] < 1: normalized_pairs.append((1, normalized_pairs[-1][1]))
+                    elif normalized_pairs[-1][0] > 1:
+                        ub = normalized_pairs[-1]
+                        lb = None
+                        old_pairs = list(reversed(normalized_pairs.copy()))
+                        for pair in old_pairs:
+                            if pair[0] < 1: # we're here
+                                if lb == None:
+                                    lb = pair
+                                    # print(lb)
+                                    new_color = plotly.colors.label_rgb(
+                                        plotly.colors.find_intermediate_color(
+                                            plotly.colors.hex_to_rgb(lb[1]),
+                                            plotly.colors.hex_to_rgb(ub[1]),
+                                            (1-lb[0])/(ub[0]-lb[0]) # distance from 0
+                                            ))
+                                    normalized_pairs = [(1, new_color)]
+                                normalized_pairs.append(pair)
+                            else:
+                                ub = pair
+                        normalized_pairs = list(reversed(normalized_pairs))
+                    # if not, does it need to be truncated
+                trace.marker.colorscale = tuple(normalized_pairs)
+                trace.meta[calc_key] = tuple(normalized_pairs)
+                # should ctime be the min max for the whole thing
+
 class CrossPlot():
     marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
     default_marker = {
@@ -566,7 +655,6 @@ class CrossPlot():
             trace['marker'] = self._get_marker_with_color(color_array, name, container_width=container_width)
             trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
             trace['visible'] = 'legendonly'
-
         else:
             trace['marker'] = self._get_marker_no_color()
             trace['name'] = "x"
@@ -594,10 +682,8 @@ class CrossPlot():
         for color in self.colors:
             trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
         if trace_definitions: del trace_definitions[0]['visible']
-
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
-
         return plotly_traces
 
     def add_figure(self, fig):
