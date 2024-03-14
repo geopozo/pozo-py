@@ -18,6 +18,8 @@ import pozo.units as pzu
 re_space = re.compile(' ')
 re_power = re.compile('\*\*')
 
+# TODO FOR CROSSPLOT MUST X Y AND ALL COLOR HAVE THE SAME SHAPE OR ELSE BREAK INTERACTIVITY
+
 # You can create your own dictionary like 'defaults' and
 # construct a Style() with it (pass it in as `template`)
 # Specifying values that are marked as "generated" will
@@ -401,7 +403,6 @@ class Plotly(pzr.Renderer):
 
         return Javascript(add_scroll) # Part of Hack #1
 
-# TODO: we probably have to accept None in depth range, what about changing depth range of render vs figure
 def is_array(value):
     if isinstance(value, str): return False
     if hasattr(value, "magnitude"):
@@ -673,7 +674,7 @@ class CrossPlot():
         self._marker_symbol_index = 1
 
         # Doing some stats
-        missing = (np.isnan(x_data) + np.isnan(y_data)).sum()
+        missing = (np.isnan(x_data) + np.isnan(y_data)).sum() # TODO improve with more statistics, how many values are there, etc
         display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
 
         self._base_trace = dict(
