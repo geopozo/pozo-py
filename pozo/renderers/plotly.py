@@ -432,8 +432,9 @@ class xpFigureWidget(go.FigureWidget):
     def match_depth_range(self):
         self.set_depth_range(depth_range=self._tracks_depth_range)
 
-    def set_depth_range(self, depth_range=None):
+    def set_depth_range(self, depth_range=None): # TODO for both graphs? xp and main?
         self._depth_range = sorted(depth_range) if depth_range else None
+        color_range_queue=[]
         with self.batch_update():
             for trace in self['data']:
                 if not trace.meta or trace.meta.get("filter", None) != 'depth': continue
@@ -444,6 +445,11 @@ class xpFigureWidget(go.FigureWidget):
                     trace.marker.color = self._xp_renderer.x.get_depth(slice_by_depth=(self._depth_range))
                 elif color_data in self._xp_renderer._colors_by_id:
                     trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=self._depth_range)
+                if 'color_range' in trace.meta and trace.meta['color_range'] != (None):
+                    color_range_queue.append((trace.name, trace.meta['color_range']))
+        with self.batch_update(): # instead of two batches, color_range could take the new info as arguments
+            for item in color_range_queue:
+                self.set_color_range(item[0], color_range=item[1])
 
     # we have to set self._color_range so that can recalculate it when depth changes
     def set_color_range(self, name, color_range=(None), auto=False, lock=False):
