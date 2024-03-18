@@ -32,6 +32,7 @@ class Graph(ood.Observer, pzt.Themeable):
         my_kwargs["compare"] = kwargs.pop('compare', False)
         my_kwargs["yaxis"] = kwargs.pop('yaxis', None)
         my_kwargs["yaxis_name"] = kwargs.pop('yaxis_name', None)
+        my_kwargs["unit_map"] = kwargs.pop("unit_map", None)
         old_kwargs = kwargs.copy()
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string")
