@@ -95,6 +95,7 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = None
+        unit_map = kwargs.pop("unit_map", None)
         if yaxis is not None: # this is a manually added y axis, don't parse it with LAS
             if yaxis_name is None and hasattr(yaxis, "mnemonic"): yaxis_name = yaxis.mnemonic
             if hasattr(yaxis, "unit"):
@@ -143,6 +144,7 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = kwargs.get('yaxis_unit', None)
+        unit_map = kwargs.pop("unit_map", None)
 
         if yaxis is not None:
             if yaxis_name and hasattr(yaxis, "mnemonic"): yaxis_name = yaxis.mnemonic
