@@ -124,8 +124,13 @@ class Graph(ood.Observer, pzt.Themeable):
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
             unit = None
-            if curve.unit is None:
-                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
+            if unit_map:
+                if curve.mnemonic in unit_map:
+                    unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
+                elif mnemonic in unit_map:
+                    unit = pzu.registry.parse_units(unit_map[mnemonic])
+            elif curve.unit is None:
+                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics   
             else: unit = pzu.parse_unit_from_curve(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
