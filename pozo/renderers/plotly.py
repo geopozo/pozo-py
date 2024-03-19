@@ -392,8 +392,10 @@ class Plotly(pzr.Renderer):
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
         if xp is None:
             self.last_fig = go.FigureWidget(data=traces, layout=layout)
+            self.last_fig._depth_axis = "yaxis1"
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range, renderer=xp)
+            self.last_fig._depth_axis = "yaxis2"
             self.last_fig.layout.on_change(self.last_fig._depth_change_cb, 'yaxis2.range')
             xp.add_figure(self.last_fig)
         return self.last_fig
@@ -410,6 +412,9 @@ def is_array(value):
     return hasattr(value, "__len__")
 
 class xpFigureWidget(go.FigureWidget):
+    def link_depth_to(self, fig):
+        fig.layout.on_change(self._depth_change_cb, fig._depth_axis+'.range', append=True)
+
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
         self._depth_range = kwargs.pop("depth_range", [None])
         self._xp_renderer = kwargs.pop("renderer", None)
