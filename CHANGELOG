@@ -1,3 +1,5 @@
+v0.9.13:
+ - flesh out crossplot api
 v0.9.10:
  - add crossplot function to plotly renderer
  - get_data and get_depth now take an optional second argument to slice_by_depth
