@@ -26,6 +26,9 @@ class Graph(ood.Observer, pzt.Themeable):
         # Be cool if we could use include to specify things be on the same track TODO
         self._name = kwargs.pop('name', 'unnamed')
         self.renderer = kwargs.pop('renderer', pzr.Plotly())
+        self.xp_renderer = kwargs.pop('xp_renderer', pzr.CrossPlot) # kinda don't like doing this, making it point to a class
+
+
         my_kwargs = {} # Don't pass these to super, but still pass them down as kwargs
         my_kwargs["include"] = kwargs.pop('include', None)
         my_kwargs["exclude"] = kwargs.pop('exclude', None)
@@ -45,8 +48,13 @@ class Graph(ood.Observer, pzt.Themeable):
         render_options = self._render.copy()
         for key in kwargs.keys():
             if key in render_options: del render_options[key]
-        self.fig = self.renderer.render(self, **kwargs, **render_options)
-        return self.fig
+        self.last_fig = self.renderer.render(self, **kwargs, **render_options)
+        return self.last_fig
+
+    def CrossPlot(self, **kwargs):
+        self.xp = self.xp_renderer(**kwargs) # TODO could add graph
+        return self.xp
+
     def javascript(self):
         self.renderer.javascript()
 
