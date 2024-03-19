@@ -54,8 +54,8 @@ class Graph(ood.Observer, pzt.Themeable):
         self.last_fig = self.renderer.render(self, **kwargs, **render_options)
         return self.last_fig
 
-    def CrossPlot(self, **kwargs):
-        self.xp.reinit(**kwargs) # TODO could add graph
+    def CrossPlot(self, x=None, y=None,**kwargs):
+        self.xp.reinit(x=x, y=y, **kwargs) # TODO could add graph
         return self.xp
 
     def javascript(self):
