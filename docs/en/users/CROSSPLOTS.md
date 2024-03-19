@@ -82,5 +82,48 @@ Data goes between 1-10. Your color map goes between 4-5. You can't see all the d
 
 Data goes between 1-10. Your color map goes between -10000 and 10000. You are too zoomed out, all points will be the same color.
 
-Everytime you update the graph, either by changing the depth range or modifying it, plotly find's the optimal colormap for your data. This isn't always useful when we want to change things without changing the colormap, since we're trying to compare several graphs or perspectives and want them to share the same colormap. See the functions below to control this behavior:
+Everytime you update the graph, either by changing the depth range or modifying it, plotly finds the optimal colormap for your data. This isn't always useful when we want to change things without changing the colormap, since we're trying to compare several graphs or perspectives and want them to share the same colormap. See the functions below to control this behavior:
 
+### Controlling colormap zoom:
+
+```python
+figure.set_color_range(name, color_range=(None), auto=False, lock=False)
+# name: the name of the trace you're targeting (read from the legend)
+
+# set one of color_range, auto, or False.
+
+# color_range=(lower_range, upper_range) functions like a slice, and will pin the minimum and maximum colors to those ranges
+
+# auto=True will make plotly figure out the color range by itself again
+
+# lock=True will pin color_range to the current values displayed
+
+```
+### Manually setting depth range of crossplots:
+
+```python
+figure.set_depth_range(depth_range=None)
+
+# depth_range also functions similiar to a slice and will manually set the depth range.
+
+figure.lock_depth_range() # don't allow depthrange of crossplot to change with track graph
+
+figure.unlock_depth_range() # crossplots depthrange changes with track graph, will call the following function:
+
+figure.match_depth_range() # sets crossplot's depthrange to track graph's depthrange one time
+
+```
+
+### Linking several crossplots to track graphs:
+
+If you have an independent crossplot's figure, you can call:
+
+```python
+
+xpFigure.link_depth_to(other_figure)
+
+# where other_figure is a normal track graph
+
+```
+
+This will now make the independent crossplot behave as if it is embeded. You can link several crossplots to one track graph.
