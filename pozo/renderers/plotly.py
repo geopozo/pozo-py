@@ -597,34 +597,62 @@ class CrossPlot():
             return selector
         raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector)}")
 
-    def __init__(self, x, y, colors=[None], **kwargs):
+    def reinit(self, x = None, y = None, **kwargs):
+        self.size                = kwargs.pop("size", self.size)
+        self.depth_range         = kwargs.pop("depth_range", self.depth_range)
+        self.xrange             = kwargs.pop("xrange", self.xrange)
+        self.yrange             = kwargs.pop("yrange", self.yrange)
+        colors                   = kwargs.pop("colors", None)
+        if colors is not None:
+            if not is_array(colors): colors = [colors]
+            self.colors = colors
+        self.y              = y if y is not None else self.y
+        self.x              = x if x is not None else self.x
+
+    def __init__(self, x=None, y=None, colors=[None], **kwargs):
         # rendering defaults
         self.size                = kwargs.pop("size", 500)
         self.depth_range         = kwargs.pop("depth_range", [None])
-        self.x_range             = kwargs.pop("xrange", None)
-        self.y_range             = kwargs.pop("yrange", None)
-        self.annotations         = kwargs.pop("annotations", [])
-        if not colors: colors = [None]
+        self.xrange             = kwargs.pop("xrange", None)
+        self.yrange             = kwargs.pop("yrange", None)
         if not is_array(colors): colors = [colors]
 
-        self.colors = []
-        for color in colors:
-            if color is None:
-                self.colors.append(None)
-            elif isinstance(color, str) and color.lower() == "depth":
-                self.colors.append("depth")
-            else:
-                self.colors.append(self._resolve_selector_to_data(color))
-
-
-        self.x = self._resolve_selector_to_data(x)
-        self.y = self._resolve_selector_to_data(y)
-
+        self.colors = colors
+        self.y = y
+        self.x = x
         self._colors_by_id = {}
         self._figures_by_id = weakref.WeakValueDictionary()
         # figures will contain all the colors currently be used, if we ever have a need to audit
         # and eliminate colors_by_id that are nto necessary TODO
 
+    @property
+    def colors(self):
+        return self.__colors
+
+    @colors.setter
+    def colors(self, colors):
+        self.__colors = []
+        for color in colors:
+            if color is None:
+                self.__colors.append(None)
+            elif isinstance(color, str) and color.lower() == "depth":
+                self.__colors.append("depth")
+            else:
+                self.__colors.append(self._resolve_selector_to_data(color))
+
+    @property
+    def x(self):
+        return self.__x
+    @x.setter
+    def x(self, x):
+        self.__x = self._resolve_selector_to_data(x) if x is not None else None
+
+    @property
+    def y(self):
+        return self.__y
+    @y.setter
+    def y(self, y):
+        self.__y = self._resolve_selector_to_data(y) if y is not None else None
 
     def create_layout(self, container_width=None):
         margin = (120) / self.size if container_width is not None else 0
@@ -633,13 +661,13 @@ class CrossPlot():
             height      = self.size,
             xaxis       = dict(
                             title = self.x.get_name(),
-                            range = self.x_range,
+                            range = self.xrange,
                             linecolor = "#888",
                             linewidth = 1,
             ),
             yaxis       = dict(
                             title = self.y.get_name(),
-                            range = self.y_range,
+                            range = self.yrange,
                             domain = (margin, 1),
                             linecolor = "#888",
                             linewidth = 1,
