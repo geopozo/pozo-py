@@ -6,9 +6,9 @@ Pozo es una API intuitiva, de código abierto, para visualizar registros de pozo
 $ pip install pozo
 ```
 
-No olviden `pip install lasio` si se usa lasio! Si se usa jupyter, `pip install ipywidgets plotly nbformat` también.
+Si usas lasio recuerda `pip install lasio`. Si usas jupyter entonces `pip install ipywidgets plotly nbformat`.
 
-## Glosario de palabras raras e importantes
+## Glosario de palabras claves
 
 ```
 - Track               --> Vía
@@ -27,7 +27,7 @@ las = lasio.read("SALADIN.LAS")
 # Se puede indicar los datos relevantes
 myGraph = pozo.Graph(las, include=["CALI", "CGR", "LLS", "ILD", "LLD", "NPH", "RHOB"])
 
-# Cangrejo es un buen tema
+# Cangrejo es un buen tema predeterminado para empezar!
 myGraph.set_theme("cangrejo") # recomendado!
 
 myGraph.render(height=800, depth=[1080, 1180])
@@ -50,13 +50,13 @@ graph1.combine_tracks("LLD","ILD","LLS")
 
 graph1.combine_tracks("RHOB", "NPHI")
 
-# Se nota que cambiamos la posición del eje de la profunidad con `depth_position=1`
+# Podemos cambiar la posición del eje de la profunidad con `depth_position=1`
 graph1.render(height=800, depth_position=1, depth=[1080, 1180])
 ```
 <p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/images/log_example.png" /> </p>
 
 #### Temas
-El tema `"cangrejo"` está incluido. Se usa el `mnemonic` de los datos para determinar el color, rango, and unidad. Pero no sabe todo, así que hay dos opciones:
+El tema `"cangrejo"` está incluido en pozo. Se emplea el `mnemonic` de los datos para determinar el color, rango, and unidad. Pero este no nos entrega toda la información, así que hay dos opciones:
 ```
 # Una: Poner un respaldo para todos (solo funciona con "cangrejo")
 graph.get_theme().set_fallback{"track_width":200}
