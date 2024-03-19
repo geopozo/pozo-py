@@ -31,7 +31,7 @@ my_graph.CrossPlot(
 ### Step 2 option 1:
 The renderer can be saved to a variable and also accessed at `my_graph.xp`.
 
-```
+```python
 my_graph.xp.render() # this will render like a graph above
 ```
 
@@ -39,7 +39,7 @@ my_graph.xp.render() # this will render like a graph above
 
 You can also link the crossplot to a regular track graph. This is great because you can easily change the range of depth you are viewing with the crossplot by changing the depth range of the track graph.
 
-```
+```python
 my_graph.render(xp=True) # this will add the default crossplot that you created with `my_graph.CrossPlot()`
 ```
 
@@ -47,7 +47,7 @@ my_graph.render(xp=True) # this will add the default crossplot that you created 
 
 You could also add a different crossplot if you have a renderer for it:
 
-```
+```python
 my_graph.render(xp=some_other_cross_plot_renderer)
 ```
 
@@ -59,7 +59,7 @@ First, `pozo` always generates `plotly.FigureWidget` objects, which are plotly g
 1) Saving it in a variable after calling `render()` (render returns a figure object)
 2) Accessing the last figure generated:
 
-```
+```python
 my_graph.last_fig
 
 my_graph.xp.last_fig
