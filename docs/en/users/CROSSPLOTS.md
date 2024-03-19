@@ -69,13 +69,16 @@ Those will be `None` if you never rendered them.
 
 ### A note about colormaps:
 
-To show the z-axis, we use colormaps in our crossplots. Plotly will generally automatically choose the optimal color range: one two show you all the data in the highest resolution. The colormap functions like a "color zoom".
+To show the z-axis, we use colormaps in our crossplots. Plotly will automatically choose the optimal color range: one to show you all the data in the highest resolution. The colormap functions like a "color zoom".
 
-#### Too zoomed in:
+
+#### *Examples of bad configurations:*
+
+##### Too zoomed in:
 
 Data goes between 1-10. Your color map goes between 4-5. You can't see all the data, it's useless.
 
-#### Too zoomed out:
+##### Too zoomed out:
 
 Data goes between 1-10. Your color map goes between -10000 and 10000. You are too zoomed out, all points will be the same color.
 
