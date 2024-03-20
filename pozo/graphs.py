@@ -177,9 +177,9 @@ class Graph(ood.Observer, pzt.Themeable):
             
             if unit_map:
                 if curve.mnemonic in unit_map:
-                    unit = pzu.registry.parse_unit_from_context(mnemonic, unit_map[curve.mnemonic], curve.values)
+                    unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:
-                    unit = pzu.registry.parse_unit_from_context(mnemonic, unit_map[mnemonic], curve.values)
+                    unit = pzu.registry.parse_units(unit_map[mnemonic])
             if curve.units is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}")
             else: unit = pzu.registry.parse_unit_from_context(mnemonic, curve.units, curve.values) # TODO is curve correct?
