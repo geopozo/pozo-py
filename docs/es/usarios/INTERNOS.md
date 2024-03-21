@@ -1,6 +1,6 @@
 # Qué es Pozo?
 
-## El arból
+## El árbol
 Si se tiene un graph `Graph`:
 ```
 import pozo
@@ -23,11 +23,11 @@ myGraph.add_tracks(
 )
 ```
 
-No tienen datos, pero todavía la estructura interna es así:
+No tienen datos, pero la estructura interna es así:
 
 <p align=center><img src=../../images/internal/2.png /></p>
 
-`myGraph.render()` aún no hace nada, debemos agregar unos datos:
+Si hacemos `myGraph.render()` aún no hace nada, debemos agregar unos datos:
 
 ```
 x = [2, 2, 1, 4, 5, 6]
@@ -41,7 +41,7 @@ track1 = myGraph.get_tracks("track1")[0] # siempre se devuelve una lista!
 track1.add_axes(new_data)
 ```
 
-Voilà:
+Listo:
 
 <p align=center><img src=../../images/internal/3.png /></p>
 
@@ -49,7 +49,7 @@ ESPERA! De donde se saca el `Axis`?
 
 #### Creación Automatica de Pozo
 
-Un `pozo.Data` está **contenido SIEMPRE** por un `pozo.Axis` está **contenido SIEMPRE** por un `pozo.Track` está **contenido SIEMPRE!** por un `pozo.Graph`.
+Un `pozo.Data` está **contenido SIEMPRE** por un `pozo.Axis`, a su vez este está **contenido SIEMPRE** por un `pozo.Track`, que está **contenido SIEMPRE!** por un `pozo.Graph`.
 
 Si se agrega algo más bajo en la jerarquía a algo más alto, los intermedios se crearán automaticamente: Si se agrega un`Axis` a un `Graph`, se crea un `Track` entre los dos. Si se agrega un `Data` a un `Graph`, se crea un `Axis` y u `Track`...
 
@@ -79,7 +79,7 @@ Muy bien.
 
 ### Crear:
 
-`newGraph = pozo.Graph()` se toman objetos de pozo o un archivo tipo LAS como argumentos, y se crea un `Track` por cada una. También se toman los argumentos, opcionales, siguientes (para usar durante renderización):
+`newGraph = pozo.Graph()` se toman objetos de pozo o un archivo tipo LAS como argumentos, y se crea un `Track` por cada una. También se toman los siguientes argumentos opcionales (para usar durante renderización):
 * `show_depth`: True/False
 * `depth_position`: 0, 1, 2, 3, 4
 * `depth`: [minimo, maximo]
@@ -88,20 +88,20 @@ Muy bien.
 ### Manipular:
 
 
-`someGraph.get_tracks()`: Se toman unos `selector`: un nombre o un indice, y se devuelven los `Track`s con ese nombre o a ese indice, si hay
+`someGraph.get_tracks()`: Se toman `selector`: un nombre o un indice, y se devuelven los `Track` con ese nombre o a ese indice, si lo hay
 	
-`someGraph.pop_tracks()`: Se toman unos `selector`, y se devuelen los `Track`, pero también los quita del `someGraph` 
+`someGraph.pop_tracks()`: Se toman `selector`, y se devuelen los `Track`, pero también los quita del `someGraph` 
 
-`someGraph.add_tracks()`: Se toman unos `pozo.Data`, `pozo.Axis`, o `pozo.Track`, se agregan al `Graph`, y se devuelvan los `Track` nuevos
+`someGraph.add_tracks()`: Se toman `pozo.Data`, `pozo.Axis`, o `pozo.Track`, se agregan al `Graph`, y se devuelvan los `Track` nuevos
 
-`someGraph.combine_tracks()`: Se toman unos `selector` o `pozo.Track`, se destruyen, y se agregan todos a la primera `selector` puesto (lo que no es destruido) 
+`someGraph.combine_tracks()`: Se toman `selector` o `pozo.Track`, se destruyen, y se agregan todos al primer `selector` puesto (el que no es destruído) 
 
-`someGraph.move_tracks()`: Se toman `selectors` y `position=?` para se poner en el orden nuevo
+`someGraph.move_tracks()`: Se toman `selectors` y `position=?` para poner en el orden nuevo
 
 
 ### Mostrar:
 
-`someGraph.render()`: Se intenta mostrar el gráfico. Se toman las mismas opcionas extra de `pozo.Graph()`
+`someGraph.render()`: Se intenta mostrar el gráfico. Se toman las mismas opciones extra de `pozo.Graph()`
 
 ### Especiales:
 
@@ -121,7 +121,7 @@ Muy bien.
 
 `someTrack.add_axes()`: Se toman objetos de pozo y se devuelven
 
-`someTrack.get_axes()`: Se toman unos `selector` y se devuelven los `Axis` si se existen
+`someTrack.get_axes()`: Se toman `selector` y se devuelven los `Axis` si se existen
 
 `someTrack.get_...` bla bla bla, El patron sigue, es parecido a  `Graph()`. `Axis()`, también. `Data()` es distinto...
 
@@ -157,7 +157,7 @@ Lo mismo.
 
 `someData.set_depth_unit()`: Se toman las unidades de la profunidad.
 
-`someData.convert_unit()`: Se toman una unidad nueva, y se puede entender, se hace la conversión.
+`someData.convert_unit()`: Se toma una unidad nueva, y se puede entender, se hace la conversión.
 
 `someData.convert_depth_unit()` Se toman una unidad nueva, y se puede entender, se hace la conversión.
 
@@ -173,4 +173,4 @@ track2 = pozo.Track()
 graph1.add_tracks(track1)
 len(graph1.get_tracks(track1, track2)) == 1
 ```
-* `pozo.HasLog("MNEMOTÉCNICA")` buscará cada dato para ver se la cosa que busques tiene ese "MNEMOTÉCNICA"
+* `pozo.HasLog("MNEMOTÉCNICA")` buscará cada dato, para ver si la cosa que buscas tiene esa "MNEMOTÉCNICA"
