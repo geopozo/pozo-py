@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+import lasio
 import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
@@ -297,3 +298,28 @@ class Graph(ood.Observer, pzt.Themeable):
                    "name": self._name,
                    }
         return self._get_theme(context=context)
+    
+    def to_lasio_curve_items(pozo_obj,**kwargs):
+        mnemonic = kwargs.pop('mnemonic', None)
+        depth = kwargs.pop('depth', None)
+        value = kwargs.pop('value', None)
+        descr = kwargs.pop('descr', None)
+        
+        if len(pozo_obj.get_tracks()) == 0:
+            raise TypeError("Cannot find tracks in the data") 
+        
+        if mnemonic == None: mnemonic = [data.get_mnemonic() for data in pozo_obj.get_traces()]
+
+        if depth == None: depth = pozo_obj.get_traces()[0].get_depth()
+        
+        lasio_list = []
+        
+        filtered_data = [track.get_traces(pozo.HasLog(name)) for track in pozo_obj for name in mnemonic if isinstance(track, pozo.Track) and len(track.get_traces(pozo.HasLog(name))) != 0]
+        for data in filtered_data:
+            curve = data[0].get_data()
+            unit = data[0].get_unit()
+            mnemonic = data[0].get_mnemonic()
+            lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=curve)
+            lasio_list.append(lasio_obj)
+        
+        return lasio_list
