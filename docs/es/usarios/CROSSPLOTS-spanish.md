@@ -22,17 +22,17 @@ my_graph.CrossPlot(
 
 # x: objeto de pozo que contiene datos del eje x
 # y: objeto de pozo que contiene datos del eje y
-# colors: lista de objetos de pozo para crear una gama de colores. Puede incluir "depth" o ser None para no tener colores.
+# colors: lista de objetos de pozo para crear una gama de colores. Puede # incluir "depth" o ser None para no tener colores.
 # xrange, yrange: establece los rangos del eje x y el eje y
 # size: establece el tamaño del gráfico
 # depth_range: filtra el gráfico por profundidad
 ```
 
 ### Paso 2 opción 1:
-The renderer can be saved to a variable and also accessed at `my_graph.xp`.
+El renderizador puede ser guardado en una variable y también se puede acceder con `my_graph.xp`.
 
 ```python
-my_graph.xp.render() # this will render like a graph above
+my_graph.xp.render() # esto se renderizará como un gráfico arriba
 ```
 
 ### Paso 2 opción 2:
@@ -48,7 +48,7 @@ my_graph.render(xp=True) # esto añadirá el crossplot por defecto que creaste e
 También puedes añadir un crossplot diferente si renderizas para esto:
 
 ```python
-my_graph.render(xp=some_other_cross_plot_renderer)
+my_graph.render(xp=otro_renderizado_de_crossplot)
 ```
 
 
@@ -90,16 +90,16 @@ Los datos están entre 1-10. Tu escala de colores está entre -10000 y 10000. Tu
 figure.set_color_range(name, color_range=(None), auto=False, lock=False)
 # name: el nombre del trace que quieres (leer de la leyenda)
 
-# establece un color_range, auto, o False.
+# establece o un color_range, un auto, o un False.
 
-# color_range=(lower_range, upper_range) funciones como un slice, y fijará los colores mínimo y máximo de esos rangos establecidos
+# color_range=(rango_bajo, rango_alto) funciona como un slice, y fijará los colores mínimo y máximo de esos rangos establecidos
 
 # auto=True hará que plotly descubra la gama de colores por sí mismo nuevamente
 
 # lock=True fijará color_range a los valores actuales mostrados
 
 ```
-### Configuración manial del rango de profundidades de los crossplots:
+### Configuración manual del rango de profundidades de los crossplots:
 
 ```python
 figure.set_depth_range(depth_range=None)
@@ -108,7 +108,7 @@ figure.set_depth_range(depth_range=None)
 
 figure.lock_depth_range() # no permite que el rango de profunidad del crossplot cambie con el gráfico del track
 
-figure.unlock_depth_range() # el rango de profunidades de los cambian con las gráficas de los track, will call the following function:
+figure.unlock_depth_range() # el rango de profunidades de los cambian con las gráficas de los track, podrán llamar la siguiente función:
 
 figure.match_depth_range() # establece el rango de profundidad del gráfico de crossplot para tomar los gráficos de profundidad del gráfico una vez
 
@@ -120,9 +120,9 @@ Si tienes una figura crossplot independiente, tú puedes llamar con:
 
 ```python
 
-xpFigure.link_depth_to(other_figure)
+xpFigure.link_depth_to(otra_figura)
 
-# dónde other_figure es un gráfico normal de un track
+# dónde otra_figura es un gráfico normal de un track
 
 ```
 
