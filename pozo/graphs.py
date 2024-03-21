@@ -35,6 +35,7 @@ class Graph(ood.Observer, pzt.Themeable):
         my_kwargs["compare"] = kwargs.pop('compare', False)
         my_kwargs["yaxis"] = kwargs.pop('yaxis', None)
         my_kwargs["yaxis_name"] = kwargs.pop('yaxis_name', None)
+        my_kwargs["unit_map"] = kwargs.pop("unit_map", None)
         old_kwargs = kwargs.copy()
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string")
@@ -106,6 +107,7 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = None
+        unit_map = kwargs.pop("unit_map", None)
         if yaxis is not None: # this is a manually added y axis, don't parse it with LAS
             if yaxis_name is None and hasattr(yaxis, "mnemonic"): yaxis_name = yaxis.mnemonic
             if hasattr(yaxis, "unit"):
@@ -134,8 +136,13 @@ class Graph(ood.Observer, pzt.Themeable):
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
             unit = None
-            if curve.unit is None:
-                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
+            if unit_map:
+                if curve.mnemonic in unit_map:
+                    unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
+                elif mnemonic in unit_map:
+                    unit = pzu.registry.parse_units(unit_map[mnemonic])
+            elif curve.unit is None:
+                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics   
             else: unit = pzu.parse_unit_from_curve(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
@@ -154,6 +161,7 @@ class Graph(ood.Observer, pzt.Themeable):
         yaxis = kwargs.get('yaxis', None)
         yaxis_name = kwargs.get('yaxis_name',"DEPTH")
         yaxis_unit = kwargs.get('yaxis_unit', None)
+        unit_map = kwargs.pop("unit_map", None)
 
         if yaxis is not None:
             if yaxis_name and hasattr(yaxis, "mnemonic"): yaxis_name = yaxis.mnemonic
@@ -177,6 +185,12 @@ class Graph(ood.Observer, pzt.Themeable):
                 continue
 
             unit = None
+            
+            if unit_map:
+                if curve.mnemonic in unit_map:
+                    unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
+                elif mnemonic in unit_map:
+                    unit = pzu.registry.parse_units(unit_map[mnemonic])
             if curve.units is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}")
             else: unit = pzu.registry.parse_unit_from_context(mnemonic, curve.units, curve.values) # TODO is curve correct?
