@@ -5,11 +5,6 @@ import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
 
-class Data(Trace):
-    def __init__(self, data, **kwargs):
-        warnings.warn("pozo.Data is deprecated, use pozo.Trace", DeprecationWarning)
-        super().__init__(self, data, **kwargs)
-
 class Trace(ood.Observed, pzt.Themeable):
     def __len__(self):
         return len(self.get_data()) 
@@ -144,4 +139,9 @@ class Trace(ood.Observed, pzt.Themeable):
                    "mnemonic": self._mnemonic,
                    }
         return self._get_theme(context=context)
+
+class Data(Trace):
+    def __init__(self, data, **kwargs):
+        warnings.warn("pozo.Data is deprecated, use pozo.Trace", DeprecationWarning)
+        super().__init__(self, data, **kwargs)
 

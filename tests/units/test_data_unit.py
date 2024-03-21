@@ -1,14 +1,14 @@
 import pytest
-import pozo.data
+import pozo.traces
 import pozo.units as pzu
 
 
 def a_data(data=[1], depth=[1], unit=None, depth_unit=None):
-    return pozo.data.Data(data, depth=depth, name="1", unit=unit, depth_unit=depth_unit)
+    return pozo.traces.Trace(data, depth=depth, name="1", unit=unit, depth_unit=depth_unit)
 
 def test_data_units():
     with pytest.raises(ValueError):
-        pozo.data.Data([1], depth=None, name="!!!")
+        pozo.traces.Trace([1], depth=None, name="!!!")
     meter = pzu.registry.meter
     a_meter = pzu.Q([1], "meter")
 

@@ -2,7 +2,7 @@ import pytest
 import ood
 import ood.selectors as s
 import ood.exceptions as e
-import pozo.data, pozo.axes, pozo.tracks
+import pozo.traces, pozo.axes, pozo.tracks
 
 index = [1, 2, 3, 4]
 values = [0, 1, 1, 0]
@@ -12,14 +12,14 @@ values2 = [2, 3, 4, 5]
 e.NameConflictException.default_level = e.ErrorLevel.IGNORE
 e.MultiParentException.default_level = e.ErrorLevel.IGNORE
 
-d1 = pozo.data.Data(values, depth=index, mnemonic="md1")
-d2 = pozo.data.Data(values, depth=index, name="d2")
-d3 = pozo.data.Data(values2, depth=index, name="d3", mnemonic="md3")
-d4 = pozo.data.Data(values2, depth=index, mnemonic="md4")
-d5 = pozo.data.Data(values, depth=index2, mnemonic="md5")
-d6 = pozo.data.Data(values, depth=index2, mnemonic="md6")
-d7 = pozo.data.Data(values2, depth=index2, mnemonic="md7")
-d8 = pozo.data.Data(values2, depth=index2, mnemonic="md8")
+d1 = pozo.traces.Trace(values, depth=index, mnemonic="md1")
+d2 = pozo.traces.Trace(values, depth=index, name="d2")
+d3 = pozo.traces.Trace(values2, depth=index, name="d3", mnemonic="md3")
+d4 = pozo.traces.Trace(values2, depth=index, mnemonic="md4")
+d5 = pozo.traces.Trace(values, depth=index2, mnemonic="md5")
+d6 = pozo.traces.Trace(values, depth=index2, mnemonic="md6")
+d7 = pozo.traces.Trace(values2, depth=index2, mnemonic="md7")
+d8 = pozo.traces.Trace(values2, depth=index2, mnemonic="md8")
 a1 = pozo.axes.Axis()
 a2 = pozo.axes.Axis()
 a3 = pozo.axes.Axis(d8)
