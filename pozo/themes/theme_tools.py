@@ -51,7 +51,7 @@ class ColorWheel(pzt.DynamicTheme):
         self._each = each
         if per is None and context is not None and "type" in context:
             if context["type"] == "axis":
-                self._per = "data"
+                self._per = "trace"
             else:
                 self._per = "axis"
         elif per is None:

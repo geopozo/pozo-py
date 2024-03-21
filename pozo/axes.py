@@ -8,62 +8,62 @@ import traceback
 
 class Axis(ood.Item, pzt.Themeable):
     _type = "axis"
-    _child_type = "data"
+    _child_type = "trace"
 
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         for ar in args:
-            self.add_data(ar)
+            self.add_traces(ar)
 
-    def _check_types(self, *data):
-        accepted_types = (pozo.Data)
+    def _check_types(self, *traces):
+        accepted_types = (pozo.Trace)
         raw_return = []
-        for datum in data:
-            if isinstance(datum, list):
-                raw_return.extend(self._check_types(*datum))
-            elif not isinstance(datum, accepted_types):
-                raise TypeError(f"Axis.add_data() only accepts pozo.Data, or a single list of pozo.Data, not {type(datum)}")
+        for trace in traces:
+            if isinstance(trace, list):
+                raw_return.extend(self._check_types(*trace))
+            elif not isinstance(trace, accepted_types):
+                raise TypeError(f"Axis.add_traces() only accepts pozo.Trace, or a single list of pozo.Trace, not {type(trace)}")
             else:
-                raw_return.append(datum)
+                raw_return.append(trace)
         return raw_return
 
     # add_items
-    def add_data(self, *data, **kwargs):
-        good_data = self._check_types(*data)
-        super().add_items(*good_data, **kwargs)
-        return good_data
+    def add_traces(self, *traces, **kwargs):
+        good_traces = self._check_types(*traces)
+        super().add_items(*good_traces, **kwargs)
+        return good_traces
 
     # get_items
-    def get_data(self, *selectors, **kwargs):
+    def get_traces(self, *selectors, **kwargs):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_datum(self, selector, **kwargs):
+    def get_trace(self, selector, **kwargs):
         return super().get_item(selector, **kwargs)
 
     # pop items
-    def pop_data(self,  *selectors, **kwargs):
+    def pop_traces(self,  *selectors, **kwargs):
         return super().pop_items(*selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
-    def has_datum(self, selector):
+    def has_trace(self, selector):
         return super().has_item(selector)
 
-    def reorder_all_data(self, order):
+    def reorder_all_traces(self, order):
         super().reorder_all_items(order)
 
-    def move_data(self, *selectors, **kwargs):
+    def move_traces(self, *selectors, **kwargs):
         super().move_items(*selectors, **kwargs)
 
     def get_named_tree(self):
         result = []
-        for el in self.get_data():
+        for el in self.get_traces():
             result.append(el.get_named_tree())
         return { "axis" : { self.name: result } }
 
     def get_theme(self):
         mnemonics = []
-        for d in self.get_data():
+        for d in self.get_traces():
             mnemonics.append(d.get_mnemonic())
         context = { "type":"axis",
                    "name": self._name,

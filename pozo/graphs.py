@@ -95,7 +95,7 @@ class Graph(ood.Observer, pzt.Themeable):
                     self.add_welly_object(ar[0], **kwargs)
             elif str(type(ar)) == WELLY_WELL_TYPE:
                 self.add_welly_object(ar, **kwargs)
-            elif isinstance(ar, (pozo.Data, pozo.Axis, pozo.Track)):
+            elif isinstance(ar, (pozo.Trace, pozo.Axis, pozo.Track)):
                 self.add_tracks(ar)
             else:
                 warnings.warn(f"Unknown argument type passed: argument {i}, {type(ar)}. Ignored")
@@ -143,8 +143,8 @@ class Graph(ood.Observer, pzt.Themeable):
             else:
                 name = curve.mnemonic
 
-            data = pozo.Data(curve.data, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
-            self.add_tracks(data)
+            trace = pozo.Trace(curve.data, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
+            self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
 
@@ -194,22 +194,22 @@ class Graph(ood.Observer, pzt.Themeable):
                 depth = curve.index
                 depth_unit = pzu.parse_unit_from_context(pozo.deLASio(curve.index_name), curve.index_name, curve.index)
 
-            data = pozo.Data(curve.values, depth=depth, mnemonic=mnemonic, name=name, unit=unit, depth_unit=depth_unit)
-            self.add_tracks(data)
+            trace = pozo.Trace(curve.values, depth=depth, mnemonic=mnemonic, name=name, unit=unit, depth_unit=depth_unit)
+            self.add_tracks(Trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
 
 
     def _check_types(self, *tracks):
-        accepted_types = (pozo.Axis, pozo.Data, pozo.Track)
+        accepted_types = (pozo.Axis, pozo.Trace, pozo.Track)
         raw_return = []
         for track in tracks:
             if isinstance(track, (list)):
                 raw_return.extend(self._check_types(*tracks))
             elif not isinstance(track, accepted_types):
-                raise TypeError("Axis.add_tracks() only accepts axes, tracks, and data: pozo objects")
+                raise TypeError("Axis.add_tracks() only accepts axes, tracks, and traces: pozo objects")
             intermediate = track
-            if isinstance(intermediate, pozo.Data):
+            if isinstance(intermediate, pozo.Trace):
                 intermediate = pozo.Axis(intermediate, name=intermediate.get_name())
             if isinstance(intermediate, pozo.Axis):
                 intermediate = pozo.Track(intermediate, name=intermediate.get_name())
@@ -243,11 +243,11 @@ class Graph(ood.Observer, pzt.Themeable):
     def combine_tracks(self, selector, *selectors):
         sink = self.get_track(selector, strict_index=False)
         if sink is None:
-            if isinstance(selector, (pozo.Data, pozo.Axis, pozo.Track)):
+            if isinstance(selector, (pozo.Trace, pozo.Axis, pozo.Track)):
                 self.add_tracks(selector)
                 sink = selector
             else:
-                raise TypeError("The first argument must be a track that exists or a new track track/axes/data to add")
+                raise TypeError("The first argument must be a track that exists or a new track track/axis/trace to add")
         for sel in selectors:
             if not self.has_track(sel) and isinstance(sel, pozo.Track):
                 self.add_tracks(sel)
@@ -272,11 +272,11 @@ class Graph(ood.Observer, pzt.Themeable):
             all_axes.extend(track.get_axes(*selectors, **kwargs))
         return all_axes
 
-    def get_data(self, *selectors, **kwargs):
-        all_data = []
+    def get_traces(self, *selectors, **kwargs):
+        all_traces = []
         for track in self.get_tracks():
-            all_data.extend(track.get_data(*selectors, **kwargs))
-        return all_data
+            all_traces.extend(track.get_traces(*selectors, **kwargs))
+        return all_traces
 
     def get_theme(self):
         context = { "type":"graph",

@@ -28,31 +28,31 @@ class TreeTable(pzr.Renderer):
         axis_node = self._get_basic(axis)
         return axis_node
 
-    def _get_datum_dict(self, datum):
-        mnemonic = datum.get_mnemonic()
-        values_t = type(datum.get_data())
-        depth_t = type(datum.get_depth())
-        length = len(datum.get_data())
-        datum_dict = self._get_basic(datum)
-        datum_dict["mnemonic"] = mnemonic
-        datum_dict["data_type"] = values_t
-        datum_dict["depth_type"] = depth_t
-        datum_dict["data_unit"] = datum.get_unit()
-        datum_dict["depth_unit"] = datum.get_depth_unit()
-        datum_dict["length"] = length
-        return datum_dict
+    def _get_trace_dict(self, trace):
+        mnemonic = trace.get_mnemonic()
+        values_t = type(trace.get_data())
+        depth_t = type(trace.get_depth())
+        length = len(trace.get_data())
+        trace_dict = self._get_basic(trace)
+        trace_dict["mnemonic"] = mnemonic
+        trace_dict["data_type"] = values_t
+        trace_dict["depth_type"] = depth_t
+        trace_dict["data_unit"] = trace.get_unit()
+        trace_dict["depth_unit"] = trace.get_depth_unit()
+        trace_dict["length"] = length
+        return trace_dict
 
     def render(self, graph, **kwargs):
         graph_node = self._get_graph_dict(graph)
-        total_data = 0
+        total_traces = 0
         for track in graph:
             track_node = self._get_track_dict(track)
             for axis in track:
                 axis_node = self._get_axis_dict(axis)
-                for datum in axis:
-                    datum_node = self._get_datum_dict(datum)
-                    axis_node["children"].append(datum_node)
-                    total_data += 1
+                for trace in axis:
+                    trace_node = self._get_trace_dict(trace)
+                    axis_node["children"].append(trace_node)
+                    total_traces += 1
                 track_node["children"].append(axis_node)
             graph_node["children"].append(track_node)
 
@@ -61,7 +61,7 @@ class TreeTable(pzr.Renderer):
         output = "<table>"
 
         output += "<tr>"
-        output += f"<td colspan=\"{total_data}\" style={style}>"
+        output += f"<td colspan=\"{total_traces}\" style={style}>"
         output += "<h3>Graph</h3>"
 
         tracks = []
@@ -89,7 +89,7 @@ class TreeTable(pzr.Renderer):
         output += "</tr>"
 
         output += "<tr>"
-        data = []
+        traces = []
         for axes_list in axes:
             for axis in axes_list:
                 output += f"<td colspan=\"{len(axis['children'])}\" style={style}>"
@@ -98,15 +98,15 @@ class TreeTable(pzr.Renderer):
                     if key != "children":
                         output += f"<p style=\"text-align:center\">{html.escape(str(key))}: {html.escape(str(value))}</p>"
                     else:
-                        data.append(value)
+                        traces.append(value)
                 output += "</td>"
         output += "</tr>"
 
-        for data_list in data:
-            for datum in data_list:
+        for traces_list in traces:
+            for trace in traces_list:
                 output += f"<td style={style}>"
                 output += "<h6>Data</h6>"
-                for key, value in datum.items():
+                for key, value in trace.items():
                     if key != "children":
                         output += f"<p style=\"text-align:center\">{html.escape(str(key))}: {html.escape(str(value))}</p>"
                     else:

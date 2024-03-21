@@ -14,14 +14,14 @@ class Track(ood.Item, pzt.Themeable):
             self.add_axes(ar)
 
     def _check_types(self, *axes):
-        accepted_types = (pozo.Axis, pozo.Data)
+        accepted_types = (pozo.Axis, pozo.Trace)
         raw_return = []
         for axis in axes:
             if isinstance(axis, (list)):
                 raw_return.extend(self._check_types(*axis))
             elif not isinstance(axis, accepted_types):
-                raise TypeError(f"Axis.add_axes() only accepts axes, and data: pozo objects, not {type(axis)}")
-            elif isinstance(axis, pozo.Data):
+                raise TypeError(f"Axis.add_axes() only accepts axes, and traces: pozo objects, not {type(axis)}")
+            elif isinstance(axis, pozo.Trace):
                 raw_return.append(pozo.Axis(axis, name=axis.get_name()))
             else:
                 raw_return.append(axis)
@@ -55,11 +55,11 @@ class Track(ood.Item, pzt.Themeable):
     def move_axes(self, *selectors, **kwargs):
         super().move_items(*selectors, **kwargs)
 
-    def get_data(self, *selectors, **kwargs):
-        ret_data = []
+    def get_traces(self, *selectors, **kwargs):
+        ret_traces = []
         for axis in self.get_axes():
-            ret_data.extend(axis.get_data(*selectors, **kwargs))
-        return ret_data
+            ret_traces.extend(axis.get_traces(*selectors, **kwargs))
+        return ret_traces
 
     def get_theme(self):
         context = { "type":"track",

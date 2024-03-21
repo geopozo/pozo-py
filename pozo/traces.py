@@ -5,9 +5,14 @@ import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
 
-class Data(ood.Observed, pzt.Themeable):
+class Data(Trace):
+    def __init__(self, data, **kwargs):
+        warnings.warn("pozo.Data is deprecated, use pozo.Trace", DeprecationWarning)
+        super().__init__(self, data, **kwargs)
+
+class Trace(ood.Observed, pzt.Themeable):
     def __len__(self):
-        return len(self.get_data())
+        return len(self.get_data()) 
 
     def __init__(self, data, **kwargs):
         unit = kwargs.pop('unit', None)
@@ -128,13 +133,13 @@ class Data(ood.Observed, pzt.Themeable):
         return self._mnemonic
 
     def get_named_tree(self):
-        return  { "data" : {
+        return  { "trace" : {
             'name': self._name,
             'mnemonic': self._mnemonic,
             'length': len(self._values),
         } }
     def get_theme(self):
-        context = { "type":"data",
+        context = { "type":"trace",
                    "name": self._name,
                    "mnemonic": self._mnemonic,
                    }

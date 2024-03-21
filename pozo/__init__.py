@@ -2,7 +2,7 @@ import ood
 
 ood.exceptions.NameConflictException.default_level = ood.exceptions.ErrorLevel.IGNORE
 ood.exceptions.MultiParentException.default_level = ood.exceptions.ErrorLevel.IGNORE
-from .data import Data
+from .traces import Trace
 from .axes import Axis
 from .tracks import Track
 from .graphs import Graph

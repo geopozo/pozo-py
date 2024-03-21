@@ -221,23 +221,23 @@ class Plotly(pzr.Renderer):
                 else:
                     range_unit = None
                 data_unit = None
-                for datum in axis:
-                    themes.append(datum.get_theme())
+                for trace in axis:
+                    themes.append(trace.get_theme())
                     if self._hidden(themes): continue
 
-                    if data_unit is not None and data_unit != datum.get_unit():
-                        raise ValueError(f"Data being displayed on one axis must be exactly the same unit. {data_unit} is not {datum.get_unit()}")
+                    if data_unit is not None and data_unit != trace.get_unit():
+                        raise ValueError(f"Data being displayed on one axis must be exactly the same unit. {data_unit} is not {trace.get_unit()}")
                     else:
-                        data_unit = datum.get_unit()
+                        data_unit = trace.get_unit()
                         if not (data_unit is None or range_unit is None or range_unit.is_compatible_with(data_unit)):
                             raise pint.DimensionalityError(range_unit, data_unit, extra_msg="range_unit set by theme is not compatible with data units")
                     themes.pop()
-                    if y_unit is not None and datum.get_depth_unit() is not None:
-                        if y_unit != datum.get_depth_unit():
-                            raise ValueError(f"All depth axis must have the same unit. You must transform the data. {y_unit} is not {datum.get_depth_unit()}")
-                    y_unit = datum.get_depth_unit()
-                    ymin = min(pzu.Q(datum.get_depth()[0], y_unit), pzu.Q(ymin, y_unit)).magnitude
-                    ymax = max(pzu.Q(datum.get_depth()[-1], y_unit), pzu.Q(ymax, y_unit)).magnitude
+                    if y_unit is not None and trace.get_depth_unit() is not None:
+                        if y_unit != trace.get_depth_unit():
+                            raise ValueError(f"All depth axis must have the same unit. You must transform the data. {y_unit} is not {trace.get_depth_unit()}")
+                    y_unit = trace.get_depth_unit()
+                    ymin = min(pzu.Q(trace.get_depth()[0], y_unit), pzu.Q(ymin, y_unit)).magnitude
+                    ymax = max(pzu.Q(trace.get_depth()[-1], y_unit), pzu.Q(ymax, y_unit)).magnitude
 
                 if data_unit is None: data_unit = range_unit
                 if range_unit is None: range_unit = data_unit # both None, or both whatever wasn't None
@@ -359,20 +359,20 @@ class Plotly(pzr.Renderer):
                 themes.append(axis.get_theme())
                 if self._hidden(themes): continue
                 all_traces = []
-                for datum in axis:
-                    themes.append(datum.get_theme())
+                for trace in axis:
+                    themes.append(trace.get_theme())
                     if self._hidden(themes): continue
                     color = themes["color"]
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         all_traces.append(go.Scattergl(
-                            x=datum.get_data(),
-                            y=datum.get_depth(),
+                            x=trace.get_data(),
+                            y=trace.get_depth(),
                             mode='lines', # nope, based on data w/ default
                             line=dict(color=color, width=1), # needs to be better, based on data
                             xaxis='x' + str(num_axes),
                             yaxis='y' if xp is None else 'y2',
-                            name = datum.get_name(),
+                            name = trace.get_name(),
                             hovertemplate = default_hovertemplate,
                             showlegend = False,
                         ))
@@ -588,9 +588,9 @@ class CrossPlot():
         if isinstance(selector, POZO_OBJS):
            data = selector.get_data()
            if len(data) == 0:
-               raise ValueError(f"{selector} has no pozo.Data object")
+               raise ValueError(f"{selector} has no pozo.Trace object")
            return data[0] # we process it in the following
-        elif isinstance(selector, pozo.Data):
+        elif isinstance(selector, pozo.Trace):
             if not is_array(selector.get_data()): raise TypeError(f"{selector}'s data seems weird: {selector.get_data()}")
             if not is_array(selector.get_depth()):raise TypeError(f"{selector}'s depth seems weird: {selector.get_depth()}")
 
