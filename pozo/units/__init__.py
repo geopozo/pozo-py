@@ -50,12 +50,14 @@ registry.add_las_map('URAN', ''    , percent_general)
 # also want it to point to posts
 import re
 desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
+red_low = re.compile(r'<td>(.+)?LOW(.+)?</td>')
+orange_medium = re.compile(r'<td>(.+)?MEDIUM(.+)?</td>')
 
 def check_las(las, registry=registry):
     def n0(s): # If None, convert to ""
         return "" if s is None else str(s)
     d = chr(0X1e) # delimiter
-    result = [f"mnemonic{d}las unit{d}pozo mapping{d}confidence{d}parsed{d}description"]
+    result = [f"mnemonic{d}las unit{d}pozo mapping{d}confidence{d}parsed{d}description{d}min{d}med{d}max{d}#NaN"]
     for curve in las.curves:
         resolved = None
         pozo_match = None
@@ -70,15 +72,26 @@ def check_las(las, registry=registry):
             confidence = " - " + str(e) + " - NONE"
         find_desc = desc_wo_num.findall(curve.descr)
         desc = find_desc[0] if len(find_desc) > 0 else curve.descr
-        result.append(d.join([n0(x) for x in [pozo.deLASio(curve.mnemonic),
+        [min, med, max] = [str(x) for x in np.nanquantile(curve.data, [0, .5, 1])]
+        result.append(d.join([n0(x) for x in [curve.mnemonic,
                                              curve.unit,
                                              pozo_match,
                                              confidence,
                                              parsed,
-                                             desc]
+                                             desc, 
+                                             min, med, max, np.count_nonzero(np.isnan(curve.data))]
                               ]))
     try:
-        display(HTML(pd.read_csv(StringIO("\n".join(result)), delimiter=d, na_filter=False).to_html()))
+        output = pd.read_csv(StringIO("\n".join(result)), delimiter=d, na_filter=False).to_html()
+        for match in red_low.finditer(output):
+            current_match = match.group()
+            colored = "<td style=\"color:red\">" + current_match[4:]
+            output = output.replace(current_match, colored)
+        for match in orange_medium.finditer(output):
+            current_match = match.group()
+            colored = "<td style=\"color:#B95000\">" + current_match[4:]
+            output = output.replace(current_match, colored)
+        display(HTML(output))
     except Exception as e:
         display(str(e))
         display(HTML("<br>".join(result)))
