@@ -313,13 +313,14 @@ class Graph(ood.Observer, pzt.Themeable):
         if depth == None: depth = pozo_obj.get_traces()[0].get_depth()
         
         lasio_list = []
-        
-        filtered_data = [track.get_traces(pozo.HasLog(name)) for track in pozo_obj for name in mnemonic if isinstance(track, pozo.Track) and len(track.get_traces(pozo.HasLog(name))) != 0]
-        for data in filtered_data:
-            curve = data[0].get_data()
-            unit = data[0].get_unit()
-            mnemonic = data[0].get_mnemonic()
-            lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=curve)
-            lasio_list.append(lasio_obj)
+        for track in pozo_obj:
+            for name in mnemonic:
+                if (isinstance(track, (pozo.Track))) and (len(track.get_data(pozo.HasLog(name))) != 0):
+                    data = track.get_traces(pozo.HasLog(name))
+                    curve = data[0].get_data()
+                    unit = data[0].get_unit()
+                    mnemonic = data[0].get_mnemonic()
+                    lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=curve)
+                    lasio_list.append(lasio_obj)
         
         return lasio_list
