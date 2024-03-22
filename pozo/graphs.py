@@ -18,7 +18,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
         self._render = {}
-        render_keys = ['show_depth', 'depth_position', 'height', 'javascript', 'depth']
+        render_keys = ['show_depth', 'depth_position', 'height', 'depth']
         for key in render_keys:
             temporary = kwargs.pop(key, None)
             if temporary is not None: self._render[key] = temporary
@@ -58,9 +58,6 @@ class Graph(ood.Observer, pzt.Themeable):
     def CrossPlot(self, x=None, y=None,**kwargs):
         self.xp.reinit(x=x, y=y, **kwargs) # TODO could add graph
         return self.xp
-
-    def javascript(self):
-        self.renderer.javascript()
 
     def get_name(self):
         return self._name

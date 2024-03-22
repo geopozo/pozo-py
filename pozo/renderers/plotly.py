@@ -16,7 +16,24 @@ import pozo.themes as pzt
 import pozo.units as pzu
 
 re_space = re.compile(' ')
-re_power = re.compile('\*\*')
+re_power = re.compile(r'\*\*')
+
+def javascript():
+    add_scroll = '''var css = '.plot-container { overflow: auto; }',
+head = document.getElementsByTagName('head')[0],
+style = document.createElement('style');
+
+style.type = 'text/css';
+if (style.styleSheet){
+  style.styleSheet.cssText = css;
+} else {
+  style.appendChild(document.createTextNode(css));
+}
+
+head.appendChild(style);'''
+    return Javascript(add_scroll)
+
+javascript()
 
 # TODO FOR CROSSPLOT MUST X Y AND ALL COLOR HAVE THE SAME SHAPE OR ELSE BREAK INTERACTIVITY
 
@@ -108,6 +125,7 @@ AXIS_PROPORTION_MAX = .6
 
 class Plotly(pzr.Renderer):
     def __init__(self, template=defaults):
+        javascript() # double it up
         self.template = copy.deepcopy(template)
         self.xaxis_template = copy.deepcopy(self.template["plotly"]["xaxis_template"])
         del self.template["plotly"]["xaxis_template"]
@@ -400,10 +418,7 @@ class Plotly(pzr.Renderer):
             xp.add_figure(self.last_fig)
         return self.last_fig
 
-    def javascript(self):
-        add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
 
-        return Javascript(add_scroll) # Part of Hack #1
 
 def is_array(value):
     if isinstance(value, str): return False
