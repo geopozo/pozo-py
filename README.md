@@ -8,7 +8,7 @@ Pozo is an open source, intuitive api for visualizing well logs. It uses [plotly
 $ pip install pozo
 ```
 
-Don't forget `pip install lasio` if you're using lasio! If you're using jupyter, `pip install ipywidgets plotly nbformat` as well.
+Don't forget `pip install lasio` if you're using lasio! If you're using jupyter, `pip install ipywidgets nbformat` as well.
 
 ## Simplest Usage
 

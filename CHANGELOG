@@ -1,3 +1,7 @@
+v0.9.15:
+ - Documentation improvements
+ - Enhanced information about units in check_las
+ - Units override when establish `Graph` w/ unit_map={}
 v0.9.14:
  - BIG BREAKING CHANGE: change pozo.Data to pozo.Trace
 v0.9.13:
