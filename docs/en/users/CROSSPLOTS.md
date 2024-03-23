@@ -11,8 +11,8 @@ However, graph objects can also plot **crossplots**, like this one of density an
 ### Step 1: Create a crossplot renderer:
 ```python
 my_graph.CrossPlot(
-	x = graph1.get_data(pozo.HasLog("NPHI")),
-	y = graph1.get_data(pozo.HasLog("RHOB")),
+	x = graph1.get_traces(pozo.HasLog("NPHI"))[0],
+	y = graph1.get_traces(pozo.HasLog("RHOB"))[0],
 	colors = ["depth", graph1.get_track(pozo.HasLog("GR"))],
 	xrange=(45, -15),
 	yrange=(1.95, 2.945),

@@ -33,12 +33,12 @@ Those don't have data, but now our internal data structure looks like this:
 x = [2, 2, 1, 4, 5, 6]
 y = [1, 2, 3, 4, 5, 6]
 
-new_data = pozo.Data(x, depth=y, mnemonic="test")
+new_trace = pozo.Trace(x, depth=y, mnemonic="test")
 
-# But where do we add the data?
+# But where do we add the trace?
 
 track1 = myGraph.get_tracks("track1")[0] # remember, get_tracks always returns a list
-track1.add_axes(new_data)
+track1.add_axes(new_trace)
 ```
 
 Voilà:
@@ -49,9 +49,9 @@ WAIT! Where did the "Axis" box come from?
 
 #### Automatic Pozo Creation
 
-A `pozo.Data` is **ALWAYS contained** by a `pozo.Axis` is **ALWAYS contained** by a `pozo.Track` is **ALWAYS contained** by a `pozo.Graph`.
+A `pozo.Trace` is **ALWAYS contained** by a `pozo.Axis` is **ALWAYS contained** by a `pozo.Track` is **ALWAYS contained** by a `pozo.Graph`.
 
-If you add a lower-level thing to an upper-level thing, the intermediate things will be created automatically: If you add an `Axis` to a `Graph`, it creates a `Track`. If you add a `Data` to a `Graph`, it creates an `Axis` and a `Track`.
+If you add a lower-level thing to an upper-level thing, the intermediate things will be created automatically: If you add an `Axis` to a `Graph`, it creates a `Track`. If you add a `Trace` to a `Graph`, it creates an `Axis` and a `Track`.
 
 _Or you can do it all manually:_
 
@@ -59,11 +59,11 @@ _Or you can do it all manually:_
 aGraph = pozo.Graph()
 aTrack = pozo.Track()
 anAxis = pozo.Axis()
-aData = pozo.Data()
+aTrace = pozo.Trace()
 
 aGraph.add_tracks(aTrack)
 aTrack.add_axes(aAxis) # order here doesn't matter
-anAxis.add_data(aData)
+anAxis.add_traces(aTrace)
 ```
 ### Render
 Anyway, now if we `myGraph.render()`, we get this:
@@ -73,6 +73,8 @@ Anyway, now if we `myGraph.render()`, we get this:
 Very good.
 
 ### Quick Reference
+
+*This is not exhaustive, it's meant to illustrate that `pozo.Graph/Track/Axis/Trace` are all very similiar and have similiar mechanics for retreiving, editing, etc children. They also all have a `get_traces()` function if you just want to get at the data for an entire graph or section.* 
 
 ## `Graph()`
 
@@ -127,39 +129,39 @@ Very good.
 
 ## `Axis()`
 
-Same.
+Is very similiar to `Track()` except it's `get_traces()` `add_traces()` `pop_traces()` etc.
 
-## `Data()`
+## `Trace()`
 
-### Create Data:
+### Create Traces:
 
-`myData = pozo.Data(data, depth=something, mnemonic="something")`: These three are required. But you can also supply `unit=` and `depth_unit=`.
+`myData = pozo.Trace(data, depth=something, mnemonic="something")`: These three are required. But you can also supply `unit=` and `depth_unit=`.
 
 ### Manipulate:
 
-`someData.get_mnemonic()`: returns mnemonic
+`someTrace.get_mnemonic()`: returns mnemonic
 
-`someData.set_mnemonic()`: takes mnemonic
+`someTrace.set_mnemonic()`: takes mnemonic
 
-`someData.get_data()`: returns data
+`someTrace.get_data()`: returns data
 
-`someData.set_data()`: sets data, can also take `depth=`
+`someTrace.set_data()`: sets data, can also take `depth=`
 
-`someData.get_depth()`: gets depth data
+`someTrace.get_depth()`: gets depth trace
 
-`someData.set_depth()`: sets depth data
+`someTrace.set_depth()`: sets depth data
 
-`someData.get_unit()`: gets current units for data
+`someTrace.get_unit()`: gets current units for data
 
-`someData.set_unit()`: sets current units for data
+`someTrace.set_unit()`: sets current units for data
 
-`someData.get_depth_unit()`: gets current depth unit
+`someTrace.get_depth_unit()`: gets current depth unit
 
-`someData.set_depth_unit()`: sets current depth unit
+`someTrace.set_depth_unit()`: sets current depth unit
 
-`someData.convert_unit()`: takes a new unit, and if it can figure out the conversion, does it
+`someTrace.convert_unit()`: takes a new unit, and if it can figure out the conversion, does it
 
-`someData.convert_depth_unit()` takes a new unit, and if it can figure out the conversion, does it
+`someTrace.convert_depth_unit()` takes a new unit, and if it can figure out the conversion, does it
 
 ## Special Selectors
 
@@ -172,4 +174,4 @@ track2 = pozo.Track()
 graph1.add_tracks(track1)
 len(graph1.get_tracks(track1, track2)) == 1
 ```
-* `pozo.HasLog("MNEMONIC")` will search every data for a particular object and return the pozo Object your looking for if it finds it.
+* `pozo.HasLog("MNEMONIC")` will search every data for a particular object and return the pozo Object you're looking for if it finds it.
