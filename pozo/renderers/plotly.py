@@ -29,9 +29,9 @@ if (style.styleSheet){
 } else {
   style.appendChild(document.createTextNode(css));
 }
-
+console.log("Executed javascript()")
 head.appendChild(style);'''
-    return Javascript(add_scroll)
+    display(Javascript(add_scroll))
 
 javascript()
 
@@ -416,6 +416,7 @@ class Plotly(pzr.Renderer):
             self.last_fig._depth_axis = "yaxis2"
             self.last_fig.layout.on_change(self.last_fig._depth_change_cb, 'yaxis2.range')
             xp.add_figure(self.last_fig)
+        javascript() # double it up
         return self.last_fig
 
 
