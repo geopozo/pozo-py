@@ -367,7 +367,6 @@ class Plotly(pzr.Renderer):
         else:
             layout[tracks_y_axis]['range'] = [ymax, ymin]
         layout['width']=posmap['pixel_width']
-        display(posmap)
         return layout
 
     def get_traces(self, graph, xp=None, **kwargs):

@@ -133,7 +133,7 @@ class Graph(ood.Observer, pzt.Themeable):
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
             unit = None
-            if unit_map:
+            if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
                     unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:
@@ -183,7 +183,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
             unit = None
             
-            if unit_map:
+            if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
                     unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:
