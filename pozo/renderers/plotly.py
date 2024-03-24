@@ -69,7 +69,7 @@ defaults = dict(
         paper_bgcolor = '#FFFFFF',
 #       width=?                # generated
 
-        yaxis = dict(
+        yaxis1 = dict(
                 visible=True, # Would hdie gridelines too, so hide ticks and labels instead of axis.
                 showgrid=True,
                 zeroline=False,
@@ -121,9 +121,11 @@ default_hovertemplate = 'Depth: %{y}, Value: %{x}' # how to get this to be the n
 GRAPH_HEIGHT_MIN = 125
 
 # TODO then look at graph render properties
-# TODO and add graph to xp, get themes from XP, and follow styles
+# TODO and add graph to xp, get themes from XP, and follow styles, as well as selectors
 # TODO get this to build annotations
 
+def toTarget(axis):
+    return axis[0] + axis[-1]
 
 # So this renderer will have a list of tracks, and their contained axis, but not the data
 # Its all position data, not styling data
@@ -160,15 +162,15 @@ class Plotly(pzr.Renderer):
         if layout["height"] < GRAPH_HEIGHT_MIN:
             raise ValueError("125px is the minimum total height")
 
-        tracks_y_axis = "yaxis"
+        tracks_y_axis = "yaxis1"
         xp_y_axis = None
         xp_x_axis = None
         if xp is not None: # TODO: rename xp to xp_subrenderer or something
             tracks_y_axis = "yaxis2"
             xp_y_axis = "yaxis1"
             xp_x_axis = "xaxis1"
-            layout[tracks_y_axis] = copy.deepcopy(layout['yaxis'])
-            del layout['yaxis']
+            layout[tracks_y_axis] = copy.deepcopy(layout['yaxis1'])
+            del layout['yaxis1']
             xp.size = layout['height'] # TODO I don't want to set these parameters this way
             xp.depth_range=depth_range # TODO I Don't want to set depth range like this
 
@@ -177,6 +179,9 @@ class Plotly(pzr.Renderer):
         # posmap is an object eventual assigned to the figure containing axis/graph/position data.
         # it's used to pull out reference numbers easily
         posmap = {
+            'xp_x': xp_x_axis,
+            'xp_y': xp_y_axis,
+            'track_y': tracks_y_axis,
             'pixel_height': layout['height'],
             'pixel_width': 4, # a lil margin helps
             'cursor': 4,
@@ -418,7 +423,7 @@ class Plotly(pzr.Renderer):
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
         if xp is None:
             self.last_fig = go.FigureWidget(data=traces, layout=layout)
-            self.last_fig._depth_axis = "yaxis1"
+            self.last_fig._depth_axis = "yaxis1" # this is pre-posmap
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range, renderer=xp)
             self.last_fig._depth_axis = "yaxis2"
