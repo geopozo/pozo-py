@@ -314,6 +314,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 data = trace[0].get_data()
                 unit = trace[0].get_unit()
                 if mnemonic == None: mnemonics = trace[0].get_mnemonic()
+                else: mnemonics = mnemonic[trace]
                 lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
                 lasio_list.append(lasio_obj)
         
