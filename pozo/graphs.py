@@ -299,9 +299,9 @@ class Graph(ood.Observer, pzt.Themeable):
                    }
         return self._get_theme(context=context)
     
-    # to_lasio_curve_items use 5 parameters to can transform data from pozo.Trace
+    # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
-    def to_lasio_curve_items(self, *selectors,**kwargs):
+    def to_las_CurveItems(self, *selectors,**kwargs):
         mnemonic = kwargs.pop('mnemonic', None)
         value = kwargs.pop('value', None)
         descr = kwargs.pop('descr', None)
