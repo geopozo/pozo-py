@@ -2,10 +2,10 @@ import copy
 import math
 import warnings
 import re
-import weakref #unused? TODO
+import weakref 
 
 import numpy as np
-from IPython.display import Javascript # Part of Hack #1
+from IPython.display import Javascript, display # Part of Hack #1
 import plotly as plotly
 import plotly.graph_objects as go
 import pint
@@ -51,6 +51,7 @@ defaults = dict(
     track_margin = 15,      # margin between each track
     depth_axis_width = 35,  # size of depth axis if it's not the first thing, will also have margin above
     axis_label_height = 80, # size of each xaxis when stacked
+    y_annotation_gutter = 10, # space for writing text
 
     # Plotly style values, structured like a plotly layout dictionary.
     # Important to know that `xaxes_template` will be used to create several `xaxis1`,`xaxis2`, `xaxisN` keys.
@@ -120,10 +121,6 @@ default_hovertemplate = 'Depth: %{y}, Value: %{x}' # how to get this to be the n
 
 GRAPH_HEIGHT_MIN = 125
 
-# TODO then look at graph render properties
-# TODO and add graph to xp, get themes from XP, and follow styles, as well as selectors
-# TODO get this to build annotations
-
 def toTarget(axis):
     return axis[0] + axis[-1]
 
@@ -141,6 +138,52 @@ class Plotly(pzr.Renderer):
         hidden = themes["hidden"]
         if hidden: themes.pop()
         return hidden
+   # TODO, units (find nearest with units too)
+    def _process_graph_note(self, note, x0, x1, yref):
+        if 'range' not in note:
+            raise ValueError(f"Depth note seems to be missing range")
+        # TODO: check numerics
+        type = 'line'
+        if isinstance(note['range'], tuple): type='rect'
+
+        shape = None
+        if type=='line':
+            shape = dict(
+                type='line',
+                xref='paper',
+                x0=x0,
+                x1=x1,
+                yref=yref,
+                y0=note['range'],
+                y1=note['range'],
+                line_width=note['weight'] if 'weight' in note else .8,
+                line_dash=note['style'] if 'style' in note else 'dot',
+                line_color=note['color'] if 'color' in note else 'black',
+            )
+        else:
+            shape = dict(
+                type='rect',
+                xref='paper',
+                x0=x0,
+                x1=x1,
+                yref=yref,
+                y0=note['range'][0],
+                y1=note['range'][1],
+                line_width=0,
+                fillcolor=note['color'] if 'color' in note else 'lightskyblue',
+                layer="below",
+                opacity=.5,
+            )
+
+        annotation = dict(
+            text=note['text'] if 'text' in note else "",
+            xref="paper", 
+            x=1, 
+            yref=yref, 
+            y=note['range'] - 1 if type=='line' else note['range'][0] - 1, 
+            showarrow=False,
+        )
+        return shape, annotation
 
     def get_layout(self, graph, xp=None, **kwargs):
         if not isinstance(graph, pozo.Graph):
@@ -165,14 +208,14 @@ class Plotly(pzr.Renderer):
         tracks_y_axis = "yaxis1"
         xp_y_axis = None
         xp_x_axis = None
-        if xp is not None: # TODO: rename xp to xp_subrenderer or something
+        if xp is not None:
             tracks_y_axis = "yaxis2"
             xp_y_axis = "yaxis1"
             xp_x_axis = "xaxis1"
             layout[tracks_y_axis] = copy.deepcopy(layout['yaxis1'])
             del layout['yaxis1']
-            xp.size = layout['height'] # TODO I don't want to set these parameters this way
-            xp.depth_range=depth_range # TODO I Don't want to set depth range like this
+            xp.size = layout['height']
+            xp.depth_range=depth_range 
 
         # TODO constrain positions and domains
 
@@ -183,23 +226,23 @@ class Plotly(pzr.Renderer):
             'xp_y': xp_y_axis,
             'track_y': tracks_y_axis,
             'pixel_height': layout['height'],
-            'pixel_width': 4, # a lil margin helps
+            'pixel_width': 4, # start drawing axes at 4 makes it look a little nicer on the left
             'cursor': 4,
             'with_xp': xp is not None,
             'xp_end': 0,
             'show_depth': show_depth,
             'depth_track_number': depth_axis_position if show_depth else 0, # putting at 0 easier if turned off
             'depth_track_position': None,
-            'depth_auto_left': not depth_axis_position,
+            'depth_auto_left': not depth_axis_position, # weird because if `width_xp` this should be false, but logic works
             'depth_auto_right': False, # calc later
             'tracks_axis_numbers': [],
             'tracks_pixel_widths': [],
             'tracks_x_domains': [],
             'tracks_y_domain': None,
             'axis_line_positions': [],
-            'total_axes': int(xp is not None)
+            'total_axes': int(xp is not None),
+            'y_bottom': self.template['y_annotation_gutter']/layout['height'],
             }
-        # TODO: if there is xp, and depth pos = 0, we need to create margin, but lets not for now
 
         
         # we do a lot of Y calculations in the first run
@@ -222,10 +265,14 @@ class Plotly(pzr.Renderer):
                 posmap['axis_line_positions'].append(
                     1 - i * (self.template["axis_label_height"]/posmap['pixel_height'])
                     )
-        layout[tracks_y_axis]["domain"] = posmap['tracks_y_domain'] = ( 0, posmap['axis_line_positions'][0] )
+        layout[tracks_y_axis]["domain"] = posmap['tracks_y_domain'] = ( posmap['y_bottom'], posmap['axis_line_positions'][0] )
         if posmap['depth_track_number'] >= len(posmap['tracks_axis_numbers']): 
             posmap['depth_auto_right'] = True
-
+        max_text = 0
+        for name, note in graph.depth_notes.items():
+            max_text = max(max_text, len(note['text'] if 'text' in note else name))
+        posmap['x_annotation_pixel_width'] = max_text*10
+        posmap['pixel_width'] += max_text*15
 
         ## in the second pass, we apply units and styles, and information from the first run
         axes_styles = [] # why not declare axes_styles earlier and then apply axes styles from the start, instead of here
@@ -330,7 +377,7 @@ class Plotly(pzr.Renderer):
             if posmap['depth_auto_left']:
                 posmap["pixel_width"] += self.template['depth_axis_width']
             posmap['xp_end'] = layout["height"] / (posmap["pixel_width"]) 
-            xp_layout = xp.create_layout(container_width = posmap["pixel_width"]) # TODO maybe do this a bit better, pass it a posmap
+            xp_layout = xp.create_layout(container_width = posmap["pixel_width"]) # pre posmap
             layout[xp_y_axis] = xp_layout["yaxis"]
             layout[xp_x_axis] = xp_layout["xaxis"]
             layout[xp_x_axis]["domain"] = (0, posmap['xp_end'])
@@ -354,7 +401,6 @@ class Plotly(pzr.Renderer):
                     track+=1
                     layout[tracks_y_axis]['position'] = (-4 + posmap['cursor'] + self.template['depth_axis_width'])/posmap['pixel_width']
                     posmap['tracks_x_domains'].append((posmap['cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
-                    #layout[tracks_y_axis]['ticks'] = "inside" # this doesn't seem to work
                     posmap['cursor'] += self.template['depth_axis_width']
             layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
         if show_depth == False: 
@@ -362,7 +408,7 @@ class Plotly(pzr.Renderer):
             layout[tracks_y_axis]['ticklen'] = 0
             layout[tracks_y_axis]['ticks'] = ""
         elif posmap['depth_auto_right']:
-            layout[tracks_y_axis]['position'] = 1
+            layout[tracks_y_axis]['position'] = 1 - posmap['x_annotation_pixel_width']/posmap['pixel_width']
         elif posmap['depth_auto_left'] and xp is not None:
             layout[tracks_y_axis]['position'] = posmap['xp_end'] + self.template['depth_axis_width']/posmap['pixel_width']
         layout[tracks_y_axis]['maxallowed'] = ymax
@@ -372,6 +418,19 @@ class Plotly(pzr.Renderer):
         else:
             layout[tracks_y_axis]['range'] = [ymax, ymin]
         layout['width']=posmap['pixel_width']
+        self._last_posmap = posmap
+
+
+        # TODO: add verts and track depth/ranges, it could be condensed into just passing posmap
+        depth_margin = self.template['depth_axis_width']/posmap['pixel_width'] if (posmap['depth_auto_left'] and posmap['with_xp']) else 0
+        layout['shapes'] = []
+        layout['annotations'] = []
+        for name, note in graph.depth_notes.items():
+            if 'text' not in note: note['text']=name
+            s, a = self._process_graph_note(note, posmap['xp_end']+depth_margin, 1, toTarget(posmap['track_y']))
+            layout['shapes'].append(s)
+            layout['annotations'].append(a)
+
         return layout
 
     def get_traces(self, graph, xp=None, **kwargs):
@@ -651,7 +710,7 @@ class CrossPlot():
         self._colors_by_id = {}
         self._figures_by_id = weakref.WeakValueDictionary()
         # figures will contain all the colors currently be used, if we ever have a need to audit
-        # and eliminate colors_by_id that are nto necessary TODO
+        # and eliminate colors_by_id that are not necessary TODO
 
     @property
     def colors(self):

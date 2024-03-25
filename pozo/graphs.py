@@ -44,6 +44,7 @@ class Graph(ood.Observer, pzt.Themeable):
         except TypeError as te:
             raise TypeError(f"One of the arguments here isn't valid: {list(old_kwargs.keys())}.") from te
         self.process_data(*args, **my_kwargs)
+        self.depth_notes = {}
 
     def render(self, **kwargs):
         xp = kwargs.get("xp", None)
@@ -206,7 +207,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 depth_unit = pzu.parse_unit_from_context(pozo.deLASio(curve.index_name), curve.index_name, curve.index)
 
             trace = pozo.Trace(curve.values, depth=depth, mnemonic=mnemonic, name=name, unit=unit, depth_unit=depth_unit)
-            self.add_tracks(Trace)
+            self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
 
