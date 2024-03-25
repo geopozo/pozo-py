@@ -301,14 +301,14 @@ class Graph(ood.Observer, pzt.Themeable):
     
     # to_lasio_curve_items use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
-    def to_lasio_curve_items(pozo_obj,**kwargs):
+    def to_lasio_curve_items(self, pozo_obj,**kwargs):
         mnemonic = kwargs.pop('mnemonic', None)
         depth = kwargs.pop('depth', None)
         value = kwargs.pop('value', None)
         descr = kwargs.pop('descr', None)
         
-        if len(pozo_obj.get_tracks()) == 0:
-            raise TypeError("Cannot find tracks in the data") 
+        if len(self.get_traces()) == 0:
+            raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information") 
         
         if mnemonic == None: mnemonic = [data.get_mnemonic() for data in pozo_obj.get_traces()]
 
@@ -317,7 +317,6 @@ class Graph(ood.Observer, pzt.Themeable):
         lasio_list = []
         for track in pozo_obj:
             for name in mnemonic:
-                if len(track.get_traces(pozo.HasLog(name))) != 0:
                     data = track.get_traces(pozo.HasLog(name))
                     curve = data[0].get_data()
                     unit = data[0].get_unit()
