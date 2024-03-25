@@ -309,6 +309,8 @@ class Graph(ood.Observer, pzt.Themeable):
         if len(self.get_traces()) == 0:
             raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information") 
         
+        if selectors != None and mnemonic == None: mnemonic = self.get_mnemonic(*selectors)
+        
         if mnemonic == None: mnemonic = [trace.get_mnemonic() for trace in self.get_traces()]
         
         lasio_list = []
