@@ -314,10 +314,10 @@ class Graph(ood.Observer, pzt.Themeable):
         lasio_list = []
         for track in self:
             for name in mnemonic:
-                    data = track.get_traces(pozo.HasLog(name))
-                    curve = data[0].get_data()
-                    unit = data[0].get_unit()
-                    mnemonic = data[0].get_mnemonic()
+                    trace = track.get_traces(pozo.HasLog(name))
+                    curve = trace[0].get_data()
+                    unit = trace[0].get_unit()
+                    mnemonic = trace[0].get_mnemonic()
                     lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=curve)
                     lasio_list.append(lasio_obj)
         
