@@ -307,17 +307,14 @@ class Graph(ood.Observer, pzt.Themeable):
         if len(self.get_traces()) == 0:
             raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information") 
         
-        if selectors != None and mnemonic == None: mnemonic = self.get_mnemonic(*selectors)
-        
-        if mnemonic == None: mnemonic = [trace.get_mnemonic() for trace in self.get_traces()]
-        
+        traces = self.get_traces(*selectors)
+  
         lasio_list = []
-        for name in mnemonic:
-                trace = self.get_traces(pozo.HasLog(name))
+        for trace in traces:
                 data = trace[0].get_data()
                 unit = trace[0].get_unit()
-                mnemonic = trace[0].get_mnemonic()
-                lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
+                if mnemonic == None: mnemonics = trace[0].get_mnemonic()
+                lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
                 lasio_list.append(lasio_obj)
         
         return lasio_list
