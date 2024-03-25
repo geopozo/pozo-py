@@ -317,7 +317,7 @@ class Graph(ood.Observer, pzt.Themeable):
         lasio_list = []
         for track in pozo_obj:
             for name in mnemonic:
-                if (isinstance(track, (pozo.Track))) and (len(track.get_data(pozo.HasLog(name))) != 0):
+                if len(track.get_data(pozo.HasLog(name))) != 0:
                     data = track.get_traces(pozo.HasLog(name))
                     curve = data[0].get_data()
                     unit = data[0].get_unit()
