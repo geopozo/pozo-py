@@ -312,13 +312,12 @@ class Graph(ood.Observer, pzt.Themeable):
         if mnemonic == None: mnemonic = [trace.get_mnemonic() for trace in self.get_traces()]
         
         lasio_list = []
-        for track in self:
-            for name in mnemonic:
-                    trace = track.get_traces(pozo.HasLog(name))
-                    data = trace[0].get_data()
-                    unit = trace[0].get_unit()
-                    mnemonic = trace[0].get_mnemonic()
-                    lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
-                    lasio_list.append(lasio_obj)
+        for name in mnemonic:
+                trace = self.get_traces(pozo.HasLog(name))
+                data = trace[0].get_data()
+                unit = trace[0].get_unit()
+                mnemonic = trace[0].get_mnemonic()
+                lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
+                lasio_list.append(lasio_obj)
         
         return lasio_list
