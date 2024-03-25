@@ -49,9 +49,9 @@ ESPERA! De donde se saca el `Axis`?
 
 #### Creación Automatica de Pozo
 
-Un `pozo.Data` está **contenido SIEMPRE** por un `pozo.Axis`, a su vez este está **contenido SIEMPRE** por un `pozo.Track`, que está **contenido SIEMPRE!** por un `pozo.Graph`.
+Un `pozo.Trace` está **contenido SIEMPRE** por un `pozo.Axis`, a su vez este está **contenido SIEMPRE** por un `pozo.Track`, que está **contenido SIEMPRE!** por un `pozo.Graph`.
 
-Si se agrega algo más bajo en la jerarquía a algo más alto, los intermedios se crearán automaticamente: Si se agrega un`Axis` a un `Graph`, se crea un `Track` entre los dos. Si se agrega un `Data` a un `Graph`, se crea un `Axis` y u `Track`...
+Si se agrega algo más bajo en la jerarquía a algo más alto, los intermedios se crearán automaticamente: Si se agrega un`Axis` a un `Graph`, se crea un `Track` entre los dos. Si se agrega un `Trace` a un `Graph`, se crea un `Axis` y u `Track`...
 
 _O se hace todo a mano:_
 
@@ -59,11 +59,11 @@ _O se hace todo a mano:_
 aGraph = pozo.Graph()
 aTrack = pozo.Track()
 anAxis = pozo.Axis()
-aData = pozo.Data()
+aTrace = pozo.Trace()
 
 aGraph.add_tracks(aTrack)
 aTrack.add_axes(aAxis)
-anAxis.add_data(aData)
+anAxis.add_traces(aTrace)
 ```
 ### Renderizar
 A ver, hagamos un `myGraph.render()`, y recibimos:
@@ -105,7 +105,7 @@ Muy bien.
 
 ### Especiales:
 
-`someGraph.get_axes()` y `someGraph.get_data()` también funcionan.
+`someGraph.get_axes()` y `someGraph.get_traces()` también funcionan.
 
 ## `Track()`
 
@@ -123,43 +123,43 @@ Muy bien.
 
 `someTrack.get_axes()`: Se toman `selector` y se devuelven los `Axis` si se existen
 
-`someTrack.get_...` bla bla bla, El patron sigue, es parecido a  `Graph()`. `Axis()`, también. `Data()` es distinto...
+`someTrack.get_...` bla bla bla, el patron sigue, es parecido a  `Graph()`. `Axis()`, también. `Trace()` es distinto...
 
 ## `Axis()`
 
 Lo mismo.
 
-## `Data()`
+## `Trace()`
 
 ### Crear:
 
-`myData = pozo.Data(data, depth=algo, mnemonic="algo")`: Estos tres son requeridos. Se pueden poner `unit=` y `depth_unit=` también.
+`myTrace = pozo.Trace(data, depth=algo, mnemonic="algo")`: Estos tres son requeridos. Se pueden poner `unit=` y `depth_unit=` también.
 
 ### Manipular:
 
-`someData.get_mnemonic()`: Se devuelve la mnemotécnica.
+`someTrace.get_mnemonic()`: Se devuelve la mnemotécnica.
 
-`someData.set_mnemonic()`: Se toma una mnemotécnica nueva.
+`someTrace.set_mnemonic()`: Se toma una mnemotécnica nueva.
 
-`someData.get_data()`: Se devuelven los datos.
+`someTrace.get_data()`: Se devuelven los datos.
 
-`someData.set_data()`: Se toma una lista de datos, pero también se acepta "depth=" y "unit=" y "depth_unit="
+`someTrace.set_data()`: Se toma una lista de datos, pero también se acepta "depth=" y "unit=" y "depth_unit="
 
-`someData.get_depth()`: Se devuelven los datos de profunidad.
+`someTrace.get_depth()`: Se devuelven los datos de profunidad.
 
-`someData.set_depth()`: Se toma una lista de datos de profunidad.
+`someTrace.set_depth()`: Se toma una lista de datos de profunidad.
 
-`someData.get_unit()`: Se devuelven las unidades de los datos.
+`someTrace.get_unit()`: Se devuelven las unidades de los datos.
 
-`someData.set_unit()`: Se toman las unidades de los datos.
+`someTrace.set_unit()`: Se toman las unidades de los datos.
 
-`someData.get_depth_unit()`: Se devuelvan las unidades de la profunidad.
+`someTrace.get_depth_unit()`: Se devuelvan las unidades de la profunidad.
 
-`someData.set_depth_unit()`: Se toman las unidades de la profunidad.
+`someTrace.set_depth_unit()`: Se toman las unidades de la profunidad.
 
-`someData.convert_unit()`: Se toma una unidad nueva, y se puede entender, se hace la conversión.
+`someTrace.convert_unit()`: Se toma una unidad nueva, y se puede entender, se hace la conversión.
 
-`someData.convert_depth_unit()` Se toman una unidad nueva, y se puede entender, se hace la conversión.
+`someTrace.convert_depth_unit()` Se toman una unidad nueva, y se puede entender, se hace la conversión.
 
 
 ## Selectores Especiales

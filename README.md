@@ -8,7 +8,7 @@ Pozo is an open source, intuitive api for visualizing well logs. It uses [plotly
 $ pip install pozo
 ```
 
-Don't forget `pip install lasio` if you're using lasio! If you're using jupyter, `pip install ipywidgets plotly nbformat` as well.
+Don't forget `pip install lasio` if you're using lasio! If you're using jupyter, `pip install ipywidgets nbformat` as well.
 
 ## Simplest Usage
 
@@ -32,8 +32,9 @@ myGraph.render(height=800, depth=[1080, 1180])
 
 Notice the tracks are in the same order as your list `include=[...]`.
 
+**We have a new feature! [learn about crossplots](docs/en/users/CROSSPLOTS.md)**
 
-#### Combining Tracks
+### Combining Tracks
 ```
 # Before you render
 
@@ -48,15 +49,12 @@ graph1.render(height=800, depth_position=1, depth=[1080, 1180])
 ```
 <p align="center"><img src="docs/images/log_example.png" /> </p>
 
+
+A `pozo.Graph` is made up of `pozo.Track`, which is made up of `pozo.Axis`, which is made up of `pozo.Trace`, which contains `data` and `depth`. 
+
 #### Theming
-The `"cangrejo"` theme above is built-in. It uses the `mnemonic` of the data to determine what the color, range, and unit might be. However, it doesn't cover all cases, so you have two options:
+
 ```
-# Option One: Set a fallback for everything (only works if theme is set to "cangrejo")
-graph.get_theme().set_fallback{"track_width":200}
-
-# Option Two: Set a specific theme on a specific track:
-graph.get_tracks("CGR")[0].set_theme({"track_width":200})
-
 # Some possible settings:
 #  "color": "blue"
 #  "scale": "log"
@@ -64,7 +62,22 @@ graph.get_tracks("CGR")[0].set_theme({"track_width":200})
 #  "range_unit": "meter"
 ```
 
-*TODO: to learn more about theming*
+Themes on more specific items (like `Axis`) override more general items (like `Track`). Calling `set_theme({})` on a `Trace` will override any theme on the `Axis`. If the theme on `Trace` lacks a key, the renderer will look in the `Axis` and so on and so forth.
+
+*Note: Setting themes on `Trace` only works for certain keys, e.g. `Trace` doesn't decide color, `Axis` or above does*
+
+The `"cangrejo"` theme above is a built-in `mnemonic` theme, it changes depending on the mnemonic.
+```
+# Option One: Set a fallback for everything (only works if theme is set to "cangrejo")
+graph.get_theme().set_fallback({"track_width":200})
+
+
+# Option Two: Set a specific theme on a specific track:
+graph.get_tracks("CGR")[0].set_theme({"track_width":200})
+
+```
+
+[learn more about themeing](docs/en/users/THEMING.md)
 
 #### Selecting Tracks
 
@@ -81,8 +94,6 @@ popped_tracks  = graph1.pop_tracks("CGR", 3)     # by name or position
 popped_tracks2 = graph1.pop_tracks(pozo.HasLog("CGR"))
 ```
 
-*TODO: to learn more about selecting*
-
 ## Adding Data Manually
 
 #### Sometimes you want to do your own math and construct your own data:
@@ -98,27 +109,17 @@ graph.add_tracks(new_data)
 ```
 You can now call `graph.add_tracks(new_data)`
 
-But maybe you want to theme it first. Don't theme the "Data" directly, it won't impact much:
+But maybe you want to theme it first. Don't theme the "Data" directly, it won't impact much. Instead:
 
 ```
 new_tracks = graph.add_tracks(new_data)
 new_tracks[0].set_theme({"color":"red", range=[0, 1], range_unit="fraction"})
 ```
 
-*TODO: learn more about the pozo internal data structure*
+[learn more about internals](docs/en/users/INTERNALS.md)
 
 ## Sanitizing Data
 
 ### Units
 
-*TODO: common geology-only units*
-
-## Common Operations
-
-### Common Derived Data
-
-### Common Track Views
-
-### Utility Functions
-
-#### Exporting to LAS file
+`pozo.units.check_las(las_object)` is a function that can help you verify the validy of LAS data. It will list the units it thinks it is and the ranges of values and number of NaNs.

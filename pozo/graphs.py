@@ -19,7 +19,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
         self._render = {}
-        render_keys = ['show_depth', 'depth_position', 'height', 'javascript', 'depth']
+        render_keys = ['show_depth', 'depth_position', 'height', 'depth']
         for key in render_keys:
             temporary = kwargs.pop(key, None)
             if temporary is not None: self._render[key] = temporary
@@ -45,6 +45,7 @@ class Graph(ood.Observer, pzt.Themeable):
         except TypeError as te:
             raise TypeError(f"One of the arguments here isn't valid: {list(old_kwargs.keys())}.") from te
         self.process_data(*args, **my_kwargs)
+        self.depth_notes = {}
 
     def render(self, **kwargs):
         xp = kwargs.get("xp", None)
@@ -59,9 +60,6 @@ class Graph(ood.Observer, pzt.Themeable):
     def CrossPlot(self, x=None, y=None,**kwargs):
         self.xp.reinit(x=x, y=y, **kwargs) # TODO could add graph
         return self.xp
-
-    def javascript(self):
-        self.renderer.javascript()
 
     def get_name(self):
         return self._name
@@ -137,7 +135,7 @@ class Graph(ood.Observer, pzt.Themeable):
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
                 continue
             unit = None
-            if unit_map:
+            if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
                     unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:
@@ -187,7 +185,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
             unit = None
             
-            if unit_map:
+            if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
                     unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:

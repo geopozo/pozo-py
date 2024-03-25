@@ -3,6 +3,8 @@ The units interface is based off package `pint`. It can be accessed w/ `pozo.uni
 
 ## Main Functions
 
+*some of this is likely somewhat changed, but the basic structure is the same*
+
 It exposes a pint registry `pozo.units.registry` object, and a quantity function, `pozo.units.Q()`.
 
 `pozo.units.registry` is an enhanced pint registry:

@@ -6,7 +6,7 @@ Pozo es una API intuitiva, de código abierto, para visualizar registros de pozo
 $ pip install pozo
 ```
 
-Si usas lasio recuerda `pip install lasio`. Si usas jupyter entonces `pip install ipywidgets plotly nbformat`.
+Si usas lasio recuerda `pip install lasio`. Si usas jupyter entonces `pip install ipywidgets nbformat`.
 
 ## Glosario de palabras claves
 
@@ -33,14 +33,15 @@ myGraph.set_theme("cangrejo") # recomendado!
 myGraph.render(height=800, depth=[1080, 1180])
 
 ```
-<p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/images/log_example2.png" /> </p>
+<p align="center"><img src="../images/log_example2.png" /> </p>
 
 <br />
 
 Se nota que las vías están ordenadas como la lista `include=[...]`.
 
+**Ya hay una función nueva: [saber de crossplots](docs/es/usuarios/CROSSPLOTS.md)**
 
-#### Combinar Vias
+### Combinar Vías
 ```
 # Antes de renderizar
 
@@ -53,25 +54,35 @@ graph1.combine_tracks("RHOB", "NPHI")
 # Podemos cambiar la posición del eje de la profunidad con `depth_position=1`
 graph1.render(height=800, depth_position=1, depth=[1080, 1180])
 ```
-<p align="center"><img src="https://github.com/geopozo/pozo-py/blob/main/docs/images/log_example.png" /> </p>
+<p align="center"><img src="../images/log_example.png" /> </p>
+
+Un `pozo.Graph` se construye por un `pozo.Track`, que contiene `pozo.Axes`, que tiene `pozo.Data`.
 
 #### Temas
-El tema `"cangrejo"` está incluido en pozo. Se emplea el `mnemonic` de los datos para determinar el color, rango, and unidad. Pero este no nos entrega toda la información, así que hay dos opciones:
+
 ```
-# Una: Poner un respaldo para todos (solo funciona con "cangrejo")
-graph.get_theme().set_fallback{"track_width":200}
-
-# Dos: Poner un tema especifica para la vía.
-graph.get_tracks("CGR")[0].set_theme({"track_width":200})
-
-# Unas configuraciones más:
+# Unas configuraciones:
 #  "color": "blue"
 #  "scale": "log"
 #  "range": [0, 10]
 #  "range_unit": "meter"
 ```
 
-*TODO: para saber más de temas*
+Temas pegadas en cosas mas especificas tienen prioridad. Es decir, un tema por un `Axis` se da antes de un tema por un `Track`. Si no hay clave pertinente en el `Axis`, se busca los otros objetos en la jerarquía.
+
+El tema `"cangrejo"` está incluido en pozo. Se emplea el `mnemonic` de los datos para determinar el color, rango, and unidad. Pero este no nos entrega toda la información, así que hay dos opciones:
+
+*Se nota: Temas por un `Trace` solo funcionan con ciertas claves.*
+
+```
+# Una: Poner un respaldo para todos (solo funciona con "cangrejo")
+graph.get_theme().set_fallback{"track_width":200}
+
+# Dos: Poner un tema especifica para la vía.
+graph.get_tracks("CGR")[0].set_theme({"track_width":200})
+```
+
+[saber más de los temas](docs/es/users/THEMING.md)
 
 #### Seleccionar Vías
 
@@ -87,8 +98,6 @@ popped_tracks  = graph1.pop_tracks("CGR", 3)     # por nombre o posición
 # Para buscar por `mnemonic`:
 popped_tracks2 = graph1.pop_tracks(pozo.HasLog("CGR")) # pozo.HasLog( "MNEMONIC" )
 ```
-
-*TODO: para saber más de seleccionar*
 
 ## Agregar Data a mano
 
@@ -115,20 +124,10 @@ graph.add_tracks(new_track)
 # Renderizalo....
 ```
 
-*TODO: para saber más de la estructura interna de un gráfico de pozo*
+[saber más de los internos](docs/es/users/INTERNOS.md)
 
 ## Depurar los Datos
 
 ### Unidades
 
-*TODO: unidades únicas a geología*
-
-## Funciones Comunes
-
-### Datos Derivados Comunes
-
-### Configuraciones de Vías Comunes
-
-### Funciones Útiles
-
-#### Exportar a archivo tipo LAS
+`pozo.units.check_las(las_object)` es una funcion que te ayuda verificar los datos y las unidades en un LAS. Crea un tabla de las unidades en forma las y la confianza de la interpretación.

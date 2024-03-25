@@ -2,10 +2,10 @@ import copy
 import math
 import warnings
 import re
-import weakref #unused? TODO
+import weakref 
 
 import numpy as np
-from IPython.display import Javascript # Part of Hack #1
+from IPython.display import Javascript, display # Part of Hack #1
 import plotly as plotly
 import plotly.graph_objects as go
 import pint
@@ -16,7 +16,24 @@ import pozo.themes as pzt
 import pozo.units as pzu
 
 re_space = re.compile(' ')
-re_power = re.compile('\*\*')
+re_power = re.compile(r'\*\*')
+
+def javascript():
+    add_scroll = '''var css = '.plot-container { overflow: auto; }',
+head = document.getElementsByTagName('head')[0],
+style = document.createElement('style');
+
+style.type = 'text/css';
+if (style.styleSheet){
+  style.styleSheet.cssText = css;
+} else {
+  style.appendChild(document.createTextNode(css));
+}
+console.log("Executed javascript()")
+head.appendChild(style);'''
+    display(Javascript(add_scroll))
+
+javascript()
 
 # TODO FOR CROSSPLOT MUST X Y AND ALL COLOR HAVE THE SAME SHAPE OR ELSE BREAK INTERACTIVITY
 
@@ -32,10 +49,9 @@ re_power = re.compile('\*\*')
 defaults = dict(
     # Non-Plotly style values, used to generate Plotly layout values. These are all "required".
     track_margin = 15,      # margin between each track
-    track_start = 35,        # left-side margin on tracks # (set axis to engineering notation) (helps with hover)
-    depth_axis_width = 30,  # size of depth axis if it's not the first thing
-    depth_axis_left_shift = 5, # what the fuck is this TODO
-    axis_label_height = 60, # size of each xaxis when stacked
+    depth_axis_width = 35,  # size of depth axis if it's not the first thing, will also have margin above
+    axis_label_height = 80, # size of each xaxis when stacked
+    y_annotation_gutter = 10, # space for writing text
 
     # Plotly style values, structured like a plotly layout dictionary.
     # Important to know that `xaxes_template` will be used to create several `xaxis1`,`xaxis2`, `xaxisN` keys.
@@ -54,7 +70,7 @@ defaults = dict(
         paper_bgcolor = '#FFFFFF',
 #       width=?                # generated
 
-        yaxis = dict(
+        yaxis1 = dict(
                 visible=True, # Would hdie gridelines too, so hide ticks and labels instead of axis.
                 showgrid=True,
                 zeroline=False,
@@ -104,99 +120,163 @@ defaults = dict(
 default_hovertemplate = 'Depth: %{y}, Value: %{x}' # how to get this to be the name
 
 GRAPH_HEIGHT_MIN = 125
-AXIS_PROPORTION_MAX = .6
 
+def toTarget(axis):
+    return axis[0] + axis[-1]
+
+# So this renderer will have a list of tracks, and their contained axis, but not the data
+# Its all position data, not styling data
 class Plotly(pzr.Renderer):
     def __init__(self, template=defaults):
+        javascript() # double it up
         self.template = copy.deepcopy(template)
         self.xaxis_template = copy.deepcopy(self.template["plotly"]["xaxis_template"])
         del self.template["plotly"]["xaxis_template"]
         self.last_fig = None
 
-    def _calc_axes_proportion(self, num_axes, height):
-        num_axes_adjusted = 0 if num_axes <= 1 else num_axes  # first axis is free!
-        proportion_per_axis = self.template["axis_label_height"] / height
-        raw_value =  num_axes_adjusted * proportion_per_axis
-        if raw_value > AXIS_PROPORTION_MAX:
-            raise ValueError(f"To display the {num_axes} stack axes, please use a height greater than {self.template['axis_label_height'] * num_axes_adjusted/.6}")
-        return raw_value
-
-    def _calc_total_width(self, num_tracks, total_track_width, add_depth_axis):
-        whole_width = (self.template["track_start"] +
-                       ((num_tracks-1) * self.template["track_margin"]) +
-                       total_track_width)
-        if add_depth_axis: whole_width += self.template["depth_axis_width"]
-        return whole_width
-
-    def _calc_track_domain(self, last_end, track_width, whole_width):
-        # Calculating whole width is not possible
-        start = (self.template["track_margin"]/whole_width) if last_end > 0 else (self.template["track_start"]/whole_width)
-        start += last_end
-        end = start + (track_width/whole_width)
-
-        return [max(start, 0), min(end, 1)]
-
     def _hidden(self, themes):
         hidden = themes["hidden"]
         if hidden: themes.pop()
         return hidden
+   # TODO, units (find nearest with units too)
+    def _process_graph_note(self, note, x0, x1, yref):
+        if 'range' not in note:
+            raise ValueError(f"Depth note seems to be missing range")
+        # TODO: check numerics
+        type = 'line'
+        if isinstance(note['range'], tuple): type='rect'
+
+        shape = None
+        if type=='line':
+            shape = dict(
+                type='line',
+                xref='paper',
+                x0=x0,
+                x1=x1,
+                yref=yref,
+                y0=note['range'],
+                y1=note['range'],
+                line_width=note['weight'] if 'weight' in note else .8,
+                line_dash=note['style'] if 'style' in note else 'dot',
+                line_color=note['color'] if 'color' in note else 'black',
+            )
+        else:
+            shape = dict(
+                type='rect',
+                xref='paper',
+                x0=x0,
+                x1=x1,
+                yref=yref,
+                y0=note['range'][0],
+                y1=note['range'][1],
+                line_width=0,
+                fillcolor=note['color'] if 'color' in note else 'lightskyblue',
+                layer="below",
+                opacity=.5,
+            )
+
+        annotation = dict(
+            text=note['text'] if 'text' in note else "",
+            xref="paper", 
+            x=1, 
+            yref=yref, 
+            y=note['range'] - 1 if type=='line' else note['range'][0] - 1, 
+            showarrow=False,
+        )
+        return shape, annotation
 
     def get_layout(self, graph, xp=None, **kwargs):
-        main_y_axis = "yaxis"
-        if xp is not None:
-            main_y_axis = "yaxis2"
+        if not isinstance(graph, pozo.Graph):
+            raise TypeError("Layout must be supplied a graph object.")
+        if not len(graph):
+            raise ValueError("There are no tracks, there is nothing to lay out.")
         show_depth = kwargs.pop("show_depth", True)
-        depth_axis_pos = kwargs.pop("depth_position", 0)
-        depth_axis_pos_prop = 0
-        if show_depth == False:
-            depth_axis_pos = 0
+        depth_axis_position = kwargs.pop("depth_position", 0)
         override_theme = kwargs.pop("override_theme", None)
         override_theme = kwargs.pop("theme_override", override_theme)
         height = kwargs.get("height", None)
         depth_range = kwargs.get("depth", None)
         if depth_range is not None and ( not isinstance(depth_range, (tuple, list)) or len(depth_range) != 2 ):
             raise TypeError(f"Depth range must be a list or tuple of length two, not {depth_range}")
-        if not isinstance(graph, pozo.Graph):
-            raise TypeError("Layout must be supplied a graph object.")
-        if not len(graph):
-            raise ValueError("There are no tracks, there is nothing to lay out.")
-
+        
         layout = copy.deepcopy(self.template["plotly"])
         if height is not None:
             layout["height"] = height
-        if xp is not None:
-            layout[main_y_axis] = copy.deepcopy(layout['yaxis'])
-            del layout['yaxis']
-            xp.size = layout['height']
-            xp.depth_range=depth_range
-
         if layout["height"] < GRAPH_HEIGHT_MIN:
             raise ValueError("125px is the minimum total height")
 
-        # first pass
-        # calculate: biggest main stack
-        # calculate: parent axis for all
-        # print("***First pass:")
+        tracks_y_axis = "yaxis1"
+        xp_y_axis = None
+        xp_x_axis = None
+        if xp is not None:
+            tracks_y_axis = "yaxis2"
+            xp_y_axis = "yaxis1"
+            xp_x_axis = "xaxis1"
+            layout[tracks_y_axis] = copy.deepcopy(layout['yaxis1'])
+            del layout['yaxis1']
+            xp.size = layout['height']
+            xp.depth_range=depth_range 
+
+        # TODO constrain positions and domains
+
+        # posmap is an object eventual assigned to the figure containing axis/graph/position data.
+        # it's used to pull out reference numbers easily
+        posmap = {
+            'xp_x': xp_x_axis,
+            'xp_y': xp_y_axis,
+            'track_y': tracks_y_axis,
+            'pixel_height': layout['height'],
+            'pixel_width': 4, # start drawing axes at 4 makes it look a little nicer on the left
+            'cursor': 4,
+            'with_xp': xp is not None,
+            'xp_end': 0,
+            'show_depth': show_depth,
+            'depth_track_number': depth_axis_position if show_depth else 0, # putting at 0 easier if turned off
+            'depth_track_position': None,
+            'depth_auto_left': not depth_axis_position, # weird because if `width_xp` this should be false, but logic works
+            'depth_auto_right': False, # calc later
+            'tracks_axis_numbers': [],
+            'tracks_pixel_widths': [],
+            'tracks_x_domains': [],
+            'tracks_y_domain': None,
+            'axis_line_positions': [],
+            'total_axes': int(xp is not None),
+            'y_bottom': self.template['y_annotation_gutter']/layout['height'],
+            }
+
+        
+        # we do a lot of Y calculations in the first run
         max_axis_stack = 0
-        total_axes = 0 if xp is None else 1
-        parent_axis_per_track = []
+        track_index = -1
         for track in graph.get_tracks():
-            if pzt.ThemeStack(track.get_theme())['hidden']: continue
-            num_axes = 0
-            for axis in track.get_axes(): # track.get_axes(matchesTheme({hidden:true}))
-                if not pzt.ThemeStack(track.get_theme())['hidden']: num_axes += 1
+            track_index += 1
+            if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0: continue
+            if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
+            posmap['tracks_axis_numbers'].append([])
+            for axis in track.get_axes(): 
+                if pzt.ThemeStack(track.get_theme())['hidden']: continue
+                posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
+                posmap['tracks_axis_numbers'][-1].append(posmap['total_axes']) 
+            max_axis_stack = max(len(posmap['tracks_axis_numbers'][-1]), max_axis_stack) 
+        if not max_axis_stack: raise ValueError("Didn't find an axes, not going to render")
+        if max_axis_stack == 1: posmap['axis_line_positions'] = [1]
+        elif max_axis_stack > 1:
+            for i in reversed(range(max_axis_stack+1)):
+                posmap['axis_line_positions'].append(
+                    1 - i * (self.template["axis_label_height"]/posmap['pixel_height'])
+                    )
+        layout[tracks_y_axis]["domain"] = posmap['tracks_y_domain'] = ( posmap['y_bottom'], posmap['axis_line_positions'][0] )
+        if posmap['depth_track_number'] >= len(posmap['tracks_axis_numbers']): 
+            posmap['depth_auto_right'] = True
+        max_text = 0
+        for name, note in graph.depth_notes.items():
+            max_text = max(max_text, len(note['text'] if 'text' in note else name))
+        posmap['x_annotation_pixel_width'] = max_text*10
+        posmap['pixel_width'] += max_text*15
 
-            max_axis_stack = max(max_axis_stack, num_axes)
-            parent_axis_per_track.append(total_axes+1)
-            total_axes += num_axes
-        layout[main_y_axis]["domain"] = [
-            0, # Old(bottom axes): self.calculate_axes_height(max_axes_bottom)
-            min(1 - self._calc_axes_proportion(max_axis_stack, layout["height"]), 1)
-        ]
+        ## in the second pass, we apply units and styles, and information from the first run
+        axes_styles = [] # why not declare axes_styles earlier and then apply axes styles from the start, instead of here
 
-        # print("***Second pass:")
-        ## second pass
-        axes_styles = []
         ymin = float('inf')
         ymax = float('-inf')
         y_unit = None
@@ -205,17 +285,23 @@ class Plotly(pzr.Renderer):
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
         if self._hidden(themes): return {}
-        track_pos = -1
+        
+        track_index = -1 # we can't use enumerate() becuase sometimes we skip iterations in the loop
         for track in graph.get_tracks():
             themes.append(track.get_theme())
-            if self._hidden(themes): continue
-            track_pos += 1
-            anchor_axis = parent_axis_per_track[track_pos]
-            axis_pos = -1
+            if self._hidden(themes) or len(track) == 0: continue
+            track_index += 1
+            if track_index and posmap['tracks_axis_numbers'][track_index] == 'depth': # don't do it for 0
+                track_index +=1
+                posmap['tracks_pixel_widths'].append(self.template['depth_axis_width'])
+             
+            
+            axis_index = -1 # same story with track_index, need to skip iterations, enumerate() won't work
             for axis in track.get_axes():
                 themes.append(axis.get_theme())
                 if self._hidden(themes): continue
-                axis_pos += 1
+                axis_index += 1
+
                 if themes["range_unit"] is not None:
                     range_unit = pzu.registry.parse_units(themes["range_unit"])
                 else:
@@ -271,76 +357,80 @@ class Plotly(pzr.Renderer):
                 if xrange is not None:
                     axis_style['range'] = xrange
 
-                axis_style['side'] = "top" # Old(bottom axes): if position>0 else "bottom"
-                if axis_pos:
-                    axis_style['anchor'] = "free"
-                    bottom = layout[main_y_axis]["domain"][1]
-                    position_above_bottom = (1-bottom) * ((axis_pos) / (max_axis_stack - 1))
-                    axis_style['position'] = min(bottom + position_above_bottom, 1)
-                    axis_style['overlaying'] = "x" + str(anchor_axis)
-                else:
-                    # All pozo-keys should not be delivered to plotly
-                    axis_style['pozo-width'] = themes["track_width"]
-                    axis_style['position'] = layout[main_y_axis]["domain"][1] # BUG PLOTLY: not needed if no xp, because position calcs automatically
-                    total_track_width += themes["track_width"]
-                    if depth_axis_pos == (track_pos+1):
-                        axis_style['pozo-yaxis-end'] = True
-
-
+                axis_style['side'] = "top" 
+                if axis_index: # is a secondary axis
+                    axis_style['anchor'] = "free" # TODO we might be able to just change this, check
+                    axis_style['overlaying'] = "x" + str(posmap['tracks_axis_numbers'][track_index][0])
+                # TODO why do we need position on automatically anchored axis in the case of XP? (from previous comment)
+                axis_style['position'] = min(posmap['axis_line_positions'][axis_index], 1)
                 axes_styles.append(axis_style)
-
-
                 themes.pop()
+            posmap['pixel_width'] += themes["track_width"] + self.template["track_margin"]
+            posmap['tracks_pixel_widths'].append(themes["track_width"])
             themes.pop()
-        num_tracks = track_pos + 1
+        posmap['pixel_width'] -= self.template["track_margin"] # we don't need margin at the end
+        if posmap['depth_track_number'] > 0: posmap['pixel_width'] += self.template['depth_axis_width'] # We'll need space
+
         # all stuff dependent on position could go here
-        layout["width"] = self._calc_total_width(num_tracks, total_track_width, depth_axis_pos)
-        shift_for_xp = 0
-        colorbar_size = 0
-        depth_axis_left_shift = self.template["depth_axis_left_shift"] if depth_axis_pos == 0 else 0 # this doesn't seem well calculated
-        layout["width"] += depth_axis_left_shift
         if xp is not None:
-            layout["width"] += xp.size + colorbar_size
-            shift_for_xp = (colorbar_size+xp.size) / (layout["width"])
-            colorbar_pos = (xp.size)/layout["width"]
-            xp_layout = xp.create_layout(container_width = layout["width"])
-            layout["yaxis"] = xp_layout["yaxis"]
-            layout["xaxis"] = xp_layout["xaxis"]
-            layout["xaxis"]["domain"] = (0, colorbar_pos - 80/layout["width"]) # add some extra marign for text
-            layout["legend"]["x"] = colorbar_pos * .8
-        last_end = shift_for_xp + depth_axis_left_shift/layout["width"]
+            posmap["pixel_width"] += layout["height"] # create a square for the crossplot
+            if posmap['depth_auto_left']:
+                posmap["pixel_width"] += self.template['depth_axis_width']
+            posmap['xp_end'] = layout["height"] / (posmap["pixel_width"]) 
+            xp_layout = xp.create_layout(container_width = posmap["pixel_width"]) # pre posmap
+            layout[xp_y_axis] = xp_layout["yaxis"]
+            layout[xp_x_axis] = xp_layout["xaxis"]
+            layout[xp_x_axis]["domain"] = (0, posmap['xp_end'])
+            posmap["xp_domain"] = layout[xp_x_axis]["domain"]
+            layout["legend"]["x"] = posmap['xp_end'] * .8
+            posmap['cursor'] += layout["height"]
+            if posmap['depth_auto_left']: posmap['cursor'] += self.template['depth_axis_width'] 
         track = 0
         for i, axis in enumerate(axes_styles):
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
             else:
-                axis['domain'] = self._calc_track_domain(last_end, axis['pozo-width'], layout["width"])
-                last_end = axis['domain'][1]
-                del axis['pozo-width']
-                if 'pozo-yaxis-end' in axis:
-                    depth_axis_pos_prop = axis['domain'][1] + self.template["depth_axis_width"] / layout["width"] - self.template["depth_axis_left_shift"] / layout["width"]
-                    last_end += self.template["depth_axis_width"] / layout["width"]
-                    del axis['pozo-yaxis-end']
-                track+1
-            axis_num = i + 1
-            if xp is not None:
-                axis_num += 1
-            layout["xaxis" + str(axis_num)] = axis
-        if show_depth == False:
-            layout[main_y_axis]['showticklabels'] = False
-            layout[main_y_axis]['ticklen'] = 0
-        elif depth_axis_pos >= num_tracks:
-            layout[main_y_axis]['position'] = 1
-        elif depth_axis_pos:
-            layout[main_y_axis]['position'] = depth_axis_pos_prop + self.template['track_margin']/layout['width']
-        elif xp is not None:
-            layout[main_y_axis]['position'] = shift_for_xp
-        layout[main_y_axis]['maxallowed'] = ymax
-        layout[main_y_axis]['minallowed'] = ymin # not changing with depth_range
+                axis['domain'] = (posmap['cursor']/posmap['pixel_width'],
+                                  (posmap['cursor']+posmap['tracks_pixel_widths'][track])/posmap['pixel_width'])
+                posmap['cursor'] += posmap['tracks_pixel_widths'][track]+self.template["track_margin"]
+                posmap['tracks_x_domains'].append(axis['domain'])
+                track+= 1
+                if ( track < len(posmap['tracks_axis_numbers']) and 
+                    posmap['tracks_axis_numbers'][track] == 'depth'
+                ): # never checks track 0, that's auto
+                    track+=1
+                    layout[tracks_y_axis]['position'] = (-4 + posmap['cursor'] + self.template['depth_axis_width'])/posmap['pixel_width']
+                    posmap['tracks_x_domains'].append((posmap['cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
+                    posmap['cursor'] += self.template['depth_axis_width']
+            layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
+        if show_depth == False: 
+            layout[tracks_y_axis]['showticklabels'] = False
+            layout[tracks_y_axis]['ticklen'] = 0
+            layout[tracks_y_axis]['ticks'] = ""
+        elif posmap['depth_auto_right']:
+            layout[tracks_y_axis]['position'] = 1 - posmap['x_annotation_pixel_width']/posmap['pixel_width']
+        elif posmap['depth_auto_left'] and xp is not None:
+            layout[tracks_y_axis]['position'] = posmap['xp_end'] + self.template['depth_axis_width']/posmap['pixel_width']
+        layout[tracks_y_axis]['maxallowed'] = ymax
+        layout[tracks_y_axis]['minallowed'] = ymin 
         if depth_range is not None:
-            layout[main_y_axis]['range'] = [depth_range[1], depth_range[0]]
+            layout[tracks_y_axis]['range'] = [depth_range[1], depth_range[0]]
         else:
-            layout[main_y_axis]['range'] = [ymax, ymin]
+            layout[tracks_y_axis]['range'] = [ymax, ymin]
+        layout['width']=posmap['pixel_width']
+        self._last_posmap = posmap
+
+
+        # TODO: add verts and track depth/ranges, it could be condensed into just passing posmap
+        depth_margin = self.template['depth_axis_width']/posmap['pixel_width'] if (posmap['depth_auto_left'] and posmap['with_xp']) else 0
+        layout['shapes'] = []
+        layout['annotations'] = []
+        for name, note in graph.depth_notes.items():
+            if 'text' not in note: note['text']=name
+            s, a = self._process_graph_note(note, posmap['xp_end']+depth_margin, 1, toTarget(posmap['track_y']))
+            layout['shapes'].append(s)
+            layout['annotations'].append(a)
+
         return layout
 
     def get_traces(self, graph, xp=None, **kwargs):
@@ -392,18 +482,16 @@ class Plotly(pzr.Renderer):
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
         if xp is None:
             self.last_fig = go.FigureWidget(data=traces, layout=layout)
-            self.last_fig._depth_axis = "yaxis1"
+            self.last_fig._depth_axis = "yaxis1" # this is pre-posmap
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range, renderer=xp)
             self.last_fig._depth_axis = "yaxis2"
             self.last_fig.layout.on_change(self.last_fig._depth_change_cb, 'yaxis2.range')
             xp.add_figure(self.last_fig)
+        javascript() # double it up
         return self.last_fig
 
-    def javascript(self):
-        add_scroll = '''document.querySelectorAll('.jp-RenderedPlotly').forEach(el => el.style.overflowX = 'auto');'''
 
-        return Javascript(add_scroll) # Part of Hack #1
 
 def is_array(value):
     if isinstance(value, str): return False
@@ -593,7 +681,6 @@ class CrossPlot():
         elif isinstance(selector, pozo.Trace):
             if not is_array(selector.get_data()): raise TypeError(f"{selector}'s data seems weird: {selector.get_data()}")
             if not is_array(selector.get_depth()):raise TypeError(f"{selector}'s depth seems weird: {selector.get_depth()}")
-
             return selector
         raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector)}")
 
@@ -623,7 +710,7 @@ class CrossPlot():
         self._colors_by_id = {}
         self._figures_by_id = weakref.WeakValueDictionary()
         # figures will contain all the colors currently be used, if we ever have a need to audit
-        # and eliminate colors_by_id that are nto necessary TODO
+        # and eliminate colors_by_id that are not necessary TODO
 
     @property
     def colors(self):
