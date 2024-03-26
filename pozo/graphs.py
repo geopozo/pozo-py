@@ -18,7 +18,7 @@ class Graph(ood.Observer, pzt.Themeable):
     _child_type="track"
 
     def __init__(self, *args, **kwargs):
-        self.original_data = None
+        self.original_data = args
         self._render = {}
         render_keys = ['show_depth', 'depth_position', 'height', 'depth']
         for key in render_keys:
