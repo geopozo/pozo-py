@@ -141,7 +141,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 elif mnemonic in unit_map:
                     unit = pzu.registry.parse_units(unit_map[mnemonic])
             elif curve.unit is None:
-                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics   
+                warnings.warn(f"No units found for mnemonic {mnemonic}") # TODO Handle percentages/lookup mnemonics
             else: unit = pzu.parse_unit_from_curve(curve)
 
             if ooderr.NameConflictException(level=self._name_conflict) is None:
@@ -150,6 +150,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 name = curve.mnemonic
 
             trace = pozo.Trace(curve.data, depth=yaxis, mnemonic=mnemonic, name=name, unit=unit, depth_unit=yaxis_unit)
+            trace.original_data = curve
             self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
@@ -184,7 +185,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 continue
 
             unit = None
-            
+
             if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
                     unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
@@ -208,6 +209,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 depth_unit = pzu.parse_unit_from_context(pozo.deLASio(curve.index_name), curve.index_name, curve.index)
 
             trace = pozo.Trace(curve.values, depth=depth, mnemonic=mnemonic, name=name, unit=unit, depth_unit=depth_unit)
+            trace.original_data = curve
             self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
@@ -296,19 +298,19 @@ class Graph(ood.Observer, pzt.Themeable):
                    "name": self._name,
                    }
         return self._get_theme(context=context)
-    
+
     # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
     def to_las_CurveItems(self, *selectors,**kwargs):
         mnemonic = kwargs.pop('mnemonic', None)
         value = kwargs.pop('value', None)
         descr = kwargs.pop('descr', None)
-        
+
         if len(self.get_traces()) == 0:
-            raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information") 
-        
+            raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information")
+
         traces = self.get_traces(*selectors)
-  
+
         lasio_list = []
         for trace in traces:
                 data = trace[0].get_data()
@@ -317,5 +319,5 @@ class Graph(ood.Observer, pzt.Themeable):
                 else: mnemonics = mnemonic[trace]
                 lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
                 lasio_list.append(lasio_obj)
-        
+
         return lasio_list
