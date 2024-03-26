@@ -7,9 +7,10 @@ import pozo.units as pzu
 
 class Trace(ood.Observed, pzt.Themeable):
     def __len__(self):
-        return len(self.get_data()) 
+        return len(self.get_data())
 
     def __init__(self, data, **kwargs):
+        self.original_data = None
         unit = kwargs.pop('unit', None)
         depth = kwargs.pop('depth', None)
         depth_unit = kwargs.pop('depth_unit', None)
