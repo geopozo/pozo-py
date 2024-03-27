@@ -404,7 +404,7 @@ class Plotly(pzr.Renderer):
                     posmap['tracks_x_domains'].append((posmap['cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
                     posmap['cursor'] += self.template['depth_axis_width']
             layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
-        if show_depth == False:
+        if not show_depth:
             layout[tracks_y_axis]['showticklabels'] = False
             layout[tracks_y_axis]['ticklen'] = 0
             layout[tracks_y_axis]['ticks'] = ""
@@ -477,12 +477,19 @@ class Plotly(pzr.Renderer):
         return traces
 
     def render(self, graph, **kwargs): # really, what gets passed in with kwargs TODO
+        static = kwargs.pop("static", False)
+        #frame = kwargs.pop("frame", None)
         xp = kwargs.pop("xp", None)
         layout = self.get_layout(graph, xp=xp, **kwargs)
         container_width = layout["width"] if xp is not None else 0
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
-        if xp is None:
-            self.last_fig = go.FigureWidget(data=traces, layout=layout)
+        if static:
+            self.last_fig = go.Figure(data=traces, layout=layout)
+            return self.last_fig
+        #elif isinstance(frame, str):
+        #   return go.Frame(data=traces, layout=layout)
+        elif xp is None:
+            self.last_fig = xpFigureWidget(data=traces, layout=layout)
             self.last_fig._depth_axis = "yaxis1" # this is pre-posmap
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, depth_range=xp.depth_range, renderer=xp)
@@ -500,17 +507,21 @@ def is_array(value):
         return is_array(value.magnitude)
     return hasattr(value, "__len__")
 
+# Use this for all FigureWidgets, have way to return FigureWidget
 class xpFigureWidget(go.FigureWidget):
+    # pass the controlling graph here, and it will add a callback
     def link_depth_to(self, fig):
+        if not isinstance(fig, go.FigureWidget):
+            raise TypeError("Supplied fig argument bust be a go.FigureWidget ot have access to interactivity")
         fig.layout.on_change(self._depth_change_cb, fig._depth_axis+'.range', append=True)
 
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
-        self._depth_range = kwargs.pop("depth_range", [None])
         self._xp_renderer = kwargs.pop("renderer", None)
-        if self._xp_renderer is None: raise ValueError("Don't call xpFigureWidget directly, let a renderer call it so it has all it's info")
-        self._depth_lock = False
-
+        if self._xp_renderer:
+            self._depth_range = kwargs.pop("depth_range", [None])
+            self._depth_lock = False
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
+        # not sure about frames, do animations work with interactivity? maybe TODO
 
     def _depth_change_cb(self, layout, new_range):
         if not self._depth_lock:
@@ -518,16 +529,20 @@ class xpFigureWidget(go.FigureWidget):
         self._tracks_depth_range = new_range
 
     def lock_depth_range(self):
+        if not self._xp_renderer: raise TypeError("lock_depth_range only applies to graphs with a crossplot")
         self._depth_lock = True
 
     def unlock_depth_range(self):
+        if not self._xp_renderer: raise TypeError("unlock_depth_range only applies to graphs with a crossplot")
         self._depth_lock = False
         self.match_depth_range()
 
     def match_depth_range(self):
+        if not self._xp_renderer: raise TypeError("match_depth_range only applies to graphs with a crossplot")
         self.set_depth_range(depth_range=self._tracks_depth_range)
 
     def set_depth_range(self, depth_range=None): # TODO for both graphs? xp and main?
+        if not self._xp_renderer: raise TypeError("set_depth_range only applies to graphs with a crossplot")
         self._depth_range = sorted(depth_range) if depth_range else None
         color_range_queue=[]
         with self.batch_update():
@@ -540,7 +555,7 @@ class xpFigureWidget(go.FigureWidget):
                     trace.marker.color = self._xp_renderer.x.get_depth(slice_by_depth=(self._depth_range))
                 elif color_data in self._xp_renderer._colors_by_id:
                     trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=self._depth_range)
-                if 'color_range' in trace.meta and trace.meta['color_range'] != (None):
+                if 'color_range' in trace.meta and trace.meta['color_range'] is not None: # no need for (None)?
                     color_range_queue.append((trace.name, trace.meta['color_range']))
         with self.batch_update(): # instead of two batches, color_range could take the new info as arguments
             for item in color_range_queue:
@@ -548,6 +563,7 @@ class xpFigureWidget(go.FigureWidget):
 
     # we have to set self._color_range so that can recalculate it when depth changes
     def set_color_range(self, name, color_range=(None), auto=False, lock=False):
+        if not self._xp_renderer: raise TypeError("set_color_range only applies to graphs with a crossplot")
         for trace in self['data']:
             if trace.meta and 'color_data' in trace.meta:
                 if trace.name != name: continue
@@ -562,7 +578,7 @@ class xpFigureWidget(go.FigureWidget):
                     trace.meta[select_key] = trace.marker.colorscale # its a tuple maybe it is hashable
 
                 colorscale_selected = trace.meta[select_key]
-                if auto==True or color_range==[None]:
+                if auto or color_range==[None]:
                     trace.meta['color_range'] = (None)
                     if calc_key in trace.meta: del trace.meta[calc_key]
                     if select_key in trace.meta: del trace.meta[select_key]
@@ -571,7 +587,7 @@ class xpFigureWidget(go.FigureWidget):
 
                 data_min = np.nanmin(trace.marker.color)
                 data_max = np.nanmax(trace.marker.color)
-                if lock == True:
+                if lock:
                     color_range = [data_min, data_max]
                 trace.meta['color_range'] = color_range
                 if color_range[0] is None: color_range[0] = data_min
@@ -616,7 +632,7 @@ class xpFigureWidget(go.FigureWidget):
                         old_pairs = list(reversed(normalized_pairs.copy()))
                         for pair in old_pairs:
                             if pair[0] < 1: # we're here
-                                if lb == None:
+                                if lb is None:
                                     lb = pair
                                     # print(lb)
                                     new_color = plotly.colors.label_rgb(
@@ -685,7 +701,7 @@ class CrossPlot():
             return selector
         raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector)}")
 
-    def reinit(self, x = None, y = None, **kwargs):
+    def reinit(self, x = None, y = None, **kwargs): # TODO TODO if we're static we don't need to add it to the list
         self.size                = kwargs.pop("size", self.size)
         self.depth_range         = kwargs.pop("depth_range", self.depth_range)
         self.xrange             = kwargs.pop("xrange", self.xrange)
@@ -819,10 +835,18 @@ class CrossPlot():
         self._figures_by_id[id(fig)] = fig
 
     def render(self, **kwargs):
+        static = kwargs.pop("static", False)
+        #frame = kwargs.pop("frame", None)
         depth_range = kwargs.get("depth_range", self.depth_range)
         layout = self.create_layout(**kwargs)
         traces = self.create_traces(**kwargs)
 
+        if static:
+            # self.add_figure() # don't think we need this if not interactive
+            self.last_fig = go.Figure(data=traces, layout=layout)
+            return self.last_fig
+        #elif isinstance(frame, str):
+        #    return go.Frame(data=traces, layout=layout, name=frame)
         # if none, it it is min and max
         fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range, renderer=self) # how do we set depth range here
         self.add_figure(fig)
