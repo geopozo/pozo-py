@@ -324,3 +324,32 @@ class Graph(ood.Observer, pzt.Themeable):
                 lasio_list.append(lasio_obj)
 
         return lasio_list
+    
+    def to_las(self, file_ref, *selectors, **kwargs):
+        strategy = kwargs.pop("strategy", "merge")
+        
+        las = self.original_data
+        curves = self.to_las_CurveItems(self, *selectors, mnemonic=mnemonic, value=value, descr=descr)
+        
+        if strategy == "merge":
+            las_new = las.copy()
+            for curve in curves:
+                if las.mnemonic() != curve.mnemonic():
+                    las_new.append_curve_item(curve)
+            las_new.write(file_ref, **kwargs)
+            
+        elif strategy == "add":
+            las_new = las.copy()
+            for curve in curves:
+                las_new.append_curve_item(curve)
+            las_new.write(file_ref, **kwargs)
+            
+        elif strategy == "pozo-only":
+            las_new = lasio.LASFile()
+            for curve in curves:
+                if las.mnemonic() != curve.mnemonic():
+                    las_new.append_curve_item(curve)
+            las_new.write(file_ref, **kwargs)
+
+        else: raise ValueError("The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'")
+        
