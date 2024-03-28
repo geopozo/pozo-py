@@ -147,7 +147,7 @@ class Plotly(pzr.Renderer):
         return hidden
 
    # TODO, units (find nearest with units too)
-    def _process_graph_note(self, note, x0, x1, yref, text=True):
+    def _process_graph_note(self, note, x0, x1, yref):
         if 'range' not in note:
             raise ValueError("Depth note seems to be missing range")
         # TODO: check numerics
@@ -182,7 +182,7 @@ class Plotly(pzr.Renderer):
                 opacity=.5,
             )
         annotation = None
-        if text:
+        if not ('show_text' in note and not note['show_text']):
             annotation = dict(
                 text=note['text'] if 'text' in note else "",
                 xref="paper",
@@ -385,7 +385,6 @@ class Plotly(pzr.Renderer):
                 posmap["pixel_width"] += self.template['depth_axis_width']
             posmap['xp_end'] = layout["height"] / (posmap["pixel_width"])
             xp_layout = xp.create_layout(container_width = posmap["pixel_width"], size = layout["height"]) # pre posmap
-            display(xp_layout)
             layout[xp_y_axis] = xp_layout["yaxis1"]
             layout[xp_x_axis] = xp_layout["xaxis1"]
             layout[xp_x_axis]["domain"] = (0, posmap['xp_end'])
@@ -436,8 +435,8 @@ class Plotly(pzr.Renderer):
         for name, note in graph.depth_notes.items():
             if 'text' not in note: note['text']=name
             s, a = self._process_graph_note(note, posmap['xp_end']+depth_margin, 1, toTarget(posmap['track_y']))
-            layout['shapes'].append(s)
-            layout['annotations'].append(a)
+            if s: layout['shapes'].append(s)
+            if a: layout['annotations'].append(a)
         return layout
 
     def get_traces(self, graph, yaxis='y1', xstart=1, **kwargs):
@@ -687,7 +686,6 @@ class CrossPlot():
         return fig
 
     def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"):
-        print(container_width)
         if not size: size = self.size
         margin = (120) / size if container_width is not None else 0
         return {
