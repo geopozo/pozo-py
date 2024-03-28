@@ -236,12 +236,11 @@ class Plotly(pzr.Renderer):
             'track_y': tracks_y_axis,
             'pixel_height': layout['height'],
             'pixel_width': 4, # start drawing axes at 4 makes it look a little nicer on the left
-            'cursor': 4,
+            'pixel_cursor': 4,
             'with_xp': xp is not None,
             'xp_end': 0,
             'show_depth': show_depth,
             'depth_track_number': depth_axis_position if show_depth else 0, # putting at 0 easier if turned off
-            'depth_track_position': None,
             'depth_auto_left': not depth_axis_position, # weird because if `width_xp` this should be false, but logic works
             'depth_auto_right': False, # calc later
             'tracks_axis_numbers': [],
@@ -392,25 +391,25 @@ class Plotly(pzr.Renderer):
             layout[xp_x_axis]["domain"] = (0, posmap['xp_end'])
             posmap["xp_domain"] = layout[xp_x_axis]["domain"]
             layout["legend"]["x"] = posmap['xp_end'] * .8
-            posmap['cursor'] += layout["height"]
-            if posmap['depth_auto_left']: posmap['cursor'] += self.template['depth_axis_width']
+            posmap['pixel_cursor'] += layout["height"]
+            if posmap['depth_auto_left']: posmap['pixel_cursor'] += self.template['depth_axis_width']
         track = 0
         for i, axis in enumerate(axes_styles):
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
             else:
-                axis['domain'] = (posmap['cursor']/posmap['pixel_width'],
-                                  (posmap['cursor']+posmap['tracks_pixel_widths'][track])/posmap['pixel_width'])
-                posmap['cursor'] += posmap['tracks_pixel_widths'][track]+self.template["track_margin"]
+                axis['domain'] = (posmap['pixel_cursor']/posmap['pixel_width'],
+                                  (posmap['pixel_cursor']+posmap['tracks_pixel_widths'][track])/posmap['pixel_width'])
+                posmap['pixel_cursor'] += posmap['tracks_pixel_widths'][track]+self.template["track_margin"]
                 posmap['tracks_x_domains'].append(axis['domain'])
                 track+= 1
                 if ( track < len(posmap['tracks_axis_numbers']) and
                     posmap['tracks_axis_numbers'][track] == 'depth'
                 ): # never checks track 0, that's auto
                     track+=1
-                    layout[tracks_y_axis]['position'] = (-4 + posmap['cursor'] + self.template['depth_axis_width'])/posmap['pixel_width']
-                    posmap['tracks_x_domains'].append((posmap['cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
-                    posmap['cursor'] += self.template['depth_axis_width']
+                    layout[tracks_y_axis]['position'] = (-4 + posmap['pixel_cursor'] + self.template['depth_axis_width'])/posmap['pixel_width']
+                    posmap['tracks_x_domains'].append((posmap['pixel_cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
+                    posmap['pixel_cursor'] += self.template['depth_axis_width']
             layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
         if not show_depth:
             layout[tracks_y_axis]['showticklabels'] = False
