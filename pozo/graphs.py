@@ -367,9 +367,10 @@ class Graph(ood.Observer, pzt.Themeable):
         return lasio_list
 
     def to_las(self, *selectors, **kwargs):
+        template = kwargs.pop("template", None)
         strategy = kwargs.pop("strategy", "merge")
 
-        las = self.original_data # TODO hombre este no existe TODO TODO
+        if template is not None: las = template
         curves = self.to_las_CurveItems(self, *selectors, **kwargs)
 
         if strategy == "merge":
