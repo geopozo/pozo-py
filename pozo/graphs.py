@@ -373,27 +373,35 @@ class Graph(ood.Observer, pzt.Themeable):
 
         if template is not None:
             if str(type(template)) == LAS_TYPE: las = template
-        elif os.path.splitext(template)[1] == ".LAS": las = lasio.read(template)
-        elif template is None: pass
-        else: raise ValueError(
-            "You must decide whether to use a template or not. If you choose to use one, it can be either a LASFile object or a .LAS file"
-            )
+            elif os.path.splitext(template)[1].lower() == ".las": las = lasio.read(template)
+            else: raise ValueError(
+                "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
+                )
+
         curves = self.to_las_CurveItems(self, *selectors, **kwargs)
 
         if strategy == "merge":
-            if template is None: raise ValueError ("If you do not have a template, you must use the option pozo-only")
+            if template is None: raise ValueError (
+                "If you do not have a template, you must use the option pozo-only"
+                )
             for curve in curves:
                 if las.mnemonic() != curve.mnemonic():
                     las.append_curve_item(curve)
 
         elif strategy == "add":
-            if template is None: raise ValueError ("If you do not have a template, you must use the option pozo-only")
+            if template is None: raise ValueError (
+                "If you do not have a template, you must use the option pozo-only"
+                )
             for curve in curves:
                 las.append_curve_item(curve)
 
         elif strategy == "pozo-only":
-            if template: raise ValueError ("If you have a template, you must use the options mergr or add")
+            if template: raise ValueError (
+                "If you have a template, you must use the options mergr or add"
+                )
             for curve in curves:
                 if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
 
-        else: raise ValueError("The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'")
+        else: raise ValueError(
+            "The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'"
+            )
