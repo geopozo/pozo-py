@@ -479,6 +479,7 @@ class Plotly(pzr.Renderer):
         return traces
 
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
+        xp_depth = kwargs.pop("xp_depth", depth)
         # kwargs: theme_override, override_theme (same thing)
         # this generates XP layout too, I don't love, would rather set axes
 
@@ -488,7 +489,7 @@ class Plotly(pzr.Renderer):
         # what arguments do we need here now
         traces = self.get_traces(graph, xstart=2 if xp else 1, yaxis='yaxis2' if xp else 'yaxis1', **kwargs)
         if xp is not None:
-            traces.extend(xp.create_traces(container_width=layout["width"], depth_range=depth, size = layout["height"], static=static, yaxis='y1'))
+            traces.extend(xp.create_traces(container_width=layout["width"], depth_range=xp_depth, size = layout["height"], static=static, yaxis='y1'))
 
         if static:
             self.last_fig = go.Figure(data=traces, layout=layout)
@@ -735,6 +736,9 @@ class CrossPlot():
 
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
+            #if trace['name'] == 'depth': # TODO not just depth, lets accept, fix depth ranges
+            #    cs = plotly_traces[-1]['marker']['colorscale']
+            #    self.project_color_scale(self, depth_range[0], depth_range[1], value, cs)
         return plotly_traces
 
 
