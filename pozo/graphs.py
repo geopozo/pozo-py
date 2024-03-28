@@ -1,5 +1,6 @@
 import warnings
 import lasio # quiero quitar esto pero en el futuro
+import os
 import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
@@ -370,8 +371,13 @@ class Graph(ood.Observer, pzt.Themeable):
         template = kwargs.pop("template", None)
         strategy = kwargs.pop("strategy", "merge")
 
-        if template is not None: las = template
-        else: las = lasio.LASFile()
+        if template is not None:
+            if str(type(template)) == LAS_TYPE: las = template
+        elif os.path.splitext(template)[1] == ".LAS": las = lasio.read(template)
+        elif template is None: pass
+        else: raise ValueError(
+            "You must decide whether to use a template or not. If you choose to use one, it can be either a LASFile object or a .LAS file"
+            )
         curves = self.to_las_CurveItems(self, *selectors, **kwargs)
 
         if strategy == "merge":
@@ -391,4 +397,3 @@ class Graph(ood.Observer, pzt.Themeable):
                 if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
 
         else: raise ValueError("The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'")
-
