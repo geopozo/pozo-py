@@ -686,35 +686,6 @@ class CrossPlot():
 
         return fig
 
-    @property
-    def colors(self):
-        return self.__colors
-
-    @colors.setter
-    def colors(self, colors):
-        self.__colors = []
-        for color in colors:
-            if color is None:
-                self.__colors.append(None)
-            elif isinstance(color, str) and color.lower() == "depth":
-                self.__colors.append("depth")
-            else:
-                self.__colors.append(self._resolve_selector_to_data(color))
-
-    @property
-    def x(self):
-        return self.__x
-    @x.setter
-    def x(self, x):
-        self.__x = self._resolve_selector_to_data(x) if x is not None else None
-
-    @property
-    def y(self):
-        return self.__y
-    @y.setter
-    def y(self, y):
-        self.__y = self._resolve_selector_to_data(y) if y is not None else None
-
     def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"):
         if not size: size = self.size
         margin = (120) / size if container_width is not None else 0
@@ -737,7 +708,7 @@ class CrossPlot():
             "showlegend"  : True
         }
 
-    def create_traces(self, container_width=None, depth_range=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1"):
+    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1"):
         if not size: size = self.size
         x_data = self.x.get_data(slice_by_depth=depth_range)
         y_data = self.y.get_data(slice_by_depth=depth_range)
@@ -847,3 +818,33 @@ class CrossPlot():
                         ub = pair
                 normalized_pairs = list(reversed(normalized_pairs))
         return normalized_pairs
+
+    @property
+    def colors(self):
+        return self.__colors
+
+    @colors.setter
+    def colors(self, colors):
+        self.__colors = []
+        for color in colors:
+            if color is None:
+                self.__colors.append(None)
+            elif isinstance(color, str) and color.lower() == "depth":
+                self.__colors.append("depth")
+            else:
+                self.__colors.append(self._resolve_selector_to_data(color))
+
+    @property
+    def x(self):
+        return self.__x
+    @x.setter
+    def x(self, x):
+        self.__x = self._resolve_selector_to_data(x) if x is not None else None
+
+    @property
+    def y(self):
+        return self.__y
+    @y.setter
+    def y(self, y):
+        self.__y = self._resolve_selector_to_data(y) if y is not None else None
+
