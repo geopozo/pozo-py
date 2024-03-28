@@ -396,9 +396,8 @@ class Graph(ood.Observer, pzt.Themeable):
 
         elif strategy == "pozo-only":
             if template: raise ValueError (
-                "If you have a template, you must use the options mergr or add"
+                "If you have a template, you must use the options merge or add"
                 )
-            for curve in curves:
-                if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
+            for curve in curves: las.append_curve_item(curve)
 
         return las
