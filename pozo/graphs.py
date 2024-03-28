@@ -377,6 +377,7 @@ class Graph(ood.Observer, pzt.Themeable):
             else: raise ValueError(
                 "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
                 )
+        else: las = lasio.LASFile()
 
         curves = self.to_las_CurveItems(self, *selectors, **kwargs)
 
