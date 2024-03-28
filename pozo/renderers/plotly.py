@@ -435,7 +435,6 @@ class Plotly(pzr.Renderer):
         return layout
 
     def get_traces(self, graph, xp=None, **kwargs):
-        container_width = kwargs.get("container_width", None)
         override_theme = kwargs.pop("override_theme", None)
         override_theme = kwargs.pop("theme_override", override_theme)
         traces = []
@@ -716,29 +715,29 @@ class CrossPlot():
     def y(self, y):
         self.__y = self._resolve_selector_to_data(y) if y is not None else None
 
-    def create_layout(self, container_width=None, size=None):
+    def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"):
         if not size: size = self.size
         margin = (120) / size if container_width is not None else 0
-        return dict(
-            width       = size,
-            height      = size,
-            xaxis       = dict(
+        return {
+            "width"       : size,
+            "height"      : size,
+            xaxis       : dict(
                             title = self.x.get_name(),
                             range = self.xrange,
                             linecolor = "#888",
                             linewidth = 1,
             ),
-            yaxis       = dict(
+            yaxis       : dict(
                             title = self.y.get_name(),
                             range = self.yrange,
                             domain = (margin, 1),
                             linecolor = "#888",
                             linewidth = 1,
             ),
-            showlegend  = True
-        )
+            "showlegend"  : True
+        }
 
-    def create_traces(self, container_width=None, depth_range=None, size=None, static=False):
+    def create_traces(self, container_width=None, depth_range=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1"):
         if not size: size = self.size
         x_data = self.x.get_data(slice_by_depth=depth_range)
         y_data = self.y.get_data(slice_by_depth=depth_range)
@@ -752,6 +751,8 @@ class CrossPlot():
             x = x_data,
             y = y_data,
             mode='markers',
+            xaxis=toTarget(xaxis),
+            yaxis=toTarget(yaxis),
         )
 
         # Make Traces
