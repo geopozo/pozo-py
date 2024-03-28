@@ -403,3 +403,5 @@ class Graph(ood.Observer, pzt.Themeable):
         else: raise ValueError(
             "The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'"
             )
+
+        return las
