@@ -17,12 +17,6 @@ class Graph(ood.Observer, pzt.Themeable):
     _child_type = "track"
 
     def __init__(self, *args, **kwargs):
-        self._render = {}
-        render_keys = ["show_depth", "depth_position", "height", "depth"]
-        for key in render_keys:
-            temporary = kwargs.pop(key, None)
-            if temporary is not None:
-                self._render[key] = temporary
 
         # Be cool if we could use include to specify things be on the same track TODO
         self._name = kwargs.pop("name", "unnamed")
@@ -52,14 +46,9 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def render(self, **kwargs):
         xp = kwargs.get("xp", None)
-
-        if xp:
+        if xp is True: # noqa this can also but something that evals to True but is not exactly true
             kwargs["xp"] = self.xp
-        render_options = self._render.copy()
-        for key in kwargs.keys():
-            if key in render_options:
-                del render_options[key]
-        self.last_fig = self.renderer.render(self, **kwargs, **render_options)
+        self.last_fig = self.renderer.render(self, **kwargs)
         return self.last_fig
 
     def CrossPlot(self, x=None, y=None, **kwargs):
