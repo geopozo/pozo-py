@@ -478,7 +478,6 @@ class Plotly(pzr.Renderer):
 
     def render(self, graph, **kwargs): # really, what gets passed in with kwargs TODO
         static = kwargs.pop("static", False)
-        #frame = kwargs.pop("frame", None)
         xp = kwargs.pop("xp", None)
         layout = self.get_layout(graph, xp=xp, **kwargs)
         container_width = layout["width"] if xp is not None else 0
@@ -486,8 +485,6 @@ class Plotly(pzr.Renderer):
         if static:
             self.last_fig = go.Figure(data=traces, layout=layout)
             return self.last_fig
-        #elif isinstance(frame, str):
-        #   return go.Frame(data=traces, layout=layout)
         elif xp is None:
             self.last_fig = xpFigureWidget(data=traces, layout=layout)
             self.last_fig._depth_axis = "yaxis1" # this is pre-posmap
@@ -836,18 +833,13 @@ class CrossPlot():
 
     def render(self, **kwargs):
         static = kwargs.pop("static", False)
-        #frame = kwargs.pop("frame", None)
         depth_range = kwargs.get("depth_range", self.depth_range)
         layout = self.create_layout(**kwargs)
         traces = self.create_traces(**kwargs)
 
         if static:
-            # self.add_figure() # don't think we need this if not interactive
             self.last_fig = go.Figure(data=traces, layout=layout)
             return self.last_fig
-        #elif isinstance(frame, str):
-        #    return go.Frame(data=traces, layout=layout, name=frame)
-        # if none, it it is min and max
         fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range, renderer=self) # how do we set depth range here
         self.add_figure(fig)
         self.last_fig = fig
