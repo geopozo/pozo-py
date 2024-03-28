@@ -57,6 +57,14 @@ class Trace(ood.Observed, pzt.Themeable):
         #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
         return idx
 
+    def find_nearest(self, value):
+        # TODO: align units depth_range, assume same units, but check if pint
+        array = np.asarray(self.get_depth())
+        idx = np.nanargmin((np.abs(array - value)))
+        # if array[idx] != value:
+        #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
+        return idx, array[idx]
+
     def get_data(self, slice_by_depth=None):
         if not slice_by_depth or slice_by_depth == [None]:
             return self._data

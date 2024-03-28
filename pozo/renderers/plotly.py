@@ -479,12 +479,20 @@ class Plotly(pzr.Renderer):
         return traces
 
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
-        xp_depth = kwargs.pop("xp_depth", None) # TODO lets unmatch the depths if they do this
+        xp_depth = kwargs.pop("xp_depth", None)
+        xp_depth_by_index = kwargs.pop("xp_depth_by_index", None)
         depth_lock = False
-        if xp_depth is not None:
+        if xp_depth or xp_depth_by_index:
             depth_lock = True
-        else:
+
+        by_index = False
+        if xp_depth_by_index:
+            if xp_depth: raise ValueError("Specify xp_depth or xp_depth_by_index")
+            xp_depth = xp_depth_by_index
+            by_index = True
+        elif not xp_depth:
             xp_depth = depth
+
         color_lock = kwargs.pop("color_lock", {})
         # kwargs: theme_override, override_theme (same thing)
 
@@ -499,6 +507,7 @@ class Plotly(pzr.Renderer):
                     xp.create_traces(
                         container_width=layout["width"],
                         depth_range=xp_depth,
+                        by_index=by_index,
                         size = layout["height"],
                         static=static,
                         yaxis='y1',
@@ -552,7 +561,7 @@ class xpFigureWidget(go.FigureWidget):
         if not self._xp_renderer: raise TypeError("match_depth_range only applies to graphs with a crossplot")
         self.set_depth_range(depth_range=self._tracks_depth_range)
 
-    def set_depth_range(self, depth_range=None): # TODO for both graphs? xp and main?
+    def set_depth_range(self, depth_range=None):
         if not self._xp_renderer: raise TypeError("set_depth_range only applies to graphs with a crossplot")
         depth_range = sorted(depth_range) if depth_range else None
         color_range_queue=[]
@@ -723,11 +732,12 @@ class CrossPlot():
             "showlegend"  : True
         }
 
-    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}):
+    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
         if not size: size = self.size
         if not depth_range: depth_range = self.depth_range
-        x_data = self.x.get_data(slice_by_depth=depth_range)
-        y_data = self.y.get_data(slice_by_depth=depth_range)
+        x_data = self.x.get_data()[slice(*depth_range)] if by_index else self.x.get_data(slice_by_depth=depth_range)
+        y_data = self.y.get_data()[slice(*depth_range)] if by_index else self.y.get_data(slice_by_depth=depth_range)
+
         self._marker_symbol_index = 1
 
         # Doing some stats
@@ -746,7 +756,7 @@ class CrossPlot():
         trace_definitions = []
         plotly_traces     = []
         for color in self.colors:
-            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range, size=size, static=static))
+            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range, size=size, static=static, by_index=by_index))
         if trace_definitions and 'visible' in trace_definitions[0]: del trace_definitions[0]['visible']
 
         for trace in trace_definitions:
@@ -767,17 +777,17 @@ class CrossPlot():
         return plotly_traces
 
 
-    def create_trace(self, color, container_width=None, depth_range=None, size=None, static=False):
+    def create_trace(self, color, container_width=None, depth_range=None, size=None, static=False, by_index=False):
         if not size: size = self.size
         trace = self._base_trace.copy()
         trace['meta']={'filter':'depth'}
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
                 trace['meta']['color_data'] = 'depth'
-                color_array = self.x.get_depth(slice_by_depth=depth_range)
+                color_array = self.x.get_depth()[slice(*depth_range)] if by_index else self.x.get_depth(slice_by_depth=depth_range)
             else:
                 color_data = self._resolve_selector_to_data(color)
-                color_array = color_data.get_data(slice_by_depth=depth_range)
+                color_array = color_data.get_data()[slice(*depth_range)] if by_index else color_data.get_data(slice_by_depth=depth_range)
                 if not static: # no need to store if image will never update
                     trace['meta']['color_data'] = id(color)
                     self._colors_by_id[id(color)] = color
