@@ -370,7 +370,7 @@ class Graph(ood.Observer, pzt.Themeable):
         strategy = kwargs.pop("strategy", "merge")
 
         las = self.original_data # TODO hombre este no existe TODO TODO
-        curves = self.to_las_CurveItems(self, *selectors, mnemonic=mnemonic, value=value, descr=descr)
+        curves = self.to_las_CurveItems(self, *selectors, **kwargs)
 
         if strategy == "merge":
             las_new = las.copy()
