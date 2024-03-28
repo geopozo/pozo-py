@@ -829,8 +829,8 @@ class CrossPlot():
                     if pair[0] < 1: # we're here
                         if lb is None:
                             lb = pair
-                            print(lb)
-                            print(ub)
+                            #print(lb)
+                            #print(ub)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
                                     plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
