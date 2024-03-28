@@ -479,7 +479,12 @@ class Plotly(pzr.Renderer):
         return traces
 
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
-        xp_depth = kwargs.pop("xp_depth", depth) # TODO lets unmatch the depths if they do this
+        xp_depth = kwargs.pop("xp_depth", None) # TODO lets unmatch the depths if they do this
+        depth_lock = False
+        if xp_depth is not None:
+            depth_lock = True
+        else:
+            xp_depth = depth
         color_lock = kwargs.pop("color_lock", {})
         # kwargs: theme_override, override_theme (same thing)
 
@@ -508,7 +513,7 @@ class Plotly(pzr.Renderer):
             self.last_fig = xpFigureWidget(data=traces, layout=layout)
             self.last_fig._lead_axis = "yaxis1"
         else:
-            self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp)
+            self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp, depth_lock=depth_lock)
             self.last_fig._lead_axis = "yaxis2"
             self.last_fig.link_depth_to(self.last_fig)
             xp.add_figure(self.last_fig)
@@ -523,10 +528,10 @@ class xpFigureWidget(go.FigureWidget):
             raise TypeError("Supplied fig argument bust be a go.FigureWidget ot have access to interactivity")
         fig.layout.on_change(self._depth_change_cb, fig._lead_axis+'.range', append=True)
 
-    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
+    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, depth_lock=False, **kwargs):
         self._xp_renderer = kwargs.pop("renderer", None)
         if self._xp_renderer:
-            self._depth_lock = False
+            self._depth_lock = True
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
 
     def _depth_change_cb(self, layout, new_range):
