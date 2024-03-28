@@ -11,9 +11,11 @@ class Trace(ood.Observed, pzt.Themeable):
         return len(self.get_data())
 
     def __init__(self, data, **kwargs):
-        unit = kwargs.pop("unit", None)
-        depth = kwargs.pop("depth", None)
-        depth_unit = kwargs.pop("depth_unit", None)
+
+        self.original_data = None
+        unit = kwargs.pop('unit', None)
+        depth = kwargs.pop('depth', None)
+        depth_unit = kwargs.pop('depth_unit', None)
         self._unit = None
         self._depth_unit = None
         if depth is None:

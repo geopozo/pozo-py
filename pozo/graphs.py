@@ -1,4 +1,6 @@
 import warnings
+import lasio # quiero quitar esto pero en el futuro
+import os
 import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
@@ -6,7 +8,7 @@ import pozo.themes as pzt
 import ood
 import ood.exceptions as ooderr
 
-LAS_TYPE = "<class 'lasio.las.LASFile'>"  # TODO this isn't going to work reliably
+LAS_TYPE = "<class 'lasio.las.LASFile'>"
 WELLY_WELL_TYPE = "<class 'welly.well.Well'>"
 WELLY_PROJECT_TYPE = "<class 'welly.project.Project'>"
 
@@ -18,12 +20,12 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
 
-        # Be cool if we could use include to specify things be on the same track TODO
+
         self._name = kwargs.pop("name", "unnamed")
         self.renderer = kwargs.pop("renderer", pzr.Plotly())
         self.xp = kwargs.pop(
             "xp", pzr.CrossPlot()
-        )  # kinda don't like doing this, making it point to a class
+        )
 
         my_kwargs = {}  # Don't pass these to super, but still pass them down as kwargs
         my_kwargs["include"] = kwargs.pop("include", None)
@@ -245,6 +247,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 unit=unit,
                 depth_unit=depth_unit,
             )
+
             self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
@@ -338,3 +341,67 @@ class Graph(ood.Observer, pzt.Themeable):
             "name": self._name,
         }
         return self._get_theme(context=context)
+
+    # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
+    # to a list with the data as lasio.CurveItem
+    def to_las_CurveItems(self, *selectors,**kwargs):
+        mnemonic = kwargs.pop('mnemonic', None)
+        value = kwargs.pop('value', None)
+        descr = kwargs.pop('descr', None)
+
+        if len(self.get_traces()) == 0:
+            raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information")
+
+        traces = self.get_traces(*selectors)
+
+        lasio_list = []
+        for trace in traces:
+                data = trace[0].get_data()
+                unit = trace[0].get_unit()
+                if trace.original_data and not value: value = trace[0].original_data.value()
+                if trace.original_data and not descr: descr = trace[0].original_data.description()
+                if mnemonic == None: mnemonics = trace[0].get_mnemonic()
+                else: mnemonics = mnemonic[trace]
+                lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
+                lasio_list.append(lasio_obj)
+
+        return lasio_list
+
+    def to_las(self, *selectors, **kwargs):
+        template = kwargs.pop("template", None)
+        strategy = kwargs.pop("strategy", "merge")
+
+        if template is not None:
+            if str(type(template)) == LAS_TYPE: las = template
+            elif os.path.splitext(template)[1].lower() == ".las": las = lasio.read(template)
+            else: raise ValueError(
+                "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
+                )
+
+        curves = self.to_las_CurveItems(self, *selectors, **kwargs)
+
+        if strategy == "merge":
+            if template is None: raise ValueError (
+                "If you do not have a template, you must use the option pozo-only"
+                )
+            for curve in curves:
+                if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
+
+        elif strategy == "add":
+            if template is None: raise ValueError (
+                "If you do not have a template, you must use the option pozo-only"
+                )
+            for curve in curves: las.append_curve_item(curve)
+
+        elif strategy == "pozo-only":
+            if template: raise ValueError (
+                "If you have a template, you must use the options mergr or add"
+                )
+            for curve in curves:
+                if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
+
+        else: raise ValueError(
+            "The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'"
+            )
+
+        return las
