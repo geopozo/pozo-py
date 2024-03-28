@@ -366,7 +366,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
         return lasio_list
 
-    def to_las(self, file_ref, *selectors, **kwargs):
+    def to_las(self, *selectors, **kwargs):
         strategy = kwargs.pop("strategy", "merge")
 
         las = self.original_data # TODO hombre este no existe TODO TODO
@@ -377,20 +377,17 @@ class Graph(ood.Observer, pzt.Themeable):
             for curve in curves:
                 if las.mnemonic() != curve.mnemonic():
                     las_new.append_curve_item(curve)
-            las_new.write(file_ref, **kwargs)
 
         elif strategy == "add":
             las_new = las.copy()
             for curve in curves:
                 las_new.append_curve_item(curve)
-            las_new.write(file_ref, **kwargs)
 
         elif strategy == "pozo-only":
             las_new = lasio.LASFile()
             for curve in curves:
                 if las.mnemonic() != curve.mnemonic():
                     las_new.append_curve_item(curve)
-            las_new.write(file_ref, **kwargs)
 
         else: raise ValueError("The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'")
 
