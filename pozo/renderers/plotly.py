@@ -888,3 +888,40 @@ class CrossPlot():
     def y(self, y):
         self.__y = self._resolve_selector_to_data(y) if y is not None else None
 
+def write_image(gp):
+    gp['graph'].write_image(gp['path'], engine="kaleido")
+
+def make_video(folder_name, graph, trace, start, window, end):
+    depth = trace.get_depth()
+    start_index = trace.find_nearest(start)[0]
+    window_index = trace.find_nearest(start+window)[0] - start_index
+    end_index = trace.find_nearest(end)[0]
+    frame_count = range(start_index, end_index-window_index, 1)
+    gp = []
+    for i, cursor in enumerate(frame_count):
+        print(f"{i} / {len(frame_count)}")
+        graph.depth_notes['Depth Highlight'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
+        gp.append(
+                dict(
+                    graph=graph.render(
+                        height=800,
+                        xp=True,
+                        depth_position=1,
+                        color_lock={'depth': [start, end]},
+                        depth=[start, end],
+                        xp_depth_by_index=[cursor, cursor+window_index],
+                        static=True
+                        ),
+                    path=folder_name+"/"+str(i)+".png"
+                    )
+                )
+    import multiprocessing
+    with multiprocessing.Pool() as pool:
+        print("starting mp")
+        pool.map(write_image, gp)
+    print("done, movie time")
+    import imageio # pip install imageio[ffmpeg]
+    ims = [imageio.imread(p['path']) for p in gp]
+    imageio.mimwrite(folder_name+"/all.mp4", ims, fps=3)
+
+
