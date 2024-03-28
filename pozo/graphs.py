@@ -369,7 +369,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def to_las(self, *selectors, **kwargs):
         template = kwargs.pop("template", None)
-        strategy = kwargs.pop("strategy", "merge")
+        strategy = kwargs.pop("strategy", "pozo-only")
 
         if template is not None:
             if str(type(template)) == LAS_TYPE: las = template
@@ -399,9 +399,5 @@ class Graph(ood.Observer, pzt.Themeable):
                 )
             for curve in curves:
                 if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
-
-        else: raise ValueError(
-            "The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'"
-            )
 
         return las
