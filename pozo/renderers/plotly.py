@@ -215,8 +215,8 @@ class Plotly(pzr.Renderer):
             xp_x_axis = "xaxis1"
             layout[tracks_y_axis] = copy.deepcopy(layout['yaxis1'])
             del layout['yaxis1']
-            xp.size = layout['height']
-            xp.depth_range=depth_range
+            # Honestly all communication between renderers should maybe not happen inside any get_layout
+            # nor any get_trace
 
         # TODO constrain positions and domains
 
@@ -378,7 +378,7 @@ class Plotly(pzr.Renderer):
             if posmap['depth_auto_left']:
                 posmap["pixel_width"] += self.template['depth_axis_width']
             posmap['xp_end'] = layout["height"] / (posmap["pixel_width"])
-            xp_layout = xp.create_layout(container_width = posmap["pixel_width"]) # pre posmap
+            xp_layout = xp.create_layout(container_width = posmap["pixel_width"], size = layout["height"], depth_range=depth_range) # pre posmap
             layout[xp_y_axis] = xp_layout["yaxis"]
             layout[xp_x_axis] = xp_layout["xaxis"]
             layout[xp_x_axis]["domain"] = (0, posmap['xp_end'])
@@ -472,16 +472,17 @@ class Plotly(pzr.Renderer):
                 traces.extend(all_traces)
                 themes.pop()
             themes.pop()
-        if xp is not None:
-            traces.extend(xp.create_traces(container_width=container_width))
         return traces
 
     def render(self, graph, **kwargs): # really, what gets passed in with kwargs TODO
         static = kwargs.pop("static", False)
+        depth = kwargs.get("depth", None)
         xp = kwargs.pop("xp", None)
         layout = self.get_layout(graph, xp=xp, **kwargs)
         container_width = layout["width"] if xp is not None else 0
         traces = self.get_traces(graph, xp=xp, container_width=container_width, **kwargs)
+        if xp is not None:
+            traces.extend(xp.create_traces(container_width=container_width, depth_range=depth))
         if static:
             self.last_fig = go.Figure(data=traces, layout=layout)
             return self.last_fig
@@ -515,7 +516,6 @@ class xpFigureWidget(go.FigureWidget):
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
         self._xp_renderer = kwargs.pop("renderer", None)
         if self._xp_renderer:
-            self._depth_range = kwargs.pop("depth_range", [None])
             self._depth_lock = False
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
         # not sure about frames, do animations work with interactivity? maybe TODO
@@ -540,18 +540,18 @@ class xpFigureWidget(go.FigureWidget):
 
     def set_depth_range(self, depth_range=None): # TODO for both graphs? xp and main?
         if not self._xp_renderer: raise TypeError("set_depth_range only applies to graphs with a crossplot")
-        self._depth_range = sorted(depth_range) if depth_range else None
+        depth_range = sorted(depth_range) if depth_range else None
         color_range_queue=[]
         with self.batch_update():
             for trace in self['data']:
                 if not trace.meta or trace.meta.get("filter", None) != 'depth': continue
-                trace.x = self._xp_renderer.x.get_data(slice_by_depth=self._depth_range)
-                trace.y = self._xp_renderer.y.get_data(slice_by_depth=self._depth_range)
+                trace.x = self._xp_renderer.x.get_data(slice_by_depth=depth_range)
+                trace.y = self._xp_renderer.y.get_data(slice_by_depth=depth_range)
                 color_data = trace.meta.get('color_data', None)
                 if color_data == 'depth': # if xp were to change x or y, this would be wrong in renderer
-                    trace.marker.color = self._xp_renderer.x.get_depth(slice_by_depth=(self._depth_range))
+                    trace.marker.color = self._xp_renderer.x.get_depth(slice_by_depth=(depth_range))
                 elif color_data in self._xp_renderer._colors_by_id:
-                    trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=self._depth_range)
+                    trace.marker.color = self._xp_renderer._colors_by_id[color_data].get_data(slice_by_depth=depth_range)
                 if 'color_range' in trace.meta and trace.meta['color_range'] is not None: # no need for (None)?
                     color_range_queue.append((trace.name, trace.meta['color_range']))
         with self.batch_update(): # instead of two batches, color_range could take the new info as arguments
@@ -572,7 +572,7 @@ class xpFigureWidget(go.FigureWidget):
                 if (calc_key not in trace.meta
                     or trace.meta[calc_key] != trace.marker.colorscale
                     ):
-                    trace.meta[select_key] = trace.marker.colorscale # its a tuple maybe it is hashable
+                    trace.meta[select_key] = trace.marker.colorscale # they must have selected that scale
 
                 colorscale_selected = trace.meta[select_key]
                 if auto or color_range==[None]:
@@ -590,60 +590,8 @@ class xpFigureWidget(go.FigureWidget):
                 if color_range[0] is None: color_range[0] = data_min
                 if color_range[1] is None: color_range[1] = data_max
 
-                distance = data_max - data_min
-                normalized_color_range = np.round((color_range - data_min) / distance, 2)
-                norm_distance = normalized_color_range[1] - normalized_color_range[0]
+                normalized_pairs = self._xp_renderer.project_color_scale(data_max, data_min, color_range, colorscale_selected)
 
-                normalized_pairs = [] # lets create normalized pairs
-                for pair in colorscale_selected:
-                    normalized_pairs.append(((pair[0]*norm_distance)+normalized_color_range[0], pair[1]))
-                if normalized_pairs[0][0] > 1: normalized_pairs = [(0, normalized_pairs[0][1]), (1,normalized_pairs[0][1]) ]
-                elif normalized_pairs[-1][0] < 0: normalized_pairs = [(0, normalized_pairs[-1][1]), (1,normalized_pairs[-1][1]) ]
-                else:
-                    # can bottom be extended
-                    if normalized_pairs[0][0] > 0: normalized_pairs.insert(0, (0, normalized_pairs[0][1]))
-                    elif normalized_pairs[0][0] < 0:
-                        lb = normalized_pairs[0]
-                        ub = None
-                        old_pairs = normalized_pairs.copy()
-                        for pair in old_pairs:
-                            if pair[0] > 0:
-                                if ub == None:
-                                    ub = pair
-                                    #print(lb)
-                                    new_color = plotly.colors.label_rgb(
-                                        plotly.colors.find_intermediate_color(
-                                            plotly.colors.hex_to_rgb(lb[1]),
-                                            plotly.colors.hex_to_rgb(ub[1]),
-                                            (-lb[0])/(ub[0]-lb[0]) # distance from 0
-                                            ))
-                                    #print(ub)
-                                    normalized_pairs = [(0, new_color)]
-                                normalized_pairs.append(pair)
-                            else:
-                                lb = pair
-                    if normalized_pairs[-1][0] < 1: normalized_pairs.append((1, normalized_pairs[-1][1]))
-                    elif normalized_pairs[-1][0] > 1:
-                        ub = normalized_pairs[-1]
-                        lb = None
-                        old_pairs = list(reversed(normalized_pairs.copy()))
-                        for pair in old_pairs:
-                            if pair[0] < 1: # we're here
-                                if lb is None:
-                                    lb = pair
-                                    # print(lb)
-                                    new_color = plotly.colors.label_rgb(
-                                        plotly.colors.find_intermediate_color(
-                                            plotly.colors.hex_to_rgb(lb[1]),
-                                            plotly.colors.hex_to_rgb(ub[1]),
-                                            (1-lb[0])/(ub[0]-lb[0]) # distance from 0
-                                            ))
-                                    normalized_pairs = [(1, new_color)]
-                                normalized_pairs.append(pair)
-                            else:
-                                ub = pair
-                        normalized_pairs = list(reversed(normalized_pairs))
-                    # if not, does it need to be truncated
                 trace.marker.colorscale = tuple(normalized_pairs)
                 trace.meta[calc_key] = tuple(normalized_pairs)
                 # should ctime be the min max for the whole thing
@@ -660,22 +608,23 @@ class CrossPlot():
         self._marker_symbol_index += 1
         return marker
 
-    def _get_marker_with_color(self, array, title=None, colorscale="Viridis_r", container_width=None):
+    def _get_marker_with_color(self, array, title=None, colorscale="Viridis_r", container_width=None, size=None):
+        if not size: size = self.size
         marker = self._get_marker_no_color()
         marker["color"] = array
         marker["showscale"] = True
         marker["colorscale"] = colorscale
         if container_width is not None:
-            marker["colorbar"] = dict(
+            marker["colorbar"] = dict( # again, problem here, this should be in layout, but its in trace, and that sucks
                     title=title,
                     orientation='h',
                     thickness=20,
                     thicknessmode='pixels',
                     x=(self.size/(2.00)-45)/container_width,
                     xref='paper',
-                    y=10/self.size, # 10% margin, does this really work for all sizes?
+                    y=10/size, # 10% margin, does this really work for all sizes?
                     yref='paper',
-                    len=self.size*.9,
+                    len=size*.9,
                     lenmode='pixels')
         else:
             marker["colorbar"] = dict(
@@ -698,15 +647,13 @@ class CrossPlot():
             return selector
         raise TypeError(f"{selector} does not appear to be a pozo object, it's a {type(selector)}")
 
-    def reinit(self, x = None, y = None, **kwargs): # TODO TODO if we're static we don't need to add it to the list
+    def reinit(self, x = None, y = None, colors=[None], **kwargs):
         self.size                = kwargs.pop("size", self.size)
         self.depth_range         = kwargs.pop("depth_range", self.depth_range)
-        self.xrange             = kwargs.pop("xrange", self.xrange)
-        self.yrange             = kwargs.pop("yrange", self.yrange)
-        colors                   = kwargs.pop("colors", None)
-        if colors is not None:
-            if not is_array(colors): colors = [colors]
-            self.colors = colors
+        self.xrange              = kwargs.pop("xrange", self.xrange)
+        self.yrange              = kwargs.pop("yrange", self.yrange)
+        if not is_array(colors): colors = [colors]
+        self.colors = colors
         self.y              = y if y is not None else self.y
         self.x              = x if x is not None else self.x
 
@@ -714,17 +661,31 @@ class CrossPlot():
         # rendering defaults
         self.size                = kwargs.pop("size", 500)
         self.depth_range         = kwargs.pop("depth_range", [None])
-        self.xrange             = kwargs.pop("xrange", None)
-        self.yrange             = kwargs.pop("yrange", None)
+        self.xrange              = kwargs.pop("xrange", None)
+        self.yrange              = kwargs.pop("yrange", None)
         if not is_array(colors): colors = [colors]
-
         self.colors = colors
         self.y = y
         self.x = x
         self._colors_by_id = {}
-        self._figures_by_id = weakref.WeakValueDictionary()
-        # figures will contain all the colors currently be used, if we ever have a need to audit
-        # and eliminate colors_by_id that are not necessary TODO
+        self._figures_by_id = weakref.WeakValueDictionary() # Do figures contain their colors? so we can clear up _colors_by_id
+
+    def add_figure(self, fig):
+        self._figures_by_id[id(fig)] = fig
+
+    def render(self, **kwargs):
+        static = kwargs.pop("static", False)
+        layout = self.create_layout(**kwargs) # container_width, size
+        traces = self.create_traces(**kwargs) # container_width, depth_range, size, static
+
+        if static:
+            self.last_fig = go.Figure(data=traces, layout=layout)
+            return self.last_fig
+        fig = xpFigureWidget(data=traces, layout=layout, renderer=self)
+        self.add_figure(fig)
+        self.last_fig = fig
+
+        return fig
 
     @property
     def colors(self):
@@ -755,11 +716,12 @@ class CrossPlot():
     def y(self, y):
         self.__y = self._resolve_selector_to_data(y) if y is not None else None
 
-    def create_layout(self, container_width=None):
-        margin = (120) / self.size if container_width is not None else 0
+    def create_layout(self, container_width=None, size=None):
+        if not size: size = self.size
+        margin = (120) / size if container_width is not None else 0
         return dict(
-            width       = self.size,
-            height      = self.size,
+            width       = size,
+            height      = size,
             xaxis       = dict(
                             title = self.x.get_name(),
                             range = self.xrange,
@@ -776,33 +738,8 @@ class CrossPlot():
             showlegend  = True
         )
 
-    def create_trace(self, color, **kwargs):
-        depth_range = kwargs.pop("depth_range", self.depth_range)
-        container_width = kwargs.get("container_width", None)
-        trace = self._base_trace.copy()
-        trace['meta']={'filter':'depth'}
-        if color is not None:
-            if isinstance(color, str) and color.lower() == "depth":
-                trace['meta']['color_data'] = 'depth'
-                color_array = self.x.get_depth(slice_by_depth=depth_range)
-            else:
-                color_data = self._resolve_selector_to_data(color)
-                color_array = color_data.get_data(slice_by_depth=depth_range)
-                trace['meta']['color_data'] = id(color)
-                self._colors_by_id[id(color)] = color
-
-            name = color_data.get_name() if color != "depth" else "depth"
-            trace['name'] = name
-            trace['marker'] = self._get_marker_with_color(color_array, name, container_width=container_width)
-            trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
-            trace['visible'] = 'legendonly'
-        else:
-            trace['marker'] = self._get_marker_no_color()
-            trace['name'] = "x"
-        return trace
-
-    def create_traces(self, container_width=None, **kwargs):
-        depth_range = kwargs.pop("depth_range", self.depth_range)
+    def create_traces(self, container_width=None, depth_range=None, size=None, static=False):
+        if not size: size = self.size
         x_data = self.x.get_data(slice_by_depth=depth_range)
         y_data = self.y.get_data(slice_by_depth=depth_range)
         self._marker_symbol_index = 1
@@ -821,27 +758,91 @@ class CrossPlot():
         trace_definitions = []
         plotly_traces     = []
         for color in self.colors:
-            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range))
+            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range, size=size, static=static))
         if trace_definitions and 'visible' in trace_definitions[0]: del trace_definitions[0]['visible']
 
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
         return plotly_traces
 
-    def add_figure(self, fig):
-        self._figures_by_id[id(fig)] = fig
 
-    def render(self, **kwargs):
-        static = kwargs.pop("static", False)
-        depth_range = kwargs.get("depth_range", self.depth_range)
-        layout = self.create_layout(**kwargs)
-        traces = self.create_traces(**kwargs)
+    def create_trace(self, color, container_width=None, depth_range=None, size=None, static=False):
+        if not size: size = self.size
+        trace = self._base_trace.copy()
+        trace['meta']={'filter':'depth'}
+        if color is not None:
+            if isinstance(color, str) and color.lower() == "depth":
+                trace['meta']['color_data'] = 'depth'
+                color_array = self.x.get_depth(slice_by_depth=depth_range)
+            else:
+                color_data = self._resolve_selector_to_data(color)
+                color_array = color_data.get_data(slice_by_depth=depth_range)
+                if not static: # no need to store if image will never update
+                    trace['meta']['color_data'] = id(color)
+                    self._colors_by_id[id(color)] = color
 
-        if static:
-            self.last_fig = go.Figure(data=traces, layout=layout)
-            return self.last_fig
-        fig = xpFigureWidget(data=traces, layout=layout, depth_range=depth_range, renderer=self) # how do we set depth range here
-        self.add_figure(fig)
-        self.last_fig = fig
+            name = color_data.get_name() if color != "depth" else "depth"
+            trace['name'] = name
+            trace['marker'] = self._get_marker_with_color(color_array, name, container_width=container_width, size=size)
+            trace['hovertemplate'] = '%{x}, %{y}, %{marker.color}'
+            trace['visible'] = 'legendonly'
+        else:
+            trace['marker'] = self._get_marker_no_color()
+            trace['name'] = "x"
+        return trace
 
-        return fig
+    def project_color_scale(data_max, data_min, color_range, colorscale_selected):
+        distance = data_max - data_min
+        normalized_color_range = np.round((color_range - data_min) / distance, 2)
+        norm_distance = normalized_color_range[1] - normalized_color_range[0]
+
+        normalized_pairs = [] # lets create normalized pairs
+        for pair in colorscale_selected:
+            normalized_pairs.append(((pair[0]*norm_distance)+normalized_color_range[0], pair[1]))
+        if normalized_pairs[0][0] > 1: normalized_pairs = [(0, normalized_pairs[0][1]), (1,normalized_pairs[0][1]) ]
+        elif normalized_pairs[-1][0] < 0: normalized_pairs = [(0, normalized_pairs[-1][1]), (1,normalized_pairs[-1][1]) ]
+        else:
+            # can bottom be extended
+            if normalized_pairs[0][0] > 0: normalized_pairs.insert(0, (0, normalized_pairs[0][1]))
+            elif normalized_pairs[0][0] < 0:
+                lb = normalized_pairs[0]
+                ub = None
+                old_pairs = normalized_pairs.copy()
+                for pair in old_pairs:
+                    if pair[0] > 0:
+                        if ub is None:
+                            ub = pair
+                            #print(lb)
+                            new_color = plotly.colors.label_rgb(
+                                plotly.colors.find_intermediate_color(
+                                    plotly.colors.hex_to_rgb(lb[1]),
+                                    plotly.colors.hex_to_rgb(ub[1]),
+                                    (-lb[0])/(ub[0]-lb[0]) # distance from 0
+                                    ))
+                            #print(ub)
+                            normalized_pairs = [(0, new_color)]
+                        normalized_pairs.append(pair)
+                    else:
+                        lb = pair
+            if normalized_pairs[-1][0] < 1: normalized_pairs.append((1, normalized_pairs[-1][1]))
+            elif normalized_pairs[-1][0] > 1:
+                ub = normalized_pairs[-1]
+                lb = None
+                old_pairs = list(reversed(normalized_pairs.copy()))
+                for pair in old_pairs:
+                    if pair[0] < 1: # we're here
+                        if lb is None:
+                            lb = pair
+                            # print(lb)
+                            new_color = plotly.colors.label_rgb(
+                                plotly.colors.find_intermediate_color(
+                                    plotly.colors.hex_to_rgb(lb[1]),
+                                    plotly.colors.hex_to_rgb(ub[1]),
+                                    (1-lb[0])/(ub[0]-lb[0]) # distance from 0
+                                    ))
+                            normalized_pairs = [(1, new_color)]
+                        normalized_pairs.append(pair)
+                    else:
+                        ub = pair
+                normalized_pairs = list(reversed(normalized_pairs))
+        return normalized_pairs
