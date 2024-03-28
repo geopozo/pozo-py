@@ -479,17 +479,27 @@ class Plotly(pzr.Renderer):
         return traces
 
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
-        xp_depth = kwargs.pop("xp_depth", depth)
+        xp_depth = kwargs.pop("xp_depth", depth) # TODO lets unmatch the depths if they do this
+        color_lock = kwargs.pop("color_lock", {})
         # kwargs: theme_override, override_theme (same thing)
-        # this generates XP layout too, I don't love, would rather set axes
 
+        # this generates XP layout too, I don't love, would rather set axes
         # separating XP from here would be good but let's call it techdebt
         layout = self.get_layout(graph, xp=xp, depth=depth, **kwargs)
 
         # what arguments do we need here now
         traces = self.get_traces(graph, xstart=2 if xp else 1, yaxis='yaxis2' if xp else 'yaxis1', **kwargs)
         if xp is not None:
-            traces.extend(xp.create_traces(container_width=layout["width"], depth_range=xp_depth, size = layout["height"], static=static, yaxis='y1'))
+            traces.extend(
+                    xp.create_traces(
+                        container_width=layout["width"],
+                        depth_range=xp_depth,
+                        size = layout["height"],
+                        static=static,
+                        yaxis='y1',
+                        color_lock=color_lock
+                        )
+                    )
 
         if static:
             self.last_fig = go.Figure(data=traces, layout=layout)
@@ -708,7 +718,7 @@ class CrossPlot():
             "showlegend"  : True
         }
 
-    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1"):
+    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}):
         if not size: size = self.size
         if not depth_range: depth_range = self.depth_range
         x_data = self.x.get_data(slice_by_depth=depth_range)
@@ -736,9 +746,19 @@ class CrossPlot():
 
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
-            #if trace['name'] == 'depth': # TODO not just depth, lets accept, fix depth ranges
-            #    cs = plotly_traces[-1]['marker']['colorscale']
-            #    self.project_color_scale(self, depth_range[0], depth_range[1], value, cs)
+            if trace['name'] in color_lock:
+                # originally we did this post-process modification  because we didn't have plotly.colors.get_colorscale(str)
+                # we could now do it in create trace
+                color_range = color_lock[trace['name']]
+                cs_sel = plotly_traces[-1]['marker']['colorscale'] # this is the selected
+                data_min = np.nanmin(plotly_traces[-1]['marker']['color'])
+                data_max = np.nanmax(plotly_traces[-1]['marker']['color'])
+                cs_calc = self.project_color_scale(data_max, data_min, color_range, cs_sel)
+                plotly_traces[-1]['marker']['colorscale'] = cs_calc
+                plotly_traces[-1].meta['color_range'] = tuple(color_range)
+                plotly_traces[-1].meta['colorscale_calculated'] = tuple(cs_calc)
+                plotly_traces[-1].meta['colorscale_selected'] = tuple(cs_sel)
+                # this should lock it, otherwise, it goes back to auto
         return plotly_traces
 
 
@@ -791,8 +811,8 @@ class CrossPlot():
                             #print(lb)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
-                                    plotly.colors.hex_to_rgb(lb[1]),
-                                    plotly.colors.hex_to_rgb(ub[1]),
+                                    plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
+                                    plotly.colors.hex_to_rgb(ub[1]) if ub[1][0] != 'r' else plotly.colors.unlabel_rgb(ub[1]),
                                     (-lb[0])/(ub[0]-lb[0]) # distance from 0
                                     ))
                             #print(ub)
@@ -809,11 +829,12 @@ class CrossPlot():
                     if pair[0] < 1: # we're here
                         if lb is None:
                             lb = pair
-                            # print(lb)
+                            print(lb)
+                            print(ub)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
-                                    plotly.colors.hex_to_rgb(lb[1]),
-                                    plotly.colors.hex_to_rgb(ub[1]),
+                                    plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
+                                    plotly.colors.hex_to_rgb(ub[1]) if ub[1][0] != 'r' else plotly.colors.unlabel_rgb(ub[1]),
                                     (1-lb[0])/(ub[0]-lb[0]) # distance from 0
                                     ))
                             normalized_pairs = [(1, new_color)]
