@@ -371,24 +371,24 @@ class Graph(ood.Observer, pzt.Themeable):
         strategy = kwargs.pop("strategy", "merge")
 
         if template is not None: las = template
+        else: las = lasio.LASFile()
         curves = self.to_las_CurveItems(self, *selectors, **kwargs)
 
         if strategy == "merge":
-            las_new = las.copy()
+            if template is None: raise ValueError ("If you do not have a template, you must use the option pozo-only")
             for curve in curves:
                 if las.mnemonic() != curve.mnemonic():
-                    las_new.append_curve_item(curve)
+                    las.append_curve_item(curve)
 
         elif strategy == "add":
-            las_new = las.copy()
+            if template is None: raise ValueError ("If you do not have a template, you must use the option pozo-only")
             for curve in curves:
-                las_new.append_curve_item(curve)
+                las.append_curve_item(curve)
 
         elif strategy == "pozo-only":
-            las_new = lasio.LASFile()
+            if template: raise ValueError ("If you have a template, you must use the options mergr or add")
             for curve in curves:
-                if las.mnemonic() != curve.mnemonic():
-                    las_new.append_curve_item(curve)
+                if las.mnemonic() != curve.mnemonic(): las.append_curve_item(curve)
 
         else: raise ValueError("The strategy does not has support from pozo, please use: 'merge', 'add' or 'pozo-only'")
 
