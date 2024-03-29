@@ -934,7 +934,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
     fade = tail.tolist() + [1]*(window_index-tail_size)
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
-        graph.depth_notes['Depth Highlight'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
+        graph.depth_notes['Depth Highlight-xxx'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
         graph.xp.fade = fade
         gp.append(
                 dict(
@@ -950,7 +950,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
                     path=folder_name+"/"+str(i)+".png",
                     )
                 )
-
+    del graph.depth_notes['Depth Highlight-xxx']
     write_image_counter = multiprocessing.Value('I',0)
     with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,)) as pool:
         p = pool.map_async(write_image, gp)
