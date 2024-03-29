@@ -905,16 +905,17 @@ def write_image(gp):
     with write_image_counter.get_lock():
         write_image_counter.value += 1
 
-def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
+def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output="all.mp4", fps=30):
     try:
         write_image_counter
         raise Exception("Please only run make_frames once at a time, or restart the kernel")
     except NameError:
         pass
-    try:
-        import imageio
-    except ImportError:
-        raise ImportError("Please install imageio. It must be installed like: pip install imageio[ffmpeg] or pip install imageio[pyav]")
+    if output:
+        try:
+            import imageio
+        except ImportError:
+            raise ImportError("Please install imageio. It must be installed like: pip install imageio[ffmpeg] or pip install imageio[pyav]")
     os.makedirs(folder_name, exist_ok=True)
     if xp is True: xp=graph.xp
     elif not isinstance(xp, CrossPlot): raise ValueError("Crossplot renderer not valid. xp=True (default) or another renderer)")
@@ -963,8 +964,6 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
                 writer_counter.value = write_image_counter.value
     writer_counter.value = len(frame_count)-1
     del write_image_counter
-
+    if not output: return
     ims = [imageio.imread(p['path']) for p in gp]
-    imageio.mimwrite(folder_name+"/all.mp4", ims, fps=30)
-
-
+    imageio.mimwrite(folder_name+"/" + output, ims, fps=fps)
