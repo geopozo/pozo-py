@@ -741,8 +741,10 @@ class CrossPlot():
         self._marker_symbol_index = 1
 
         # Doing some stats
-        missing = (np.isnan(x_data) + np.isnan(y_data)).sum() # TODO improve with more statistics, how many values are there, etc
-        display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
+        missing = (np.isnan(x_data) + np.isnan(y_data)).sum() # noqa TODO
+        # TODO improve with more statistics, how many values are there, etc
+        title = "Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)" # noqa TODO
+        # title will be added but also updated whenever written so maybe this should be a function
 
         self._base_trace = dict(
             x = x_data,
