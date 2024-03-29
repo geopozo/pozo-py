@@ -1,8 +1,11 @@
 import copy
+import os
 import math
 import warnings
 import re
 import weakref
+import multiprocessing
+from ipywidgets import IntProgress
 
 import numpy as np
 from IPython.display import Javascript, display # Part of Hack #1
@@ -890,19 +893,44 @@ class CrossPlot():
     def y(self, y):
         self.__y = self._resolve_selector_to_data(y) if y is not None else None
 
+
+def init_write_image(counter):
+    global write_image_counter
+    write_image_counter = counter
+
 def write_image(gp):
     gp['graph'].write_image(gp['path'], engine="kaleido")
+    with write_image_counter.get_lock():
+        write_image_counter.value += 1
 
-def make_video(folder_name, graph, trace, start, window, end):
+def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
+    try:
+        write_image_counter
+        raise Exception("Please only run make_frames once at a time, or restart the kernel")
+    except NameError:
+        pass
+    try:
+        import imageio
+    except ImportError:
+        raise ImportError("Please install imageio. It must be installed like: pip install imageio[ffmpeg] or pip install imageio[pyav]")
+    os.makedirs(folder_name, exist_ok=True)
+    if xp is True: xp=graph.xp
+    elif not isinstance(xp, CrossPlot): raise ValueError("Crossplot renderer not valid. xp=True (default) or another renderer)")
+    trace = xp.x
     depth = trace.get_depth()
     start_index = trace.find_nearest(start)[0]
     window_index = trace.find_nearest(start+window)[0] - start_index
     end_index = trace.find_nearest(end)[0]
     frame_count = range(start_index, end_index-window_index, 1)
     gp = []
+    render_counter = IntProgress(min=0, max=len(frame_count)-1, description="Rendering:")
+    writer_counter = IntProgress(min=0, max=len(frame_count)-1, description="Writing:")
+    display(render_counter)
+    display(writer_counter)
     for i, cursor in enumerate(frame_count):
-        print(f"{i} / {len(frame_count)}")
+        render_counter.value += 1
         graph.depth_notes['Depth Highlight'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
+        graph.xp.fade = np.ones(window_index)
         gp.append(
                 dict(
                     graph=graph.render(
@@ -912,18 +940,26 @@ def make_video(folder_name, graph, trace, start, window, end):
                         color_lock={'depth': [start, end]},
                         depth=[start, end],
                         xp_depth_by_index=[cursor, cursor+window_index],
-                        static=True
+                        static=True,
                         ),
-                    path=folder_name+"/"+str(i)+".png"
+                    path=folder_name+"/"+str(i)+".png",
                     )
                 )
-    import multiprocessing
-    with multiprocessing.Pool() as pool:
-        print("starting mp")
-        pool.map(write_image, gp)
-    print("done, movie time")
-    import imageio # pip install imageio[ffmpeg]
+
+    write_image_counter = multiprocessing.Value('I',0)
+    with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,)) as pool:
+        p = pool.map_async(write_image, gp)
+        while True:
+            p.wait(.5)
+            try:
+                p.successful()
+                break
+            except ValueError:
+                writer_counter.value = write_image_counter.value
+    writer_counter.value = len(frame_count)-1
+    del write_image_counter
+
     ims = [imageio.imread(p['path']) for p in gp]
-    imageio.mimwrite(folder_name+"/all.mp4", ims, fps=3)
+    imageio.mimwrite(folder_name+"/all.mp4", ims, fps=30)
 
 
