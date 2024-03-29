@@ -658,6 +658,7 @@ class CrossPlot():
                     orientation='h',
                     thickness=20,
                     thicknessmode='pixels')
+        marker["opacity"] = self.fade
         return marker
 
     def _resolve_selector_to_data(self, selector):
@@ -689,6 +690,7 @@ class CrossPlot():
         self.depth_range         = kwargs.pop("depth_range", [None])
         self.xrange              = kwargs.pop("xrange", None)
         self.yrange              = kwargs.pop("yrange", None)
+        self.fade = 1
         if not is_array(colors): colors = [colors]
         self.colors = colors
         self.y = y
@@ -927,10 +929,13 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
     writer_counter = IntProgress(min=0, max=len(frame_count)-1, description="Writing:")
     display(render_counter)
     display(writer_counter)
+    tail_size = math.floor(window_index*.2)
+    tail = np.linspace(1,0,tail_size)
+    fade = [1]*(window_index-tail_size) + tail.tolist()
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
         graph.depth_notes['Depth Highlight'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
-        graph.xp.fade = np.ones(window_index)
+        graph.xp.fade = fade
         gp.append(
                 dict(
                     graph=graph.render(
