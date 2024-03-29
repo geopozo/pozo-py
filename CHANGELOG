@@ -1,5 +1,7 @@
-v0.9.16:
+v0.9.17
  - Add license (non-commerical use)
+ - Update deps
+v0.9.16:
  - Fix bug with unit override
  - No longer support style initialized in Graph()
  - Add ability to put separate depth_range on render

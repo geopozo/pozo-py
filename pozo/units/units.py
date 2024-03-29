@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import pint
 
-import lasio
 import pozo
 class MissingRangeError(pint.UndefinedUnitError):
     pass
