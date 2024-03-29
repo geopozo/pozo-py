@@ -1,8 +1,11 @@
 import copy
+import os
 import math
 import warnings
 import re
 import weakref
+import multiprocessing
+from ipywidgets import IntProgress
 
 import numpy as np
 from IPython.display import Javascript, display # Part of Hack #1
@@ -479,17 +482,41 @@ class Plotly(pzr.Renderer):
         return traces
 
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
-        xp_depth = kwargs.pop("xp_depth", depth)
-        # kwargs: theme_override, override_theme (same thing)
-        # this generates XP layout too, I don't love, would rather set axes
+        xp_depth = kwargs.pop("xp_depth", None)
+        xp_depth_by_index = kwargs.pop("xp_depth_by_index", None)
+        depth_lock = False
+        if xp_depth or xp_depth_by_index:
+            depth_lock = True
 
+        by_index = False
+        if xp_depth_by_index:
+            if xp_depth: raise ValueError("Specify xp_depth or xp_depth_by_index")
+            xp_depth = xp_depth_by_index
+            by_index = True
+        elif not xp_depth:
+            xp_depth = depth
+
+        color_lock = kwargs.pop("color_lock", {})
+        # kwargs: theme_override, override_theme (same thing)
+
+        # this generates XP layout too, I don't love, would rather set axes
         # separating XP from here would be good but let's call it techdebt
         layout = self.get_layout(graph, xp=xp, depth=depth, **kwargs)
 
         # what arguments do we need here now
         traces = self.get_traces(graph, xstart=2 if xp else 1, yaxis='yaxis2' if xp else 'yaxis1', **kwargs)
         if xp is not None:
-            traces.extend(xp.create_traces(container_width=layout["width"], depth_range=xp_depth, size = layout["height"], static=static, yaxis='y1'))
+            traces.extend(
+                    xp.create_traces(
+                        container_width=layout["width"],
+                        depth_range=xp_depth,
+                        by_index=by_index,
+                        size = layout["height"],
+                        static=static,
+                        yaxis='y1',
+                        color_lock=color_lock
+                        )
+                    )
 
         if static:
             self.last_fig = go.Figure(data=traces, layout=layout)
@@ -498,7 +525,7 @@ class Plotly(pzr.Renderer):
             self.last_fig = xpFigureWidget(data=traces, layout=layout)
             self.last_fig._lead_axis = "yaxis1"
         else:
-            self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp)
+            self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp, depth_lock=depth_lock)
             self.last_fig._lead_axis = "yaxis2"
             self.last_fig.link_depth_to(self.last_fig)
             xp.add_figure(self.last_fig)
@@ -513,10 +540,10 @@ class xpFigureWidget(go.FigureWidget):
             raise TypeError("Supplied fig argument bust be a go.FigureWidget ot have access to interactivity")
         fig.layout.on_change(self._depth_change_cb, fig._lead_axis+'.range', append=True)
 
-    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, **kwargs):
+    def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, depth_lock=False, **kwargs):
         self._xp_renderer = kwargs.pop("renderer", None)
         if self._xp_renderer:
-            self._depth_lock = False
+            self._depth_lock = True
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
 
     def _depth_change_cb(self, layout, new_range):
@@ -537,7 +564,7 @@ class xpFigureWidget(go.FigureWidget):
         if not self._xp_renderer: raise TypeError("match_depth_range only applies to graphs with a crossplot")
         self.set_depth_range(depth_range=self._tracks_depth_range)
 
-    def set_depth_range(self, depth_range=None): # TODO for both graphs? xp and main?
+    def set_depth_range(self, depth_range=None):
         if not self._xp_renderer: raise TypeError("set_depth_range only applies to graphs with a crossplot")
         depth_range = sorted(depth_range) if depth_range else None
         color_range_queue=[]
@@ -631,6 +658,7 @@ class CrossPlot():
                     orientation='h',
                     thickness=20,
                     thicknessmode='pixels')
+        marker["opacity"] = self.fade
         return marker
 
     def _resolve_selector_to_data(self, selector):
@@ -662,6 +690,7 @@ class CrossPlot():
         self.depth_range         = kwargs.pop("depth_range", [None])
         self.xrange              = kwargs.pop("xrange", None)
         self.yrange              = kwargs.pop("yrange", None)
+        self.fade = 1
         if not is_array(colors): colors = [colors]
         self.colors = colors
         self.y = y
@@ -708,16 +737,19 @@ class CrossPlot():
             "showlegend"  : True
         }
 
-    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1"):
+    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
         if not size: size = self.size
         if not depth_range: depth_range = self.depth_range
-        x_data = self.x.get_data(slice_by_depth=depth_range)
-        y_data = self.y.get_data(slice_by_depth=depth_range)
+        x_data = self.x.get_data()[slice(*depth_range)] if by_index else self.x.get_data(slice_by_depth=depth_range)
+        y_data = self.y.get_data()[slice(*depth_range)] if by_index else self.y.get_data(slice_by_depth=depth_range)
+
         self._marker_symbol_index = 1
 
         # Doing some stats
-        missing = (np.isnan(x_data) + np.isnan(y_data)).sum() # TODO improve with more statistics, how many values are there, etc
-        display(f"Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)")
+        missing = (np.isnan(x_data) + np.isnan(y_data)).sum() # noqa TODO
+        # TODO improve with more statistics, how many values are there, etc
+        title = "Number of unplottable values: {missing} ({(100 * missing/len(x_data)):.1f}%)" # noqa TODO
+        # title will be added but also updated whenever written so maybe this should be a function
 
         self._base_trace = dict(
             x = x_data,
@@ -731,28 +763,38 @@ class CrossPlot():
         trace_definitions = []
         plotly_traces     = []
         for color in self.colors:
-            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range, size=size, static=static))
+            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range, size=size, static=static, by_index=by_index))
         if trace_definitions and 'visible' in trace_definitions[0]: del trace_definitions[0]['visible']
 
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
-            #if trace['name'] == 'depth': # TODO not just depth, lets accept, fix depth ranges
-            #    cs = plotly_traces[-1]['marker']['colorscale']
-            #    self.project_color_scale(self, depth_range[0], depth_range[1], value, cs)
+            if trace['name'] in color_lock:
+                # originally we did this post-process modification  because we didn't have plotly.colors.get_colorscale(str)
+                # we could now do it in create trace
+                color_range = color_lock[trace['name']]
+                cs_sel = plotly_traces[-1]['marker']['colorscale'] # this is the selected
+                data_min = np.nanmin(plotly_traces[-1]['marker']['color'])
+                data_max = np.nanmax(plotly_traces[-1]['marker']['color'])
+                cs_calc = self.project_color_scale(data_max, data_min, color_range, cs_sel)
+                plotly_traces[-1]['marker']['colorscale'] = cs_calc
+                plotly_traces[-1].meta['color_range'] = tuple(color_range)
+                plotly_traces[-1].meta['colorscale_calculated'] = tuple(cs_calc)
+                plotly_traces[-1].meta['colorscale_selected'] = tuple(cs_sel)
+                # this should lock it, otherwise, it goes back to auto
         return plotly_traces
 
 
-    def create_trace(self, color, container_width=None, depth_range=None, size=None, static=False):
+    def create_trace(self, color, container_width=None, depth_range=None, size=None, static=False, by_index=False):
         if not size: size = self.size
         trace = self._base_trace.copy()
         trace['meta']={'filter':'depth'}
         if color is not None:
             if isinstance(color, str) and color.lower() == "depth":
                 trace['meta']['color_data'] = 'depth'
-                color_array = self.x.get_depth(slice_by_depth=depth_range)
+                color_array = self.x.get_depth()[slice(*depth_range)] if by_index else self.x.get_depth(slice_by_depth=depth_range)
             else:
                 color_data = self._resolve_selector_to_data(color)
-                color_array = color_data.get_data(slice_by_depth=depth_range)
+                color_array = color_data.get_data()[slice(*depth_range)] if by_index else color_data.get_data(slice_by_depth=depth_range)
                 if not static: # no need to store if image will never update
                     trace['meta']['color_data'] = id(color)
                     self._colors_by_id[id(color)] = color
@@ -791,8 +833,8 @@ class CrossPlot():
                             #print(lb)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
-                                    plotly.colors.hex_to_rgb(lb[1]),
-                                    plotly.colors.hex_to_rgb(ub[1]),
+                                    plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
+                                    plotly.colors.hex_to_rgb(ub[1]) if ub[1][0] != 'r' else plotly.colors.unlabel_rgb(ub[1]),
                                     (-lb[0])/(ub[0]-lb[0]) # distance from 0
                                     ))
                             #print(ub)
@@ -809,11 +851,12 @@ class CrossPlot():
                     if pair[0] < 1: # we're here
                         if lb is None:
                             lb = pair
-                            # print(lb)
+                            #print(lb)
+                            #print(ub)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
-                                    plotly.colors.hex_to_rgb(lb[1]),
-                                    plotly.colors.hex_to_rgb(ub[1]),
+                                    plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
+                                    plotly.colors.hex_to_rgb(ub[1]) if ub[1][0] != 'r' else plotly.colors.unlabel_rgb(ub[1]),
                                     (1-lb[0])/(ub[0]-lb[0]) # distance from 0
                                     ))
                             normalized_pairs = [(1, new_color)]
@@ -852,3 +895,75 @@ class CrossPlot():
     def y(self, y):
         self.__y = self._resolve_selector_to_data(y) if y is not None else None
 
+
+def init_write_image(counter):
+    global write_image_counter
+    write_image_counter = counter
+
+def write_image(gp):
+    gp['graph'].write_image(gp['path'], engine="kaleido")
+    with write_image_counter.get_lock():
+        write_image_counter.value += 1
+
+def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output="all.mp4", fps=30):
+    try:
+        write_image_counter
+        raise Exception("Please only run make_frames once at a time, or restart the kernel")
+    except NameError:
+        pass
+    if output:
+        try:
+            import imageio
+        except ImportError:
+            raise ImportError("Please install imageio. It must be installed like: pip install imageio[ffmpeg] or pip install imageio[pyav]")
+    os.makedirs(folder_name, exist_ok=True)
+    if xp is True: xp=graph.xp
+    elif not isinstance(xp, CrossPlot): raise ValueError("Crossplot renderer not valid. xp=True (default) or another renderer)")
+    trace = xp.x
+    depth = trace.get_depth()
+    start_index = trace.find_nearest(start)[0]
+    window_index = trace.find_nearest(start+window)[0] - start_index
+    end_index = trace.find_nearest(end)[0]
+    frame_count = range(start_index, end_index-window_index, 1)
+    gp = []
+    render_counter = IntProgress(min=0, max=len(frame_count)-1, description="Rendering:")
+    writer_counter = IntProgress(min=0, max=len(frame_count)-1, description="Writing:")
+    display(render_counter)
+    display(writer_counter)
+    tail_size = math.floor(window_index*.2)
+    tail = np.linspace(0,1,tail_size)
+    fade = tail.tolist() + [1]*(window_index-tail_size)
+    for i, cursor in enumerate(frame_count):
+        render_counter.value += 1
+        graph.depth_notes['Depth Highlight-xxx'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
+        graph.xp.fade = fade
+        gp.append(
+                dict(
+                    graph=graph.render(
+                        height=800,
+                        xp=True,
+                        depth_position=1,
+                        color_lock={'depth': [start, end]},
+                        depth=[start, end],
+                        xp_depth_by_index=[cursor, cursor+window_index],
+                        static=True,
+                        ),
+                    path=folder_name+"/"+str(i)+".png",
+                    )
+                )
+    del graph.depth_notes['Depth Highlight-xxx']
+    write_image_counter = multiprocessing.Value('I',0)
+    with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,)) as pool:
+        p = pool.map_async(write_image, gp)
+        while True:
+            p.wait(.5)
+            try:
+                p.successful()
+                break
+            except ValueError:
+                writer_counter.value = write_image_counter.value
+    writer_counter.value = len(frame_count)-1
+    del write_image_counter
+    if not output: return
+    ims = [imageio.imread(p['path']) for p in gp]
+    imageio.mimwrite(folder_name+"/" + output, ims, fps=fps)
