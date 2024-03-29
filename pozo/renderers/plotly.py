@@ -930,8 +930,8 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True):
     display(render_counter)
     display(writer_counter)
     tail_size = math.floor(window_index*.2)
-    tail = np.linspace(1,0,tail_size)
-    fade = [1]*(window_index-tail_size) + tail.tolist()
+    tail = np.linspace(0,1,tail_size)
+    fade = tail.tolist() + [1]*(window_index-tail_size)
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
         graph.depth_notes['Depth Highlight'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
