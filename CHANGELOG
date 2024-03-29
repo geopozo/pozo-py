@@ -1,3 +1,13 @@
+v0.9.16:
+ - Add license (non-commerical use)
+ - Fix bug with unit override
+ - No longer support style initialized in Graph()
+ - Add ability to put separate depth_range on render
+ - Add ability to specify color range on render
+ - Can now specify depth for xp by index
+ - Add function to produce videos!
+ - Add a reverse unit map to pozo.units.registry
+ - Specify whole graph annotations by depth!
 v0.9.15:
  - Documentation improvements
  - Enhanced information about units in check_las
