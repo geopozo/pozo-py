@@ -6,6 +6,15 @@ import pozo.themes as pzt
 import traceback
 
 class Track(ood.Item, pzt.Themeable):
+
+    def set_name(self, name):
+        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        return super().set_name(name)
+
+    def get_name(self):
+        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        return super().get_name()
+
     _type="track"
     _child_type="axis"
     def __init__(self, *args, **kwargs):
