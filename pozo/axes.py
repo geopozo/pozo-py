@@ -44,25 +44,53 @@ class Axis(ood.Item, pzt.Themeable):
 
     # get_items
     def get_traces(self, *selectors, **kwargs):
-        return super().get_items(*selectors, **kwargs)
+        good_selectors = []
+        for selector in selectors:
+            if isinstance(selector, str):
+                good_selectors.append(pozo.HasLog(selector))
+            else:
+                good_selectors.append(selector)
+        return super().get_items(*good_selectors, **kwargs)
 
     # get_item
     def get_trace(self, selector, **kwargs):
+        if isinstance(selector, str):
+            selector = pozo.HasLog(selector)
         return super().get_item(selector, **kwargs)
 
     # pop items
     def pop_traces(self,  *selectors, **kwargs):
-        return super().pop_items(*selectors, **kwargs)
+        good_selectors = []
+        for selector in selectors:
+            if isinstance(selector, str):
+                good_selectors.append(pozo.HasLog(selector))
+            else:
+                good_selectors.append(selector)
+        return super().pop_items(*good_selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
     def has_trace(self, selector):
+        if isinstance(selector, str): # TODO all these transformations could be functions
+            selector = pozo.HasLog(selector)
         return super().has_item(selector)
 
     def reorder_all_traces(self, order):
-        super().reorder_all_items(order)
+        good_selectors = []
+        for selector in order:
+            if isinstance(selector, str):
+                good_selectors.append(pozo.HasLog(selector))
+            else:
+                good_selectors.append(selector)
+        super().reorder_all_items(good_selectors)
 
     def move_traces(self, *selectors, **kwargs):
-        super().move_items(*selectors, **kwargs)
+        good_selectors = []
+        for selector in order:
+            if isinstance(selector, str):
+                good_selectors.append(pozo.HasLog(selector))
+            else:
+                good_selectors.append(selector)
+        super().move_items(*good_selectors, **kwargs)
 
     def get_named_tree(self):
         result = []
