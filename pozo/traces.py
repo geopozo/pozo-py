@@ -10,7 +10,59 @@ class Trace(ood.Observed, pzt.Themeable):
     def __len__(self):
         return len(self.get_data())
 
+    @property
+    def _data(self):
+        return self.__data[self.version]
+    @_data.setter
+    def _data(self, data):
+        self.__data[self.version] = data
+
+    @property
+    def _unit(self):
+        return self.__unit[self.version]
+    @_unit.setter
+    def _unit(self, unit):
+        self.__unit[self.version] = unit
+
+    @property
+    def note(self):
+        return self.__note[self.version]
+    @note.setter
+    def note(self, note):
+        self.__note[self.version] = note
+
+    # only increments current version if you're on the last one
+    def new_version(self, note="", copy=True):
+        if copy:
+            self.__data.append(self._data.copy())
+            self.__unit.append(self._unit.copy())
+        else:
+            self.__data.append(None)
+            self.__unit.append(None)
+        self.__note.append(note)
+        if self.version == len(self.__data) - 2: self.version += 1
+
+    def latest_version(self):
+        return len(self.__data)
+
+    # list all versions
+    def list_version(self):
+        return [
+                { 'version': i,
+                 'data': d[0],
+                 'unit': d[1],
+                 'note': d[2]
+                 } for i, d in enumerate(zip(self.__data, self.__unit, self.__note))
+                ]
+
+    # change versions (semi permanently)
+    # get data and unit w/ a version
+
     def __init__(self, data, **kwargs):
+        self.version = 0
+        self.__data = [[]]
+        self.__unit = [None]
+        self.__note = ["original"]
         unit = kwargs.pop("unit", None)
         depth = kwargs.pop("depth", None)
         depth_unit = kwargs.pop("depth_unit", None)
@@ -80,7 +132,7 @@ class Trace(ood.Observed, pzt.Themeable):
     def set_depth(self, depth, depth_unit=None):
         depth_unit = self._check_unit(depth_unit)
         if len(self._data) != len(depth):
-            raise ValueError("Depth and values have different length.")
+            raise ValueError(f"Depth and values have different length: data/depth: {len(self._data)}/{len(depth)}.")
 
         self._depth = depth
         if depth_unit is not None:
