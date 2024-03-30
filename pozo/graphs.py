@@ -314,12 +314,22 @@ class Graph(ood.Observer, pzt.Themeable):
             all_axes.extend(track.get_axes(*selectors, **kwargs))
         return all_axes
 
+    def get_axis(self, selector, **kwargs):
+        ret = get_axes(selector, **kwargs)
+        if len(ret) == 0: return None
+        return ret[0]
+
     def get_traces(self, *selectors, **kwargs):
         selectors = pozo.str_to_HasLog(selectors)
         all_traces = []
         for track in self.get_tracks():
             all_traces.extend(track.get_traces(*selectors, **kwargs))
         return all_traces
+
+    def get_trace(self, selector, **kwargs):
+        ret = get_traces(selector, **kwargs)
+        if len(ret) == 0: return None
+        return ret[0]
 
     def get_theme(self):
         context = {
