@@ -19,7 +19,7 @@ def deLASio(mnemonic):
     return mnemonic.split(":", 1)[0] if ":" in mnemonic else mnemonic
 
 # is_array use the input data to verify if is pint data or other type that has
-# __len__ and return a boolean
+# __len__ and return a boolean. Be careful with this, it will return true for Pozo objects.
 def is_array(value):
     if isinstance(value, str): return False
     if isinstance(value, pint.Quantity):
@@ -53,7 +53,7 @@ class HasLog(ood.selectors.Selector):
         return ret_items
 
 def str_to_HasLog(argument):
-    if is_array(argument):
+    if isinstance(argument, list):
         ret = []
         for selector in argument:
             if isinstance(selector, str):
