@@ -7,8 +7,8 @@ index2 = [5, 6, 7, 8]
 values2 = [2, 3, 4, 5]
 
 d1 = pozo.traces.Trace(values, depth=index, mnemonic="md1")
-d2 = pozo.traces.Trace(values, depth=index, name="d2")
-d3 = pozo.traces.Trace(values, depth=index, name="d3", mnemonic="md3")
+d2 = pozo.traces.Trace(values, depth=index, mnemonic="d2")
+d3 = pozo.traces.Trace(values, depth=index, name="d3")
 d4 = pozo.traces.Trace(values, depth=index, mnemonic="md4")
 d5 = pozo.traces.Trace(values, depth=index, mnemonic="md5")
 d6 = pozo.traces.Trace(values, depth=index, mnemonic="md6")
@@ -21,7 +21,7 @@ def test_user_simulation():
     assert x.get_name() == "DHO"
     x.set_name("NAME")
     assert x.get_name() == "NAME"
-    assert x.get_mnemonic() == "DHO"
+    assert x.get_mnemonic() == "NAME"
     x.set_mnemonic("TEST")
     assert x.get_mnemonic() == "TEST"
     assert x.get_data() == values
@@ -42,18 +42,18 @@ def test_user_simulation():
 
 def test_user_simulation2():
     ## Init
-    first = pozo.traces.Trace([2], depth=[1], name="test", mnemonic="test2")
+    first = pozo.traces.Trace([2], depth=[1], name="test")
     assert isinstance(first, pozo.traces.Trace)
     assert first.get_data() == [2]
     assert first.get_depth() == [1]
     assert first.get_name() == "test"
-    assert first.get_mnemonic() == "test2"
+    assert first.get_mnemonic() == "test"
     second = pozo.traces.Trace([2], depth=[1], name="test")
     assert isinstance(second, pozo.traces.Trace)
     assert second.get_data() == [2]
     assert second.get_depth() == [1]
     assert second.get_name() == "test"
-    assert second.get_mnemonic() is None
+    assert second.get_mnemonic() == "test"
     second.set_mnemonic("test2")
     assert second.get_mnemonic() == "test2"
     second.set_name("test3")

@@ -10,6 +10,7 @@ class Trace(ood.Observed, pzt.Themeable):
 
     def set_name(self, name):
         warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        self.set_mnemonic(name)
         return super().set_name(name)
 
     def get_name(self):
@@ -32,12 +33,15 @@ class Trace(ood.Observed, pzt.Themeable):
             raise ValueError("Depth and values have different length")
 
         self._mnemonic = kwargs.pop("mnemonic", None)
-        if "name" not in kwargs:
-            if not self._mnemonic:
-                raise ValueError(
-                    "You must supply 'name'. Or 'mnemonic' will be used as 'name' if 'name' absent..."
-                )
-            kwargs["name"] = self._mnemonic
+        if 'name' in kwargs and self._mnemonic:
+            raise ValueError("mnemonic and name are the same thing, please specify only one")
+        elif 'name' in kwargs and not self._mnemonic:
+            self._mnemonic = kwargs.get('name', None)
+        if not self._mnemonic:
+            raise ValueError(
+                "You must supply 'mnemonic' as a name."
+            )
+        kwargs["name"] = self._mnemonic
 
         self.set_data(data, unit=unit, depth=depth, depth_unit=depth_unit)
         super().__init__(**kwargs)  # od.ChildObserved sets name
@@ -180,6 +184,7 @@ class Trace(ood.Observed, pzt.Themeable):
         self.set_unit(unit)
 
     def set_mnemonic(self, mnemonic):
+        super().set_name(mnemonic)
         self._mnemonic = mnemonic
 
     def get_mnemonic(self):
