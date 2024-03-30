@@ -18,12 +18,9 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
 
-        # Be cool if we could use include to specify things be on the same track TODO
-        self._name = kwargs.pop("name", "unnamed")
+        self._name = kwargs.pop("name", "unnamed") # why do graphs have a name? for a title?
         self.renderer = kwargs.pop("renderer", pzr.Plotly())
-        self.xp = kwargs.pop(
-            "xp", pzr.CrossPlot()
-        )  # kinda don't like doing this, making it point to a class
+        self.xp = kwargs.pop("xp", pzr.CrossPlot())
 
         my_kwargs = {}  # Don't pass these to super, but still pass them down as kwargs
         my_kwargs["include"] = kwargs.pop("include", None)
@@ -60,24 +57,6 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def set_name(self, name):
         self._name = name
-
-    def set_render_setting(self, key, value):
-        self._render[key] = value
-
-    def show_depth(self, boolean):
-        self.set_render_setting("show_depth", boolean)
-
-    def set_depth_position(self, position):
-        self.set_render_setting("depth_position", position)
-
-    def set_height(self, height):
-        self.set_render_setting("height", height)
-
-    def set_depth(self, depth_range):
-        self.set_render_setting("depth", depth_range)
-
-    def get_render_settings(self):
-        return self._render
 
     def process_data(self, *args, **kwargs):  # Add ways to add data
         for i, ar in enumerate(args):
