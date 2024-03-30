@@ -282,17 +282,22 @@ class Graph(ood.Observer, pzt.Themeable):
 
     # get_items
     def get_tracks(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         return super().get_items(*selectors, **kwargs)
 
     # get_item
     def get_track(self, selector, **kwargs):
+        selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
     # pop items
     def pop_tracks(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         return super().pop_items(*selectors, **kwargs)
 
     def combine_tracks(self, selector, *selectors):
+        selectors = pozo.str_to_HasLog(selectors)
+        selector = pozo.str_to_HasLog(selector)
         sink = self.get_track(selector, strict_index=False)
         if sink is None:
             if isinstance(selector, (pozo.Trace, pozo.Axis, pozo.Track)):
@@ -312,21 +317,26 @@ class Graph(ood.Observer, pzt.Themeable):
 
     # what about whitelabelling all the other stuff
     def has_track(self, selector):
+        selector = pozo.str_to_HasLog(selector)
         return super().has_item(selector)
 
     def reorder_all_tracks(self, order):
+        order = pozo.str_to_HasLog(order)
         super().reorder_all_items(order)
 
     def move_tracks(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         super().move_items(*selectors, **kwargs)
 
     def get_axes(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         all_axes = []
         for track in self.get_tracks():
             all_axes.extend(track.get_axes(*selectors, **kwargs))
         return all_axes
 
     def get_traces(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         all_traces = []
         for track in self.get_tracks():
             all_traces.extend(track.get_traces(*selectors, **kwargs))

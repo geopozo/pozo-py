@@ -44,64 +44,37 @@ class Track(ood.Item, pzt.Themeable):
 
     # get_items
     def get_axes(self, *selectors, **kwargs):
-        good_selectors = []
-        for selector in selectors:
-            if isinstance(selector, str):
-                good_selectors.append(pozo.HasLog(selector))
-            else:
-                good_selectors.append(selector)
-        return super().get_items(*good_selectors, **kwargs)
+        selectors = pozo.str_to_HasLog(selectors)
+        return super().get_items(*selectors, **kwargs)
 
     # get_item
     def get_axis(self, selector, **kwargs):
-        if isinstance(selector, str):
-            selector = pozo.HasLog(selector)
+        selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
     # pop items
-    def pop_axes(self,  *selectors, **kwargs):
-        good_selectors = []
-        for selector in selectors:
-            if isinstance(selector, str):
-                good_selectors.append(pozo.HasLog(selector))
-            else:
-                good_selectors.append(selector)
-        return super().pop_items(*good_selectors, **kwargs)
+    def pop_axes(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
+        return super().pop_items(*selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
     def has_axis(self, selector):
-        if isinstance(selector, str):
-            selector = pozo.HasLog(selector)
+        selector = pozo.str_to_HasLog(selector)
         return super().has_item(selector)
 
     def reorder_all_axes(self, order):
-        new_order = []
-        for el in order:
-            if isinstance(el, str):
-                new_order.append(pozo.HasLog(el))
-            else:
-                new_order.append(el)
+        order = pozo.str_to_HasLog(order)
         super().reorder_all_items(order)
 
     def move_axes(self, *selectors, **kwargs):
-        good_selectors = []
-        for selector in selectors:
-            if isinstance(selector, str):
-                good_selectors.append(pozo.HasLog(selector))
-            else:
-                good_selectors.append(selector)
-        super().move_items(*good_selectors, **kwargs)
+        selectors = pozo.str_to_HasLog(selectors)
+        super().move_items(*selectors, **kwargs)
 
     def get_traces(self, *selectors, **kwargs):
-        good_selectors = []
-        for selector in selectors:
-            if isinstance(selector, str):
-                good_selectors.append(pozo.HasLog(selector))
-            else:
-                good_selectors.append(selector)
+        selectors = pozo.str_to_HasLog(selectors)
         ret_traces = []
         for axis in self.get_axes():
-            ret_traces.extend(axis.get_traces(*good_selectors, **kwargs))
+            ret_traces.extend(axis.get_traces(*selectors, **kwargs))
         return ret_traces
 
     def get_trace(self, selector, kwargs):
