@@ -10,25 +10,34 @@ class Trace(ood.Observed, pzt.Themeable):
     def __len__(self):
         return len(self.get_data())
 
+    def _check_version(self):
+        if self.version >= len(self.__data): raise IndexError(f"trace version is set to {self.version} which doesn't exist")
+
     @property
     def _data(self):
+        self._check_version()
         return self.__data[self.version]
     @_data.setter
     def _data(self, data):
+        self._check_version()
         self.__data[self.version] = data
 
     @property
     def _unit(self):
+        self._check_version()
         return self.__unit[self.version]
     @_unit.setter
     def _unit(self, unit):
+        self._check_version()
         self.__unit[self.version] = unit
 
     @property
     def note(self):
+        self._check_version()
         return self.__note[self.version]
     @note.setter
     def note(self, note):
+        self._check_version()
         self.__note[self.version] = note
 
     # only increments current version if you're on the last one
@@ -44,6 +53,19 @@ class Trace(ood.Observed, pzt.Themeable):
 
     def latest_version(self):
         return len(self.__data)
+
+    def pop_version(self, version=None):
+        if not version:
+            self._check_version()
+            version = self.version
+        elif version >= len(self.__data): raise KeyError(f"Cannot pop version {version} because it doesn't exist")
+        if len(self.__data) == 1: raise ValueError("You cannot pop the version if there is only one")
+
+        if version == self.version:
+            self.version -= 1 if self.version > 0 else 0
+        self.__data.pop(version)
+        self.__unit.pop(version)
+        self.__note.pop(version)
 
     # list all versions
     def list_version(self):
