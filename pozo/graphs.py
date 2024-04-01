@@ -381,7 +381,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
         curves = self.to_las_CurveItems(*selectors, **kwargs)
 
-        if strategy == "merge": #Aún no funciona, está en desarrollo
+        if strategy == "merge":
             if template is None: raise ValueError (
                 "If you do not have a template, you must use the option pozo-only"
                 )
