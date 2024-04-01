@@ -358,8 +358,8 @@ class Graph(ood.Observer, pzt.Themeable):
         for trace in traces:
                 data = trace.get_data()
                 unit = trace.get_unit()
-                if trace.original_data and not value: value = trace.original_data.value()
-                if trace.original_data and not descr: descr = trace.original_data.description()
+                if trace.original_data and not value: value = trace.original_data.value() #TODO: arreglar la extracción de value del original_data
+                if trace.original_data and not descr: descr = trace.original_data.description() #TODO: arreglar la extracción de value del original_data
                 if mnemonic is None: mnemonics = trace.get_mnemonic()
                 else: mnemonics = mnemonic[trace]
                 lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
