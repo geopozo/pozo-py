@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import pint
 
-import lasio
 import pozo
 class MissingRangeError(pint.UndefinedUnitError):
     pass
@@ -35,6 +34,7 @@ class LasRegistry(pint.UnitRegistry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._mnemonic_units = {}
+        self._reverse_mnemonic_units = {}
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
@@ -48,11 +48,22 @@ class LasRegistry(pint.UnitRegistry):
             self.parse_units(ra.unit) # Can't check in LasMapEntry because don't have registry
         if mnemonic not in self._mnemonic_units:
             self._mnemonic_units[mnemonic] = {}
+            self._reverse_mnemonic_units[mnemonic] = {}
         self._mnemonic_units[mnemonic][unit] = ranges
+        for ra in ranges:
+            self._reverse_mnemonic_units[mnemonic][ra.unit] = unit
+
+    def resolve_SI_unit_to_las(self, mnemonic, unit):
+        # TODO: looking up the dimension would be nice
+        mnemonic = pozo.deLASio(mnemonic)
+        if mnemonic in self._reverse_mnemonic_units and unit in self._reverse_mnemonic_units[mnemonic]:
+            return self._reverse_mnemonic_units[mnemonic][unit]
+        else: return None
+
 
     def resolve_las_unit(self, mnemonic, unit, data):
         mnemonic = pozo.deLASio(mnemonic)
-        unit = unit
+        # unit = unit
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
         if mnemonic in self._mnemonic_units and unit in self._mnemonic_units[mnemonic]:
