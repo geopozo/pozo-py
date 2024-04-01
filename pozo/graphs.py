@@ -385,8 +385,12 @@ class Graph(ood.Observer, pzt.Themeable):
             if template is None: raise ValueError (
                 "If you do not have a template, you must use the option pozo-only"
                 )
+
             for curve in curves:
-                if las.mnemonic != curve.mnemonic: las.append_curve_item(curve)
+                if curve.mnemonic in las.curves:
+                    las.delete_curve(curve.mnemonic)
+                    las.append_curve_item(curve)
+                elif curve.mnemonic not in las.curves: las.append_curve_item(curve)
 
         elif strategy == "add": #Aún no funciona correctamente, está en desarrollo
             if template is None: raise ValueError (
