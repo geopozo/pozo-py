@@ -367,6 +367,8 @@ class Graph(ood.Observer, pzt.Themeable):
 
         return lasio_list
 
+    # to_las use 2 parameters to can transform data from pozo object or
+    # lasio.CurveItem to a lasio.LASFile
     def to_las(self, *selectors, **kwargs):
         template = kwargs.pop("template", None)
         strategy = kwargs.pop("strategy", "pozo-only")
