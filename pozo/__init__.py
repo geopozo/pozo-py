@@ -53,7 +53,7 @@ class HasLog(ood.selectors.Selector):
         return ret_items
 
 def str_to_HasLog(argument):
-    if isinstance(argument, list):
+    if isinstance(argument, (list, tuple)):
         ret = []
         for selector in argument:
             if isinstance(selector, str):
