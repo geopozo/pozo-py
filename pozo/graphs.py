@@ -349,7 +349,8 @@ class Graph(ood.Observer, pzt.Themeable):
             for trace in traces:
                     data = trace.get_data()
                     unit = trace.get_unit()
-                    if not value: value = las.get_curve(trace.get_mnemonic()).value #TODO
+                    if not value:
+                        if las.get_curve(trace.get_mnemonic()).value is not None: value = las.get_curve(trace.get_mnemonic()).value #TODO
                     if not descr: descr = las.get_curve(trace.get_mnemonic()).descr #TODO
                     if mnemonic is None: mnemonics = trace.get_mnemonic()
                     else: mnemonics = mnemonic[trace]
@@ -359,7 +360,8 @@ class Graph(ood.Observer, pzt.Themeable):
             for trace in traces:
                     data = trace.get_data()
                     unit = trace.get_unit()
-                    if trace.original_data and not value: value = trace.original_data.value #TODO: arreglar la extracción de value del original_data
+                    if trace.original_data and not value:
+                        if trace.original_data.value is not None: value = trace.original_data.value #TODO: arreglar la extracción de value del original_data
                     if trace.original_data and not descr: descr = trace.original_data.descr #TODO: arreglar la extracción de descr del original_data
                     if mnemonic is None: mnemonics = trace.get_mnemonic()
                     else: mnemonics = mnemonic[trace]
@@ -382,7 +384,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 )
         else: las = lasio.LASFile()
 
-        curves = self.to_las_CurveItems(*selectors,**kwargs)
+        curves = self.to_las_CurveItems(*selectors, las=las, **kwargs)
 
         if strategy == "merge":
             if template is None: raise ValueError (
