@@ -1,11 +1,18 @@
 import warnings
 import ood
 import pozo
-import pozo.renderers as pzr
 import pozo.themes as pzt
-import traceback
 
 class Track(ood.Item, pzt.Themeable):
+
+    def set_name(self, name):
+        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        return super().set_name(name)
+
+    def get_name(self):
+        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        return super().get_name()
+
     _type="track"
     _child_type="axis"
     def __init__(self, *args, **kwargs):
@@ -35,31 +42,43 @@ class Track(ood.Item, pzt.Themeable):
 
     # get_items
     def get_axes(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         return super().get_items(*selectors, **kwargs)
 
     # get_item
     def get_axis(self, selector, **kwargs):
+        selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
     # pop items
-    def pop_axes(self,  *selectors, **kwargs):
+    def pop_axes(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         return super().pop_items(*selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
     def has_axis(self, selector):
+        selector = pozo.str_to_HasLog(selector)
         return super().has_item(selector)
 
     def reorder_all_axes(self, order):
+        order = pozo.str_to_HasLog(order)
         super().reorder_all_items(order)
 
     def move_axes(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         super().move_items(*selectors, **kwargs)
 
     def get_traces(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         ret_traces = []
         for axis in self.get_axes():
             ret_traces.extend(axis.get_traces(*selectors, **kwargs))
         return ret_traces
+
+    def get_trace(self, selector, kwargs):
+        ret = self.get_traces(selector)
+        if len(ret) == 0: return None
+        return ret[0]
 
     def get_theme(self):
         context = { "type":"track",

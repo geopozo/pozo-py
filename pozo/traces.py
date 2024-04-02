@@ -7,10 +7,95 @@ import pozo.units as pzu
 
 
 class Trace(ood.Observed, pzt.Themeable):
+
+    def set_name(self, name):
+        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        self.set_mnemonic(name)
+        return super().set_name(name)
+
+    def get_name(self):
+        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
+        return super().get_name()
+
+
     def __len__(self):
         return len(self.get_data())
 
+    def _check_version(self):
+        if self.version >= len(self.__data): raise IndexError(f"trace version is set to {self.version} which doesn't exist")
+
+    @property
+    def _data(self):
+        self._check_version()
+        return self.__data[self.version]
+    @_data.setter
+    def _data(self, data):
+        self._check_version()
+        self.__data[self.version] = data
+
+    @property
+    def _unit(self):
+        self._check_version()
+        return self.__unit[self.version]
+    @_unit.setter
+    def _unit(self, unit):
+        self._check_version()
+        self.__unit[self.version] = unit
+
+    @property
+    def note(self):
+        self._check_version()
+        return self.__note[self.version]
+    @note.setter
+    def note(self, note):
+        self._check_version()
+        self.__note[self.version] = note
+
+    # only increments current version if you're on the last one
+    def new_version(self, note="", copy=True):
+        if copy:
+            self.__data.append(self._data.copy())
+            self.__unit.append(self._unit.copy())
+        else:
+            self.__data.append(None)
+            self.__unit.append(None)
+        self.__note.append(note)
+        if self.version == len(self.__data) - 2: self.version += 1
+
+    def latest_version(self):
+        return len(self.__data) - 1
+
+    def pop_version(self, version=None):
+        if not version:
+            self._check_version()
+            version = self.version
+        elif version >= len(self.__data): raise KeyError(f"Cannot pop version {version} because it doesn't exist")
+        if len(self.__data) == 1: raise ValueError("You cannot pop the version if there is only one")
+
+        if version == self.version:
+            self.version -= 1 if self.version > 0 else 0
+        self.__data.pop(version)
+        self.__unit.pop(version)
+        self.__note.pop(version)
+
+    # list all versions
+    def list_version(self):
+        return [
+                { 'version': i,
+                 'data': d[0],
+                 'unit': d[1],
+                 'note': d[2]
+                 } for i, d in enumerate(zip(self.__data, self.__unit, self.__note))
+                ]
+
+    # change versions (semi permanently)
+    # get data and unit w/ a version
+
     def __init__(self, data, **kwargs):
+        self.version = 0
+        self.__data = [[]]
+        self.__unit = [None]
+        self.__note = ["original"]
 
         self.original_data = None
         unit = kwargs.pop('unit', None)
@@ -24,12 +109,15 @@ class Trace(ood.Observed, pzt.Themeable):
             raise ValueError("Depth and values have different length")
 
         self._mnemonic = kwargs.pop("mnemonic", None)
-        if "name" not in kwargs:
-            if not self._mnemonic:
-                raise ValueError(
-                    "You must supply 'name'. Or 'mnemonic' will be used as 'name' if 'name' absent..."
-                )
-            kwargs["name"] = self._mnemonic
+        if 'name' in kwargs and self._mnemonic:
+            raise ValueError("mnemonic and name are the same thing, please specify only one")
+        elif 'name' in kwargs and not self._mnemonic:
+            self._mnemonic = kwargs.get('name', None)
+        if not self._mnemonic:
+            raise ValueError(
+                "You must supply 'mnemonic' as a name."
+            )
+        kwargs["name"] = self._mnemonic
 
         self.set_data(data, unit=unit, depth=depth, depth_unit=depth_unit)
         super().__init__(**kwargs)  # od.ChildObserved sets name
@@ -82,7 +170,7 @@ class Trace(ood.Observed, pzt.Themeable):
     def set_depth(self, depth, depth_unit=None):
         depth_unit = self._check_unit(depth_unit)
         if len(self._data) != len(depth):
-            raise ValueError("Depth and values have different length.")
+            raise ValueError(f"Depth and values have different length: data/depth: {len(self._data)}/{len(depth)}.")
 
         self._depth = depth
         if depth_unit is not None:
@@ -172,6 +260,7 @@ class Trace(ood.Observed, pzt.Themeable):
         self.set_unit(unit)
 
     def set_mnemonic(self, mnemonic):
+        super().set_name(mnemonic)
         self._mnemonic = mnemonic
 
     def get_mnemonic(self):
