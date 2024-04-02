@@ -334,6 +334,7 @@ class Graph(ood.Observer, pzt.Themeable):
     # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
     def to_las_CurveItems(self, *selectors,**kwargs):
+        las = kwargs.pop('las', None)
         mnemonic = kwargs.pop('mnemonic', None)
         value = kwargs.pop('value', None)
         descr = kwargs.pop('descr', None)
@@ -344,15 +345,26 @@ class Graph(ood.Observer, pzt.Themeable):
         traces = self.get_traces(*selectors)
 
         lasio_list = []
-        for trace in traces:
-                data = trace.get_data()
-                unit = trace.get_unit()
-                if trace.original_data and not value: value = trace.original_data.value #TODO: arreglar la extracción de value del original_data
-                if trace.original_data and not descr: descr = trace.original_data.descr #TODO: arreglar la extracción de descr del original_data
-                if mnemonic is None: mnemonics = trace.get_mnemonic()
-                else: mnemonics = mnemonic[trace]
-                lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
-                lasio_list.append(lasio_obj)
+        if las:
+            for trace in traces:
+                    data = trace.get_data()
+                    unit = trace.get_unit()
+                    if not value: value = las.get_curve(trace.mnemonic).value #TODO
+                    if not descr: descr = las.get_curve(trace.mnemonic).descr #TODO
+                    if mnemonic is None: mnemonics = trace.get_mnemonic()
+                    else: mnemonics = mnemonic[trace]
+                    lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
+                    lasio_list.append(lasio_obj)
+        else:
+            for trace in traces:
+                    data = trace.get_data()
+                    unit = trace.get_unit()
+                    if trace.original_data and not value: value = trace.original_data.value #TODO: arreglar la extracción de value del original_data
+                    if trace.original_data and not descr: descr = trace.original_data.descr #TODO: arreglar la extracción de descr del original_data
+                    if mnemonic is None: mnemonics = trace.get_mnemonic()
+                    else: mnemonics = mnemonic[trace]
+                    lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
+                    lasio_list.append(lasio_obj)
 
         return lasio_list
 
