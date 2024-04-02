@@ -134,16 +134,10 @@ class Graph(ood.Observer, pzt.Themeable):
             else:
                 unit = pzu.parse_unit_from_curve(curve)
 
-            if ooderr.NameConflictException(level=self._name_conflict) is None:
-                name = mnemonic
-            else:
-                name = curve.mnemonic
-
             trace = pozo.Trace(
                 curve.data,
                 depth=yaxis,
                 mnemonic=mnemonic,
-                name=name,
                 unit=unit,
                 depth_unit=yaxis_unit,
             )
@@ -203,10 +197,6 @@ class Graph(ood.Observer, pzt.Themeable):
                     mnemonic, curve.units, curve.values
                 )  # TODO is curve correct?
 
-            if ooderr.NameConflictException(level=self._name_conflict) is None:
-                name = mnemonic
-            else:
-                name = curve.mnemonic
             depth = None
             depth_unit = None
             if yaxis is not None:
@@ -222,7 +212,6 @@ class Graph(ood.Observer, pzt.Themeable):
                 curve.values,
                 depth=depth,
                 mnemonic=mnemonic,
-                name=name,
                 unit=unit,
                 depth_unit=depth_unit,
             )
