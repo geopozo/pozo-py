@@ -21,6 +21,9 @@ import pozo.units as pzu
 re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
 
+def toTarget(axis):
+    return axis[0] + axis[-1]
+
 def javascript():
     add_scroll = '''var css = '.plot-container { overflow: auto; }',
 head = document.getElementsByTagName('head')[0],
@@ -126,13 +129,11 @@ GRAPH_HEIGHT_MIN = 125
 
 # move this?
 def is_array(value):
+    warnings.warn("is_array should be used from pozo", DeprecationWarning)
     if isinstance(value, str): return False
     if hasattr(value, "magnitude"):
         return is_array(value.magnitude)
     return hasattr(value, "__len__")
-
-def toTarget(axis):
-    return axis[0] + axis[-1]
 
 # So this renderer will have a list of tracks, and their contained axis, but not the data
 # Its all position data, not styling data

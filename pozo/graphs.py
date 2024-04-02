@@ -18,12 +18,9 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
 
-        # Be cool if we could use include to specify things be on the same track TODO
-        self._name = kwargs.pop("name", "unnamed")
+        self._name = kwargs.pop("name", "unnamed") # why do graphs have a name? for a title?
         self.renderer = kwargs.pop("renderer", pzr.Plotly())
-        self.xp = kwargs.pop(
-            "xp", pzr.CrossPlot()
-        )  # kinda don't like doing this, making it point to a class
+        self.xp = kwargs.pop("xp", pzr.CrossPlot())
 
         my_kwargs = {}  # Don't pass these to super, but still pass them down as kwargs
         my_kwargs["include"] = kwargs.pop("include", None)
@@ -60,24 +57,6 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def set_name(self, name):
         self._name = name
-
-    def set_render_setting(self, key, value):
-        self._render[key] = value
-
-    def show_depth(self, boolean):
-        self.set_render_setting("show_depth", boolean)
-
-    def set_depth_position(self, position):
-        self.set_render_setting("depth_position", position)
-
-    def set_height(self, height):
-        self.set_render_setting("height", height)
-
-    def set_depth(self, depth_range):
-        self.set_render_setting("depth", depth_range)
-
-    def get_render_settings(self):
-        return self._render
 
     def process_data(self, *args, **kwargs):  # Add ways to add data
         for i, ar in enumerate(args):
@@ -282,17 +261,22 @@ class Graph(ood.Observer, pzt.Themeable):
 
     # get_items
     def get_tracks(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         return super().get_items(*selectors, **kwargs)
 
     # get_item
     def get_track(self, selector, **kwargs):
+        selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
     # pop items
     def pop_tracks(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         return super().pop_items(*selectors, **kwargs)
 
     def combine_tracks(self, selector, *selectors):
+        selectors = pozo.str_to_HasLog(selectors)
+        selector = pozo.str_to_HasLog(selector)
         sink = self.get_track(selector, strict_index=False)
         if sink is None:
             if isinstance(selector, (pozo.Trace, pozo.Axis, pozo.Track)):
@@ -312,25 +296,40 @@ class Graph(ood.Observer, pzt.Themeable):
 
     # what about whitelabelling all the other stuff
     def has_track(self, selector):
+        selector = pozo.str_to_HasLog(selector)
         return super().has_item(selector)
 
     def reorder_all_tracks(self, order):
+        order = pozo.str_to_HasLog(order)
         super().reorder_all_items(order)
 
     def move_tracks(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         super().move_items(*selectors, **kwargs)
 
     def get_axes(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         all_axes = []
         for track in self.get_tracks():
             all_axes.extend(track.get_axes(*selectors, **kwargs))
         return all_axes
 
+    def get_axis(self, selector, **kwargs):
+        ret = get_axes(selector, **kwargs)
+        if len(ret) == 0: return None
+        return ret[0]
+
     def get_traces(self, *selectors, **kwargs):
+        selectors = pozo.str_to_HasLog(selectors)
         all_traces = []
         for track in self.get_tracks():
             all_traces.extend(track.get_traces(*selectors, **kwargs))
         return all_traces
+
+    def get_trace(self, selector, **kwargs):
+        ret = get_traces(selector, **kwargs)
+        if len(ret) == 0: return None
+        return ret[0]
 
     def get_theme(self):
         context = {

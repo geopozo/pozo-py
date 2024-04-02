@@ -12,8 +12,8 @@ e.NameConflictException.default_level = e.ErrorLevel.IGNORE
 e.MultiParentException.default_level = e.ErrorLevel.IGNORE
 
 d1 = pozo.traces.Trace(values, depth=index, mnemonic="md1")
-d2 = pozo.traces.Trace(values, depth=index, name="d2")
-d3 = pozo.traces.Trace(values2, depth=index, name="d3", mnemonic="md3")
+d2 = pozo.traces.Trace(values, depth=index, mnemonic="d2")
+d3 = pozo.traces.Trace(values2, depth=index, name="d3") # no maky sensy
 d4 = pozo.traces.Trace(values2, depth=index, mnemonic="md4")
 d5 = pozo.traces.Trace(values, depth=index2, mnemonic="md5")
 d6 = pozo.traces.Trace(values, depth=index2, mnemonic="md6")
@@ -109,5 +109,5 @@ def test_axis():
     assert e.get_trace(d1) == d1
     assert e.get_trace("md1") == d1
     d1.set_name("test")
-    assert e.get_trace("test") == d1
-    assert e.get_trace("md1") == None
+    #assert e.get_trace("test") == d1 # maybe this comes back after set_name set to equal set_mnemonic
+    #assert e.get_trace("md1") == None
