@@ -20,6 +20,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
 
+        self.original_data = None
         self._name = kwargs.pop("name", "unnamed") # why do graphs have a name? for a title?
         self.renderer = kwargs.pop("renderer", pzr.Plotly())
         self.xp = kwargs.pop("xp", pzr.CrossPlot())
