@@ -58,9 +58,9 @@ class Axis(ood.Item, pzt.Themeable):
         return super().pop_items(*selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
-    def has_trace(self, *selectors):
-        selectors = pozo.str_to_HasLog(selectors)
-        return super().has_item(selectors)
+    def has_trace(self, selector):
+        selector = pozo.str_to_HasLog(selector)
+        return super().has_item(selector)
 
     def reorder_all_traces(self, order):
         order = pozo.str_to_HasLog(order)
