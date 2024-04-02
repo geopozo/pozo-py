@@ -349,9 +349,10 @@ class Graph(ood.Observer, pzt.Themeable):
             for trace in traces:
                     data = trace.get_data()
                     unit = trace.get_unit()
-                    if not value:
+                    if not value and trace.get_mnemonic in las.curves:
                         if las.get_curve(trace.get_mnemonic()).value is not None: value = las.get_curve(trace.get_mnemonic()).value #TODO
-                    if not descr: descr = las.get_curve(trace.get_mnemonic()).descr #TODO
+                    if not descr and trace.get_mnemonic in las.curves:
+                        if las.get_curve(trace.get_mnemonic()).descr is not None: descr = las.get_curve(trace.get_mnemonic()).descr #TODO
                     if mnemonic is None: mnemonics = trace.get_mnemonic()
                     else: mnemonics = mnemonic[trace]
                     lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
