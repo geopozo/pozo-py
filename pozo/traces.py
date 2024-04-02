@@ -52,7 +52,7 @@ class Trace(ood.Observed, pzt.Themeable):
         if self.version == len(self.__data) - 2: self.version += 1
 
     def latest_version(self):
-        return len(self.__data)
+        return len(self.__data) - 1
 
     def pop_version(self, version=None):
         if not version:
