@@ -355,8 +355,11 @@ class Graph(ood.Observer, pzt.Themeable):
             data = trace.get_data()
             mnemonic = trace.get_mnemonic()
 
-            unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
-            if unit is None: unit = trace.get_unit()
+            if unit:
+                unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), str(pozo.registry.parse_units(unit[i])))
+            else:
+                unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
+                if unit is None: unit = trace.get_unit()
 
             if values:
                 value = values[i]
