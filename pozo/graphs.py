@@ -336,8 +336,8 @@ class Graph(ood.Observer, pzt.Themeable):
     def to_las_CurveItems(self, *selectors,**kwargs):
         template = kwargs.pop("template", None)
         mnemonic = kwargs.pop('mnemonic', None)
-        value = kwargs.pop('value', None)
-        descr = kwargs.pop('descr', None)
+        values = kwargs.pop('values', None)
+        description = kwargs.pop('description', None)
 
         if template is not None:
             if str(type(template)) == LAS_TYPE: las = template
@@ -356,7 +356,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 data = trace.get_data()
                 unit = trace.get_unit()
 
-                if value: pass
+                if values: value = values
                 elif trace.original_data:
                     value = trace.original_data.value
                     if value is None: value = ""
@@ -364,7 +364,7 @@ class Graph(ood.Observer, pzt.Themeable):
                     value = template.curves[trace.get_mnemonic()].value
                     if value is None: value = ""
 
-                if descr: pass
+                if description: descr = description
                 elif trace.original_data:
                     descr = trace.original_data.descr
                     if descr is None: descr = ""
