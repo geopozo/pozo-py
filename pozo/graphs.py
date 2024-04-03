@@ -335,7 +335,6 @@ class Graph(ood.Observer, pzt.Themeable):
     # to a list with the data as lasio.CurveItem
     def to_las_CurveItems(self, *selectors,**kwargs):
         template = kwargs.pop("template", None)
-        include = kwargs.pop('include', None)
         values = kwargs.pop('values', None)
         description = kwargs.pop('description', None)
 
