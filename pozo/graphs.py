@@ -337,7 +337,7 @@ class Graph(ood.Observer, pzt.Themeable):
         template = kwargs.pop("template", None)
         values = kwargs.pop('values', None)
         description = kwargs.pop('description', None)
-        unit = kwargs.pop('unit', None)
+        units = kwargs.pop('unit', None)
 
         if template is not None and str(type(template)) != LAS_TYPE:
             if os.path.splitext(template)[1].lower() == ".las":
@@ -355,8 +355,9 @@ class Graph(ood.Observer, pzt.Themeable):
             data = trace.get_data()
             mnemonic = trace.get_mnemonic()
 
-            if unit:
-                unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, str(pozo.registry.parse_units(unit[index])))
+            if units:
+                if pozo.is_array(units):
+                    unit = units[index]
             else:
                 unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = trace.get_unit()
