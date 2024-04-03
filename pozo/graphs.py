@@ -355,14 +355,23 @@ class Graph(ood.Observer, pzt.Themeable):
         for trace in traces:
                 data = trace.get_data()
                 unit = trace.get_unit()
-                if template is not None and value is None and descr is None:
-                    if trace.get_mnemonic() in las.curves:
-                        if las.get_curve(trace.get_mnemonic()).value is not None: value = las.get_curve(trace.get_mnemonic()).value #TODO
-                        if las.get_curve(trace.get_mnemonic()).descr is not None: descr = las.get_curve(trace.get_mnemonic()).descr #TODO
-                elif trace.original_data and value is None and descr is None:
-                    if trace.get_mnemonic() in trace.original_data.curves:
-                        if trace.original_data.value is not None: value = trace.original_data.value #TODO: arreglar la extracción de value del original_data
-                        if trace.original_data.descr is not None: descr = trace.original_data.descr #TODO: arreglar la extracción de descr del original_data
+
+                if value: pass
+                elif trace.original_data:
+                    value = trace.original_data.value
+                    if value is None: value = ""
+                elif template and trace.get_mnemonic() in template.curves:
+                    value = template.curves[trace.get_mnemonic()].value
+                    if value is None: value = ""
+
+                if descr: pass
+                elif trace.original_data:
+                    descr = trace.original_data.descr
+                    if descr is None: descr = ""
+                elif template and trace.get_mnemonic() in template.curves:
+                    descr = template.curves[trace.get_mnemonic()].descr
+                    if descr is None: descr = ""
+
                 if mnemonic is None: mnemonics = trace.get_mnemonic()
                 else: mnemonics = mnemonic[trace.get_mnemonic()]
                 lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
