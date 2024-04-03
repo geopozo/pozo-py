@@ -354,7 +354,11 @@ class Graph(ood.Observer, pzt.Themeable):
         lasio_list = []
         for trace in traces:
                 data = trace.get_data()
-                unit = trace.get_unit()
+
+                if include is None:
+                    mnemonic, unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
+                else:
+                    mnemonic, unit = pzu.registry.resolve_SI_unit_to_las(include[trace.get_mnemonic()], trace.get_unit())
 
                 if values: value = values
                 elif trace.original_data:
@@ -382,8 +386,7 @@ class Graph(ood.Observer, pzt.Themeable):
                     else: descr = ""
                 else: descr = ""
 
-                if include is None: mnemonic = trace.get_mnemonic()
-                else: mnemonic = include[trace.get_mnemonic()]
+
                 lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
                 lasio_list.append(lasio_obj)
 
