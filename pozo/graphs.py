@@ -356,26 +356,26 @@ class Graph(ood.Observer, pzt.Themeable):
             mnemonic = trace.get_mnemonic()
 
             if unit:
-                unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), str(pozo.registry.parse_units(unit[i])))
+                unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, str(pozo.registry.parse_units(unit[i])))
             else:
-                unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
+                unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = trace.get_unit()
 
             if values:
                 value = values[i]
             elif trace.original_data:
-                value = trace.original_data.value if trace.get_mnemonic() in trace.original_data.curves else ""
+                value = trace.original_data.value if mnemonic in trace.original_data.curves else ""
             elif template:
-                value = template.curves[trace.get_mnemonic()].value if trace.get_mnemonic() in template.curves else ""
+                value = template.curves[mnemonic].value if mnemonic in template.curves else ""
             else:
                 value = ""
 
             if description:
                 descr = description[i]
             elif trace.original_data:
-                descr = trace.original_data.descr if trace.get_mnemonic() in trace.original_data.curves else ""
+                descr = trace.original_data.descr if mnemonic in trace.original_data.curves else ""
             elif template:
-                descr = template.curves[trace.get_mnemonic()].descr if trace.get_mnemonic() in template.curves else ""
+                descr = template.curves[mnemonic].descr if mnemonic in template.curves else ""
             else:
                 descr = ""
 
