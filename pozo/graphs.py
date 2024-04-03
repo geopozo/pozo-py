@@ -335,7 +335,7 @@ class Graph(ood.Observer, pzt.Themeable):
     # to a list with the data as lasio.CurveItem
     def to_las_CurveItems(self, *selectors,**kwargs):
         template = kwargs.pop("template", None)
-        mnemonic = kwargs.pop('mnemonic', None)
+        include = kwargs.pop('include', None)
         values = kwargs.pop('values', None)
         description = kwargs.pop('description', None)
 
@@ -382,8 +382,8 @@ class Graph(ood.Observer, pzt.Themeable):
                     else: descr = ""
                 else: descr = ""
 
-                if mnemonic is None: mnemonics = trace.get_mnemonic()
-                else: mnemonics = mnemonic[trace.get_mnemonic()]
+                if include is None: mnemonics = trace.get_mnemonic()
+                else: mnemonics = include[trace.get_mnemonic()]
                 lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
                 lasio_list.append(lasio_obj)
 
