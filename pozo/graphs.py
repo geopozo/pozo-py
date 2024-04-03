@@ -399,37 +399,49 @@ class Graph(ood.Observer, pzt.Themeable):
         strategy = kwargs.pop("strategy", "pozo-only")
 
         if template is not None:
-            if str(type(template)) == LAS_TYPE: las = template
-            elif os.path.splitext(template)[1].lower() == ".las": las = lasio.read(template)
-            else: raise ValueError(
-                "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
+            if str(type(template)) == LAS_TYPE:
+                las = template
+            elif os.path.splitext(template)[1].lower() == ".las":
+                las = lasio.read(template)
+            else:
+                raise ValueError(
+                    "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
                 )
-        else: las = lasio.LASFile()
+        else:
+            las = lasio.LASFile()
 
-        if template: curves = self.to_las_CurveItems(*selectors, template=template, **kwargs)
-        else: curves = self.to_las_CurveItems(*selectors, **kwargs)
+        if template:
+            curves = self.to_las_CurveItems(*selectors, template=template, **kwargs)
+        else:
+            curves = self.to_las_CurveItems(*selectors, **kwargs)
 
         if strategy == "merge":
-            if template is None: raise ValueError (
-                "If you do not have a template, you must use the option pozo-only"
+            if template is None:
+                raise ValueError(
+                    "If you do not have a template, you must use the option pozo-only"
                 )
 
             for curve in curves:
                 if curve.mnemonic in las.curves:
                     las.delete_curve(curve.mnemonic)
                     las.append_curve_item(curve)
-                elif curve.mnemonic not in las.curves: las.append_curve_item(curve)
+                elif curve.mnemonic not in las.curves:
+                    las.append_curve_item(curve)
 
         elif strategy == "add":
-            if template is None: raise ValueError (
-                "If you do not have a template, you must use the option pozo-only"
+            if template is None:
+                raise ValueError(
+                    "If you do not have a template, you must use the option pozo-only"
                 )
-            for curve in curves: las.append_curve_item(curve)
+            for curve in curves:
+                las.append_curve_item(curve)
 
         elif strategy == "pozo-only":
-            if template: raise ValueError (
-                "If you have a template, you must use the options merge or add"
+            if template:
+                raise ValueError(
+                    "If you have a template, you must use the options merge or add"
                 )
-            for curve in curves: las.append_curve_item(curve)
+            for curve in curves:
+                las.append_curve_item(curve)
 
         return las
