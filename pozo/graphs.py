@@ -340,8 +340,8 @@ class Graph(ood.Observer, pzt.Themeable):
         description = kwargs.pop('description', None)
 
         if template is not None:
-            if str(type(template)) == LAS_TYPE: las = template
-            elif os.path.splitext(template)[1].lower() == ".las": las = lasio.read(template)
+            if str(type(template)) == LAS_TYPE: pass
+            elif os.path.splitext(template)[1].lower() == ".las": template = lasio.read(template)
             else: raise ValueError(
                 "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
                 )
