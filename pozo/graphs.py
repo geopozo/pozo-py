@@ -358,18 +358,22 @@ class Graph(ood.Observer, pzt.Themeable):
 
                 if values: value = values
                 elif trace.original_data:
-                    value = trace.original_data.value
-                    if value is None: value = ""
+                    if trace.get_mnemonic() in template.curves:
+                        value = trace.original_data.value
+                        if value is None: value = ""
+                    else: value = ""
                 elif template:
                     if trace.get_mnemonic() in template.curves:
                         value = template.curves[trace.get_mnemonic()].value
                         if value is None: value = ""
-                    else: descr = ""
+                    else: value = ""
 
                 if description: descr = description
                 elif trace.original_data:
-                    descr = trace.original_data.descr
-                    if descr is None: descr = ""
+                    if trace.get_mnemonic() in template.curves:
+                        descr = trace.original_data.descr
+                        if descr is None: descr = ""
+                    else: descr = ""
                 elif template:
                     if trace.get_mnemonic() in template.curves:
                         descr = template.curves[trace.get_mnemonic()].descr
