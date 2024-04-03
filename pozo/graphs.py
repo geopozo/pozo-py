@@ -401,7 +401,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 )
         else: las = lasio.LASFile()
 
-        curves = self.to_las_CurveItems(*selectors, **kwargs)
+        if template: curves = self.to_las_CurveItems(*selectors, template=template, **kwargs)
+        else: curves = self.to_las_CurveItems(*selectors, **kwargs)
 
         if strategy == "merge":
             if template is None: raise ValueError (
