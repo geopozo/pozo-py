@@ -337,6 +337,7 @@ class Graph(ood.Observer, pzt.Themeable):
         template = kwargs.pop("template", None)
         values = kwargs.pop('values', None)
         description = kwargs.pop('description', None)
+        unit = kwargs.pop('unit', None)
 
         if template is not None and str(type(template)) != LAS_TYPE:
             if os.path.splitext(template)[1].lower() == ".las":
@@ -350,14 +351,15 @@ class Graph(ood.Observer, pzt.Themeable):
         traces = self.get_traces(*selectors)
 
         lasio_list = []
-        for trace in traces:
+        for trace, i in traces, range(traces):
             data = trace.get_data()
             mnemonic = trace.get_mnemonic()
+
             unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
             if unit is None: unit = trace.get_unit()
 
             if values:
-                value = values
+                value = values[i]
             elif trace.original_data:
                 value = trace.original_data.value if trace.get_mnemonic() in trace.original_data.curves else ""
             elif template:
@@ -366,7 +368,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 value = ""
 
             if description:
-                descr = description
+                descr = description[i]
             elif trace.original_data:
                 descr = trace.original_data.descr if trace.get_mnemonic() in trace.original_data.curves else ""
             elif template:
