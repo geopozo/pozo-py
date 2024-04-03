@@ -352,7 +352,8 @@ class Graph(ood.Observer, pzt.Themeable):
         lasio_list = []
         for trace in traces:
             data = trace.get_data()
-            mnemonic, unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
+            mnemonic = trace.get_mnemonic()
+            unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
 
             if values:
                 value = values
