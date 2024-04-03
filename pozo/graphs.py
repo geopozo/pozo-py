@@ -353,42 +353,29 @@ class Graph(ood.Observer, pzt.Themeable):
 
         lasio_list = []
         for trace in traces:
-                data = trace.get_data()
+            data = trace.get_data()
+            mnemonic, unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
 
-                if include is None:
-                    mnemonic, unit = pzu.registry.resolve_SI_unit_to_las(trace.get_mnemonic(), trace.get_unit())
-                else:
-                    mnemonic, unit = pzu.registry.resolve_SI_unit_to_las(include[trace.get_mnemonic()], trace.get_unit())
+            if values:
+                value = values
+            elif trace.original_data:
+                value = trace.original_data.value if trace.get_mnemonic() in trace.original_data.curves else ""
+            elif template:
+                value = template.curves[trace.get_mnemonic()].value if trace.get_mnemonic() in template.curves else ""
+            else:
+                value = ""
 
-                if values: value = values
-                elif trace.original_data:
-                    if trace.get_mnemonic() in trace.original_data.curves:
-                        value = trace.original_data.value
-                        if value is None: value = ""
-                    else: value = ""
-                elif template:
-                    if trace.get_mnemonic() in template.curves:
-                        value = template.curves[trace.get_mnemonic()].value
-                        if value is None: value = ""
-                    else: value = ""
-                else: value = ""
+            if description:
+                descr = description
+            elif trace.original_data:
+                descr = trace.original_data.descr if trace.get_mnemonic() in trace.original_data.curves else ""
+            elif template:
+                descr = template.curves[trace.get_mnemonic()].descr if trace.get_mnemonic() in template.curves else ""
+            else:
+                descr = ""
 
-                if description: descr = description
-                elif trace.original_data:
-                    if trace.get_mnemonic() in trace.original_data.curves:
-                        descr = trace.original_data.descr
-                        if descr is None: descr = ""
-                    else: descr = ""
-                elif template:
-                    if trace.get_mnemonic() in template.curves:
-                        descr = template.curves[trace.get_mnemonic()].descr
-                        if descr is None: descr = ""
-                    else: descr = ""
-                else: descr = ""
-
-
-                lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
-                lasio_list.append(lasio_obj)
+            lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
+            lasio_list.append(lasio_obj)
 
         return lasio_list
 
