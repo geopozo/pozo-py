@@ -339,6 +339,13 @@ class Graph(ood.Observer, pzt.Themeable):
         value = kwargs.pop('value', None)
         descr = kwargs.pop('descr', None)
 
+        if template is not None:
+            if str(type(template)) == LAS_TYPE: las = template
+            elif os.path.splitext(template)[1].lower() == ".las": las = lasio.read(template)
+            else: raise ValueError(
+                "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
+                )
+
         if len(self.get_traces()) == 0:
             raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information")
 
