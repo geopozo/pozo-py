@@ -382,9 +382,9 @@ class Graph(ood.Observer, pzt.Themeable):
                     else: descr = ""
                 else: descr = ""
 
-                if include is None: mnemonics = trace.get_mnemonic()
-                else: mnemonics = include[trace.get_mnemonic()]
-                lasio_obj = lasio.CurveItem(mnemonic=mnemonics, unit=unit, value=value, descr=descr, data=data)
+                if include is None: mnemonic = trace.get_mnemonic()
+                else: mnemonic = include[trace.get_mnemonic()]
+                lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
                 lasio_list.append(lasio_obj)
 
         return lasio_list
