@@ -358,8 +358,8 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if units:
                 if pozo.is_array(units):
-                    if not pzm.verify_array_len(units, data): raise ValueError(
-                        "If you are using an array for units, it must be the same size as data"
+                    if not pzm.verify_array_len(units, traces): raise ValueError(
+                        "If you are using an array for units, it must be the same size as traces"
                         )
                     unit = units[index]
                 else: unit = units
@@ -369,8 +369,8 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if values:
                 if pozo.is_array(values):
-                    if not pzm.verify_array_len(values, data): raise ValueError(
-                        "If you are using an array for values, it must be the same size as data"
+                    if not pzm.verify_array_len(values, traces): raise ValueError(
+                        "If you are using an array for values, it must be the same size as traces"
                         )
                     value = values[index]
                 else: value = values
@@ -383,8 +383,8 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if description:
                 if pozo.is_array(description):
-                    if not pzm.verify_array_len(description, data): raise ValueError(
-                        "If you are using an array for description, it must be the same size as data"
+                    if not pzm.verify_array_len(description, traces): raise ValueError(
+                        "If you are using an array for description, it must be the same size as traces"
                         )
                     descr = description[index]
                 else: descr = description
