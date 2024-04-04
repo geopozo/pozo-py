@@ -363,7 +363,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 if unit is None: unit = trace.get_unit()
 
             if values:
-                value = values[index]
+                if pozo.is_array(values):
+                    value = values[index]
             elif trace.original_data:
                 value = trace.original_data.value if mnemonic in trace.original_data.curves else ""
             elif template:
@@ -372,7 +373,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 value = ""
 
             if description:
-                descr = description[index]
+                if pozo.is_array(description):
+                    descr = description[index]
             elif trace.original_data:
                 descr = trace.original_data.descr if mnemonic in trace.original_data.curves else ""
             elif template:
