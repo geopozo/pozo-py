@@ -406,6 +406,7 @@ class Graph(ood.Observer, pzt.Themeable):
         template = kwargs.pop("template", None)
         strategy = kwargs.pop("strategy", "pozo-only")
 
+        if self.original_data: template = self.original_data
         if template is not None:
             if str(type(template)) == LAS_TYPE:
                 las = template
@@ -413,7 +414,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 las = lasio.read(template)
             else:
                 raise ValueError(
-                    "If you use a template, it must be either a lasio.LASFile object or a .LAS file"
+                    "If you use a template or original_data, it must be either a lasio.LASFile object or a .LAS file"
                 )
         else:
             las = lasio.LASFile()
@@ -426,7 +427,7 @@ class Graph(ood.Observer, pzt.Themeable):
         if strategy == "merge":
             if template is None:
                 raise ValueError(
-                    "If you do not have a template, you must use the option pozo-only"
+                    "If you do not have a template or original_data, you must use the option pozo-only"
                 )
 
             for curve in curves:
@@ -439,7 +440,7 @@ class Graph(ood.Observer, pzt.Themeable):
         elif strategy == "add":
             if template is None:
                 raise ValueError(
-                    "If you do not have a template, you must use the option pozo-only"
+                    "If you do not have a template or original_data, you must use the option pozo-only"
                 )
             for curve in curves:
                 las.append_curve_item(curve)
@@ -447,7 +448,7 @@ class Graph(ood.Observer, pzt.Themeable):
         elif strategy == "pozo-only":
             if template:
                 raise ValueError(
-                    "If you have a template, you must use the options merge or add"
+                    "If you have a template or original_data, you must use the options merge or add"
                 )
             for curve in curves:
                 las.append_curve_item(curve)
