@@ -63,6 +63,7 @@ def check_las(las, registry=registry, HTML=True):
         resolved = None
         pozo_match = None
         confidence = None
+        parsed = None
         try:
             resolved = registry.resolve_las_unit(curve.mnemonic, curve.unit, curve.data)
             if resolved is not None:
