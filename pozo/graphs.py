@@ -356,15 +356,15 @@ class Graph(ood.Observer, pzt.Themeable):
             mnemonic = trace.get_mnemonic()
 
             if units:
-                if pozo.is_array(units):
-                    unit = units[index]
+                if pozo.is_array(units): unit = units[index]
+                else: unit = units
             else:
                 unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = trace.get_unit()
 
             if values:
-                if pozo.is_array(values):
-                    value = values[index]
+                if pozo.is_array(values): value = values[index]
+                else: value = values
             elif trace.original_data:
                 value = trace.original_data.value if mnemonic in trace.original_data.curves else ""
             elif template:
@@ -373,8 +373,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 value = ""
 
             if description:
-                if pozo.is_array(description):
-                    descr = description[index]
+                if pozo.is_array(description): descr = description[index]
+                else: descr = description
             elif trace.original_data:
                 descr = trace.original_data.descr if mnemonic in trace.original_data.curves else ""
             elif template:
