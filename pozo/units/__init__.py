@@ -20,6 +20,7 @@ percent_general = [
     ]
 
 registry.add_las_map('DEPT', 'M'   , 'meter'                   , "HIGH")
+registry.add_las_map('DEPT', 'FT'   , 'feet'                   , "HIGH")
 registry.add_las_map('GR'  , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('CGR' , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('CALI', 'CM'  , 'centimeter'              , "HIGH")
