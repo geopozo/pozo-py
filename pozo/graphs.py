@@ -5,6 +5,7 @@ import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
 import pozo.themes as pzt
+import pozomath as pzm
 import ood
 import ood.exceptions as ooderr
 
@@ -356,14 +357,22 @@ class Graph(ood.Observer, pzt.Themeable):
             mnemonic = trace.get_mnemonic()
 
             if units:
-                if pozo.is_array(units): unit = units[index]
+                if pozo.is_array(units):
+                    if not pzm.verify_array_len(units, data): raise ValueError(
+                        "If you are using an array for units, it must be the same size as data"
+                        )
+                    unit = units[index]
                 else: unit = units
             else:
                 unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = trace.get_unit()
 
             if values:
-                if pozo.is_array(values): value = values[index]
+                if pozo.is_array(values):
+                    if not pzm.verify_array_len(values, data): raise ValueError(
+                        "If you are using an array for values, it must be the same size as data"
+                        )
+                    value = values[index]
                 else: value = values
             elif trace.original_data:
                 value = trace.original_data.value if mnemonic in trace.original_data.curves else ""
@@ -373,7 +382,11 @@ class Graph(ood.Observer, pzt.Themeable):
                 value = ""
 
             if description:
-                if pozo.is_array(description): descr = description[index]
+                if pozo.is_array(description):
+                    if not pzm.verify_array_len(description, data): raise ValueError(
+                        "If you are using an array for description, it must be the same size as data"
+                        )
+                    descr = description[index]
                 else: descr = description
             elif trace.original_data:
                 descr = trace.original_data.descr if mnemonic in trace.original_data.curves else ""
