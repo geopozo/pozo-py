@@ -85,7 +85,10 @@ class LasRegistry(pint.UnitRegistry):
         else:
             try:
                 if not unit or unit == "": raise pint.UndefinedUnitError("Empty unit not allowed- please map it")
-                return self.parse_units(unit)
+                try:
+                    return self.parse_units(unit)
+                except Exception as e:
+                    raise pint.UndefinedUnitError(f"Can't parse '{unit}'") from e
             except pint.UndefinedUnitError as e:
                 raise pint.UndefinedUnitError(f"{unit} for {pozo.deLASio(mnemonic)} not found. {str(e)}")
 
