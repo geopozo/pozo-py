@@ -56,7 +56,7 @@ desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
 red_low = re.compile(r'<td>(.+)?LOW(.+)?</td>')
 orange_medium = re.compile(r'<td>(.+)?MEDIUM(.+)?</td>')
 
-def check_las(las, registry=registry, HTML=True):
+def check_las(las, registry=registry, HTML_out=True):
     def n0(s): # If None, convert to ""
         return "" if s is None else str(s)
     d = chr(0X1e) # delimiter
@@ -84,9 +84,9 @@ def check_las(las, registry=registry, HTML=True):
                       parsed,
                       desc,
                       min, med, max, np.count_nonzero(np.isnan(curve.data))]
-        if not HTML: result.append(curve_data)
+        if not HTML_out: result.append(curve_data)
         else: result.append(d.join([n0(x) for x in curve_data]))
-    if not HTML: return result
+    if not HTML_out: return result
     try:
         output = pd.read_csv(StringIO("\n".join(result)), delimiter=d, na_filter=False).to_html()
         for match in red_low.finditer(output):
