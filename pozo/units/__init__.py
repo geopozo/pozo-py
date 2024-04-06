@@ -20,10 +20,12 @@ percent_general = [
     ]
 
 registry.add_las_map('DEPT', 'M'   , 'meter'                   , "HIGH")
-registry.add_las_map('DEPT', 'FT'   , 'feet'                   , "HIGH")
+registry.add_las_map('DEPT', 'FT'  , 'feet'                    , "HIGH")
 registry.add_las_map('GR'  , 'GAPI', 'gAPI'                    , "HIGH")
+registry.add_las_map('GR'  , '',     'gAPI'                    , "HIGH")
 registry.add_las_map('CGR' , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('CALI', 'CM'  , 'centimeter'              , "HIGH")
+registry.add_las_map('CALI', 'IN'  , 'inch'                    , "HIGH")
 registry.add_las_map('DRHO', 'G/C3', 'gram / centimeter ** 3'  , "HIGH")
 registry.add_las_map('RHOB', 'G/C3', 'gram / centimeter ** 3'  , "HIGH")
 registry.add_las_map('DT'  , 'US/F', 'microsecond / foot'      , "HIGH")
