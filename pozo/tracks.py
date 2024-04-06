@@ -75,8 +75,8 @@ class Track(ood.Item, pzt.Themeable):
             ret_traces.extend(axis.get_traces(*selectors, **kwargs))
         return ret_traces
 
-    def get_trace(self, selector, kwargs):
-        ret = self.get_traces(selector)
+    def get_trace(self, selector, **kwargs):
+        ret = self.get_traces(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]
 
