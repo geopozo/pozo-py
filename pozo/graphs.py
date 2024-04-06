@@ -26,7 +26,7 @@ class Graph(ood.Observer, pzt.Themeable):
         self.xp = kwargs.pop("xp", pzr.CrossPlot())
 
         my_kwargs = {}  # Don't pass these to super, but still pass them down as kwargs
-        my_kwargs["include"] = kwargs.pop("include", None)
+        include = my_kwargs["include"] = kwargs.pop("include", None)
         my_kwargs["exclude"] = kwargs.pop("exclude", None)
         my_kwargs["compare"] = kwargs.pop("compare", False)
         my_kwargs["yaxis"] = kwargs.pop("yaxis", None)
@@ -42,6 +42,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 f"One of the arguments here isn't valid: {list(old_kwargs.keys())}."
             ) from te
         self.process_data(*args, **my_kwargs)
+        if len(args) == 1 and include and len(include) != 0:
+            self.reorder_all_tracks(include)
         self.depth_notes = {}
 
     def render(self, **kwargs):
@@ -143,8 +145,6 @@ class Graph(ood.Observer, pzt.Themeable):
                 depth_unit=yaxis_unit,
             )
             self.add_tracks(trace)
-        if include and len(include) != 0:
-            self.reorder_all_tracks(include)
 
     def add_welly_object(self, ar, **kwargs):
         include = kwargs.get("include", [])
@@ -218,8 +218,6 @@ class Graph(ood.Observer, pzt.Themeable):
             )
 
             self.add_tracks(trace)
-        if include and len(include) != 0:
-            self.reorder_all_tracks(include)
 
     def _check_types(self, *tracks):
         accepted_types = (pozo.Axis, pozo.Trace, pozo.Track)
