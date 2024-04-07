@@ -7,7 +7,10 @@ os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
 import pint # noqa
 
 
-class MissingRangeError(pint.UndefinedUnitError):
+class UnitException(Exception):
+    pass
+
+class MissingRangeError(Exception):
     pass
 
 class LasMapEntry():
@@ -83,13 +86,13 @@ class LasRegistry(pint.UnitRegistry):
             return self.parse_units(resolved.unit)
         else:
             try:
-                if not unit or unit == "": raise pint.UndefinedUnitError("Empty unit not allowed- please map it")
+                if not unit or unit == "": raise UnitException("Empty unit not allowed- please map it")
                 try:
                     return self.parse_units(unit)
                 except Exception as e:
-                    raise pint.UndefinedUnitError(f"Can't parse '{unit}'") from e
+                    raise UnitException(f"Can't parse '{unit}'") from e
             except pint.UndefinedUnitError as e:
-                raise pint.UndefinedUnitError(f"{unit} for {pozo.deLASio(mnemonic)} not found. {str(e)}")
+                raise UnitException(f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found.") from e
 
 # we now don't get confidence from string
 

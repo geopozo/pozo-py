@@ -4,8 +4,9 @@ from IPython.display import HTML, display
 from io import StringIO
 import pandas as pd
 
-from .units import MissingRangeError, LasMapEntry, LasRegistry
+from .units import MissingRangeError, LasMapEntry, LasRegistry, UnitException
 import re
+
 
 registry = LasRegistry()
 Q = registry.Quantity # Overriding the registry and all this is a little weird
@@ -80,14 +81,14 @@ def check_las(las, registry=registry, HTML_out=True):
                 pozo_match = resolved.unit
                 confidence = resolved.confidence
             parsed = registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
-        except (pint.UndefinedUnitError, MissingRangeError) as e:
+        except (pint.UndefinedUnitError, MissingRangeError, UnitException) as e:
             confidence = " - " + str(e) + " - NONE"
         find_desc = desc_wo_num.findall(curve.descr)
         desc = find_desc[0] if len(find_desc) > 0 else curve.descr
         [v_min, v_med, v_max] = [str(x) for x in np.nanquantile(curve.data, [0, .5, 1])]
         curve_data = dict(
                 mnemonic = curve.mnemonic,
-                unit = curve.unit,
+                las_unit = curve.unit,
                 pozo_match = pozo_match,
                 confidence = confidence,
                 parsed_unit = parsed,
