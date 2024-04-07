@@ -90,6 +90,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=None):
                     pozo_match = resolved.unit
                     confidence = resolved.confidence
                 parsed = registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+                if resolved is None: raise MissingLasUnitWarning("Parsed directly from LAS, probably wrong")
             except (pint.UndefinedUnitError, MissingRangeError, UnitException, MissingLasUnitWarning) as e:
                 confidence = " - " + str(e) + " - NONE"
             find_desc = desc_wo_num.findall(curve.descr)
