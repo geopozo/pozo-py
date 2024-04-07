@@ -397,6 +397,7 @@ class Graph(ood.Observer, pzt.Themeable):
     def to_las(self, *selectors, **kwargs):
         template = kwargs.pop("template", lasio.LASFile()) #
         strategy = kwargs.pop("strategy", "pozo-only")
+        priority_new = kwargs.pop("priority_new", True)
 
         # Bad vibes feeding random stuff to a .read(file), also increasing surface area of attack and dependency - AP
         # TypeError, not value error - AP
@@ -414,6 +415,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 if curve.mnemonic in double_mnemonics:
                     warnings.warn(f"Ambiguous merge: there are several curves in this template with mnemonic {curve.mnemonic}. Please delete one or more manually with las.delete_curve")
                 if curve.mnemonic in template.curves:
+                    if not priority_new: continue # give priority to old, don't delete, don't append
                     template.delete_curve(curve.mnemonic)
                 template.append_curve_item(curve)
 
