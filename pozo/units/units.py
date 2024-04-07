@@ -1,14 +1,12 @@
 import os
-os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
 import warnings
-from io import StringIO
 
-from IPython.core.display import HTML
-import pandas as pd
 import numpy as np
-import pint
-
 import pozo
+os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
+import pint # noqa
+
+
 class MissingRangeError(pint.UndefinedUnitError):
     pass
 
@@ -94,3 +92,4 @@ class LasRegistry(pint.UnitRegistry):
                 raise pint.UndefinedUnitError(f"{unit} for {pozo.deLASio(mnemonic)} not found. {str(e)}")
 
 # we now don't get confidence from string
+
