@@ -31,6 +31,7 @@ percent_general = [
 
 registry.add_las_map('DEPT', 'M'   , 'meter'                   , "HIGH")
 registry.add_las_map('DEPT', 'FT'  , 'feet'                    , "HIGH")
+registry.add_las_map('DEPT', 'F'  , 'feet'                    , "HIGH")
 registry.add_las_map('GR'  , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('GR'  , '',     'gAPI'                    , "HIGH")
 registry.add_las_map('CGR' , 'GAPI', 'gAPI'                    , "HIGH")
@@ -66,7 +67,7 @@ desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
 red_low = re.compile(r'<td>(.+)?(?:LOW|NONE)(.+)?</td>')
 orange_medium = re.compile(r'<td>(.+)?MEDIUM(.+)?</td>')
 
-def check_las(las, registry=registry, HTML_out=True, divid=None):
+def check_las(las, registry=registry, HTML_out=True, divid=""):
     def n0(s): # If None, convert to ""
         return "" if s is None else str(s)
     # using the warnings like this kind sucks
@@ -111,7 +112,8 @@ def check_las(las, registry=registry, HTML_out=True, divid=None):
             else: result.append(d.join([n0(x) for x in curve_data.values()]))
         if not HTML_out: return result
         try:
-            output = pd.read_csv(StringIO("\n".join(result)), delimiter=d, na_filter=False).to_html()
+            post_result = "\n".join(result)
+            output = pd.read_csv(StringIO(post_result), delimiter=d, na_filter=False).to_html()
             for match in red_low.finditer(output):
                 current_match = match.group()
                 colored = "<td style=\"color:red\">" + current_match[4:]
