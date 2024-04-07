@@ -13,6 +13,8 @@ import pozo.themes as themes # noqa
 import pozo.renderers as renderers # noqa
 import pozo.units as units # noqa
 
+class PozoWarning(UserWarning):
+    pass
 
 # These are all utility functions
 def deLASio(mnemonic):

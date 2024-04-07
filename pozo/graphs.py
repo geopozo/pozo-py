@@ -97,7 +97,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if hasattr(yaxis, "unit"):
                 yaxis_unit = yaxis.unit
             else:
-                warnings.warn("Not sure what yaxis units are.")
+                warnings.warn("Not sure what yaxis units are.", pozo.PozoWarning)
             if hasattr(yaxis, "data"):
                 yaxis = yaxis.data
             if len(yaxis) != len(ar.index):
@@ -109,7 +109,7 @@ class Graph(ood.Observer, pzt.Themeable):
             yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name])
         else:
             warnings.warn(
-                "No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are."
+                "No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are.", pozo.PozoWarning
             )
             yaxis = ar.depth_m
             yaxis_unit = pzu.registry.parse_units("meter")
@@ -172,7 +172,7 @@ class Graph(ood.Observer, pzt.Themeable):
             )
         else:
             raise ValueError(
-                "No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=."
+                "No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=.", pozo.PozoWarning
             )
         for curve in ar.data.values():
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
