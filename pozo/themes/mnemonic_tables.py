@@ -4,6 +4,11 @@ cangrejo  = {
         "range": [0, 16],
         "range_unit": "inch",
     },
+    "GR" : {
+        "color" : "green",
+        "range": [0, 150.00],
+        "range_unit": "gAPI",
+    },
     "CGR" : {
         "color" : "green",
         "range": [0, 150.00],

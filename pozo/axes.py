@@ -9,11 +9,9 @@ import traceback
 class Axis(ood.Item, pzt.Themeable):
 
     def set_name(self, name):
-        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
         return super().set_name(name)
 
     def get_name(self):
-        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
         return super().get_name()
 
     _type = "axis"
@@ -59,7 +57,7 @@ class Axis(ood.Item, pzt.Themeable):
 
     # what about whitelabelling all the other stuff
     def has_trace(self, selector):
-        selectors = pozo.str_to_HasLog(selectors)
+        selector = pozo.str_to_HasLog(selector)
         return super().has_item(selector)
 
     def reorder_all_traces(self, order):

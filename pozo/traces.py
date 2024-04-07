@@ -96,9 +96,11 @@ class Trace(ood.Observed, pzt.Themeable):
         self.__data = [[]]
         self.__unit = [None]
         self.__note = ["original"]
-        unit = kwargs.pop("unit", None)
-        depth = kwargs.pop("depth", None)
-        depth_unit = kwargs.pop("depth_unit", None)
+
+        self.original_data = None
+        unit = kwargs.pop('unit', None)
+        depth = kwargs.pop('depth', None)
+        depth_unit = kwargs.pop('depth_unit', None)
         self._unit = None
         self._depth_unit = None
         if depth is None:

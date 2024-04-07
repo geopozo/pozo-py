@@ -20,9 +20,12 @@ percent_general = [
     ]
 
 registry.add_las_map('DEPT', 'M'   , 'meter'                   , "HIGH")
+registry.add_las_map('DEPT', 'FT'  , 'feet'                    , "HIGH")
 registry.add_las_map('GR'  , 'GAPI', 'gAPI'                    , "HIGH")
+registry.add_las_map('GR'  , '',     'gAPI'                    , "HIGH")
 registry.add_las_map('CGR' , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('CALI', 'CM'  , 'centimeter'              , "HIGH")
+registry.add_las_map('CALI', 'IN'  , 'inch'                    , "HIGH")
 registry.add_las_map('DRHO', 'G/C3', 'gram / centimeter ** 3'  , "HIGH")
 registry.add_las_map('RHOB', 'G/C3', 'gram / centimeter ** 3'  , "HIGH")
 registry.add_las_map('DT'  , 'US/F', 'microsecond / foot'      , "HIGH")
@@ -53,7 +56,7 @@ desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
 red_low = re.compile(r'<td>(.+)?LOW(.+)?</td>')
 orange_medium = re.compile(r'<td>(.+)?MEDIUM(.+)?</td>')
 
-def check_las(las, registry=registry):
+def check_las(las, registry=registry, HTML_out=True):
     def n0(s): # If None, convert to ""
         return "" if s is None else str(s)
     d = chr(0X1e) # delimiter
@@ -62,6 +65,7 @@ def check_las(las, registry=registry):
         resolved = None
         pozo_match = None
         confidence = None
+        parsed = None
         try:
             resolved = registry.resolve_las_unit(curve.mnemonic, curve.unit, curve.data)
             if resolved is not None:
@@ -73,14 +77,16 @@ def check_las(las, registry=registry):
         find_desc = desc_wo_num.findall(curve.descr)
         desc = find_desc[0] if len(find_desc) > 0 else curve.descr
         [min, med, max] = [str(x) for x in np.nanquantile(curve.data, [0, .5, 1])]
-        result.append(d.join([n0(x) for x in [curve.mnemonic,
-                                             curve.unit,
-                                             pozo_match,
-                                             confidence,
-                                             parsed,
-                                             desc, 
-                                             min, med, max, np.count_nonzero(np.isnan(curve.data))]
-                              ]))
+        curve_data = [curve.mnemonic,
+                      curve.unit,
+                      pozo_match,
+                      confidence,
+                      parsed,
+                      desc,
+                      min, med, max, np.count_nonzero(np.isnan(curve.data))]
+        if not HTML_out: result.append(curve_data)
+        else: result.append(d.join([n0(x) for x in curve_data]))
+    if not HTML_out: return result
     try:
         output = pd.read_csv(StringIO("\n".join(result)), delimiter=d, na_filter=False).to_html()
         for match in red_low.finditer(output):
