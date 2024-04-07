@@ -376,7 +376,6 @@ class Graph(ood.Observer, pzt.Themeable):
                 else: descr = descriptions
             elif ( trace.original_data is not None and
                   ( 'descr' in trace.original_data or hasattr(trace.original_data, 'descr') ) ):
-                print("Found")
                 descr = trace.original_data['descr']
                 find_desc = desc_wo_num.findall(descr)
                 descr = find_desc[0] if len(find_desc) > 0 else descr
@@ -423,9 +422,14 @@ class Graph(ood.Observer, pzt.Themeable):
                 template.append_curve_item(curve)
 
         elif strategy == "pozo-only": # this isn't correct, you need to delete curves AP
-            for curve in template.curves:
-                template.delete_curve(curve.mnemonic)
+            all_curves = []
+            for curve in template.curves: # could probably copy .keys()
+                all_curves.append(curve.mnemonic)
+            for mnemonic in all_curves:
+                template.delete_curve(mnemonic)
             for curve in pozo_curves:
                 template.append_curve_item(curve)
+        else:
+            raise ValueError("Avaialble strategies are merge, add, and pozo-only")
 
         return template
