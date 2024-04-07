@@ -25,3 +25,4 @@ dist/
 .#*
 build/
 .vscode/
+data/

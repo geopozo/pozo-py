@@ -51,9 +51,10 @@ class LasRegistry(pint.UnitRegistry):
             self._reverse_mnemonic_units[mnemonic] = {}
         self._mnemonic_units[mnemonic][unit] = ranges
         for ra in ranges:
-            self._reverse_mnemonic_units[mnemonic][ra.unit] = unit
+            self._reverse_mnemonic_units[mnemonic][self.parse_units(ra.unit)] = unit # doesn't this override
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
+        unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
         # TODO: looking up the dimension would be nice
         mnemonic = pozo.deLASio(mnemonic)
         if mnemonic in self._reverse_mnemonic_units and unit in self._reverse_mnemonic_units[mnemonic]:
