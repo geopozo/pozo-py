@@ -1,9 +1,6 @@
-import warnings
 import ood
 import pozo
-import pozo.renderers as pzr
 import pozo.themes as pzt
-import traceback
 
 
 class Axis(ood.Item, pzt.Themeable):
