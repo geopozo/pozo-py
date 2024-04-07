@@ -373,7 +373,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 else: descr = descriptions
             elif trace.original_data and 'descr' in trace.original_data: descr = trace.origina_data['descr']
             elif trace.original_data and 'description' in trace.original_data: descr = trace.origina_data['description']
-            else: value = ""
+            else: descr = ""
 
             lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
             lasio_list.append(lasio_obj)
