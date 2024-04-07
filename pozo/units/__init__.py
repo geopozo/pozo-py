@@ -75,7 +75,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=None):
     # hate this interface
     # it has to be pulled twice because we need internal info for checklas
     with warnings.catch_warnings():
-        warnings.filterwarnings("error", category=MissingLasUnitWarning) # this doesn't seem to be working
+        warnings.filterwarnings("error", category=MissingLasUnitWarning)
         d = chr(0X1e) # delimiter
         col_names = f"mnemonic{d}las unit{d}pozo mapping{d}confidence{d}parsed{d}description{d}min{d}med{d}max{d}#NaN"
         result = [col_names] if HTML_out else []
