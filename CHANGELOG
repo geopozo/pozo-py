@@ -1,4 +1,9 @@
-v0.9.17
+v0.9.18:
+ - We now can make movies of depth ranges with crossplots
+ - We export to las files and curve items
+ - We add some units from other las files
+ - We also now treat "string" as HasLog() instead of Name
+v0.9.17:
  - Add license (non-commerical use)
  - Update deps
 v0.9.16:
