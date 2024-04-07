@@ -57,7 +57,6 @@ class LasRegistry(pint.UnitRegistry):
         unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
         # TODO: looking up the dimension would be nice
         mnemonic = pozo.deLASio(mnemonic)
-        display(self._reverse_mnemonic_units)
         if mnemonic in self._reverse_mnemonic_units and unit in self._reverse_mnemonic_units[mnemonic]:
             return self._reverse_mnemonic_units[mnemonic][unit]
         else: return None

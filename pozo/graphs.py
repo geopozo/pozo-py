@@ -1,13 +1,13 @@
 import warnings
 import lasio # quiero quitar esto pero en el futuro
-import os
 import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import ood
-import ood.exceptions as ooderr
 
+import re
+desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 WELLY_WELL_TYPE = "<class 'welly.well.Well'>"
 WELLY_PROJECT_TYPE = "<class 'welly.project.Project'>"
@@ -349,7 +349,8 @@ class Graph(ood.Observer, pzt.Themeable):
             data = trace.get_data()
             mnemonic = trace.get_mnemonic()
 
-            if units: # accepting anything other than an array doesn't make sense, how often will all unit be the same
+            # LAS objects resolve False, not sure why
+            if units: # accepting anything other than an array doesn't make sense, how often will all unit be the same - AP
                 # pzm (pozomath) is a private repository, public users of this repository won't have access to it - AP
                 if not pozo.verify_array_len(units, traces):
                     raise ValueError(f"If you are using an array for units, it must be the same size as traces: {len(traces)}")
@@ -362,7 +363,9 @@ class Graph(ood.Observer, pzt.Themeable):
                 if not pozo.verify_array_len(values, traces):
                     raise ValueError("If you are using an array for values, it must be the same size as traces")
                 value = values[index]
-            elif trace.original_data and 'value' in trace.original_data: value = trace.origina_data['value']
+            elif ( trace.original_data is not None and
+                  ( 'value' in trace.original_data or hasattr(trace.original_data, 'value') ) ):
+                value = trace.original_data['value']
             else: value = ""
 
             if descriptions:
@@ -371,9 +374,19 @@ class Graph(ood.Observer, pzt.Themeable):
                         raise ValueError("If you are using an array for description, it must be the same size as traces")
                     descr = descriptions[index]
                 else: descr = descriptions
-            elif trace.original_data and 'descr' in trace.original_data: descr = trace.origina_data['descr']
-            elif trace.original_data and 'description' in trace.original_data: descr = trace.origina_data['description']
-            else: descr = ""
+            elif ( trace.original_data is not None and
+                  ( 'descr' in trace.original_data or hasattr(trace.original_data, 'descr') ) ):
+                print("Found")
+                descr = trace.original_data['descr']
+                find_desc = desc_wo_num.findall(descr)
+                descr = find_desc[0] if len(find_desc) > 0 else descr
+            elif ( trace.original_data is not None and
+                  ( 'description' in trace.original_data or hasattr(trace.original_data, 'description') ) ):
+                descr = trace.original_data['description']
+                find_desc = desc_wo_num.findall(descr)
+                descr = find_desc[0] if len(find_desc) > 0 else descr
+            else:
+                descr = ""
 
             lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
             lasio_list.append(lasio_obj)
