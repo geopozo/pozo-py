@@ -331,9 +331,9 @@ class Graph(ood.Observer, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
-    # to_las_CurveItem use 5 parameters to can transform data from pozo.Trace
+    # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
-    def to_las_CurveItem(self, *selectors, **kwargs):
+    def to_las_CurveItems(self, *selectors, **kwargs):
         values = kwargs.pop('values', None)
         descriptions = kwargs.pop('descriptions', None) # Mix of plural and singular AP
         units = kwargs.pop('units', None)
