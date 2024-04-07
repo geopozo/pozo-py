@@ -6,6 +6,8 @@ import pozo
 os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
 import pint # noqa
 
+class MissingLasUnitWarning(UserWarning):
+    pass
 
 class UnitException(Exception):
     pass
@@ -86,7 +88,7 @@ class LasRegistry(pint.UnitRegistry):
             try:
                 return self.parse_units(resolved.unit)
             except Exception as e:
-                warnings.warn(f"Couldn't parse unit: {e}")
+                warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
                 return None
         else:
             try:
@@ -94,7 +96,7 @@ class LasRegistry(pint.UnitRegistry):
                 try:
                     return self.parse_units(unit)
                 except Exception as e:
-                    warnings.warn(f"Couldn't parse unit: {e}")
+                    warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
                     return None
             except pint.UndefinedUnitError as e:
                 raise UnitException(f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found.") from e
