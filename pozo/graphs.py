@@ -436,4 +436,9 @@ class Graph(ood.Observer, pzt.Themeable):
         else:
             raise ValueError("Avaialble strategies are merge, add, and pozo-only")
 
+        for i, curve in enumerate(template.curves):
+            descr = curve.descr
+            find_desc = desc_wo_num.findall(descr)
+            curve.descr = str(i + 1) + " " + find_desc[0] if len(find_desc) > 0 else descr
+
         return template
