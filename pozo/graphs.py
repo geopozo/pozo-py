@@ -5,7 +5,6 @@ import pozo
 import pozo.units as pzu
 import pozo.renderers as pzr
 import pozo.themes as pzt
-import pozomath as pzm
 import ood
 import ood.exceptions as ooderr
 
@@ -21,7 +20,6 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def __init__(self, *args, **kwargs):
 
-        self.original_data = None
         self._name = kwargs.pop("name", "unnamed") # why do graphs have a name? for a title?
         self.renderer = kwargs.pop("renderer", pzr.Plotly())
         self.xp = kwargs.pop("xp", pzr.CrossPlot())
@@ -143,6 +141,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 unit=unit,
                 depth_unit=yaxis_unit,
             )
+            trace.original_data = curve
             self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
@@ -217,7 +216,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 unit=unit,
                 depth_unit=depth_unit,
             )
-
+            trace.original_data = curve
             self.add_tracks(trace)
         if include and len(include) != 0:
             self.reorder_all_tracks(include)
@@ -332,68 +331,49 @@ class Graph(ood.Observer, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
-    # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
+    # to_las_CurveItem use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
-    def to_las_CurveItems(self, *selectors,**kwargs):
-        template = kwargs.pop("template", None)
+    def to_las_CurveItem(self, *selectors, **kwargs):
         values = kwargs.pop('values', None)
-        description = kwargs.pop('description', None)
-        units = kwargs.pop('unit', None)
+        descriptions = kwargs.pop('descriptions', None) # Mix of plural and singular AP
+        units = kwargs.pop('units', None)
 
-        if template is not None and str(type(template)) != LAS_TYPE:
-            if os.path.splitext(template)[1].lower() == ".las":
-                template = lasio.read(template)
-            else:
-                raise ValueError("If you use a template, it must be either a lasio.LASFile object or a .LAS file")
+        # Didn't have the original_data we include in all the traces - AP
 
-        if len(self.get_traces()) == 0:
-            raise TypeError("Pozo can not finds traces in the input, please verify if is a pozo object and if this has information")
 
-        traces = self.get_traces(*selectors)
+        traces = self.get_traces(*selectors) # Check after collecting, more complete - AP
+        if not traces: raise KeyError("It appears there are no traces to add, aborting") # KeyError - AP
 
         lasio_list = []
-        for index,trace in enumerate(traces):
+        for index, trace in enumerate(traces):
             data = trace.get_data()
             mnemonic = trace.get_mnemonic()
 
-            if units:
-                if pozo.is_array(units):
-                    if not pzm.verify_array_len(units, traces): raise ValueError(
-                        "If you are using an array for units, it must be the same size as traces"
-                        )
-                    unit = units[index]
-                else: unit = units
+            if units: # accepting anything other than an array doesn't make sense, how often will all unit be the same
+                # pzm (pozomath) is a private repository, public users of this repository won't have access to it - AP
+                if not pozo.verify_array_len(units, traces):
+                    raise ValueError(f"If you are using an array for units, it must be the same size as traces: {len(traces)}")
+                unit = units[index]
             else:
                 unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = trace.get_unit()
 
             if values:
-                if pozo.is_array(values):
-                    if not pzm.verify_array_len(values, traces): raise ValueError(
-                        "If you are using an array for values, it must be the same size as traces"
-                        )
-                    value = values[index]
-                else: value = values
-            elif self.original_data:
-                value = self.original_data.curves[mnemonic].value if mnemonic in self.original_data.curves else ""
-            elif template:
-                value = template.curves[mnemonic].value if mnemonic in template.curves else ""
-            else:
-                value = ""
+                if not pozo.verify_array_len(values, traces):
+                    raise ValueError("If you are using an array for values, it must be the same size as traces")
+                value = values[index]
+            elif trace.original_data and 'value' in trace.original_data: value = trace.origina_data['value']
+            else: value = ""
 
-            if description:
-                if pozo.is_array(description):
-                    if not pzm.verify_array_len(description, traces): raise ValueError(
-                        "If you are using an array for description, it must be the same size as traces"
-                        )
-                    descr = description[index]
-                else: descr = description
-            elif self.original_data:
-                descr = self.original_data.curves[mnemonic].descr if mnemonic in self.original_data.curves else ""
-            elif template:
-                descr = template.curves[mnemonic].descr if mnemonic in template.curves else ""
-            else:
-                descr = ""
+            if descriptions:
+                if pozo.is_array(descriptions):
+                    if not pozo.verify_array_len(descriptions, traces):
+                        raise ValueError("If you are using an array for description, it must be the same size as traces")
+                    descr = descriptions[index]
+                else: descr = descriptions
+            elif trace.original_data and 'descr' in trace.original_data: descr = trace.origina_data['descr']
+            elif trace.original_data and 'description' in trace.original_data: descr = trace.origina_data['description']
+            else: value = ""
 
             lasio_obj = lasio.CurveItem(mnemonic=mnemonic, unit=unit, value=value, descr=descr, data=data)
             lasio_list.append(lasio_obj)
@@ -403,54 +383,36 @@ class Graph(ood.Observer, pzt.Themeable):
     # to_las use 2 parameters to can transform data from pozo object or
     # lasio.CurveItem to a lasio.LASFile
     def to_las(self, *selectors, **kwargs):
-        template = kwargs.pop("template", None)
+        template = kwargs.pop("template", lasio.LASFile()) #
         strategy = kwargs.pop("strategy", "pozo-only")
 
-        if self.original_data: template = self.original_data
-        if template is not None:
-            if str(type(template)) == LAS_TYPE:
-                las = template
-            elif os.path.splitext(template)[1].lower() == ".las":
-                las = lasio.read(template)
-            else:
-                raise ValueError(
-                    "If you use a template or original_data, it must be either a lasio.LASFile object or a .LAS file"
-                )
-        else:
-            las = lasio.LASFile()
+        # Bad vibes feeding random stuff to a .read(file), also increasing surface area of attack and dependency - AP
+        # TypeError, not value error - AP
+        if template and str(type(template)) != LAS_TYPE:
+            raise TypeError("Templates must be a lasio LAS Object")
 
-        if template:
-            curves = self.to_las_CurveItems(*selectors, template=template, **kwargs)
-        else:
-            curves = self.to_las_CurveItems(*selectors, **kwargs)
+        pozo_curves = self.to_las_CurveItems(*selectors, plate=template, **kwargs)
 
         if strategy == "merge":
-            if template is None:
-                raise ValueError(
-                    "If you do not have a template or original_data, you must use the option pozo-only"
-                )
-
-            for curve in curves:
-                if curve.mnemonic in las.curves:
-                    las.delete_curve(curve.mnemonic)
-                    las.append_curve_item(curve)
-                elif curve.mnemonic not in las.curves:
-                    las.append_curve_item(curve)
+            double_mnemonics = {}
+            for curve in template.curves:
+                if curve.original_mnemonic != curve.mnemonic:
+                    double_mnemonics[curve.original_mnemonic] = True
+            for curve in pozo_curves:
+                if curve.mnemonic in double_mnemonics:
+                    warnings.warn(f"Ambiguous merge: there are several curves in this template with mnemonic {curve.mnemonic}. Please delete one or more manually with las.delete_curve")
+                if curve.mnemonic in template.curves:
+                    template.delete_curve(curve.mnemonic)
+                template.append_curve_item(curve)
 
         elif strategy == "add":
-            if template is None:
-                raise ValueError(
-                    "If you do not have a template or original_data, you must use the option pozo-only"
-                )
-            for curve in curves:
-                las.append_curve_item(curve)
+            for curve in pozo_curves:
+                template.append_curve_item(curve)
 
-        elif strategy == "pozo-only":
-            if template:
-                raise ValueError(
-                    "If you have a template or original_data, you must use the options merge or add"
-                )
-            for curve in curves:
-                las.append_curve_item(curve)
+        elif strategy == "pozo-only": # this isn't correct, you need to delete curves AP
+            for curve in template.curves:
+                template.delete_curve(curve.mnemonic)
+            for curve in pozo_curves:
+                template.append_curve_item(curve)
 
-        return las
+        return template
