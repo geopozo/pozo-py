@@ -1,5 +1,6 @@
 import numpy as np
 import pint
+import warnings
 from IPython.display import HTML, display
 from io import StringIO
 import pandas as pd
@@ -61,7 +62,7 @@ registry.add_las_map('URAN', ''    , percent_general)
 # also want it to point to posts
 
 desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
-red_low = re.compile(r'<td>(.+)?LOW(.+)?</td>')
+red_low = re.compile(r'<td>(.+)?(?:LOW|NONE)(.+)?</td>')
 orange_medium = re.compile(r'<td>(.+)?MEDIUM(.+)?</td>')
 
 def check_las(las, registry=registry, HTML_out=True):
@@ -117,4 +118,8 @@ def check_las(las, registry=registry, HTML_out=True):
 
 # Just a shorcut to make the API nice
 def parse_unit_from_curve(curve, registry=registry):
-    return registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+    try:
+        return registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+    except Exception as e:
+        warnings.warn(f"Couldn't parse unit: {e}")
+        return None

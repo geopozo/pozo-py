@@ -83,14 +83,19 @@ class LasRegistry(pint.UnitRegistry):
         except MissingRangeError as e:
             warnings.warn(str(e))
         if resolved is not None:
-            return self.parse_units(resolved.unit)
+            try:
+                return self.parse_units(resolved.unit)
+            except Exception as e:
+                warnings.warn(f"Couldn't parse unit: {e}")
+                return None
         else:
             try:
                 if not unit or unit == "": raise UnitException("Empty unit not allowed- please map it")
                 try:
                     return self.parse_units(unit)
                 except Exception as e:
-                    raise UnitException(f"Can't parse '{unit}'") from e
+                    warnings.warn(f"Couldn't parse unit: {e}")
+                    return None
             except pint.UndefinedUnitError as e:
                 raise UnitException(f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found.") from e
 
