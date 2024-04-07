@@ -52,6 +52,11 @@ class HasLog(ood.selectors.Selector):
                     break
         return ret_items
 
+# verify_array_len use three inputs to verify the lenght in the data
+def verify_array_len(constant, data):
+    if is_array(constant) and len(constant) != len(data): return False
+    return True
+
 def str_to_HasLog(argument):
     if isinstance(argument, (list, tuple)):
         ret = []
