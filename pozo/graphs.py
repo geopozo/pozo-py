@@ -359,6 +359,8 @@ class Graph(ood.Observer, pzt.Themeable):
                 unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = trace.get_unit()
 
+            unit = unit.upper() # las standard all uppercase
+
             if values:
                 if not pozo.verify_array_len(values, traces):
                     raise ValueError("If you are using an array for values, it must be the same size as traces")
