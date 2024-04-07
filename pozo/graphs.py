@@ -331,6 +331,13 @@ class Graph(ood.Observer, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
+
+    def depth_to_las_CurveItem(self, trace):
+        mnemonic = "DEPT"
+        unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
+        descr = "Depth"
+        return lasio.CurveItem(mnemonic=mnemonic, unit=unit, value="", descr=descr, data=trace.get_depth())
+
     # to_las_CurveItems use 5 parameters to can transform data from pozo.Trace
     # to a list with the data as lasio.CurveItem
     def to_las_CurveItems(self, *selectors, **kwargs):
@@ -357,7 +364,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 unit = units[index]
             else:
                 unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
-                if unit is None: unit = trace.get_unit()
+                if unit is None: unit = str(trace.get_unit())
 
             unit = unit.upper() # las standard all uppercase
 
@@ -405,6 +412,8 @@ class Graph(ood.Observer, pzt.Themeable):
         # TypeError, not value error - AP
         if template and str(type(template)) != LAS_TYPE:
             raise TypeError("Templates must be a lasio LAS Object")
+        else:
+            strategy = "pozo-only"
 
         pozo_curves = self.to_las_CurveItems(*selectors, plate=template, **kwargs)
 
@@ -431,7 +440,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 all_curves.append(curve.mnemonic)
             for mnemonic in all_curves:
                 template.delete_curve(mnemonic)
-            for curve in pozo_curves:
+            for curve in [ self.depth_to_las_CurveItem(self.get_traces(*selectors)[0]) ]+ pozo_curves:
                 template.append_curve_item(curve)
         else:
             raise ValueError("Avaialble strategies are merge, add, and pozo-only")
