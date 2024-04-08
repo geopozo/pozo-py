@@ -1,3 +1,6 @@
+v0.9.19
+ - Ood now includes exclude to filter out selectors
+ - There is a declare option for using a dictionary to describe graphs from las files
 v0.9.18:
  - We now can make movies of depth ranges with crossplots
  - We export to las files and curve items

@@ -11,9 +11,9 @@ license = {file = "LICENSE.txt"}
 description = "Help visualizing well log data - Herramienta para visualizar registros de pozos"
 readme = "README.md"
 requires-python = ">=3.9"
-version = "0.9.18"
+version = "0.9.19"
 dependencies = [
- "ood >=1.0.6",
+ "ood >=1.0.7",
  "plotly >=5.18.0",
  "colour >= 0.1.5",
  "pint >= 0.23",
