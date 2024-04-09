@@ -260,12 +260,12 @@ class Plotly(pzr.Renderer):
         # we do a lot of Y calculations in the first run
         max_axis_stack = 0
         track_index = -1
-        for track in graph.get_tracks():
-            track_index += 1
+        for track in graph.get_tracks(): # track stack TODO NOW
             if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0: continue
+            track_index += 1
             if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
             posmap['tracks_axis_numbers'].append([])
-            for axis in track.get_axes():
+            for axis in track.get_axes(): # axis stack TODO NOW
                 if pzt.ThemeStack(track.get_theme())['hidden']: continue
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
