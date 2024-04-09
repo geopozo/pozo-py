@@ -285,6 +285,25 @@ class Graph(ood.Observer, pzt.Themeable):
         self.pop_tracks(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
         self.add_tracks(*tracks, **kwargs)
 
+    # TODO: exclude and
+    def replace_traces(self, *traces, **kwargs):
+        if 'exclude' in kwargs: raise RuntimeError("exclude is nto valid for replace traces")
+        mnemonics = {}
+        for trace in traces:
+            if trace.get_mnemonic() in mnemonics:
+                raise ValueError("Please don't use replace_traces to replace or add two traces with the same mnemonic. It's ambiguous. Pease delete, add, and combine specifically what you want")
+            mnemonics[trace.get_mnemonic()] = trace
+        total_popped = {}
+        for axis in self.get_axes():
+            popped = axis.pop_traces(*mnemonics, strict_index=False) # we've removed all the traces that we want to replace
+            for trace_popped in popped: # for each that we've removed, add the replacement
+                total_popped[trace_popped.get_mnemonic()] = True
+                axis.add_traces(mnemonics[trace_popped.get_mnemonic()])
+        for trace in traces:
+            if trace.get_mnemonic() not in total_popped:
+                self.add_tracks(trace) # create new track for those that weren't repaced
+
+
     # add_items
     def add_tracks(self, *tracks, **kwargs):  # axis can take axes... and other axis?
         good_tracks = self._check_types(*tracks)
