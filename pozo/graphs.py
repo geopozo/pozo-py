@@ -307,8 +307,8 @@ class Graph(ood.Observer, pzt.Themeable):
         return super().pop_items(*selectors, **kwargs)
 
     def combine_tracks(self, selector, *selectors):
-        selectors = pozo.str_to_HasLog(selectors)
         selector = pozo.str_to_HasLog(selector)
+        selectors = pozo.str_to_HasLog(selectors)
         sink = self.get_track(selector, strict_index=False)
         if sink is None:
             if isinstance(selector, (pozo.Trace, pozo.Axis, pozo.Track)):
@@ -319,9 +319,9 @@ class Graph(ood.Observer, pzt.Themeable):
                     "The first argument must be a track that exists or a new track track/axis/trace to add"
                 )
         for sel in selectors:
-            if not self.has_track(sel) and isinstance(sel, pozo.Track):
+            if isinstance(sel, pozo.Track) and not self.has_track(sel):
                 self.add_tracks(sel)
-        source = self.pop_tracks(*selectors, sort=False)
+        source = self.pop_tracks(*selectors, sort=False, exclude=[sink])
         for track in source:
             if track == sink: continue
             axes = track.pop_axes()

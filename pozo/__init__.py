@@ -51,6 +51,8 @@ class HasLog(ood.selectors.Selector):
                 if item.has_item(self):
                     ret_items.append(item)
         return ret_items
+    def __repr__(self):
+        return f"HasLog({self.mnemonic})"
 
 # verify_array_len use three inputs to verify the lenght in the data
 def verify_array_len(constant, data):
