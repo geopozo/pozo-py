@@ -323,6 +323,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 self.add_tracks(sel)
         source = self.pop_tracks(*selectors, sort=False)
         for track in source:
+            if track == sink: continue
             axes = track.pop_axes()
             sink.add_axes(axes)
 
