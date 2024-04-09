@@ -43,7 +43,7 @@ class Axis(ood.Item, pzt.Themeable):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_trace(self, selector, **kwargs):
+    def get_trace(self, selector=None, **kwargs):
         selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 

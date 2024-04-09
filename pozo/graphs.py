@@ -295,7 +295,7 @@ class Graph(ood.Observer, pzt.Themeable):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_track(self, selector, **kwargs):
+    def get_track(self, selector=None, **kwargs):
         selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
@@ -344,7 +344,7 @@ class Graph(ood.Observer, pzt.Themeable):
             all_axes.extend(track.get_axes(*selectors, **kwargs))
         return all_axes
 
-    def get_axis(self, selector, **kwargs):
+    def get_axis(self, selector=None, **kwargs):
         ret = self.get_axes(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]
@@ -356,7 +356,7 @@ class Graph(ood.Observer, pzt.Themeable):
             all_traces.extend(track.get_traces(*selectors, **kwargs))
         return all_traces
 
-    def get_trace(self, selector, **kwargs):
+    def get_trace(self, selector=None, **kwargs):
         ret = self.get_traces(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]
