@@ -31,6 +31,13 @@ class Axis(ood.Item, pzt.Themeable):
                 raw_return.append(trace)
         return raw_return
 
+    def replace_traces(self, *traces, **kwargs):
+       mnemonics = []
+       for trace in traces:
+           mnemonics.append(trace.get_mnemonic())
+       self.pop_traces(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
+       self.add_traces(*traces, **kwargs)
+
     # add_items
     def add_traces(self, *traces, **kwargs):
         good_traces = self._check_types(*traces)

@@ -266,7 +266,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 raw_return.extend(self._check_types(*tracks))
             elif not isinstance(track, accepted_types):
                 raise TypeError(
-                    "Axis.add_tracks() only accepts axes, tracks, and traces: pozo objects"
+                    f"Axis.add_tracks() only accepts axes, tracks, and traces: pozo objects, not {type(track)}"
                 )
             intermediate = track
             if isinstance(intermediate, pozo.Trace):
@@ -277,11 +277,13 @@ class Graph(ood.Observer, pzt.Themeable):
                 raw_return.append(intermediate)
         return raw_return
 
-    # add_items
-    def add_axes(self, *axes, **kwargs):
-        good_axes = self._check_types(*axes)
-        super().add_items(*good_axes, **kwargs)
-        return good_axes
+    def replace_tracks(self, *tracks, **kwargs):
+        mnemonics = []
+        for track in tracks:
+            for trace in track.get_traces():
+                mnemonics.append(trace.get_mnemonic())
+        self.pop_tracks(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
+        self.add_tracks(*tracks, **kwargs)
 
     # add_items
     def add_tracks(self, *tracks, **kwargs):  # axis can take axes... and other axis?
