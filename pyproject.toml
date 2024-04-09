@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 version = "0.9.19"
 dependencies = [
- "ood >=1.0.7",
+ "ood >=1.0.8",
  "plotly >=5.18.0",
  "colour >= 0.1.5",
  "pint >= 0.23",
