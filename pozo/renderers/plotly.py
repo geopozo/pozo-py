@@ -145,10 +145,10 @@ class Plotly(pzr.Renderer):
         del self.template["plotly"]["xaxis_template"]
         self.last_fig = None
 
-    def _hidden(self, themes):
+    def _hidden(self, themes, override=False):
         hidden = themes["hidden"]
-        if hidden: themes.pop()
-        return hidden
+        if hidden or override: themes.pop()
+        return hidden or override
 
    # TODO, units (find nearest with units too)
     def _process_graph_note(self, note, x0, x1, yref):
@@ -256,21 +256,40 @@ class Plotly(pzr.Renderer):
             'y_bottom': self.template['y_annotation_gutter']/layout['height'],
             }
 
-
+        effectively_hidden = {}
         # we do a lot of Y calculations in the first run
         max_axis_stack = 0
         track_index = -1
-        for track in graph.get_tracks(): # track stack TODO NOW
-            if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0: continue
+        for track in graph.get_tracks():
+            if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0:
+                effectively_hidden[id(track)] = True
+                continue
             track_index += 1
             if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
             posmap['tracks_axis_numbers'].append([])
-            for axis in track.get_axes(): # axis stack TODO NOW
-                if pzt.ThemeStack(track.get_theme())['hidden']: continue
+            axes_exist = False
+            for axis in track.get_axes():
+                if pzt.ThemeStack(axis.get_theme())['hidden']:
+                    effectively_hidden[id(axis)] = True
+                    continue
+                traces_exist = False
+                for trace in axis.get_traces():
+                    if not pzt.ThemeStack(trace.get_theme())['hidden']: traces_exist = True
+                    else:
+                        effectively_hidden[id(trace)] = True
+                if not traces_exist:
+                    effectively_hidden[id(axis)] = True
+                    continue
+                axes_exist = True
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
-            max_axis_stack = max(len(posmap['tracks_axis_numbers'][-1]), max_axis_stack)
-        if not max_axis_stack: raise ValueError("Didn't find an axes, not going to render")
+            if not axes_exist:
+                effectively_hidden[id(track)] = True
+                if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].pop()
+                posmap['tracks_axis_numbers'].pop()
+                track_index -= 1
+            max_axis_stack = max(len(posmap['tracks_axis_numbers'][-1]), max_axis_stack) if track_index != -1 else 0
+        if not max_axis_stack: raise ValueError("Didn't find any axes, not going to render")
         if max_axis_stack == 1: posmap['axis_line_positions'] = [1]
         elif max_axis_stack > 1:
             for i in reversed(range(max_axis_stack+1)):
@@ -300,7 +319,7 @@ class Plotly(pzr.Renderer):
         track_index = -1 # we can't use enumerate() becuase sometimes we skip iterations in the loop
         for track in graph.get_tracks():
             themes.append(track.get_theme())
-            if self._hidden(themes) or len(track) == 0: continue
+            if self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0: continue
             track_index += 1
             if track_index and posmap['tracks_axis_numbers'][track_index] == 'depth': # don't do it for 0
                 track_index +=1
@@ -310,7 +329,7 @@ class Plotly(pzr.Renderer):
             axis_index = -1 # same story with track_index, need to skip iterations, enumerate() won't work
             for axis in track.get_axes():
                 themes.append(axis.get_theme())
-                if self._hidden(themes): continue
+                if self._hidden(themes, id(axis) in effectively_hidden): continue
                 axis_index += 1
 
                 if themes["range_unit"] is not None:
@@ -320,7 +339,7 @@ class Plotly(pzr.Renderer):
                 data_unit = None
                 for trace in axis:
                     themes.append(trace.get_theme())
-                    if self._hidden(themes): continue
+                    if self._hidden(themes, id(trace) in effectively_hidden): continue
 
                     if data_unit is not None and data_unit != trace.get_unit():
                         raise ValueError(f"Data being displayed on one axis must be exactly the same unit. {data_unit} is not {trace.get_unit()}")
@@ -429,6 +448,7 @@ class Plotly(pzr.Renderer):
         else:
             layout[tracks_y_axis]['range'] = [ymax, ymin]
         layout['width']=posmap['pixel_width']
+        posmap['effectively_hidden'] = effectively_hidden
         self._last_posmap = posmap
 
 
@@ -458,9 +478,11 @@ class Plotly(pzr.Renderer):
                 themes.append(axis.get_theme())
                 if self._hidden(themes): continue
                 all_traces = []
+                traces_exist = False
                 for trace in axis:
                     themes.append(trace.get_theme())
                     if self._hidden(themes): continue
+                    traces_exist = True
                     color = themes["color"]
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
@@ -476,8 +498,9 @@ class Plotly(pzr.Renderer):
                             showlegend = False,
                         ))
                     themes.pop()
-                num_axes += 1
-                traces.extend(all_traces)
+                if traces_exist:
+                    num_axes += 1
+                    traces.extend(all_traces)
                 themes.pop()
             themes.pop()
         return traces
