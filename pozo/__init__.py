@@ -47,11 +47,9 @@ class HasLog(ood.selectors.Selector):
             if hasattr(item, 'get_mnemonic'):
                 if item.get_mnemonic() == self.mnemonic:
                     ret_items.append(item)
-                    break
             if isinstance(item, ood.Observer):
                 if item.has_item(self):
                     ret_items.append(item)
-                    break
         return ret_items
 
 # verify_array_len use three inputs to verify the lenght in the data
