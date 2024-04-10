@@ -505,6 +505,36 @@ class Plotly(pzr.Renderer):
             themes.pop()
         return traces
 
+
+    def summarize_curves(self, graph, selectors=None, **kwargs):
+        depth = kwargs.get("depth", None)
+        traces = set()
+        if selectors is None or not selectors:
+            traces.update(graph.get_traces())
+        else:
+            for selector in selectors:
+                if selector is None:
+                    traces.update(graph.get_traces())
+                if isinstance(selector, pozo.Trace):
+                    traces.add(selector)
+                elif isinstance(selector, (pozo.Axis, pozo.Track, pozo.Graph)):
+                    traces.update(selector.get_traces())
+                else:
+                    traces.update(graph.get_traces(selector))
+        display(graph)
+        display(depth)
+        display(selectors)
+        display(traces)
+        # lets create a new graph
+        # lets store posmap
+        # lets run get_layout
+        # lets replace posmap
+        # lets print posmap
+        # then lets improve posmap in layout and get it to a point we like
+        # lets add a with_unit to data and simplify evertyhing there
+
+
+
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
         xp_depth = kwargs.pop("xp_depth", None)
         xp_depth_by_index = kwargs.pop("xp_depth_by_index", None)

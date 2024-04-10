@@ -82,6 +82,9 @@ class Graph(ood.Observer, pzt.Themeable):
             self.reorder_all_tracks(include)
         self.depth_notes = {}
 
+    def summarize_curves(self, *selectors, **kwargs):
+        self.renderer.summarize(self, selectors=selectors, **kwargs)
+
     def render(self, **kwargs):
         xp = kwargs.get("xp", None)
         if xp is True: # noqa this can also but something that evals to True but is not exactly true
