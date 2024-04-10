@@ -283,6 +283,8 @@ class Trace(ood.Observed, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
+    def __repr__(self):
+        return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
 
 class Data(Trace):
     def __init__(self, data, **kwargs):
