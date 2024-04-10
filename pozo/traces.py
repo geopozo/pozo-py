@@ -168,7 +168,7 @@ class Trace(ood.Observed, pzt.Themeable):
                 )
             ]
         if force_unit:
-            return pint.Quantity(data, self.get_unit()) # we could be checking first TODO
+            return pzu.Quantity(data, self.get_unit()) # we could be checking first TODO
         else: return data
 
     def set_depth(self, depth, depth_unit=None):
@@ -196,7 +196,7 @@ class Trace(ood.Observed, pzt.Themeable):
                 )
             ]
         if force_unit:
-            return pint.Quantity(depth, self.get_depth_unit())
+            return pzu.Quantity(depth, self.get_depth_unit())
         else:
             return depth
 

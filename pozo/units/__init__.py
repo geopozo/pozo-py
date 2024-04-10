@@ -11,7 +11,7 @@ import re
 
 
 registry = LasRegistry()
-Q = registry.Quantity # Overriding the registry and all this is a little weird
+Quantity = Q = registry.Quantity # Overriding the registry and all this is a little weird
 
 registry.define('gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI')
 registry.define("porosity_unit = percent = pu")

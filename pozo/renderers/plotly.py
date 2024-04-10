@@ -21,6 +21,10 @@ import pozo.units as pzu
 re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
 
+def clean_inf(nparray): # TODO: modifying user data, big loop, bad, better fix plotly
+    nparray[np.logical_or(nparray == -np.inf, nparray == np.inf)] = np.nan
+    return nparray
+
 def toTarget(axis):
     return axis[0] + axis[-1]
 
@@ -489,7 +493,7 @@ class Plotly(pzr.Renderer):
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         all_traces.append(go.Scattergl(
-                            x=trace.get_data(),
+                            x=clean_inf(trace.get_data()),
                             y=trace.get_depth(),
                             mode='lines', # nope, based on data w/ default
                             line=dict(color=color, width=1), # needs to be better, based on data
@@ -538,21 +542,23 @@ class Plotly(pzr.Renderer):
         traces = temp_graph.renderer.get_traces(temp_graph, xstart=1, yaxis='yaxis1')
         for i, axis in posmap['axis_number_to_Axis'].items():
             trace = axis.get_trace()
-            new_trace = go.Violin(
-                    x=trace.get_data(),
-                    points=False, #'all',
-                    box_visible=False,
-                    name="",
-                    hovertemplate="%{x}",
-                    hoveron="kde",
-                    xaxis=f"x{i}",
-                    yaxis=f"y{i+1}",
-                    scalegroup=f'y{i+1}',
-                    line_color='black',
-                    fillcolor='rgba(0,0,0, .3)',
-                    opacity=.7,
-                    showlegend=False,
-                    )
+            with warnings.catch_warnings():
+                warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
+                new_trace = go.Violin(
+                        x=trace.get_data(),
+                        points='outliers', #'all',
+                        box_visible=False,
+                        name="",
+                        hovertemplate="%{x}",
+                        hoveron="kde",
+                        xaxis=f"x{i}",
+                        yaxis=f"y{i+1}",
+                        scalegroup=f'y{i+1}',
+                        line_color='black',
+                        fillcolor='rgba(0,0,0, .3)',
+                        opacity=.7,
+                        showlegend=False,
+                        )
             traces.append(new_trace)
             layout[f'yaxis{i+1}'] = dict(
                     domain=(0, .2),
