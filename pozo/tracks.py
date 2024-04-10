@@ -54,7 +54,7 @@ class Track(ood.Item, pzt.Themeable):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_axis(self, selector=None, **kwargs):
+    def get_axis(self, selector=0, **kwargs):
         selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
@@ -83,7 +83,7 @@ class Track(ood.Item, pzt.Themeable):
             ret_traces.extend(axis.get_traces(*selectors, **kwargs))
         return ret_traces
 
-    def get_trace(self, selector=None, **kwargs):
+    def get_trace(self, selector=0, **kwargs):
         ret = self.get_traces(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]
