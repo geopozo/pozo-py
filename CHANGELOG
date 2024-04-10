@@ -1,4 +1,6 @@
-v0.9.19
+v0.9.20:
+ - add a "sumarize" function for printing violin kdes
+v0.9.19:
  - Ood now includes exclude to filter out selectors
  - There is a declare option for using a dictionary to describe graphs from las files
 v0.9.18:
