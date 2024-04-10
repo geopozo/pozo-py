@@ -254,6 +254,7 @@ class Plotly(pzr.Renderer):
             'axis_line_positions': [],
             'total_axes': int(xp is not None),
             'y_bottom': self.template['y_annotation_gutter']/layout['height'],
+            'axis_number_to_Axis': {},
             }
 
         effectively_hidden = {}
@@ -283,6 +284,7 @@ class Plotly(pzr.Renderer):
                 axes_exist = True
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
+                posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
             if not axes_exist:
                 effectively_hidden[id(track)] = True
                 if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].pop()
@@ -507,31 +509,65 @@ class Plotly(pzr.Renderer):
 
 
     def summarize_curves(self, graph, selectors=None, **kwargs):
+        traces = {}
+        def update(array):
+            for item in array:
+                if id(item) in traces: continue
+                traces[id(item)] = item
+        exclude = kwargs.get("exclude", None)
         depth = kwargs.get("depth", None)
-        traces = set()
+        height= kwargs.get("height", None)
+
         if selectors is None or not selectors:
-            traces.update(graph.get_traces())
+            update(graph.get_traces(exclude=exclude))
         else:
             for selector in selectors:
                 if selector is None:
-                    traces.update(graph.get_traces())
+                    update(graph.get_traces(exclude=exclude))
                 if isinstance(selector, pozo.Trace):
-                    traces.add(selector)
+                    update([selector])
                 elif isinstance(selector, (pozo.Axis, pozo.Track, pozo.Graph)):
-                    traces.update(selector.get_traces())
+                    update(selector.get_traces(exclude=exclude))
                 else:
-                    traces.update(graph.get_traces(selector))
-        display(graph)
-        display(depth)
-        display(selectors)
-        display(traces)
-        # lets create a new graph
-        # lets store posmap
-        # lets run get_layout
-        # lets replace posmap
-        # lets print posmap
-        # then lets improve posmap in layout and get it to a point we like
-        # lets add a with_unit to data and simplify evertyhing there
+                    update(graph.get_traces(selector, exclude=exclude))
+        temp_graph = pozo.Graph(list(traces.values()))
+        temp_graph.set_theme({"color": "black", "track_width": 300})
+        layout = temp_graph.renderer.get_layout(temp_graph, xp=None, depth=depth, height=height)
+        layout['yaxis1']['domain'] = (.2, layout['yaxis1']['domain'][1]) #
+        posmap = temp_graph.renderer._last_posmap
+        traces = temp_graph.renderer.get_traces(temp_graph, xstart=1, yaxis='yaxis1')
+        for i, axis in posmap['axis_number_to_Axis'].items():
+            trace = axis.get_trace()
+            new_trace = go.Violin(
+                    x=trace.get_data(),
+                    points=False, #'all',
+                    box_visible=False,
+                    name="",
+                    hovertemplate="%{x}",
+                    hoveron="kde",
+                    xaxis=f"x{i}",
+                    yaxis=f"y{i+1}",
+                    scalegroup=f'y{i+1}',
+                    line_color='black',
+                    fillcolor='rgba(0,0,0, .3)',
+                    opacity=.7,
+                    showlegend=False,
+                    )
+            traces.append(new_trace)
+            layout[f'yaxis{i+1}'] = dict(
+                    domain=(0, .2),
+                    anchor=f'x{i}',
+                    )
+
+
+
+        ret = go.FigureWidget(data=traces, layout=layout)
+        return ret
+        #TODO: make sure depth works
+        #TODO: properly scale by depth on depth changes
+        #TODO: add these to main plots
+        #TODO: deal with xp
+        #TODO: add NAN percentage (within depth)
 
 
 
@@ -556,7 +592,7 @@ class Plotly(pzr.Renderer):
         # this generates XP layout too, I don't love, would rather set axes
         # separating XP from here would be good but let's call it techdebt
         layout = self.get_layout(graph, xp=xp, depth=depth, **kwargs)
-
+        posmap = self._last_posmap
         # what arguments do we need here now
         traces = self.get_traces(graph, xstart=2 if xp else 1, yaxis='yaxis2' if xp else 'yaxis1', **kwargs)
         if xp is not None:
@@ -577,9 +613,11 @@ class Plotly(pzr.Renderer):
             return self.last_fig
         elif xp is None:
             self.last_fig = xpFigureWidget(data=traces, layout=layout)
+            self.last_fig._posmap = posmap
             self.last_fig._lead_axis = "yaxis1"
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp, depth_lock=depth_lock)
+            self.last_fig._posmap = posmap
             self.last_fig._lead_axis = "yaxis2"
             self.last_fig.link_depth_to(self.last_fig)
             xp.add_figure(self.last_fig)

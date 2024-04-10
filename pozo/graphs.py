@@ -83,7 +83,7 @@ class Graph(ood.Observer, pzt.Themeable):
         self.depth_notes = {}
 
     def summarize_curves(self, *selectors, **kwargs):
-        self.renderer.summarize(self, selectors=selectors, **kwargs)
+        return self.renderer.summarize_curves(self, selectors=selectors, **kwargs)
 
     def render(self, **kwargs):
         xp = kwargs.get("xp", None)
@@ -103,6 +103,7 @@ class Graph(ood.Observer, pzt.Themeable):
         self._name = name
 
     def process_data(self, *args, **kwargs):  # Add ways to add data
+        _no_loop = kwargs.pop("_no_list", False)
         for i, ar in enumerate(args):
             if str(type(ar)) == LAS_TYPE:
                 if kwargs['declare']:
@@ -121,6 +122,9 @@ class Graph(ood.Observer, pzt.Themeable):
                 self.add_welly_object(ar, **kwargs)
             elif isinstance(ar, (pozo.Trace, pozo.Axis, pozo.Track)):
                 self.add_tracks(ar)
+            elif isinstance(ar, (set, list, tuple)):
+                if _no_loop: raise RuntimeError(f"Found a list in a list to process, please don't pass any nested lists: {ar}")
+                self.process_data(*ar, **kwargs, _no_loop=True)
             else:
                 warnings.warn(
                     f"Unknown argument type passed: argument {i}, {type(ar)}. Ignored"
