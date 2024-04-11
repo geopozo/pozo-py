@@ -6,7 +6,7 @@ on:
 jobs:
   pypi-publish:
     name: Upload release to PyPI
-    if: github.ref == 'refs/head/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: pypi
