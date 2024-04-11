@@ -386,7 +386,7 @@ class Plotly(pzr.Renderer):
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
 
-                if axis_style is not None:
+                if scale_type is not None:
                     axis_style['type'] = scale_type
                     if scale_type == "log":
                         xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
@@ -524,7 +524,7 @@ class Plotly(pzr.Renderer):
         height= kwargs.get("height", None)
 
         if selectors is None or not selectors:
-            update(graph.get_traces(exclude=exclude))
+            update(graph.get_traces(exclude=exclude)) #exclude by position is buggy TODO
         else:
             for selector in selectors:
                 if selector is None:
