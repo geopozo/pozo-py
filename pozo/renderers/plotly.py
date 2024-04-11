@@ -196,6 +196,8 @@ class Plotly(pzr.Renderer):
         def _make_note(note, xref, yref, is_line): # if graph,
             annotation = dict(
                 text=note.text,
+                axref   = xref if xref != 'paper' else None,
+                ayref   =  yref if yref != 'paper' else None,
                 xref=xref, # could be domain or paper
                 x=1,
                 yref=yref,
@@ -282,6 +284,7 @@ class Plotly(pzr.Renderer):
             if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
             posmap['tracks_axis_numbers'].append([])
             axes_exist = True if stack['force'] else False
+            axis_index = -1
             for axis in track.get_axes():
                 if pzt.ThemeStack(axis.get_theme())['hidden']:
                     effectively_hidden[id(axis)] = True
@@ -294,7 +297,12 @@ class Plotly(pzr.Renderer):
                 if not traces_exist:
                     effectively_hidden[id(axis)] = True
                     continue
+                axis_index += 1
                 axes_exist = True
+                posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
+                posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
+                posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
+            if axis_index == -1 and stack['force']:
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
                 posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
@@ -447,7 +455,14 @@ class Plotly(pzr.Renderer):
         i = -1
         for axis in axes_styles:
             dummy = len(axis) == 0
-            if not dummy: i += 1
+            if dummy:
+                axis['visible'] = False
+                axis['showgrid'] = False
+                axis['zeroline'] = False
+                axis['showline'] = False
+                #axis['dragmode'] = False
+                axis['side'] = 'top'
+            i += 1
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
             else:
@@ -463,7 +478,7 @@ class Plotly(pzr.Renderer):
                     layout[tracks_y_axis]['position'] = (-4 + posmap['pixel_cursor'] + self.template['depth_axis_width'])/posmap['pixel_width']
                     posmap['tracks_x_domains'].append((posmap['pixel_cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
                     posmap['pixel_cursor'] += self.template['depth_axis_width']
-            if not dummy: layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
+            layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
         if not show_depth:
             layout[tracks_y_axis]['showticklabels'] = False
             layout[tracks_y_axis]['ticklen'] = 0
@@ -496,6 +511,24 @@ class Plotly(pzr.Renderer):
                                       left_margin = posmap['xp_end']+depth_margin)
             if s: layout['shapes'].append(s)
             if a: layout['annotations'].append(a)
+
+        themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
+        themes.append(graph.get_theme())
+        if self._hidden(themes): return {}
+        track_index = -1 + bool(posmap['with_xp'])# we can't use enumerate() becuase sometimes we skip iterations in the loop
+        for track in graph.get_tracks():
+            themes.append(track.get_theme())
+            if not themes['force'] and ( self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0 ): continue
+            track_index += 1
+            for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
+                s, a = self._process_note(note,
+                                          xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
+                                          yref=toTarget(posmap['track_y']))
+                if s: layout['shapes'].append(s)
+                if a: layout['annotations'].append(a)
+
+
+
         return layout
 
     def get_traces(self, graph, yaxis='y1', xstart=1, **kwargs):
@@ -508,7 +541,22 @@ class Plotly(pzr.Renderer):
         if self._hidden(themes): return []
         for track in graph:
             themes.append(track.get_theme())
-            if self._hidden(themes): continue
+            if not themes['force'] and self._hidden(themes): continue
+            if themes['force'] and len(track) == 0:
+                traces.append(
+                        go.Scatter(
+                            x=[0],
+                            y=[0],
+                            mode='markers',
+                            xaxis='x' + str(num_axes),
+                            yaxis=toTarget(yaxis),
+                            showlegend=False,
+                            opacity=0,
+                            hoverinfo='skip',
+                            )
+                        )
+                num_axes += 1
+                continue
             for axis in track:
                 themes.append(axis.get_theme())
                 if self._hidden(themes): continue
@@ -629,10 +677,6 @@ class Plotly(pzr.Renderer):
 
         ret = go.FigureWidget(data=traces, layout=layout)
         return ret
-        #TODO: make sure depth works
-        #TODO: properly scale by depth on depth changes
-        #TODO: add these to main plots
-        #TODO: deal with xp
         #TODO: add NAN percentage (within depth)
 
 
@@ -921,7 +965,15 @@ class CrossPlot():
         trace_definitions = []
         plotly_traces     = []
         for color in self.colors:
-            trace_definitions.append(self.create_trace(color, container_width=container_width, depth_range=depth_range, size=size, static=static, by_index=by_index))
+            trace_definitions.append(
+                    self.create_trace(
+                        color,
+                        container_width=container_width,
+                        depth_range=depth_range,
+                        size=size,
+                        static=static,
+                        by_index=by_index)
+                    )
         if trace_definitions and 'visible' in trace_definitions[0]: del trace_definitions[0]['visible']
 
         for trace in trace_definitions:

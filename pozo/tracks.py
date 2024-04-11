@@ -14,6 +14,8 @@ class Track(ood.Item, pzt.Themeable):
     _child_type="axis"
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
+        self.note_dict = {}
+        self.note_list = []
         for ar in args:
             self.add_axes(ar)
 
