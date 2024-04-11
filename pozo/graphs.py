@@ -290,7 +290,7 @@ class Graph(ood.Observer, pzt.Themeable):
         for track in tracks:
             for trace in track.get_traces():
                 mnemonics.append(trace.get_mnemonic())
-        self.pop_tracks(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
+        if len(mnemonics) > 0: self.pop_tracks(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
         self.add_tracks(*tracks, **kwargs)
 
     # TODO: exclude and
@@ -303,7 +303,7 @@ class Graph(ood.Observer, pzt.Themeable):
             mnemonics[trace.get_mnemonic()] = trace
         total_popped = {}
         for axis in self.get_axes():
-            popped = axis.pop_traces(*mnemonics, strict_index=False) # we've removed all the traces that we want to replace
+            if len(mnemonics) > 0: popped = axis.pop_traces(*mnemonics, strict_index=False) # we've removed all the traces that we want to replace
             for trace_popped in popped: # for each that we've removed, add the replacement
                 total_popped[trace_popped.get_mnemonic()] = True
                 axis.add_traces(mnemonics[trace_popped.get_mnemonic()])
