@@ -274,13 +274,14 @@ class Plotly(pzr.Renderer):
         max_axis_stack = 0
         track_index = -1
         for track in graph.get_tracks():
-            if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0:
+            stack = pzt.ThemeStack(track.get_theme())
+            if not stack['force'] and ( stack['hidden'] or len(track)==0 ):
                 effectively_hidden[id(track)] = True
                 continue
             track_index += 1
             if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
             posmap['tracks_axis_numbers'].append([])
-            axes_exist = False
+            axes_exist = True if stack['force'] else False
             for axis in track.get_axes():
                 if pzt.ThemeStack(axis.get_theme())['hidden']:
                     effectively_hidden[id(axis)] = True
@@ -333,12 +334,11 @@ class Plotly(pzr.Renderer):
         track_index = -1 # we can't use enumerate() becuase sometimes we skip iterations in the loop
         for track in graph.get_tracks():
             themes.append(track.get_theme())
-            if self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0: continue
+            if not themes['force'] and ( self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0 ): continue
             track_index += 1
             if track_index and posmap['tracks_axis_numbers'][track_index] == 'depth': # don't do it for 0
                 track_index +=1
                 posmap['tracks_pixel_widths'].append(self.template['depth_axis_width'])
-
 
             axis_index = -1 # same story with track_index, need to skip iterations, enumerate() won't work
             for axis in track.get_axes():
@@ -422,6 +422,7 @@ class Plotly(pzr.Renderer):
                 axis_style['position'] = min(posmap['axis_line_positions'][axis_index], 1)
                 axes_styles.append(axis_style)
                 themes.pop()
+            if themes['force'] and axis_index == -1: axes_styles.append({}) # create a dummy axis for a forced empty track
             posmap['pixel_width'] += themes["track_width"] + self.template["track_margin"]
             posmap['tracks_pixel_widths'].append(themes["track_width"])
             themes.pop()
@@ -443,7 +444,10 @@ class Plotly(pzr.Renderer):
             posmap['pixel_cursor'] += layout["height"]
             if posmap['depth_auto_left']: posmap['pixel_cursor'] += self.template['depth_axis_width']
         track = 0
-        for i, axis in enumerate(axes_styles):
+        i = -1
+        for axis in axes_styles:
+            dummy = len(axis) == 0
+            if not dummy: i += 1
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
             else:
@@ -459,7 +463,7 @@ class Plotly(pzr.Renderer):
                     layout[tracks_y_axis]['position'] = (-4 + posmap['pixel_cursor'] + self.template['depth_axis_width'])/posmap['pixel_width']
                     posmap['tracks_x_domains'].append((posmap['pixel_cursor']/posmap['pixel_width'], layout[tracks_y_axis]['position']))
                     posmap['pixel_cursor'] += self.template['depth_axis_width']
-            layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
+            if not dummy: layout["xaxis" + str(i + 1 + int(xp is not None))] = axis
         if not show_depth:
             layout[tracks_y_axis]['showticklabels'] = False
             layout[tracks_y_axis]['ticklen'] = 0
