@@ -285,13 +285,20 @@ class Graph(ood.Observer, pzt.Themeable):
                 raw_return.append(intermediate)
         return raw_return
 
-    def replace_tracks(self, *tracks, **kwargs):
+    def replace_tracks(self, *tracks, **kwargs): # this interface sucks, maybe just use name
         mnemonics = []
+        good_tracks = []
         for track in tracks:
+            if isinstance(track, (tuple, list)) and len(track) == 2:
+                self.pop_tracks({'name':track[0]}, strict_index=False)
+                good_tracks.append(track[1])
+                continue
+            else:
+                good_tracks.append(track)
             for trace in track.get_traces():
                 mnemonics.append(trace.get_mnemonic())
         if len(mnemonics) > 0: self.pop_tracks(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
-        self.add_tracks(*tracks, **kwargs)
+        self.add_tracks(*good_tracks, **kwargs)
 
     # TODO: exclude and
     def replace_traces(self, *traces, **kwargs):
