@@ -160,7 +160,7 @@ class Plotly(pzr.Renderer):
             raise ValueError("Depth note seems to be missing range")
         # TODO: check numerics
         type = 'line'
-        if isinstance(note['range'], tuple): type='rect'
+        if isinstance(note['range'], (list, tuple)): type='rect'
         shape = None
         if type=='line':
             shape = dict(
