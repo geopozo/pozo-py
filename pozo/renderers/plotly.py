@@ -182,8 +182,8 @@ class Plotly(pzr.Renderer):
                 default_line.update(note.line) # to ge
                 shape['line']       = default_line
                 shape['fillcolor']  = note.fillcolor
-                shape['layer']      = "below",
-                shape['opacity']    = .5,
+                shape['layer']      = "below"
+                shape['opacity']    = .5
             elif pozo.is_scalar_number(note.depth):
                 shape['type']               = 'line'
                 shape['y0'] = shape['y1']   = note.depth
