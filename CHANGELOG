@@ -1,5 +1,11 @@
 v0.9.20:
- - add a "sumarize" function for printing violin kdes
+ - add a "summarize" function for printing violin/box plots
+ - HasLog() now properly returns all items that HasLog()
+ - replace_tracks will add tracks OR replace by mnemonic
+ - combine_tracks will ignore tracks already combined
+ - replace_traces is like replace_tracks but focuses on Trace
+ - get_trace()/axis()/track() now defaults to selector=0
+ - axis if they're missing a range/unit/scale type property look @ their children for first match
 v0.9.19:
  - Ood now includes exclude to filter out selectors
  - There is a declare option for using a dictionary to describe graphs from las files
