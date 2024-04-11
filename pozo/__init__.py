@@ -64,11 +64,10 @@ def str_to_HasLog(argument):
     if isinstance(argument, (list, tuple)):
         ret = []
         for selector in argument:
-            if isinstance(selector, str):
-                ret.append(HasLog(selector))
-            else:
-                ret.append(selector)
+                ret.append(str_to_HasLog(selector))
         return ret
     elif isinstance(argument, str):
         return HasLog(argument)
+    elif isinstance(argument, dict) and 'name' in argument:
+        return argument['name']
     return argument
