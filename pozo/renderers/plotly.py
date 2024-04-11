@@ -5,6 +5,7 @@ import warnings
 import re
 import weakref
 import multiprocessing
+import itertools
 from ipywidgets import IntProgress
 
 import numpy as np
@@ -177,9 +178,9 @@ class Plotly(pzr.Renderer):
             if pozo.is_array(note.depth) and len(note.depth) == 2:
                 shape['type']       = 'rect'
                 shape['y0']         = note.depth[0]
-                shape['y1']         = note.depth[1] # to get
+                shape['y1']         = note.depth[1]
                 default_line['width'] = 0
-                default_line.update(note.line) # to ge
+                default_line.update(note.line)
                 shape['line']       = default_line
                 shape['fillcolor']  = note.fillcolor
                 shape['layer']      = "below"
@@ -187,6 +188,7 @@ class Plotly(pzr.Renderer):
             elif pozo.is_scalar_number(note.depth):
                 shape['type']               = 'line'
                 shape['y0'] = shape['y1']   = note.depth
+                default_line.update(note.line)
                 shape['line']               = default_line
             else:
                 raise TypeError("Range must be a number or two numbers in a tuple or list")
@@ -312,7 +314,7 @@ class Plotly(pzr.Renderer):
         if posmap['depth_track_number'] >= len(posmap['tracks_axis_numbers']):
             posmap['depth_auto_right'] = True
         max_text = 0
-        for name, note in graph.depth_notes.items():
+        for note in itertools.chain(list(graph.note_dict.values()) + graph.note_list):
             max_text = max(max_text, len(note.text))
         posmap['x_annotation_pixel_width'] = max_text*10
         posmap['pixel_width'] += max_text*10
@@ -483,7 +485,7 @@ class Plotly(pzr.Renderer):
             depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
         layout['shapes'] = []
         layout['annotations'] = []
-        for name, note in graph.depth_notes.items():
+        for note in itertools.chain(list(graph.note_dict.values()) + graph.note_list):
             s, a = self._process_note(note,
                                       xref="paper",
                                       yref=toTarget(posmap['track_y']),
@@ -1087,7 +1089,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
     fade = tail.tolist() + [1]*(window_index-tail_size)
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
-        graph.depth_notes['Depth Highlight-xxx'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
+        graph.note_dict['Depth Highlight-xxx'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
         graph.xp.fade = fade
         gp.append(
                 dict(
@@ -1103,7 +1105,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
                     path=folder_name+"/"+str(i)+".png",
                     )
                 )
-    del graph.depth_notes['Depth Highlight-xxx']
+    del graph.note_dict['Depth Highlight-xxx']
     write_image_counter = multiprocessing.Value('I',0)
     with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,)) as pool:
         p = pool.map_async(write_image, gp)
