@@ -154,52 +154,58 @@ class Plotly(pzr.Renderer):
         if hidden or override: themes.pop()
         return hidden or override
 
-   # TODO, units (find nearest with units too)
-    def _process_graph_note(self, note, x0, x1, yref):
-        if 'range' not in note:
-            raise ValueError("Depth note seems to be missing range")
-        # TODO: check numerics
-        type = 'line'
-        if isinstance(note['range'], (list, tuple)): type='rect'
-        shape = None
-        if type=='line':
+    def _process_note(self, note, xref, yref, left_margin=0):
+        def _make_shape(note, xref, yref):
+            x_lower_bound = 0
+            x_upper_bound = 1
+            if note.width > 0:
+               x_upper_bound = note.width
+            elif note.width < 0:
+               x_lower_bound = 1 + note.width
+
             shape = dict(
-                type='line',
-                xref='paper',
-                x0=x0,
-                x1=x1,
-                yref=yref,
-                y0=note['range'],
-                y1=note['range'],
-                line_width=note['weight'] if 'weight' in note else 1,
-                line_dash=note['style'] if 'style' in note else 'dot',
-                line_color=note['color'] if 'color' in note else 'black',
+                    xref    =  xref,
+                    x0      =  x_lower_bound+left_margin,
+                    x1      =  x_upper_bound,
+                    yref    =  yref
+                    )
+            default_line = dict(
+                    color   = 'black',
+                    width   = 1,
+                    dash    = 'dot',
             )
-        else:
-            shape = dict(
-                type='rect',
-                xref='paper',
-                x0=x0,
-                x1=x1,
-                yref=yref,
-                y0=note['range'][0],
-                y1=note['range'][1],
-                line_width=0,
-                fillcolor=note['color'] if 'color' in note else 'lightskyblue',
-                layer="below",
-                opacity=.5,
-            )
-        annotation = None
-        if not ('show_text' in note and not note['show_text']):
+            if pozo.is_array(note.depth) and len(note.depth) == 2:
+                shape['type']       = 'rect'
+                shape['y0']         = note.depth[0]
+                shape['y1']         = note.depth[1] # to get
+                default_line['width'] = 0
+                default_line.update(note.line) # to ge
+                shape['line']       = default_line
+                shape['fillcolor']  = note.fillcolor
+                shape['layer']      = "below",
+                shape['opacity']    = .5,
+            elif pozo.is_scalar_number(note.depth):
+                shape['type']               = 'line'
+                shape['y0'] = shape['y1']   = note.depth
+                shape['line']               = default_line
+            else:
+                raise TypeError("Range must be a number or two numbers in a tuple or list")
+            return shape
+        def _make_note(note, xref, yref, is_line): # if graph,
             annotation = dict(
-                text=note['text'] if 'text' in note else "",
-                xref="paper",
+                text=note.text,
+                xref=xref, # could be domain or paper
                 x=1,
                 yref=yref,
-                y=note['range'] if type=='line' else note['range'][0],
-                yshift=5,
+                y=note.depth if is_line else note.depth[0],
+                yshift=-5,
                 showarrow=False,
             )
+            return annotation
+        shape = _make_shape(note, xref, yref)
+        annotation = None
+        if note.show_text:
+            annotation = _make_note(note, xref, yref, shape['type'] == 'line')
         return shape, annotation
 
     def get_layout(self, graph, xp=None, **kwargs):
@@ -307,7 +313,7 @@ class Plotly(pzr.Renderer):
             posmap['depth_auto_right'] = True
         max_text = 0
         for name, note in graph.depth_notes.items():
-            max_text = max(max_text, len(note['text'] if 'text' in note else name))
+            max_text = max(max_text, len(note.text))
         posmap['x_annotation_pixel_width'] = max_text*10
         posmap['pixel_width'] += max_text*10
 
@@ -472,12 +478,16 @@ class Plotly(pzr.Renderer):
 
 
         # TODO: add verts and track depth/ranges, it could be condensed into just passing posmap
-        depth_margin = self.template['depth_axis_width']/posmap['pixel_width'] if (posmap['depth_auto_left'] and posmap['with_xp']) else 0
+        depth_margin = 0
+        if (posmap['depth_auto_left'] and posmap['with_xp']):
+            depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
         layout['shapes'] = []
         layout['annotations'] = []
         for name, note in graph.depth_notes.items():
-            if 'text' not in note: note['text']=name
-            s, a = self._process_graph_note(note, posmap['xp_end']+depth_margin, 1, toTarget(posmap['track_y']))
+            s, a = self._process_note(note,
+                                      xref="paper",
+                                      yref=toTarget(posmap['track_y']),
+                                      left_margin = posmap['xp_end']+depth_margin)
             if s: layout['shapes'].append(s)
             if a: layout['annotations'].append(a)
         return layout
