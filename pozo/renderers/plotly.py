@@ -556,21 +556,40 @@ class Plotly(pzr.Renderer):
             trace = axis.get_trace()
             with warnings.catch_warnings():
                 warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
-                new_trace = go.Violin(
-                        x=trace.get_data(),
-                        points='outliers', #'all',
-                        box_visible=False,
-                        name="",
-                        hovertemplate="%{x}",
-                        hoveron="kde",
-                        xaxis=f"x{i}",
-                        yaxis=f"y{i+1}",
-                        scalegroup=f'y{i+1}',
-                        line_color='black',
-                        fillcolor='rgba(0,0,0, .3)',
-                        opacity=.7,
-                        showlegend=False,
-                        )
+                if layout[f'xaxis{i}']['type'] != 'log':
+                    new_trace = go.Violin(
+                            x=trace.get_data(),
+                            points='suspectedoutliers', #'all',
+                            box_visible=False,
+                            name="",
+                            hovertemplate="%{x}",
+                            hoveron="kde",
+                            xaxis=f"x{i}",
+                            yaxis=f"y{i+1}",
+                            scalegroup=f'y{i+1}',
+                            line_color='black',
+                            fillcolor='rgba(0,0,0, .3)',
+                            opacity=.7,
+                            showlegend=False,
+                            )
+                else:
+                    new_trace = go.Box(
+                            x=trace.get_data(),
+                            boxpoints='suspectedoutliers', #'all',
+                            #box_visible=False,
+                            name="",
+                            hovertemplate="%{x}",
+                            hoveron="points",
+                            xaxis=f"x{i}",
+                            yaxis=f"y{i+1}",
+                            #scalegroup=f'y{i+1}',
+                            line_color='black',
+                            fillcolor='rgba(0,0,0, .3)',
+                            opacity=.7,
+                            showlegend=False,
+                            pointpos=0,
+                            )
+
             traces.append(new_trace)
             layout[f'yaxis{i+1}'] = dict(
                     domain=(0, .2),
