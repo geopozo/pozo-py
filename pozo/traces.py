@@ -155,17 +155,21 @@ class Trace(ood.Observed, pzt.Themeable):
         #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
         return idx, array[idx]
 
-    def get_data(self, slice_by_depth=None):
+    def get_data(self, slice_by_depth=None, force_unit=False):
         if not slice_by_depth or slice_by_depth == [None]:
-            return self._data
-        return self._data[
-            slice(
-                *[
-                    self._find_nearest(val) if val is not None else val
-                    for val in slice_by_depth
-                ]
-            )
-        ]
+            data = self._data
+        else:
+            data = self._data[
+                slice(
+                    *[
+                        self._find_nearest(val) if val is not None else val
+                        for val in slice_by_depth
+                    ]
+                )
+            ]
+        if force_unit:
+            return pzu.Quantity(data, self.get_unit()) # we could be checking first TODO
+        else: return data
 
     def set_depth(self, depth, depth_unit=None):
         depth_unit = self._check_unit(depth_unit)
@@ -179,17 +183,22 @@ class Trace(ood.Observed, pzt.Themeable):
             self.set_depth_unit(depth.units)
         # else, keep old units
 
-    def get_depth(self, slice_by_depth=None):
+    def get_depth(self, slice_by_depth=None, force_unit=False):
         if not slice_by_depth or slice_by_depth == [None]:
-            return self._depth
-        return self._depth[
-            slice(
-                *[
-                    self._find_nearest(val) if val is not None else val
-                    for val in slice_by_depth
-                ]
-            )
-        ]
+            depth = self._depth
+        else:
+            depth = self._depth[
+                slice(
+                    *[
+                        self._find_nearest(val) if val is not None else val
+                        for val in slice_by_depth
+                    ]
+                )
+            ]
+        if force_unit:
+            return pzu.Quantity(depth, self.get_depth_unit())
+        else:
+            return depth
 
     def _check_unit(
         self, unit
@@ -283,6 +292,8 @@ class Trace(ood.Observed, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
+    def __repr__(self):
+        return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
 
 class Data(Trace):
     def __init__(self, data, **kwargs):

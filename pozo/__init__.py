@@ -13,6 +13,8 @@ import pozo.themes as themes # noqa
 import pozo.renderers as renderers # noqa
 import pozo.units as units # noqa
 
+class PozoWarning(UserWarning):
+    pass
 
 # These are all utility functions
 def deLASio(mnemonic):
@@ -45,12 +47,12 @@ class HasLog(ood.selectors.Selector):
             if hasattr(item, 'get_mnemonic'):
                 if item.get_mnemonic() == self.mnemonic:
                     ret_items.append(item)
-                    break
             if isinstance(item, ood.Observer):
                 if item.has_item(self):
                     ret_items.append(item)
-                    break
         return ret_items
+    def __repr__(self):
+        return f"HasLog({self.mnemonic})"
 
 # verify_array_len use three inputs to verify the lenght in the data
 def verify_array_len(constant, data):

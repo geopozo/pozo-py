@@ -31,6 +31,13 @@ class Axis(ood.Item, pzt.Themeable):
                 raw_return.append(trace)
         return raw_return
 
+    def replace_traces(self, *traces, **kwargs):
+       mnemonics = []
+       for trace in traces:
+           mnemonics.append(trace.get_mnemonic())
+       self.pop_traces(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
+       self.add_traces(*traces, **kwargs)
+
     # add_items
     def add_traces(self, *traces, **kwargs):
         good_traces = self._check_types(*traces)
@@ -43,7 +50,7 @@ class Axis(ood.Item, pzt.Themeable):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_trace(self, selector, **kwargs):
+    def get_trace(self, selector=0, **kwargs):
         selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 

@@ -1,15 +1,18 @@
 import os
-os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
 import warnings
-from io import StringIO
 
-from IPython.core.display import HTML
-import pandas as pd
 import numpy as np
-import pint
-
 import pozo
-class MissingRangeError(pint.UndefinedUnitError):
+os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
+import pint # noqa
+
+class MissingLasUnitWarning(UserWarning):
+    pass
+
+class UnitException(Exception):
+    pass
+
+class MissingRangeError(Exception):
     pass
 
 class LasMapEntry():
@@ -82,15 +85,21 @@ class LasRegistry(pint.UnitRegistry):
         except MissingRangeError as e:
             warnings.warn(str(e))
         if resolved is not None:
-            return self.parse_units(resolved.unit)
+            try:
+                return self.parse_units(resolved.unit)
+            except Exception as e:
+                warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+                return None
         else:
             try:
-                if not unit or unit == "": raise pint.UndefinedUnitError("Empty unit not allowed- please map it")
+                if not unit or unit == "": raise UnitException("Empty unit not allowed- please map it")
                 try:
                     return self.parse_units(unit)
                 except Exception as e:
-                    raise pint.UndefinedUnitError(f"Can't parse '{unit}'") from e
+                    warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+                    return None
             except pint.UndefinedUnitError as e:
-                raise pint.UndefinedUnitError(f"{unit} for {pozo.deLASio(mnemonic)} not found. {str(e)}")
+                raise UnitException(f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found.") from e
 
 # we now don't get confidence from string
+

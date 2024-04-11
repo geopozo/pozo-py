@@ -21,6 +21,10 @@ import pozo.units as pzu
 re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
 
+def clean_inf(nparray): # TODO: modifying user data, big loop, bad, better fix plotly
+    nparray[np.logical_or(nparray == -np.inf, nparray == np.inf)] = np.nan
+    return nparray
+
 def toTarget(axis):
     return axis[0] + axis[-1]
 
@@ -145,10 +149,10 @@ class Plotly(pzr.Renderer):
         del self.template["plotly"]["xaxis_template"]
         self.last_fig = None
 
-    def _hidden(self, themes):
+    def _hidden(self, themes, override=False):
         hidden = themes["hidden"]
-        if hidden: themes.pop()
-        return hidden
+        if hidden or override: themes.pop()
+        return hidden or override
 
    # TODO, units (find nearest with units too)
     def _process_graph_note(self, note, x0, x1, yref):
@@ -156,7 +160,7 @@ class Plotly(pzr.Renderer):
             raise ValueError("Depth note seems to be missing range")
         # TODO: check numerics
         type = 'line'
-        if isinstance(note['range'], tuple): type='rect'
+        if isinstance(note['range'], (list, tuple)): type='rect'
         shape = None
         if type=='line':
             shape = dict(
@@ -254,23 +258,44 @@ class Plotly(pzr.Renderer):
             'axis_line_positions': [],
             'total_axes': int(xp is not None),
             'y_bottom': self.template['y_annotation_gutter']/layout['height'],
+            'axis_number_to_Axis': {},
             }
 
-
+        effectively_hidden = {}
         # we do a lot of Y calculations in the first run
         max_axis_stack = 0
         track_index = -1
         for track in graph.get_tracks():
+            if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0:
+                effectively_hidden[id(track)] = True
+                continue
             track_index += 1
-            if pzt.ThemeStack(track.get_theme())['hidden'] or len(track) == 0: continue
             if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
             posmap['tracks_axis_numbers'].append([])
+            axes_exist = False
             for axis in track.get_axes():
-                if pzt.ThemeStack(track.get_theme())['hidden']: continue
+                if pzt.ThemeStack(axis.get_theme())['hidden']:
+                    effectively_hidden[id(axis)] = True
+                    continue
+                traces_exist = False
+                for trace in axis.get_traces():
+                    if not pzt.ThemeStack(trace.get_theme())['hidden']: traces_exist = True
+                    else:
+                        effectively_hidden[id(trace)] = True
+                if not traces_exist:
+                    effectively_hidden[id(axis)] = True
+                    continue
+                axes_exist = True
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
-            max_axis_stack = max(len(posmap['tracks_axis_numbers'][-1]), max_axis_stack)
-        if not max_axis_stack: raise ValueError("Didn't find an axes, not going to render")
+                posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
+            if not axes_exist:
+                effectively_hidden[id(track)] = True
+                if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].pop()
+                posmap['tracks_axis_numbers'].pop()
+                track_index -= 1
+            max_axis_stack = max(len(posmap['tracks_axis_numbers'][-1]), max_axis_stack) if track_index != -1 else 0
+        if not max_axis_stack: raise ValueError("Didn't find any axes, not going to render")
         if max_axis_stack == 1: posmap['axis_line_positions'] = [1]
         elif max_axis_stack > 1:
             for i in reversed(range(max_axis_stack+1)):
@@ -300,7 +325,7 @@ class Plotly(pzr.Renderer):
         track_index = -1 # we can't use enumerate() becuase sometimes we skip iterations in the loop
         for track in graph.get_tracks():
             themes.append(track.get_theme())
-            if self._hidden(themes) or len(track) == 0: continue
+            if self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0: continue
             track_index += 1
             if track_index and posmap['tracks_axis_numbers'][track_index] == 'depth': # don't do it for 0
                 track_index +=1
@@ -310,17 +335,29 @@ class Plotly(pzr.Renderer):
             axis_index = -1 # same story with track_index, need to skip iterations, enumerate() won't work
             for axis in track.get_axes():
                 themes.append(axis.get_theme())
-                if self._hidden(themes): continue
+                if self._hidden(themes, id(axis) in effectively_hidden): continue
                 axis_index += 1
 
-                if themes["range_unit"] is not None:
-                    range_unit = pzu.registry.parse_units(themes["range_unit"])
+                xrange_raw = themes["range"]
+                scale_type_raw = themes["scale"]
+                range_unit_raw = themes["range_unit"]
+                for trace in axis:
+                    if xrange_raw and scale_type_raw and range_unit_raw: break
+                    themes.append(trace.get_theme())
+                    if self._hidden(themes, id(trace) in effectively_hidden): continue
+                    if xrange_raw is None: xrange_raw = themes["range"]
+                    if scale_type_raw is None: scale_type_raw = themes["scale"]
+                    if range_unit_raw is None: range_unit_raw = themes["range_unit"]
+                    themes.pop()
+
+                if range_unit_raw is not None:
+                    range_unit = pzu.registry.parse_units(range_unit_raw)
                 else:
                     range_unit = None
                 data_unit = None
                 for trace in axis:
                     themes.append(trace.get_theme())
-                    if self._hidden(themes): continue
+                    if self._hidden(themes, id(trace) in effectively_hidden): continue
 
                     if data_unit is not None and data_unit != trace.get_unit():
                         raise ValueError(f"Data being displayed on one axis must be exactly the same unit. {data_unit} is not {trace.get_unit()}")
@@ -338,15 +375,17 @@ class Plotly(pzr.Renderer):
 
                 if data_unit is None: data_unit = range_unit
                 if range_unit is None: range_unit = data_unit # both None, or both whatever wasn't None
+
+
                 if data_unit != range_unit:
-                    xrange = pzu.Q(themes["range"], range_unit).m_as(data_unit)
+                    xrange = pzu.Q(xrange_raw, range_unit).m_as(data_unit)
                 else:
-                    xrange = themes["range"]
+                    xrange = xrange_raw
                 # So we've just created xrange which is the data_unit
                 # But here we'd want to override ticks and such to the range unit
                 color = themes["color"]
 
-                scale_type = themes["scale"]
+                scale_type = scale_type_raw
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -361,10 +400,9 @@ class Plotly(pzr.Renderer):
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
 
-                if axis_style is not None:
-                    axis_style['type'] = scale_type
-                    if scale_type == "log":
-                        xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
+                axis_style['type'] = scale_type
+                if scale_type == "log":
+                    xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
                 if xrange is not None:
                     axis_style['range'] = xrange
 
@@ -429,6 +467,7 @@ class Plotly(pzr.Renderer):
         else:
             layout[tracks_y_axis]['range'] = [ymax, ymin]
         layout['width']=posmap['pixel_width']
+        posmap['effectively_hidden'] = effectively_hidden
         self._last_posmap = posmap
 
 
@@ -458,14 +497,16 @@ class Plotly(pzr.Renderer):
                 themes.append(axis.get_theme())
                 if self._hidden(themes): continue
                 all_traces = []
+                traces_exist = False
                 for trace in axis:
                     themes.append(trace.get_theme())
                     if self._hidden(themes): continue
+                    traces_exist = True
                     color = themes["color"]
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         all_traces.append(go.Scattergl(
-                            x=trace.get_data(),
+                            x=clean_inf(trace.get_data()),
                             y=trace.get_depth(),
                             mode='lines', # nope, based on data w/ default
                             line=dict(color=color, width=1), # needs to be better, based on data
@@ -476,11 +517,109 @@ class Plotly(pzr.Renderer):
                             showlegend = False,
                         ))
                     themes.pop()
-                num_axes += 1
-                traces.extend(all_traces)
+                if traces_exist:
+                    num_axes += 1
+                    traces.extend(all_traces)
                 themes.pop()
             themes.pop()
         return traces
+
+
+    def summarize_curves(self, graph, selectors=None, **kwargs):
+        theme = kwargs.pop("theme", "cangrejo")
+        traces = {}
+        def update(array):
+            for item in array:
+                if id(item) in traces: continue
+                traces[id(item)] = item
+        exclude = kwargs.get("exclude", None)
+        depth = kwargs.get("depth", None)
+        height= kwargs.get("height", None)
+
+        if selectors is None or not selectors:
+            update(graph.get_traces(exclude=exclude)) #exclude by position is buggy TODO
+        else:
+            for selector in selectors:
+                if selector is None:
+                    update(graph.get_traces(exclude=exclude))
+                if isinstance(selector, pozo.Trace):
+                    update([selector])
+                elif isinstance(selector, (pozo.Axis, pozo.Track, pozo.Graph)):
+                    update(selector.get_traces(exclude=exclude))
+                else:
+                    update(graph.get_traces(selector, exclude=exclude))
+        temp_graph = pozo.Graph(list(traces.values()))
+        temp_graph.set_theme(theme)
+        layout = temp_graph.renderer.get_layout(
+                temp_graph,
+                xp=None,
+                depth=depth,
+                height=height,
+                override_theme={"color": "black", "track_width": 300}
+                )
+        layout['yaxis1']['domain'] = (.2, layout['yaxis1']['domain'][1]) #
+        posmap = temp_graph.renderer._last_posmap
+        traces = temp_graph.renderer.get_traces(
+                temp_graph,
+                xstart=1,
+                yaxis='yaxis1',
+                override_theme={"color": "black", "track_width": 300}
+                )
+        for i, axis in posmap['axis_number_to_Axis'].items():
+            trace = axis.get_trace()
+            with warnings.catch_warnings():
+                warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
+                if layout[f'xaxis{i}']['type'] != 'log':
+                    new_trace = go.Violin(
+                            x=trace.get_data(),
+                            points='suspectedoutliers', #'all',
+                            box_visible=False,
+                            name="",
+                            hovertemplate="%{x}",
+                            hoveron="kde",
+                            xaxis=f"x{i}",
+                            yaxis=f"y{i+1}",
+                            scalegroup=f'y{i+1}',
+                            line_color='black',
+                            fillcolor='rgba(0,0,0, .3)',
+                            opacity=.7,
+                            showlegend=False,
+                            )
+                else:
+                    new_trace = go.Box(
+                            x=trace.get_data(),
+                            boxpoints='suspectedoutliers', #'all',
+                            #box_visible=False,
+                            name="",
+                            hovertemplate="%{x}",
+                            hoveron="points",
+                            xaxis=f"x{i}",
+                            yaxis=f"y{i+1}",
+                            #scalegroup=f'y{i+1}',
+                            line_color='black',
+                            fillcolor='rgba(0,0,0, .3)',
+                            opacity=.7,
+                            showlegend=False,
+                            pointpos=0,
+                            )
+
+            traces.append(new_trace)
+            layout[f'yaxis{i+1}'] = dict(
+                    domain=(0, .2),
+                    anchor=f'x{i}',
+                    )
+
+
+
+        ret = go.FigureWidget(data=traces, layout=layout)
+        return ret
+        #TODO: make sure depth works
+        #TODO: properly scale by depth on depth changes
+        #TODO: add these to main plots
+        #TODO: deal with xp
+        #TODO: add NAN percentage (within depth)
+
+
 
     def render(self, graph, static=False, depth=None, xp=None, **kwargs):
         xp_depth = kwargs.pop("xp_depth", None)
@@ -503,7 +642,7 @@ class Plotly(pzr.Renderer):
         # this generates XP layout too, I don't love, would rather set axes
         # separating XP from here would be good but let's call it techdebt
         layout = self.get_layout(graph, xp=xp, depth=depth, **kwargs)
-
+        posmap = self._last_posmap
         # what arguments do we need here now
         traces = self.get_traces(graph, xstart=2 if xp else 1, yaxis='yaxis2' if xp else 'yaxis1', **kwargs)
         if xp is not None:
@@ -524,9 +663,11 @@ class Plotly(pzr.Renderer):
             return self.last_fig
         elif xp is None:
             self.last_fig = xpFigureWidget(data=traces, layout=layout)
+            self.last_fig._posmap = posmap
             self.last_fig._lead_axis = "yaxis1"
         else:
             self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp, depth_lock=depth_lock)
+            self.last_fig._posmap = posmap
             self.last_fig._lead_axis = "yaxis2"
             self.last_fig.link_depth_to(self.last_fig)
             xp.add_figure(self.last_fig)

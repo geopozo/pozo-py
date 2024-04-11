@@ -18,6 +18,42 @@ class Graph(ood.Observer, pzt.Themeable):
     _type = "graph"
     _child_type = "track"
 
+    def declare_graph(self, las, structure):
+        yaxis, yaxis_name, yaxis_unit = self.get_yaxis_from_las_object(las)
+        tracks = []
+        for track in structure:
+            axes = []
+            for axis_name, axis_options in track.items():
+                n_keys = 1
+                if 'mnemonics' not in axis_options:
+                    raise TypeError("axis options must contain 'mnemonics'")
+                if 'optional' in axis_options:
+                    n_keys += 1
+                if len(axis_options.keys()) != n_keys:
+                    raise TypeError("axis keys can be 'mnemonics' and 'optional'")
+                found_curve = None
+                for mnemonic in axis_options['mnemonics']: # looking for one option
+                    for curve in las.curves: # lookin in all las
+                        if curve.original_mnemonic == mnemonic:
+                            found_curve = curve
+                            break
+                    if found_curve is not None: # LAS CURVES EVAL FALSE WHY
+                        break
+                if found_curve is None:
+                    if ('optional' in axis_options and axis_options['optional']):
+                        continue
+                    raise RuntimeError(f"Missing any mnemonics for {axis_name}")
+                unit = pozo.units.parse_unit_from_curve(found_curve)
+                axes.append(pozo.Axis(pozo.Trace(
+                        found_curve.data,
+                        depth = yaxis,
+                        mnemonic = mnemonic,
+                        unit = unit,
+                        depth_unit = yaxis_unit), name = axis_name))
+            if axes: tracks.append(pozo.Track(axes))
+        if not tracks: raise RuntimeError("No tracks were created")
+        return tracks
+
     def __init__(self, *args, **kwargs):
 
         self._name = kwargs.pop("name", "unnamed") # why do graphs have a name? for a title?
@@ -31,6 +67,7 @@ class Graph(ood.Observer, pzt.Themeable):
         my_kwargs["yaxis"] = kwargs.pop("yaxis", None)
         my_kwargs["yaxis_name"] = kwargs.pop("yaxis_name", None)
         my_kwargs["unit_map"] = kwargs.pop("unit_map", None)
+        my_kwargs["declare"] = kwargs.pop("declare", None)
         old_kwargs = kwargs.copy()
         if not isinstance(self._name, str):
             raise TypeError("Name must be a string")
@@ -44,6 +81,9 @@ class Graph(ood.Observer, pzt.Themeable):
         if len(args) == 1 and include and len(include) != 0:
             self.reorder_all_tracks(include)
         self.depth_notes = {}
+
+    def summarize_curves(self, *selectors, **kwargs):
+        return self.renderer.summarize_curves(self, selectors=selectors, **kwargs)
 
     def render(self, **kwargs):
         xp = kwargs.get("xp", None)
@@ -63,9 +103,14 @@ class Graph(ood.Observer, pzt.Themeable):
         self._name = name
 
     def process_data(self, *args, **kwargs):  # Add ways to add data
+        _no_loop = kwargs.pop("_no_list", False)
         for i, ar in enumerate(args):
             if str(type(ar)) == LAS_TYPE:
-                self.add_las_object(ar, **kwargs)
+                if kwargs['declare']:
+                    tracks = self.declare_graph(ar, kwargs['declare'])
+                    self.add_tracks(*tracks)
+                else:
+                    self.add_las_object(ar, **kwargs)
             elif str(type(ar)) == WELLY_PROJECT_TYPE:
                 if len(ar.get_wells()) != 1:
                     raise ValueError(
@@ -77,27 +122,25 @@ class Graph(ood.Observer, pzt.Themeable):
                 self.add_welly_object(ar, **kwargs)
             elif isinstance(ar, (pozo.Trace, pozo.Axis, pozo.Track)):
                 self.add_tracks(ar)
+            elif isinstance(ar, (set, list, tuple)):
+                if _no_loop: raise RuntimeError(f"Found a list in a list to process, please don't pass any nested lists: {ar}")
+                self.process_data(*ar, **kwargs, _no_loop=True)
             else:
                 warnings.warn(
                     f"Unknown argument type passed: argument {i}, {type(ar)}. Ignored"
                 )
 
-    def add_las_object(self, ar, **kwargs):
-        include = kwargs.get("include", [])
-        exclude = kwargs.get("exclude", [])
+    def get_yaxis_from_las_object(self, ar, **kwargs):
         yaxis = kwargs.get("yaxis", None)
-        yaxis_name = kwargs.get("yaxis_name", "DEPTH")
-        yaxis_unit = None
-        unit_map = kwargs.pop("unit_map", None)
-        if (
-            yaxis is not None
-        ):  # this is a manually added y axis, don't parse it with LAS
+        yaxis_name = kwargs.get("yaxis_name", None)
+        yaxis_unit = kwargs.get("yaxis_unit", None)
+        if yaxis:
             if yaxis_name is None and hasattr(yaxis, "mnemonic"):
                 yaxis_name = yaxis.mnemonic
-            if hasattr(yaxis, "unit"):
+            if not yaxis_unit and hasattr(yaxis, "unit"):
                 yaxis_unit = yaxis.unit
             else:
-                warnings.warn("Not sure what yaxis units are.")
+                warnings.warn("Not sure what yaxis units are.", pozo.PozoWarning)
             if hasattr(yaxis, "data"):
                 yaxis = yaxis.data
             if len(yaxis) != len(ar.index):
@@ -106,13 +149,19 @@ class Graph(ood.Observer, pzt.Themeable):
                 )
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
-            yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name])
+            yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name]) if not yaxis_unit else yaxis_unit
         else:
-            warnings.warn(
-                "No yaxis specified and 'DEPTH' not found: using index. Set explicitly with yaxis= OR yaxis_name=. Not sure what y-axis units are."
-            )
-            yaxis = ar.depth_m
-            yaxis_unit = pzu.registry.parse_units("meter")
+            yaxis = ar.index
+            yaxis_unit = pzu.registry.parse_unit_from_context("DEPT", ar.index_unit, ar.index) if not yaxis_unit else yaxis_unit
+
+        return yaxis, yaxis_name, yaxis_unit
+
+    def add_las_object(self, ar, **kwargs):
+        include = kwargs.get("include", [])
+        exclude = kwargs.get("exclude", [])
+        unit_map = kwargs.pop("unit_map", None)
+
+        yaxis, yaxis_name, yaxis_unit = self.get_yaxis_from_las_object(ar, **kwargs)
 
         for curve in ar.curves:
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
@@ -132,7 +181,7 @@ class Graph(ood.Observer, pzt.Themeable):
             elif curve.unit is None:
                 warnings.warn(
                     f"No units found for mnemonic {mnemonic}"
-                )  # TODO Handle percentages/lookup mnemonics
+                )  # TODO should return proper type of error
             else:
                 unit = pzu.parse_unit_from_curve(curve)
 
@@ -150,30 +199,27 @@ class Graph(ood.Observer, pzt.Themeable):
         include = kwargs.get("include", [])
         exclude = kwargs.get("exclude", [])
         yaxis = kwargs.get("yaxis", None)
-        yaxis_name = kwargs.get("yaxis_name", "DEPTH")
+        yaxis_name = kwargs.get("yaxis_name", None)
         yaxis_unit = kwargs.get("yaxis_unit", None)
         unit_map = kwargs.pop("unit_map", None)
 
-        if yaxis is not None:
+        if yaxis:
             if yaxis_name and hasattr(yaxis, "mnemonic"):
                 yaxis_name = yaxis.mnemonic
-            if hasattr(yaxis, "units"):
+            if not yaxis_unit and hasattr(yaxis, "units"):
                 yaxis_unit = pzu.registry.parse_unit_from_context(
                     pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values
                 )
             else:
-                warnings.warn("Not sure what yaxis units are.")  # TODO
+                warnings.warn("Not sure what yaxis units are.")
             if hasattr(yaxis, "values"):
                 yaxis = yaxis.values
-        elif yaxis_name in ar.data.keys():
+        elif yaxis_name and yaxis_name in ar.data.keys():
             yaxis = ar.data[yaxis_name]
             yaxis_unit = pzu.registry.parse_unit_from_context(
                 pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values
             )
-        else:
-            raise ValueError(
-                "No yaxis specified and 'DEPTH' not found. Set explicitly with yaxis= OR yaxis_name=."
-            )
+
         for curve in ar.data.values():
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
@@ -200,7 +246,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
             depth = None
             depth_unit = None
-            if yaxis is not None:
+            if yaxis:
                 depth = yaxis
                 depth_unit = yaxis_unit
             else:
@@ -227,7 +273,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 raw_return.extend(self._check_types(*tracks))
             elif not isinstance(track, accepted_types):
                 raise TypeError(
-                    "Axis.add_tracks() only accepts axes, tracks, and traces: pozo objects"
+                    f"Axis.add_tracks() only accepts axes, tracks, and traces: pozo objects, not {type(track)}"
                 )
             intermediate = track
             if isinstance(intermediate, pozo.Trace):
@@ -238,11 +284,32 @@ class Graph(ood.Observer, pzt.Themeable):
                 raw_return.append(intermediate)
         return raw_return
 
-    # add_items
-    def add_axes(self, *axes, **kwargs):
-        good_axes = self._check_types(*axes)
-        super().add_items(*good_axes, **kwargs)
-        return good_axes
+    def replace_tracks(self, *tracks, **kwargs):
+        mnemonics = []
+        for track in tracks:
+            for trace in track.get_traces():
+                mnemonics.append(trace.get_mnemonic())
+        self.pop_tracks(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
+        self.add_tracks(*tracks, **kwargs)
+
+    # TODO: exclude and
+    def replace_traces(self, *traces, **kwargs):
+        if 'exclude' in kwargs: raise RuntimeError("exclude is nto valid for replace traces")
+        mnemonics = {}
+        for trace in traces:
+            if trace.get_mnemonic() in mnemonics:
+                raise ValueError("Please don't use replace_traces to replace or add two traces with the same mnemonic. It's ambiguous. Pease delete, add, and combine specifically what you want")
+            mnemonics[trace.get_mnemonic()] = trace
+        total_popped = {}
+        for axis in self.get_axes():
+            popped = axis.pop_traces(*mnemonics, strict_index=False) # we've removed all the traces that we want to replace
+            for trace_popped in popped: # for each that we've removed, add the replacement
+                total_popped[trace_popped.get_mnemonic()] = True
+                axis.add_traces(mnemonics[trace_popped.get_mnemonic()])
+        for trace in traces:
+            if trace.get_mnemonic() not in total_popped:
+                self.add_tracks(trace) # create new track for those that weren't repaced
+
 
     # add_items
     def add_tracks(self, *tracks, **kwargs):  # axis can take axes... and other axis?
@@ -256,7 +323,7 @@ class Graph(ood.Observer, pzt.Themeable):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_track(self, selector, **kwargs):
+    def get_track(self, selector=0, **kwargs):
         selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
@@ -266,8 +333,8 @@ class Graph(ood.Observer, pzt.Themeable):
         return super().pop_items(*selectors, **kwargs)
 
     def combine_tracks(self, selector, *selectors):
-        selectors = pozo.str_to_HasLog(selectors)
         selector = pozo.str_to_HasLog(selector)
+        selectors = pozo.str_to_HasLog(selectors)
         sink = self.get_track(selector, strict_index=False)
         if sink is None:
             if isinstance(selector, (pozo.Trace, pozo.Axis, pozo.Track)):
@@ -278,10 +345,11 @@ class Graph(ood.Observer, pzt.Themeable):
                     "The first argument must be a track that exists or a new track track/axis/trace to add"
                 )
         for sel in selectors:
-            if not self.has_track(sel) and isinstance(sel, pozo.Track):
+            if isinstance(sel, pozo.Track) and not self.has_track(sel):
                 self.add_tracks(sel)
-        source = self.pop_tracks(*selectors, sort=False)
+        source = self.pop_tracks(*selectors, sort=False, exclude=[sink])
         for track in source:
+            if track == sink: continue
             axes = track.pop_axes()
             sink.add_axes(axes)
 
@@ -305,7 +373,7 @@ class Graph(ood.Observer, pzt.Themeable):
             all_axes.extend(track.get_axes(*selectors, **kwargs))
         return all_axes
 
-    def get_axis(self, selector, **kwargs):
+    def get_axis(self, selector=0, **kwargs):
         ret = self.get_axes(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]
@@ -317,7 +385,7 @@ class Graph(ood.Observer, pzt.Themeable):
             all_traces.extend(track.get_traces(*selectors, **kwargs))
         return all_traces
 
-    def get_trace(self, selector, **kwargs):
+    def get_trace(self, selector=0, **kwargs):
         ret = self.get_traces(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]

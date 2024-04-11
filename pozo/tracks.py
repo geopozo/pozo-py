@@ -34,6 +34,14 @@ class Track(ood.Item, pzt.Themeable):
                 raw_return.append(axis)
         return raw_return
 
+    def replace_axes(self, *axes, **kwargs):
+       mnemonics = []
+       for axis in axes:
+           for trace in axis.get_traces():
+               mnemonics.append(trace.get_mnemonic())
+       self.pop_axes(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
+       self.add_axes(*axes, **kwargs)
+
     # add_items
     def add_axes(self, *axes, **kwargs):
         good_axes = self._check_types(*axes)
@@ -46,7 +54,7 @@ class Track(ood.Item, pzt.Themeable):
         return super().get_items(*selectors, **kwargs)
 
     # get_item
-    def get_axis(self, selector, **kwargs):
+    def get_axis(self, selector=0, **kwargs):
         selector = pozo.str_to_HasLog(selector)
         return super().get_item(selector, **kwargs)
 
@@ -75,7 +83,7 @@ class Track(ood.Item, pzt.Themeable):
             ret_traces.extend(axis.get_traces(*selectors, **kwargs))
         return ret_traces
 
-    def get_trace(self, selector, **kwargs):
+    def get_trace(self, selector=0, **kwargs):
         ret = self.get_traces(selector, **kwargs)
         if len(ret) == 0: return None
         return ret[0]
