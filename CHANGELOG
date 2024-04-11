@@ -1,3 +1,5 @@
+v0.9.21:
+ - fix to CI system
 v0.9.20:
  - add a "summarize" function for printing violin/box plots
  - HasLog() now properly returns all items that HasLog()
