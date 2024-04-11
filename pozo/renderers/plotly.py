@@ -338,8 +338,20 @@ class Plotly(pzr.Renderer):
                 if self._hidden(themes, id(axis) in effectively_hidden): continue
                 axis_index += 1
 
-                if themes["range_unit"] is not None:
-                    range_unit = pzu.registry.parse_units(themes["range_unit"])
+                xrange_raw = themes["range"]
+                scale_type_raw = themes["scale"]
+                range_unit_raw = themes["range_unit"]
+                for trace in axis:
+                    if xrange_raw and scale_type_raw and range_unit_raw: break
+                    themes.append(trace.get_theme())
+                    if self._hidden(themes, id(trace) in effectively_hidden): continue
+                    if xrange_raw is None: xrange_raw = themes["range"]
+                    if scale_type_raw is None: scale_type_raw = themes["scale"]
+                    if range_unit_raw is None: range_unit_raw = themes["range_unit"]
+                    themes.pop()
+
+                if range_unit_raw is not None:
+                    range_unit = pzu.registry.parse_units(range_unit_raw)
                 else:
                     range_unit = None
                 data_unit = None
@@ -363,15 +375,17 @@ class Plotly(pzr.Renderer):
 
                 if data_unit is None: data_unit = range_unit
                 if range_unit is None: range_unit = data_unit # both None, or both whatever wasn't None
+
+
                 if data_unit != range_unit:
-                    xrange = pzu.Q(themes["range"], range_unit).m_as(data_unit)
+                    xrange = pzu.Q(xrange_raw, range_unit).m_as(data_unit)
                 else:
-                    xrange = themes["range"]
+                    xrange = xrange_raw
                 # So we've just created xrange which is the data_unit
                 # But here we'd want to override ticks and such to the range unit
                 color = themes["color"]
 
-                scale_type = themes["scale"]
+                scale_type = scale_type_raw
                 axis_style = dict(
                     **self.xaxis_template
                 )
@@ -386,10 +400,9 @@ class Plotly(pzr.Renderer):
                 axis_style['tickcolor'] = color
                 axis_style['tickfont']  = dict(color=color,)
 
-                if scale_type is not None:
-                    axis_style['type'] = scale_type
-                    if scale_type == "log":
-                        xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
+                axis_style['type'] = scale_type
+                if scale_type == "log":
+                    xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
                 if xrange is not None:
                     axis_style['range'] = xrange
 
