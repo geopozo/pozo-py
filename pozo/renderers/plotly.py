@@ -513,6 +513,7 @@ class Plotly(pzr.Renderer):
 
 
     def summarize_curves(self, graph, selectors=None, **kwargs):
+        theme = kwargs.pop("theme", "cangrejo")
         traces = {}
         def update(array):
             for item in array:
@@ -535,11 +536,22 @@ class Plotly(pzr.Renderer):
                 else:
                     update(graph.get_traces(selector, exclude=exclude))
         temp_graph = pozo.Graph(list(traces.values()))
-        temp_graph.set_theme({"color": "black", "track_width": 300})
-        layout = temp_graph.renderer.get_layout(temp_graph, xp=None, depth=depth, height=height)
+        temp_graph.set_theme(theme)
+        layout = temp_graph.renderer.get_layout(
+                temp_graph,
+                xp=None,
+                depth=depth,
+                height=height,
+                override_theme={"color": "black", "track_width": 300}
+                )
         layout['yaxis1']['domain'] = (.2, layout['yaxis1']['domain'][1]) #
         posmap = temp_graph.renderer._last_posmap
-        traces = temp_graph.renderer.get_traces(temp_graph, xstart=1, yaxis='yaxis1')
+        traces = temp_graph.renderer.get_traces(
+                temp_graph,
+                xstart=1,
+                yaxis='yaxis1',
+                override_theme={"color": "black", "track_width": 300}
+                )
         for i, axis in posmap['axis_number_to_Axis'].items():
             trace = axis.get_trace()
             with warnings.catch_warnings():
