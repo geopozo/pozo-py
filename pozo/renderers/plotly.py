@@ -890,10 +890,10 @@ class CrossPlot():
     def _resolve_selector_to_data(self, selector):
         POZO_OBJS = (pozo.Graph, pozo.Track, pozo.Axis)
         if isinstance(selector, POZO_OBJS):
-           data = selector.get_data()
-           if len(data) == 0:
+           data = selector.get_trace()
+           if not data:
                raise ValueError(f"{selector} has no pozo.Trace object")
-           return data[0] # we process it in the following
+           return data
         elif isinstance(selector, pozo.Trace):
             if not is_array(selector.get_data()): raise TypeError(f"{selector}'s data seems weird: {selector.get_data()}")
             if not is_array(selector.get_depth()):raise TypeError(f"{selector}'s depth seems weird: {selector.get_depth()}")
