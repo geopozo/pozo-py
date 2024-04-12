@@ -770,9 +770,6 @@ class xpFigureWidget(go.FigureWidget):
 
     def _depth_change_cb(self, layout, new_range):
         print("Depth change callback")
-        display(layout)
-        display(new_range)
-        display(f'locked: {self._depth_lock}')
         if not self._depth_lock:
             self.set_depth_range(new_range)
         self._tracks_depth_range = new_range
