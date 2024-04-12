@@ -22,6 +22,8 @@ import pozo.units as pzu
 re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
 
+warnings.filterwarnings("ignore", category=UserWarning, message="Message serialization failed with")
+
 def clean_inf(nparray): # TODO: modifying user data, big loop, bad, better fix plotly
     nparray[np.logical_or(nparray == -np.inf, nparray == np.inf)] = np.nan
     return nparray
