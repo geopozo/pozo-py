@@ -23,7 +23,6 @@ def test_Theme():
         new_theme.set_context()
 
 def test_ThemeDict():
-    tdict0 = pzt.ThemeDict({})
     tdict1 = pzt.ThemeDict({"key": "value"})
     tdict2 = pzt.ThemeDict(dict(key="value"))
     assert tdict1["key"] == tdict2["key"]
@@ -99,14 +98,14 @@ def test_ThemeStack():
         "d": theme4,
         "e": theme4,
         })
-    list_no_override = pzt.ThemeStack()
+    list_no_override = pzt.ThemeStack(default=None)
     assert len(list_no_override._list) == 0
-    assert list_no_override["a"] == None
-    assert list_no_override["b"] == None
-    assert list_no_override["c"] == None
-    assert list_no_override["d"] == None
-    assert list_no_override["e"] == None
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["a"]
+    with pytest.raises(KeyError): list_no_override["b"]
+    with pytest.raises(KeyError): list_no_override["c"]
+    with pytest.raises(KeyError): list_no_override["d"]
+    with pytest.raises(KeyError): list_no_override["e"]
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.append(theme5)
     assert len(list_no_override._list) == 1
     assert list_no_override["a"] == "theme5"
@@ -114,7 +113,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme5"
     assert list_no_override["d"] == "theme5"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.append(theme4)
     assert len(list_no_override._list) == 2
     assert list_no_override["a"] == "theme4"
@@ -122,7 +121,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme4"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.append(theme3)
     assert len(list_no_override._list) == 3
     assert list_no_override["a"] == "theme3"
@@ -130,7 +129,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme3a"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.append(theme2)
     assert len(list_no_override._list) == 4
     assert list_no_override["a"] == "theme2"
@@ -138,7 +137,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme3a"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.append(theme1)
     assert len(list_no_override._list) == 5
     assert list_no_override["a"] == "theme1"
@@ -146,7 +145,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme3a"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.pop()
     assert len(list_no_override._list) == 4
     assert list_no_override["a"] == "theme2"
@@ -154,7 +153,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme3a"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.pop()
     assert len(list_no_override._list) == 3
     assert list_no_override["a"] == "theme3"
@@ -162,7 +161,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme3a"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.pop()
     assert len(list_no_override._list) == 2
     assert list_no_override["a"] == "theme4"
@@ -170,7 +169,7 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme4"
     assert list_no_override["d"] == "theme4"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.pop()
     assert len(list_no_override._list) == 1
     assert list_no_override["a"] == "theme5"
@@ -178,37 +177,37 @@ def test_ThemeStack():
     assert list_no_override["c"] == "theme5"
     assert list_no_override["d"] == "theme5"
     assert list_no_override["e"] == "theme5"
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["f"]
     list_no_override.pop()
     assert len(list_no_override._list) == 0
-    assert list_no_override["a"] == None
-    assert list_no_override["b"] == None
-    assert list_no_override["c"] == None
-    assert list_no_override["d"] == None
-    assert list_no_override["e"] == None
-    assert list_no_override["f"] == None
+    with pytest.raises(KeyError): list_no_override["a"]
+    with pytest.raises(KeyError): list_no_override["b"]
+    with pytest.raises(KeyError): list_no_override["c"]
+    with pytest.raises(KeyError): list_no_override["d"]
+    with pytest.raises(KeyError): list_no_override["e"]
+    with pytest.raises(KeyError): list_no_override["f"]
     list_override = pzt.ThemeStack(theme=override)
     assert len(list_no_override._list) == 0
     assert list_override["a"] == "theme1"
     assert list_override["b"] == "theme2"
     assert list_override["c"] == "theme3a"
     assert list_override["d"] == "theme4"
-    assert list_override["e"] == None
-    assert list_override["f"] == None
+    with pytest.raises(KeyError): list_override["e"]
+    with pytest.raises(KeyError): list_override["f"]
     list_override.append(theme5)
     assert list_override["a"] == "theme1"
     assert list_override["b"] == "theme2"
     assert list_override["c"] == "theme3a"
     assert list_override["d"] == "theme4"
     assert list_override["e"] == "theme5"
-    assert list_override["f"] == None
+    with pytest.raises(KeyError): list_override["f"]
     list_override.pop()
     assert list_override["a"] == "theme1"
     assert list_override["b"] == "theme2"
     assert list_override["c"] == "theme3a"
     assert list_override["d"] == "theme4"
-    assert list_override["e"] == None
-    assert list_override["f"] == None
+    with pytest.raises(KeyError): list_override["e"]
+    with pytest.raises(KeyError): list_override["f"]
     with pytest.raises(IndexError):
         list_override.pop()
 

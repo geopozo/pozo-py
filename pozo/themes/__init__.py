@@ -66,8 +66,9 @@ themes = {'cangrejo': MnemonicDictionary(tables.cangrejo)}
 # ThemeList also has a theme, which is considered an override!
 class ThemeStack(Themeable):
     def __init__(self, *args, **kwargs):
+        local_default_theme = kwargs.pop("default", default_theme)
         self._contexts_vertical = [] # parallel con _list
-        self._list = [] # the themes
+        self._list = [local_default_theme] if local_default_theme else [] # the themes
         self._shadow_objects = {} # if themes have things that are initialized when they're added
         for arg in args:
             self.append(arg)
@@ -84,9 +85,16 @@ class ThemeStack(Themeable):
         self._contexts_vertical.pop(index)
         return self._list.pop(index)
 
+    def __contains__(self, key):
+        try:
+            self.__getitem__(key)
+        except KeyError:
+            return False
+        return True
+
     def __getitem__(self, key):
         if not isinstance(key, str):
-            raise TyperError("Key must be string")
+            raise TypeError(f"Key must be string, not {type(key)} | value:{key}")
         # print(f'\ngetitem() Trying to get theme: {key}')
 
         contexts_horizontal = []
@@ -137,11 +145,13 @@ class ThemeStack(Themeable):
 
     def _process_output(self, value, key):
         if value is None:
-            return None # default should supply all values. Grep "How did this happen" to find other error. TODO
+            raise KeyError(f"{key} does not exist in this theme, and there is no default")
         if key == "color":
             if not isinstance(value, colour.Color):
                 return colour.Color(value).hex_l
             else:
                 return value.hex_l
+        elif key == "range_unit" and value is False:
+            return None
         return value
 

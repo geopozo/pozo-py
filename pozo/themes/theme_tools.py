@@ -3,7 +3,7 @@ import pozo.units as pzu
 
 
 default_color_list = ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52']
-default_theme = pzt.ThemeDict({ "color": default_color_list, "track_width": 200 })
+default_theme = pzt.ThemeDict({ "color": default_color_list, "track_width": 200, 'force':False, 'hidden':False, 'range':[None,None], 'scale':'linear', 'range_unit':False })
 #
 class MnemonicDictionary(pzt.DynamicTheme):
     def __init__(self, mnemonic_table, registry=pzu.registry):

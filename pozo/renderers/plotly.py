@@ -572,9 +572,16 @@ class Plotly(pzr.Renderer):
                     with warnings.catch_warnings():
                         warnings.simplefilter("default")
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
-                        fill = "none"
-                        fillcolor = 'white'
-                        if themes['fill'] == 'heatmap': fill = 'tozerox'
+                        fill = None
+                        fillcolor = 'blue' if 'fillcolor' not in themes else themes['fillcolor']
+                        heatmap = False
+                        if 'fill' in themes:
+                            if themes['fill'] == 'heatmap':
+                                heatmap = True
+                                fill = 'tozerox'
+                                fillcolor = 'white'
+                            else:
+                                fill = themes['fill']
                         all_traces.append(go.Scattergl(
                             x=clean_inf(trace.get_data()),
                             y=trace.get_depth(),
@@ -588,7 +595,7 @@ class Plotly(pzr.Renderer):
                             fill = fill,
                             fillcolor = fillcolor
                             ))
-                        if themes['fill'] == 'heatmap':
+                        if heatmap:
                             data = trace.get_data()
                             min = np.nanmin(data)
                             max = np.nanmax(data)
