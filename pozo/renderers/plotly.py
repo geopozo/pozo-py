@@ -748,7 +748,6 @@ class Plotly(pzr.Renderer):
             self.last_fig = xpFigureWidget(data=traces, layout=layout, renderer=xp, depth_lock=depth_lock)
             self.last_fig._posmap = posmap
             self.last_fig._lead_axis = "yaxis2"
-            print("made an xp combined graph, going to call xpFW linker")
             self.last_fig.link_depth_to(self.last_fig)
             xp.add_figure(self.last_fig)
         javascript() # double it up
@@ -760,7 +759,6 @@ class xpFigureWidget(go.FigureWidget):
     def link_depth_to(self, fig):
         if not isinstance(fig, go.FigureWidget):
             raise TypeError("Supplied fig argument bust be a go.FigureWidget ot have access to interactivity")
-        print("xpFigureWidget linking")
         fig.layout.on_change(self._depth_change_cb, fig._lead_axis+'.range', append=True)
 
     def __init__(self, data=None, layout=None, frames=None, skip_invalid=False, depth_lock=False, **kwargs):
@@ -769,7 +767,6 @@ class xpFigureWidget(go.FigureWidget):
         super().__init__(data=data, layout=layout, frames=frames, skip_invalid=skip_invalid, **kwargs)
 
     def _depth_change_cb(self, layout, new_range):
-        print("Depth change callback")
         if not self._depth_lock:
             self.set_depth_range(new_range)
         self._tracks_depth_range = new_range
