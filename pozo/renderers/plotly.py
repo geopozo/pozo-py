@@ -183,7 +183,7 @@ class Plotly(pzr.Renderer):
                 default_line.update(note.line)
                 shape['line']       = default_line
                 shape['fillcolor']  = note.fillcolor
-                shape['layer']      = "below"
+                shape['layer']      = "above"
                 shape['opacity']    = .5
             elif pozo.is_scalar_number(note.depth):
                 shape['type']               = 'line'
@@ -460,7 +460,7 @@ class Plotly(pzr.Renderer):
                 axis['showgrid'] = False
                 axis['zeroline'] = False
                 axis['showline'] = False
-                #axis['dragmode'] = False
+                axis['fixedrange'] = True
                 axis['side'] = 'top'
             i += 1
             if 'overlaying' in axis:
@@ -569,6 +569,9 @@ class Plotly(pzr.Renderer):
                     color = themes["color"]
                     with warnings.catch_warnings():
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
+                        fill = "none"
+                        fillcolor = 'white'
+                        if themes['fill'] == 'heatmap': fill = 'tozerox'
                         all_traces.append(go.Scattergl(
                             x=clean_inf(trace.get_data()),
                             y=trace.get_depth(),
@@ -579,10 +582,26 @@ class Plotly(pzr.Renderer):
                             name = trace.get_name(),
                             hovertemplate = default_hovertemplate,
                             showlegend = False,
-                        ))
+                            fill = fill,
+                            fillcolor = fillcolor
+                            ))
+                        if themes['fill'] == 'heatmap':
+                            data = trace.get_data()
+                            min = np.nanmin(data)
+                            max = np.nanmax(data)
+                            heatmap = go.Heatmap(
+                                        z = [[x] for x in data],
+                                        xaxis='x' + str(num_axes),
+                                        yaxis=toTarget(yaxis),
+                                        y = trace.get_depth(),
+                                        x = [max*2,min],
+                                        showlegend=False,
+                                        showscale=False,
+                                        hoverinfo='skip',
+                                        )
+                            all_traces.append(heatmap)
                     themes.pop()
-                if traces_exist:
-                    num_axes += 1
+                    if traces_exist: num_axes += 1
                     traces.extend(all_traces)
                 themes.pop()
             themes.pop()
