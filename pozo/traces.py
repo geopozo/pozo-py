@@ -155,7 +155,7 @@ class Trace(ood.Observed, pzt.Themeable):
         #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
         return idx, array[idx]
 
-    def get_data(self, slice_by_depth=None, force_unit=False):
+    def get_data(self, slice_by_depth=None, force_unit=False, clean=False):
         if not slice_by_depth or slice_by_depth == [None]:
             data = self._data
         else:
@@ -167,6 +167,8 @@ class Trace(ood.Observed, pzt.Themeable):
                     ]
                 )
             ]
+        if clean:
+            data = data[np.isfinite(data)].copy()
         if force_unit:
             return pzu.Quantity(data, self.get_unit()) # we could be checking first TODO
         else: return data
@@ -183,7 +185,7 @@ class Trace(ood.Observed, pzt.Themeable):
             self.set_depth_unit(depth.units)
         # else, keep old units
 
-    def get_depth(self, slice_by_depth=None, force_unit=False):
+    def get_depth(self, slice_by_depth=None, force_unit=False, clean=False):
         if not slice_by_depth or slice_by_depth == [None]:
             depth = self._depth
         else:
@@ -195,6 +197,9 @@ class Trace(ood.Observed, pzt.Themeable):
                     ]
                 )
             ]
+        if clean:
+            data = self.get_data(slice_by_depth=slice_by_depth)
+            depth = depth[np.isfinite(data)].copy()
         if force_unit:
             return pzu.Quantity(depth, self.get_depth_unit())
         else:
