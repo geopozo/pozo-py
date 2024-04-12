@@ -1,3 +1,5 @@
+# does autoshift work?
+# https://plotly.com/python/multiple-axes/#automatically-shifting-axes
 import copy
 import os
 import math
@@ -23,10 +25,6 @@ re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
 
 warnings.filterwarnings("ignore", category=UserWarning, message="Message serialization failed with")
-
-def clean_inf(nparray): # TODO: modifying user data, big loop, bad, better fix plotly
-    nparray[np.logical_or(nparray == -np.inf, nparray == np.inf)] = np.nan
-    return nparray
 
 def toTarget(axis):
     return axis[0] + axis[-1]
@@ -271,6 +269,9 @@ class Plotly(pzr.Renderer):
             'total_axes': int(xp is not None),
             'y_bottom': self.template['y_annotation_gutter']/layout['height'],
             'axis_number_to_Axis': {},
+            'trace_id_to_axis_number': {}, # same trace multiple times will break this, TODO, gotta fix plotly first to not need it
+            'cross_axis_fills': {}, # this would be a dictionary source: , sink: , shadow_trace: calculated at the end of layout
+            # we need a
             }
 
         effectively_hidden = {}
@@ -292,8 +293,11 @@ class Plotly(pzr.Renderer):
                     effectively_hidden[id(axis)] = True
                     continue
                 traces_exist = False
+                trace_ids = []
                 for trace in axis.get_traces():
-                    if not pzt.ThemeStack(trace.get_theme())['hidden']: traces_exist = True
+                    if not pzt.ThemeStack(trace.get_theme())['hidden']:
+                        traces_exist = True
+                        trace_ids.append(id(trace))
                     else:
                         effectively_hidden[id(trace)] = True
                 if not traces_exist:
@@ -304,10 +308,13 @@ class Plotly(pzr.Renderer):
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
                 posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
+                for trace_id in trace_ids:
+                    posmap['trace_id_to_axis_number'][trace_id] = posmap['total_axes']
             if axis_index == -1 and stack['force']:
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
                 posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
+                # there will be a trace here but it will be a dummy trace
             if not axes_exist:
                 effectively_hidden[id(track)] = True
                 if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].pop()
@@ -373,9 +380,27 @@ class Plotly(pzr.Renderer):
                 else:
                     range_unit = None
                 data_unit = None
+                # this might work for locking them together scaleanchor = False, see other comments
                 for trace in axis:
                     themes.append(trace.get_theme())
                     if self._hidden(themes, id(trace) in effectively_hidden): continue
+
+                    if 'cross_axis_fill' in themes:
+                        caf = themes['cross_axis_fill']
+                        if isinstance(caf, str):
+                            if caf not in posmap['cross_axis_fills']:
+                                posmap['cross_axis_fills'][caf] = {}
+                            # else get the sink
+                            # get the axis for that sink
+                            # constrain that to myself
+                            posmap['cross_axis_fills'][caf]['source'] = trace
+                        elif isinstance(caf, (tuple, list)):
+                            if caf[0] not in posmap['cross_axis_fills']:
+                                posmap['cross_axis_fills'][caf[0]] = {}
+                            # else get the source trace
+                            # get the axis for that source trace
+                            # and use that to constrain myself (in this loop)
+                            posmap['cross_axis_fills'][caf[0]]['sink'] = trace
 
                     if data_unit is not None and data_unit != trace.get_unit():
                         raise ValueError(f"Data being displayed on one axis must be exactly the same unit. {data_unit} is not {trace.get_unit()}")
@@ -497,7 +522,6 @@ class Plotly(pzr.Renderer):
             layout[tracks_y_axis]['range'] = [ymax, ymin]
         layout['width']=posmap['pixel_width']
         posmap['effectively_hidden'] = effectively_hidden
-        self._last_posmap = posmap
 
 
         # TODO: add verts and track depth/ranges, it could be condensed into just passing posmap
@@ -530,7 +554,8 @@ class Plotly(pzr.Renderer):
                 if a: layout['annotations'].append(a)
 
 
-
+        posmap['layout'] = layout
+        self._last_posmap = posmap
         return layout
 
     def get_traces(self, graph, yaxis='y1', xstart=1, **kwargs):
@@ -575,6 +600,7 @@ class Plotly(pzr.Renderer):
                         fill = None
                         fillcolor = 'blue' if 'fillcolor' not in themes else themes['fillcolor']
                         heatmap = False
+                        shadow_data = None
                         if 'fill' in themes:
                             if themes['fill'] == 'heatmap':
                                 heatmap = True
@@ -582,9 +608,27 @@ class Plotly(pzr.Renderer):
                                 fillcolor = 'white'
                             else:
                                 fill = themes['fill']
-                        all_traces.append(go.Scattergl(
-                            x=clean_inf(trace.get_data()),
-                            y=trace.get_depth(),
+                        elif 'cross_axis_fill' in themes:
+                            color='black'
+                            if isinstance(themes['cross_axis_fill'], (list, tuple)):
+                                assert id(trace) in self._last_posmap['trace_id_to_axis_number']
+                                caf_name = themes['cross_axis_fill'][0]
+                                assert caf_name in self._last_posmap['cross_axis_fills']
+                                sink_range = self._last_posmap['layout']['xaxis'+str(num_axes)]['range']
+                                source_trace = self._last_posmap['cross_axis_fills'][caf_name]['source']
+                                source_axis = self._last_posmap['trace_id_to_axis_number'][id(source_trace)]
+                                source_range = self._last_posmap['layout']['xaxis' + str(source_axis)]['range']
+                                sink_distance = sink_range[1] - sink_range[0]
+                                source_distance = source_range[1] - source_range[0]
+                                point_scale = sink_distance/source_distance
+                                point_shift = sink_range[0] - (source_range[0] * point_scale)
+                                shadow_data = source_trace.get_data(clean=True) * point_scale + point_shift
+                                # we will lock both axes completely but it seems like mutual zoom operations are ok
+                                # notes above on how to do that
+
+                        all_traces.append(go.Scatter(
+                            x=trace.get_data(clean=True),
+                            y=trace.get_depth(clean=True),
                             mode='lines', # nope, based on data w/ default
                             line=dict(color=color, width=1), # needs to be better, based on data
                             xaxis='x' + str(num_axes),
@@ -593,17 +637,30 @@ class Plotly(pzr.Renderer):
                             hovertemplate = default_hovertemplate,
                             showlegend = False,
                             fill = fill,
-                            fillcolor = fillcolor
+                            fillcolor = fillcolor,
                             ))
+                        if shadow_data is not None:
+                            all_traces.append(go.Scatter(
+                                x=shadow_data,
+                                y=trace.get_depth(clean=True),
+                                mode='lines', # nope, based on data w/ default
+                                line=dict(color='black', width=0), # needs to be better, based on data
+                                xaxis='x' + str(num_axes),
+                                yaxis=toTarget(yaxis),
+                                name = source_trace.get_mnemonic() + "-shadow",
+                                showlegend = False,
+                                fill = 'tonextx', # DOESN'T WORK
+                                fillcolor = ['yellow'] * len(shadow_data)
+                                ))
                         if heatmap:
-                            data = trace.get_data()
+                            data = trace.get_data(clean=True)
                             min = np.nanmin(data)
                             max = np.nanmax(data)
                             heatmap = go.Heatmap(
                                         z = [[x] for x in data],
                                         xaxis='x' + str(num_axes),
                                         yaxis=toTarget(yaxis),
-                                        y = trace.get_depth(),
+                                        y = trace.get_depth(clean=True),
                                         x = [max*2,min],
                                         showlegend=False,
                                         showscale=False,
@@ -853,6 +910,7 @@ class xpFigureWidget(go.FigureWidget):
                 trace.meta[calc_key] = tuple(normalized_pairs)
                 # should ctime be the min max for the whole thing
 
+# TODO: clean these values and see if warning-error goes away, but also let us know how many values were cleaned
 class CrossPlot():
     marker_symbols = ["circle", "diamond", "square", "cross", "x", "pentagon", "start", "hexagram", "starsquare"]
     default_marker = {
