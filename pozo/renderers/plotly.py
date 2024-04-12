@@ -568,6 +568,7 @@ class Plotly(pzr.Renderer):
                     traces_exist = True
                     color = themes["color"]
                     with warnings.catch_warnings():
+                        warnings.simplefilter("default")
                         warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                         fill = "none"
                         fillcolor = 'white'
@@ -579,7 +580,7 @@ class Plotly(pzr.Renderer):
                             line=dict(color=color, width=1), # needs to be better, based on data
                             xaxis='x' + str(num_axes),
                             yaxis=toTarget(yaxis),
-                            name = trace.get_name(),
+                            name = trace.get_mnemonic(),
                             hovertemplate = default_hovertemplate,
                             showlegend = False,
                             fill = fill,
@@ -651,6 +652,7 @@ class Plotly(pzr.Renderer):
         for i, axis in posmap['axis_number_to_Axis'].items():
             trace = axis.get_trace()
             with warnings.catch_warnings():
+                warnings.simplefilter("default")
                 warnings.filterwarnings(action='ignore', category=pint.UnitStrippedWarning, append=True)
                 if layout[f'xaxis{i}']['type'] != 'log':
                     new_trace = go.Violin(
