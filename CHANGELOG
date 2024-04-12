@@ -1,3 +1,7 @@
+v0.9.23:
+ - Refactor annotation systems
+ - Add per-track annotations
+ - depth_lock set to false for xp renderer
 v0.9.22:
  - fix to CI system
 v0.9.21:
