@@ -650,7 +650,7 @@ class Plotly(pzr.Renderer):
                                 name = source_trace.get_mnemonic() + "-shadow",
                                 showlegend = False,
                                 fill = 'tonextx',
-                                fillcolor = ['yellow']
+                                fillcolor = 'yellow'
                                 ))
                         if heatmap:
                             data = trace.get_data(clean=True)
