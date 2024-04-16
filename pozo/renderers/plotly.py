@@ -649,8 +649,8 @@ class Plotly(pzr.Renderer):
                                 yaxis=toTarget(yaxis),
                                 name = source_trace.get_mnemonic() + "-shadow",
                                 showlegend = False,
-                                fill = 'tonextx', # DOESN'T WORK
-                                fillcolor = ['yellow'] * len(shadow_data)
+                                fill = 'tonextx',
+                                fillcolor = ['yellow']
                                 ))
                         if heatmap:
                             data = trace.get_data(clean=True)
