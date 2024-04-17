@@ -612,7 +612,6 @@ class Plotly(pzr.Renderer):
                             else:
                                 fill = themes['fill']
                         elif 'cross_axis_fill' in themes:
-                            color='black'
                             if isinstance(themes['cross_axis_fill'], (list, tuple)):
                                 assert id(trace) in self._last_posmap['trace_id_to_axis_number']
                                 caf_name = themes['cross_axis_fill'][0]
@@ -653,7 +652,7 @@ class Plotly(pzr.Renderer):
                                 name = source_trace.get_mnemonic() + "-shadow",
                                 showlegend = False,
                                 fill = 'tonextx',
-                                fillcolor = 'yellow'
+                                fillcolor = fillcolor
                                 ))
                         if heatmap:
                             data = trace.get_data(clean=True)
