@@ -481,6 +481,7 @@ class Plotly(pzr.Renderer):
             if posmap['depth_auto_left']: posmap['pixel_cursor'] += self.template['depth_axis_width']
         track = 0
         i = -1
+        hackshapes = []
         for axis in axes_styles:
             dummy = len(axis) == 0
             if dummy:
@@ -488,8 +489,22 @@ class Plotly(pzr.Renderer):
                 axis['showgrid'] = False
                 axis['zeroline'] = False
                 axis['showline'] = False
-                axis['fixedrange'] = True
+                axis['fixedrange'] = True #scale anchor might be beter
                 axis['side'] = 'top'
+                axis['position'] = posmap['tracks_y_domain'][1]
+                hackshape_x = (posmap['pixel_cursor']/posmap['pixel_width'],
+                               (posmap['pixel_cursor']+posmap['tracks_pixel_widths'][track])/posmap['pixel_width'])
+                hackshape = dict(xref='paper',
+                                 x0 = hackshape_x[0],
+                                 x1 =  hackshape_x[1],
+                                 yref = 'paper',
+                                 type= 'rect',
+                                 y0= 1,
+                                 y1= posmap['tracks_y_domain'][1],
+                                 fillcolor=defaults['plotly']['paper_bgcolor'],
+                                 line= {'width':0}
+                                 )
+                hackshapes.append(hackshape)
             i += 1
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
@@ -556,7 +571,7 @@ class Plotly(pzr.Renderer):
                 if s: layout['shapes'].append(s)
                 if a: layout['annotations'].append(a)
 
-
+        layout['shapes'].extend(hackshapes)
         posmap['layout'] = layout
         self._last_posmap = posmap
         return layout
@@ -1129,14 +1144,12 @@ class CrossPlot():
                     if pair[0] > 0:
                         if ub is None:
                             ub = pair
-                            #print(lb)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
                                     plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
                                     plotly.colors.hex_to_rgb(ub[1]) if ub[1][0] != 'r' else plotly.colors.unlabel_rgb(ub[1]),
                                     (-lb[0])/(ub[0]-lb[0]) # distance from 0
                                     ))
-                            #print(ub)
                             normalized_pairs = [(0, new_color)]
                         normalized_pairs.append(pair)
                     else:
@@ -1150,8 +1163,6 @@ class CrossPlot():
                     if pair[0] < 1: # we're here
                         if lb is None:
                             lb = pair
-                            #print(lb)
-                            #print(ub)
                             new_color = plotly.colors.label_rgb(
                                 plotly.colors.find_intermediate_color(
                                     plotly.colors.hex_to_rgb(lb[1]) if lb[1][0] != 'r' else plotly.colors.unlabel_rgb(lb[1]),
