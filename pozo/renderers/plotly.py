@@ -284,7 +284,8 @@ class Plotly(pzr.Renderer):
                 effectively_hidden[id(track)] = True
                 continue
             track_index += 1
-            if track_index and posmap['depth_track_number'] == track_index: posmap['tracks_axis_numbers'].append("depth")
+            if track_index and posmap['depth_track_number'] == track_index:
+                posmap['tracks_axis_numbers'].append("depth")
             posmap['tracks_axis_numbers'].append([])
             axes_exist = True if stack['force'] else False
             axis_index = -1
@@ -546,6 +547,8 @@ class Plotly(pzr.Renderer):
             themes.append(track.get_theme())
             if not themes['force'] and ( self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0 ): continue
             track_index += 1
+            if posmap['tracks_axis_numbers'][track_index] == "depth":
+                track_index +=1
             for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
                 s, a = self._process_note(note,
                                           xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
