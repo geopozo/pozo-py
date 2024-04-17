@@ -562,7 +562,7 @@ class Plotly(pzr.Renderer):
             themes.append(track.get_theme())
             if not themes['force'] and ( self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0 ): continue
             track_index += 1
-            if posmap['tracks_axis_numbers'][track_index] == "depth":
+            if not bool(posmap['with_xp']) and posmap['tracks_axis_numbers'][track_index] == "depth":
                 track_index +=1
             for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
                 s, a = self._process_note(note,
