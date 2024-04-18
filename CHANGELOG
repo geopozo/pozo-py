@@ -1,3 +1,6 @@
+v0.9.24:
+ - Add trial for fill options
+ - Fix some bugs
 v0.9.23:
  - Refactor annotation systems
  - Add per-track annotations
