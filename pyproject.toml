@@ -11,7 +11,7 @@ license = {file = "LICENSE.txt"}
 description = "Help visualizing well log data - Herramienta para visualizar registros de pozos"
 readme = "README.md"
 requires-python = ">=3.9"
-version = "0.9.24"
+version = "0.9.25"
 dependencies = [
  "ood >=1.0.9",
  "plotly >=5.18.0",
@@ -19,7 +19,9 @@ dependencies = [
  "pint >= 0.23",
  "pandas >= 2.0.0",
  "numpy >= 1.26.0",
- "kaleido >=0.2.1"
+ "kaleido >=0.2.1",
+ "ipywidgets",
+ "nbformat"
  ]
 
 [project.optional-dependencies]
