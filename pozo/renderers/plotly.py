@@ -1215,7 +1215,7 @@ def write_image(gp):
     with write_image_counter.get_lock():
         write_image_counter.value += 1
 
-def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output="all.mp4", fps=30):
+def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output="all.mp4", fps=30, cpus=None):
     try:
         write_image_counter
         raise Exception("Please only run make_frames once at a time, or restart the kernel")
@@ -1245,7 +1245,10 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
     fade = tail.tolist() + [1]*(window_index-tail_size)
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
-        graph.note_dict['Depth Highlight-xxx'] = dict(range = (depth[cursor], depth[cursor+window_index]), show_text=False)
+        graph.note_dict['Depth Highlight-xxx'] = pozo.Note(
+                (depth[cursor], depth[cursor+window_index]),
+                show_text=False,
+                )
         graph.xp.fade = fade
         gp.append(
                 dict(
@@ -1263,7 +1266,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
                 )
     del graph.note_dict['Depth Highlight-xxx']
     write_image_counter = multiprocessing.Value('I',0)
-    with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,)) as pool:
+    with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,), processes=cpus) as pool:
         p = pool.map_async(write_image, gp)
         while True:
             p.wait(.5)
@@ -1276,4 +1279,5 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
     del write_image_counter
     if not output: return
     ims = [imageio.imread(p['path']) for p in gp]
+    display("Writing movie from frames...")
     imageio.mimwrite(folder_name+"/" + output, ims, fps=fps)
