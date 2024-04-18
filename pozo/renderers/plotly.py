@@ -1265,18 +1265,26 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
                     )
                 )
     del graph.note_dict['Depth Highlight-xxx']
-    write_image_counter = multiprocessing.Value('I',0)
-    with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,), processes=cpus) as pool:
-        p = pool.map_async(write_image, gp)
-        while True:
-            p.wait(.5)
-            try:
-                p.successful()
-                break
-            except ValueError:
-                writer_counter.value = write_image_counter.value
-    writer_counter.value = len(frame_count)-1
-    del write_image_counter
+
+    if not cpus: cpus = multiprocessing.cpu_count()
+    if cpus == 1:
+        for g in gp:
+            g['graph'].write_image(g['path'], engine="kaleido")
+            writer_counter.value += 1
+
+    else:
+        write_image_counter = multiprocessing.Value('I',0)
+        with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,), processes=cpus) as pool:
+            p = pool.map_async(write_image, gp)
+            while True:
+                p.wait(.5)
+                try:
+                    p.successful()
+                    break
+                except ValueError:
+                    writer_counter.value = write_image_counter.value
+        writer_counter.value = len(frame_count)-1
+        del write_image_counter
     if not output: return
     ims = [imageio.imread(p['path']) for p in gp]
     display("Writing movie from frames...")
