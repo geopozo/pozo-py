@@ -88,6 +88,11 @@ defaults = dict(
                 showline=False,
                 position=0,
                 gridcolor="#f0f0f0",
+                minor = dict(
+                    tickmode = "linear",
+                    tick0 = 0,
+                    dtick = 25,
+                ),
 #               domain=[?,?],  # generated
 #               maxallowed=,   # generated
 #               minallowed=,   # generated
