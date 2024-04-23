@@ -300,16 +300,22 @@ class Trace(ood.Observed, pzt.Themeable):
     def get_interval(self):
         intervals = []
         sample_rate = round(self.get_depth()[1] - self.get_depth()[0], 4)
-        for i in range(len(self.get_depth())-1):
-            if  self.get_depth()[i] == self.get_depth()[-1]: break
+        for i in range(len(self.get_depth()) - 1):
+            if self.get_depth()[i] == self.get_depth()[-1]:
+                break
 
             start = self.get_depth()[i]
-            stop = self.get_depth()[i+1]
+            stop = self.get_depth()[i + 1]
             step = round(stop - start, 4)
             sample_rate_consistent = step == sample_rate
             if step == 0:
                 step = 0.0001
-            interval = {'start': start, 'stop': stop, 'step': step, 'sample_rate_consistent': sample_rate_consistent}
+            interval = {
+                "start": start,
+                "stop": stop,
+                "step": step,
+                "sample_rate_consistent": sample_rate_consistent,
+            }
             intervals.append(interval)
         return intervals
 
