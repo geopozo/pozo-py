@@ -297,6 +297,18 @@ class Trace(ood.Observed, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
+    def get_interval(self):
+        intervals = []
+        for i, data in enumerate(self.get_data()):
+            if  data == self.get_data()[-1]: break
+            interval = dict(
+                start = data,
+                stop = self.get_data()[i+1],
+                step = self.get_data()[i+1]-data
+            )
+            intervals.append(interval)
+        return intervals
+
     def __repr__(self):
         return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
 
