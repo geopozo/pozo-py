@@ -299,13 +299,15 @@ class Trace(ood.Observed, pzt.Themeable):
 
     def get_interval(self):
         intervals = []
-        for i in range(self.get_depth()):
+        for i in range(len(self.get_depth())-1):
             if  self.get_depth()[i] == self.get_depth()[-1]: break
-            interval = dict(
-                start = self.get_depth()[i],
-                stop = self.get_depth()[i+1],
-                step = self.get_data()[i + 1] - self.get_depth()[i]
-            )
+
+            start = self.get_depth()[i]
+            stop = self.get_depth()[i+1]
+            step = round(stop - start, 4)
+            if step == 0:
+                step = 0.0001
+            interval = {'start': start, 'stop': stop, 'step': step}
             intervals.append(interval)
         return intervals
 
