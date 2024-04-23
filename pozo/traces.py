@@ -314,7 +314,7 @@ class Trace(ood.Observed, pzt.Themeable):
                 "start": start,
                 "stop": stop,
                 "step": step,
-                "sample_rate_consistent": sample_rate_consistent,
+                "sample_rate_consistent": sample_rate_consistent
             }
             intervals.append(interval)
         return intervals
