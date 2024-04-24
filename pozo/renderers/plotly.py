@@ -1004,6 +1004,7 @@ class CrossPlot():
         self.colors = colors
         self.y = y
         self.x = x
+        self.notes = {}
         self._colors_by_id = {}
         self._figures_by_id = weakref.WeakValueDictionary() # Do figures contain their colors? so we can clear up _colors_by_id
 
