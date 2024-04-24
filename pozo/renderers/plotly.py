@@ -7,7 +7,6 @@ import warnings
 import re
 import weakref
 import multiprocessing
-import itertools
 from ipywidgets import IntProgress
 
 import numpy as np
@@ -337,7 +336,7 @@ class Plotly(pzr.Renderer):
         if posmap['depth_track_number'] >= len(posmap['tracks_axis_numbers']):
             posmap['depth_auto_right'] = True
         max_text = 0
-        for note in itertools.chain(list(graph.note_dict.values()) + graph.note_list):
+        for note in list(graph.note_dict.values()):
             max_text = max(max_text, len(note.text))
         posmap['x_annotation_pixel_width'] = max_text*10
         posmap['pixel_width'] += max_text*10
@@ -550,7 +549,7 @@ class Plotly(pzr.Renderer):
             depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
         layout['shapes'] = []
         layout['annotations'] = []
-        for note in itertools.chain(list(graph.note_dict.values()) + graph.note_list):
+        for note in list(graph.note_dict.values()):
             s, a = self._process_note(note,
                                       xref="paper",
                                       yref=toTarget(posmap['track_y']),
@@ -568,7 +567,7 @@ class Plotly(pzr.Renderer):
             track_index += 1
             if not bool(posmap['with_xp']) and posmap['tracks_axis_numbers'][track_index] == "depth":
                 track_index +=1
-            for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
+            for note in list(track.note_dict.values()):
                 s, a = self._process_note(note,
                                           xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
                                           yref=toTarget(posmap['track_y']))
