@@ -336,7 +336,7 @@ class Plotly(pzr.Renderer):
         if posmap['depth_track_number'] >= len(posmap['tracks_axis_numbers']):
             posmap['depth_auto_right'] = True
         max_text = 0
-        for note in list(graph.note_dict.values()):
+        for note in list(graph.notes.values()):
             max_text = max(max_text, len(note.text))
         posmap['x_annotation_pixel_width'] = max_text*10
         posmap['pixel_width'] += max_text*10
@@ -549,7 +549,7 @@ class Plotly(pzr.Renderer):
             depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
         layout['shapes'] = []
         layout['annotations'] = []
-        for note in list(graph.note_dict.values()):
+        for note in list(graph.notes.values()):
             s, a = self._process_note(note,
                                       xref="paper",
                                       yref=toTarget(posmap['track_y']),
@@ -567,7 +567,7 @@ class Plotly(pzr.Renderer):
             track_index += 1
             if not bool(posmap['with_xp']) and posmap['tracks_axis_numbers'][track_index] == "depth":
                 track_index +=1
-            for note in list(track.note_dict.values()):
+            for note in list(track.notes.values()):
                 s, a = self._process_note(note,
                                           xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
                                           yref=toTarget(posmap['track_y']))
@@ -1248,7 +1248,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
     fade = tail.tolist() + [1]*(window_index-tail_size)
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
-        graph.note_dict['Depth Highlight-xxx'] = pozo.Note(
+        graph.notes['Depth Highlight-xxx'] = pozo.Note(
                 (depth[cursor], depth[cursor+window_index]),
                 show_text=False,
                 )
@@ -1267,7 +1267,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
                     path=folder_name+"/"+str(i)+".png",
                     )
                 )
-    del graph.note_dict['Depth Highlight-xxx']
+    del graph.notes['Depth Highlight-xxx']
 
     if not cpus: cpus = multiprocessing.cpu_count()
     if cpus == 1:
