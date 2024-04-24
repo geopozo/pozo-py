@@ -80,7 +80,7 @@ class Graph(ood.Observer, pzt.Themeable):
         self.process_data(*args, **my_kwargs)
         if len(args) == 1 and include and len(include) != 0:
             self.reorder_all_tracks(include)
-        self.note_dict = {}
+        self.notes = {}
 
     def summarize_curves(self, *selectors, **kwargs):
         return self.renderer.summarize_curves(self, selectors=selectors, **kwargs)
