@@ -1037,7 +1037,7 @@ class CrossPlot():
             }
 
         depth_margin = 0
-        if (posmap['depth_auto_left'] and posmap['with_xp']):
+        if (posmap['depth_auto_left']):
             depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
         layout = {}
         layout['shapes'] = []
