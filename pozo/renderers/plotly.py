@@ -28,6 +28,63 @@ warnings.filterwarnings("ignore", category=UserWarning, message="Message seriali
 def toTarget(axis):
     return axis[0] + axis[-1]
 
+def process_note(note, xref, yref, left_margin=0):
+    def make_shape(note, xref, yref):
+        x_lower_bound = 0
+        x_upper_bound = 1
+        if note.width > 0:
+            x_upper_bound = note.width
+        elif note.width < 0:
+            x_lower_bound = 1 + note.width
+
+        shape = dict(
+                xref    =  xref,
+                x0      =  x_lower_bound+left_margin,
+                x1      =  x_upper_bound,
+                yref    =  yref
+                )
+        default_line = dict(
+                color   = 'black',
+                width   = 1,
+                dash    = 'dot',
+        )
+        if pozo.is_array(note.depth) and len(note.depth) == 2:
+            shape['type']       = 'rect'
+            shape['y0']         = note.depth[0]
+            shape['y1']         = note.depth[1]
+            default_line['width'] = 0
+            default_line.update(note.line)
+            shape['line']       = default_line
+            shape['fillcolor']  = note.fillcolor
+            shape['layer']      = "above"
+            shape['opacity']    = .5
+        elif pozo.is_scalar_number(note.depth):
+            shape['type']               = 'line'
+            shape['y0'] = shape['y1']   = note.depth
+            default_line.update(note.line)
+            shape['line']               = default_line
+        else:
+            raise TypeError("Range must be a number or two numbers in a tuple or list")
+        return shape
+    def make_note(note, xref, yref, is_line): # if graph,
+        annotation = dict(
+            text=note.text,
+            axref   = xref if xref != 'paper' else None,
+            ayref   =  yref if yref != 'paper' else None,
+            xref=xref, # could be domain or paper
+            x=1,
+            yref=yref,
+            y=note.depth if is_line else note.depth[0],
+            yshift=-5,
+            showarrow=False,
+        )
+        return annotation
+    shape = make_shape(note, xref, yref)
+    annotation = None
+    if note.show_text:
+        annotation = make_note(note, xref, yref, shape['type'] == 'line')
+    return shape, annotation
+
 def javascript():
     add_scroll = '''var css = '.plot-container { overflow: auto; }',
 head = document.getElementsByTagName('head')[0],
@@ -157,63 +214,6 @@ class Plotly(pzr.Renderer):
         hidden = themes["hidden"]
         if hidden or override: themes.pop()
         return hidden or override
-
-    def _process_note(self, note, xref, yref, left_margin=0):
-        def _make_shape(note, xref, yref):
-            x_lower_bound = 0
-            x_upper_bound = 1
-            if note.width > 0:
-               x_upper_bound = note.width
-            elif note.width < 0:
-               x_lower_bound = 1 + note.width
-
-            shape = dict(
-                    xref    =  xref,
-                    x0      =  x_lower_bound+left_margin,
-                    x1      =  x_upper_bound,
-                    yref    =  yref
-                    )
-            default_line = dict(
-                    color   = 'black',
-                    width   = 1,
-                    dash    = 'dot',
-            )
-            if pozo.is_array(note.depth) and len(note.depth) == 2:
-                shape['type']       = 'rect'
-                shape['y0']         = note.depth[0]
-                shape['y1']         = note.depth[1]
-                default_line['width'] = 0
-                default_line.update(note.line)
-                shape['line']       = default_line
-                shape['fillcolor']  = note.fillcolor
-                shape['layer']      = "above"
-                shape['opacity']    = .5
-            elif pozo.is_scalar_number(note.depth):
-                shape['type']               = 'line'
-                shape['y0'] = shape['y1']   = note.depth
-                default_line.update(note.line)
-                shape['line']               = default_line
-            else:
-                raise TypeError("Range must be a number or two numbers in a tuple or list")
-            return shape
-        def _make_note(note, xref, yref, is_line): # if graph,
-            annotation = dict(
-                text=note.text,
-                axref   = xref if xref != 'paper' else None,
-                ayref   =  yref if yref != 'paper' else None,
-                xref=xref, # could be domain or paper
-                x=1,
-                yref=yref,
-                y=note.depth if is_line else note.depth[0],
-                yshift=-5,
-                showarrow=False,
-            )
-            return annotation
-        shape = _make_shape(note, xref, yref)
-        annotation = None
-        if note.show_text:
-            annotation = _make_note(note, xref, yref, shape['type'] == 'line')
-        return shape, annotation
 
     def get_layout(self, graph, xp=None, **kwargs):
         if not isinstance(graph, pozo.Graph):
@@ -550,10 +550,10 @@ class Plotly(pzr.Renderer):
         layout['shapes'] = []
         layout['annotations'] = []
         for note in list(graph.notes.values()):
-            s, a = self._process_note(note,
-                                      xref="paper",
-                                      yref=toTarget(posmap['track_y']),
-                                      left_margin = posmap['xp_end']+depth_margin)
+            s, a = process_note(note,
+                                xref="paper",
+                                yref=toTarget(posmap['track_y']),
+                                left_margin = posmap['xp_end']+depth_margin)
             if s: layout['shapes'].append(s)
             if a: layout['annotations'].append(a)
 
@@ -568,9 +568,9 @@ class Plotly(pzr.Renderer):
             if not bool(posmap['with_xp']) and posmap['tracks_axis_numbers'][track_index] == "depth":
                 track_index +=1
             for note in list(track.notes.values()):
-                s, a = self._process_note(note,
-                                          xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
-                                          yref=toTarget(posmap['track_y']))
+                s, a = process_note(note,
+                                        xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
+                                        yref=toTarget(posmap['track_y']))
                 if s: layout['shapes'].append(s)
                 if a: layout['annotations'].append(a)
 
@@ -1043,10 +1043,10 @@ class CrossPlot():
         layout['shapes'] = []
         layout['annotations'] = []
         for note in list(self.notes.values()):
-            s, a = self._process_note(note,
-                                      xref="paper",
-                                      yref=toTarget(yaxis),
-                                      left_margin = xp_end+depth_margin)
+            s, a = process_note(note,
+                                xref="paper",
+                                yref=toTarget(yaxis),
+                                left_margin = xp_end+depth_margin)
             if s: layout['shapes'].append(s)
             if a: layout['annotations'].append(a)
         return {
