@@ -1025,8 +1025,7 @@ class CrossPlot():
 
         return fig
 
-    def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1", xp_end=0, **kwargs):
-        depth_axis_position = kwargs.pop("depth_position", 0)
+    def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"):
         if not size: size = self.size
         margin = (120) / size if container_width is not None else 0
 
