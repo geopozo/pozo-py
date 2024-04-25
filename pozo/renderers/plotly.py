@@ -1030,23 +1030,13 @@ class CrossPlot():
         if not size: size = self.size
         margin = (120) / size if container_width is not None else 0
 
-        posmap = {
-            'pixel_width': 4,
-            'pixel_cursor': 4,
-            'depth_auto_left': not depth_axis_position
-            }
-
-        depth_margin = 0
-        if (posmap['depth_auto_left']):
-            depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
         layout = {}
         layout['shapes'] = []
         layout['annotations'] = []
         for note in list(self.notes.values()):
             s, a = process_note(note,
                                 xref="paper",
-                                yref=toTarget(yaxis),
-                                left_margin = xp_end+depth_margin)
+                                yref=toTarget(yaxis))
             if s: layout['shapes'].append(s)
             if a: layout['annotations'].append(a)
         return {
