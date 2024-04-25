@@ -1025,9 +1025,30 @@ class CrossPlot():
 
         return fig
 
-    def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"):
+    def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1", xp_end=0, **kwargs):
+        depth_axis_position = kwargs.pop("depth_position", 0)
         if not size: size = self.size
         margin = (120) / size if container_width is not None else 0
+
+        posmap = {
+            'pixel_width': 4,
+            'pixel_cursor': 4,
+            'depth_auto_left': not depth_axis_position
+            }
+
+        depth_margin = 0
+        if (posmap['depth_auto_left'] and posmap['with_xp']):
+            depth_margin = self.template['depth_axis_width']/posmap['pixel_width']
+        layout = {}
+        layout['shapes'] = []
+        layout['annotations'] = []
+        for note in list(self.notes.values()):
+            s, a = self._process_note(note,
+                                      xref="paper",
+                                      yref=toTarget(yaxis),
+                                      left_margin = xp_end+depth_margin)
+            if s: layout['shapes'].append(s)
+            if a: layout['annotations'].append(a)
         return {
             "width"       : size,
             "height"      : size,
@@ -1044,7 +1065,9 @@ class CrossPlot():
                             linecolor = "#888",
                             linewidth = 1,
             ),
-            "showlegend"  : True
+            "shapes"        : list(layout['shapes']),
+            "annotations"   : list(layout['annotations']),
+            "showlegend"    : True
         }
 
     def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
