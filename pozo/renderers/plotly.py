@@ -1034,14 +1034,12 @@ class CrossPlot():
         layout['annotations'] = []
         for note in list(self.notes.values()):
             if isinstance(note, pozo.Note):
-                s, a = process_note(note,
+                shape, annotation = process_note(note,
                                     xref="paper",
                                     yref=toTarget(yaxis))
-                if s: layout['shapes'].append(s)
-                if a: layout['annotations'].append(a)
             elif isinstance(note, dict):
                 if 'x' in note and 'y' in note:
-                    layout["shape"] = dict(
+                    shape = dict(
                         type="line",
                         x=note["x"],
                         y=note["y"],
@@ -1051,7 +1049,7 @@ class CrossPlot():
                         mode=note["mode"] if "mode" in note else "lines",
                         line=dict(color=note["color"] if "color" in note else "RoyalBlue")
                     )
-                    layout["annotation"] = dict(
+                    annotation = dict(
                         text=note['text'],
                         axref= xaxis if xaxis != 'paper' else None,
                         ayref=  yaxis if yaxis != 'paper' else None,
@@ -1063,7 +1061,7 @@ class CrossPlot():
                         showarrow= note["showarrow"] if "showarrow" in note else False,
                     )
                 elif 'x1' in note and 'y1' in note:
-                    layout["shape"] = dict(
+                    shape = dict(
                         type="line",
                         x0=note["x0"] if "x0" in note else 0,
                         y0=note["y0"] if "y0" in note else 0,
@@ -1077,7 +1075,7 @@ class CrossPlot():
                             dash=note["dash"] if "dash" in note else "solid",
                         )
                     )
-                    layout["annotation"] = dict(
+                    annotation = dict(
                         text=note['text'],
                         axref= xaxis if xaxis != 'paper' else None,
                         ayref=  yaxis if yaxis != 'paper' else None,
@@ -1088,6 +1086,8 @@ class CrossPlot():
                         yshift= note['yshift'] if "yshift" in note else -5,
                         showarrow= note["showarrow"] if "showarrow" in note else False,
                     )
+            if shape: layout['shapes'].append(shape)
+            if annotation: layout['annotations'].append(annotation)
 
         return {
             "width"       : size,
