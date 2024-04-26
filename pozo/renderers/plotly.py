@@ -1033,11 +1033,14 @@ class CrossPlot():
         layout['shapes'] = []
         layout['annotations'] = []
         for note in list(self.notes.values()):
-            s, a = process_note(note,
-                                xref="paper",
-                                yref=toTarget(yaxis))
-            if s: layout['shapes'].append(s)
-            if a: layout['annotations'].append(a)
+            if isinstance(note, pozo.Note):
+                s, a = process_note(note,
+                                    xref="paper",
+                                    yref=toTarget(yaxis))
+                if s: layout['shapes'].append(s)
+                if a: layout['annotations'].append(a)
+            elif isinstance(note, dict):
+
         return {
             "width"       : size,
             "height"      : size,
