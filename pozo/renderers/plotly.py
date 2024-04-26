@@ -1025,20 +1025,23 @@ class CrossPlot():
 
         return fig
 
-    def create_layout(self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"):
-        if not size: size = self.size
+    def create_layout(
+        self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"
+    ):
+        if not size:
+            size = self.size
         margin = (120) / size if container_width is not None else 0
 
         layout = {}
-        layout['shapes'] = []
-        layout['annotations'] = []
+        layout["shapes"] = []
+        layout["annotations"] = []
         for note in list(self.notes.values()):
             if isinstance(note, pozo.Note):
-                shape, annotation = process_note(note,
-                                    xref="paper",
-                                    yref=toTarget(yaxis))
+                shape, annotation = process_note(
+                    note, xref="paper", yref=toTarget(yaxis)
+                )
             elif isinstance(note, dict):
-                if 'x' in note and 'y' in note:
+                if "x" in note and "y" in note:
                     shape = dict(
                         type="line",
                         x=note["x"],
@@ -1047,20 +1050,22 @@ class CrossPlot():
                         yaxis=yaxis,
                         fill=note["fill"] if "fill" in note else "toself",
                         mode=note["mode"] if "mode" in note else "lines",
-                        line=dict(color=note["color"] if "color" in note else "RoyalBlue")
+                        line=dict(
+                            color=note["color"] if "color" in note else "RoyalBlue"
+                        ),
                     )
                     annotation = dict(
-                        text=note['text'],
-                        axref= xaxis if xaxis != 'paper' else None,
-                        ayref=  yaxis if yaxis != 'paper' else None,
+                        text=note["text"],
+                        axref=xaxis if xaxis != "paper" else None,
+                        ayref=yaxis if yaxis != "paper" else None,
                         xref=xaxis,
-                        x=note['x'][0],
+                        x=note["x"][0],
                         yref=yaxis,
-                        y=note['y'][0],
-                        yshift= note['yshift'] if "yshift" in note else -5,
-                        showarrow= note["showarrow"] if "showarrow" in note else False,
+                        y=note["y"][0],
+                        yshift=note["yshift"] if "yshift" in note else -5,
+                        showarrow=note["showarrow"] if "showarrow" in note else False,
                     )
-                elif 'x1' in note and 'y1' in note:
+                elif "x1" in note and "y1" in note:
                     shape = dict(
                         type="line",
                         x0=note["x0"] if "x0" in note else 0,
@@ -1073,41 +1078,43 @@ class CrossPlot():
                             color=note["color"] if "color" in note else "RoyalBlue",
                             width=note["width"] if "width" in note else 3,
                             dash=note["dash"] if "dash" in note else "solid",
-                        )
+                        ),
                     )
                     annotation = dict(
-                        text=note['text'],
-                        axref= xaxis if xaxis != 'paper' else None,
-                        ayref=  yaxis if yaxis != 'paper' else None,
+                        text=note["text"],
+                        axref=xaxis if xaxis != "paper" else None,
+                        ayref=yaxis if yaxis != "paper" else None,
                         xref=xaxis,
-                        x=note['x0'],
+                        x=note["x0"],
                         yref=yaxis,
-                        y=note['y0'],
-                        yshift= note['yshift'] if "yshift" in note else -5,
-                        showarrow= note["showarrow"] if "showarrow" in note else False,
+                        y=note["y0"],
+                        yshift=note["yshift"] if "yshift" in note else -5,
+                        showarrow=note["showarrow"] if "showarrow" in note else False,
                     )
-            if shape: layout['shapes'].append(shape)
-            if annotation: layout['annotations'].append(annotation)
+            if shape:
+                layout["shapes"].append(shape)
+            if annotation:
+                layout["annotations"].append(annotation)
 
         return {
-            "width"       : size,
-            "height"      : size,
-            xaxis       : dict(
-                            title = self.x.get_name(),
-                            range = self.xrange,
-                            linecolor = "#888",
-                            linewidth = 1,
+            "width": size,
+            "height": size,
+            xaxis: dict(
+                title=self.x.get_name(),
+                range=self.xrange,
+                linecolor="#888",
+                linewidth=1,
             ),
-            yaxis       : dict(
-                            title = self.y.get_name(),
-                            range = self.yrange,
-                            domain = (margin, 1),
-                            linecolor = "#888",
-                            linewidth = 1,
+            yaxis: dict(
+                title=self.y.get_name(),
+                range=self.yrange,
+                domain=(margin, 1),
+                linecolor="#888",
+                linewidth=1,
             ),
-            "shapes"        : list(layout['shapes']),
-            "annotations"   : list(layout['annotations']),
-            "showlegend"    : True
+            "shapes": list(layout["shapes"]),
+            "annotations": list(layout["annotations"]),
+            "showlegend": True,
         }
 
     def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
