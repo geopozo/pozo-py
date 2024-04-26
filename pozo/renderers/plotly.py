@@ -1041,28 +1041,27 @@ class CrossPlot():
                 if a: layout['annotations'].append(a)
             elif isinstance(note, dict):
                 if 'x' in note and 'y' in note:
-                    for name, trace in note.items():
-                    layout["shape"] = dict(
-                        type="line",
-                        x=trace["x"],
-                        y=trace["y"],
-                        xaxis=xaxis,
-                        yaxis=yaxis,
-                        fill=note["fill"] if "fill" in note else "toself",
-                        mode=note["mode"] if "mode" in note else "lines"
-                        line=dict(color=note["color"] if "color" in note else "RoyalBlue")
-                    )
-                    layout["annotation"] = dict(
-                        text=note['text'],
-                        axref= xaxis if xaxis != 'paper' else None,
-                        ayref=  yaxis if yaxis != 'paper' else None,
-                        xref=xaxis,
-                        x=note['x'][0],
-                        yref=yaxis,
-                        y=note['y'][0],
-                        yshift= note['yshift'] if "yshift" in note else -5,
-                        showarrow= note["showarrow"] if "showarrow" in note else False,
-                    )
+                layout["shape"] = dict(
+                    type="line",
+                    x=trace["x"],
+                    y=trace["y"],
+                    xaxis=xaxis,
+                    yaxis=yaxis,
+                    fill=note["fill"] if "fill" in note else "toself",
+                    mode=note["mode"] if "mode" in note else "lines"
+                    line=dict(color=note["color"] if "color" in note else "RoyalBlue")
+                )
+                layout["annotation"] = dict(
+                    text=note['text'],
+                    axref= xaxis if xaxis != 'paper' else None,
+                    ayref=  yaxis if yaxis != 'paper' else None,
+                    xref=xaxis,
+                    x=note['x'][0],
+                    yref=yaxis,
+                    y=note['y'][0],
+                    yshift= note['yshift'] if "yshift" in note else -5,
+                    showarrow= note["showarrow"] if "showarrow" in note else False,
+                )
                 elif 'x1' in note and 'y1' in note:
                     layout["shape"] = dict(
                         type="line",
