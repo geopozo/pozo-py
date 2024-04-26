@@ -1055,7 +1055,7 @@ class CrossPlot():
                             )
                         )
                 elif 'x1' in note and 'y1' in note:
-                    self.add_shape(
+                    layout["shape"] = dict(
                         type="line",
                         x0=note["x0"] if "x0" in note else 0,
                         y0=note["y0"] if "y0" in note else 0,
@@ -1068,6 +1068,17 @@ class CrossPlot():
                             width=note["width"] if "width" in note else 3,
                             dash=note["dash"] if "dash" in note else "solid",
                         )
+                    )
+                    layout["annotation"] = dict(
+                        text=note['text'],
+                        axref= xaxis if xaxis != 'paper' else None,
+                        ayref=  yaxis if yaxis != 'paper' else None,
+                        xref=xaxis,
+                        x=note['x'][0],
+                        yref=yaxis,
+                        y=note['y'][0],
+                        yshift= note['yshift'] if "yshift" in note else -5,
+                        showarrow= note["showarrow"] if "showarrow" in note else False,
                     )
 
         return {
