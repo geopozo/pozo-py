@@ -1074,9 +1074,9 @@ class CrossPlot():
                         axref= xaxis if xaxis != 'paper' else None,
                         ayref=  yaxis if yaxis != 'paper' else None,
                         xref=xaxis,
-                        x=note['x'][0],
+                        x=note['x0'],
                         yref=yaxis,
-                        y=note['y'][0],
+                        y=note['y0'],
                         yshift= note['yshift'] if "yshift" in note else -5,
                         showarrow= note["showarrow"] if "showarrow" in note else False,
                     )
