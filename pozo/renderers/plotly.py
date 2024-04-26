@@ -1040,6 +1040,35 @@ class CrossPlot():
                 if s: layout['shapes'].append(s)
                 if a: layout['annotations'].append(a)
             elif isinstance(note, dict):
+                if 'x' in note.keys() and 'y' in note.keys():
+                    for name, trace in note.items():
+                        self.add_trace(
+                            go.Scatter(
+                                x=trace["x"],
+                                y=trace["y"],
+                                xaxis=xaxis,
+                                yaxis=yaxis,
+                                fill="toself",
+                                mode="lines",
+                                name=name,
+                                line=dict(color=trace["color"])
+                            )
+                        )
+                elif 'x1' in note.keys() and 'y1' in note.keys():
+                    self.add_shape(
+                        type="line",
+                        x0=note["x0"] if "x0" in note else 0,
+                        y0=note["y0"] if "y0" in note else 0,
+                        x1=note["x1"],
+                        y1=note["y1"],
+                        xref=toTarget(xaxis),
+                        yref=toTarget(yaxis),
+                        line=dict(
+                            color=note["color"] if "color" in note else "RoyalBlue",
+                            width=note["width"] if "width" in note else 3,
+                            dash=note["dash"] if "dash" in note else "solid",
+                        )
+                    )
 
         return {
             "width"       : size,
