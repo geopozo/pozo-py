@@ -1040,7 +1040,7 @@ class CrossPlot():
                 if s: layout['shapes'].append(s)
                 if a: layout['annotations'].append(a)
             elif isinstance(note, dict):
-                if 'x' in note.keys() and 'y' in note.keys():
+                if 'x' in note and 'y' in note:
                     for name, trace in note.items():
                         self.add_trace(
                             go.Scatter(
@@ -1054,7 +1054,7 @@ class CrossPlot():
                                 line=dict(color=trace["color"])
                             )
                         )
-                elif 'x1' in note.keys() and 'y1' in note.keys():
+                elif 'x1' in note and 'y1' in note:
                     self.add_shape(
                         type="line",
                         x0=note["x0"] if "x0" in note else 0,
