@@ -54,6 +54,8 @@ class LineNote(Note):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
+        if y1 == None or x1 == None:
+            raise ValueError("You must use values for x1 and y1")
         self.x0 = x0
         self.y0 = y0
         self.x1 = x1
