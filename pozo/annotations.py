@@ -48,5 +48,18 @@ class PolygonNote(Note):
         self.opacity = opacity
 
 class LineNote(Note):
-    def __init__(self, depth, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
+    def __init__(self, depth, *, x0=0, y0=0, x1=None, y1=None, xref="xaxis1", yref="yref1", line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
         Note.__init__(self, depth, *, line, width, fillcolor, opacity)
+        if not isinstance(line, dict):
+            raise TypeError("line must be a dictionary")
+        if width < -1 or width > 1:
+            raise ValueError("width must be between -1 and 1")
+        self.x0 = x0
+        self.y0 = y0
+        self.x1 = x1
+        self.y1 = y1
+        self.yref = xref
+        self.xref = yref
+        self.line = line
+        self.opacity = opacity
+        self.fillcolor = fillcolor
