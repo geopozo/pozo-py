@@ -33,15 +33,16 @@ class DepthNote(Note):
         self.width      = width
 
 class PolygonNote(Note):
-    def __init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True):
-        Note.__init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True)
+    def __init__(self, depth, *, x=[], y=[], xaxis="xaxis1", yaxis="yaxis1", fill="toself", line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
+        Note.__init__(self, depth, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5)
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
-        self.x
-        self.y
-        self.yaxis
-        self.xaxis
-        self.fill
-        self.line
+        self.x = x
+        self.y = y
+        self.yaxis = xaxis
+        self.xaxis = yaxis
+        self.fill = fill
+        self.line = line
+        self.opacity = opacity
