@@ -20,3 +20,12 @@ class Note():
         self.text       = text
         self.width      = width
 
+class PolygonNote(Note):
+    def __init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True):
+        Note.__init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True)
+        self.x
+        self.y
+        self.yaxis
+        self.xaxis
+        self.fill
+        self.line
