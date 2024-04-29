@@ -46,3 +46,7 @@ class PolygonNote(Note):
         self.fill = fill
         self.line = line
         self.opacity = opacity
+
+class LineNote(Note):
+    def __init__(self, depth, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
+        Note.__init__(self, depth, *, line, width, fillcolor, opacity)
