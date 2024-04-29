@@ -23,8 +23,8 @@ class DepthNote(Note):
         self.depth      = depth
         self.line       = line
         self.fillcolor  = fillcolor
-        self.opacity    = None
-        self.show_text  = True
+        self.opacity    = opacity
+        self.show_text  = show_text
         self.text       = text
         self.width      = width
 
