@@ -17,7 +17,7 @@ class Note():
 
 class DepthNote(Note):
     def __init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True):
-        Note.__init__(self, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True)
+        Note.__init__(self, *, line, width, fillcolor, opacity, show_text)
         if not ( ( pozo.is_array(depth) and len(depth) == 2 ) or pozo.is_scalar_number(depth) ):
             raise TypeError("depth must be two numbers in a tuple or list or just one number")
         if not isinstance(line, dict):
@@ -34,7 +34,7 @@ class DepthNote(Note):
 
 class PolygonNote(Note):
     def __init__(self, depth, *, x=[], y=[], xaxis="xaxis1", yaxis="yaxis1", fill="toself", line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
-        Note.__init__(self, depth, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5)
+        Note.__init__(self, depth, *, line, width, fillcolor, opacity)
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
