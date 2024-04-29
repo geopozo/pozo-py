@@ -17,7 +17,9 @@ class Note():
 
 class DepthNote(Note):
     def __init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True):
-        Note.__init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True)
+        Note.__init__(self, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True)
+        if not ( ( pozo.is_array(depth) and len(depth) == 2 ) or pozo.is_scalar_number(depth) ):
+            raise TypeError("depth must be two numbers in a tuple or list or just one number")
         self.depth      = depth
         self.line       = line
         self.fillcolor  = fillcolor
