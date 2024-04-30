@@ -1,4 +1,5 @@
 import pozo
+import plotly.graph_objects as go
 
 #TODO this doesn't handle units
 #TODO xp doesn't handle units or check indices
@@ -114,7 +115,7 @@ class PolygonNote(Note):
         self.legendrank=legendrank,
         self.legendwidth=legendwidth
 
-class LineNote(Note):
+class LineNote(Note, go.Scatter):
     def __init__(self,
                  *,
                  x0=0,
@@ -137,27 +138,32 @@ class LineNote(Note):
                  ids=None
                  ):
 
-        Note.__init__(self, *, line, width, fillcolor, opacity)
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
         if y1 == None or x1 == None:
             raise ValueError("You must use values for x1 and y1")
-        self.x0 = x0
-        self.y0 = y0
-        self.x1 = x1
-        self.y1 = y1
-        self.yref = xref
-        self.xref = yref
-        self.line = line
-        self.opacity = opacity
-        self.fillcolor = fillcolor
-        self.hoverinfo = hoverinfo
-        self.hoverinfosrc = hoverinfosrc
-        self.hoverlabel = hoverlabel
-        self.hovertemplate = hovertemplate
-        self.hovertemplatesrc = hovertemplatesrc
-        self.hovertext = hovertext
-        self.hovertextsrc = hovertextsrc
-        self.ids = ids
+
+        Note.__init__(self, line=line, width=width, fillcolor=fillcolor, opacity=opacity)
+        go.Scatter.__init__(self,
+                            x0=x0,
+                            y0=y0,
+                            x1=x1,
+                            y1=y1,
+                            xref=xref,
+                            yref=yref,
+                            line=line,
+                            width=width,
+                            fillcolor=fillcolor,
+                            opacity=opacity,
+                            hoverinfo=hoverinfo,
+                            hoverinfosrc=hoverinfosrc,
+                            hoverlabel=hoverlabel,
+                            hovertemplate=hovertemplate,
+                            hovertemplatesrc=hovertemplatesrc,
+                            hovertext=hovertext,
+                            hovertextsrc=hovertextsrc,
+                            ids=ids
+                            )
+
