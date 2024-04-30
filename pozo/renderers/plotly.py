@@ -1040,7 +1040,7 @@ class CrossPlot():
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
-            if isinstance(note, pozo.PolygonNote):
+            if isinstance(note, pozo.PolygonNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
                     x=note["x"],
@@ -1064,7 +1064,7 @@ class CrossPlot():
                     yshift=note["yshift"] if "yshift" in note else -5,
                     showarrow=note["showarrow"] if "showarrow" in note else False,
                 )
-            elif isinstance(note, pozo.LineNote):
+            elif isinstance(note, pozo.LineNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
                     x0=note["x0"] if "x0" in note else 0,
