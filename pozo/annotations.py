@@ -55,15 +55,7 @@ class PolygonNote(Note):
                  line={},
                  width=1,
                  fillcolor = 'lightskyblue',
-                 opacity=.5,
-                 hoverinfo=None,
-                 hoverinfosrc=None,
-                 hoverlabel=None,
-                 hovertemplate=None,
-                 hovertemplatesrc=None,
-                 hovertext=None,
-                 hovertextsrc=None,
-                 ids=None
+                 opacity=.5
                  ):
 
         Note.__init__(self, line, width, fillcolor, opacity)
@@ -78,14 +70,6 @@ class PolygonNote(Note):
         self.fill = fill
         self.line = line
         self.opacity = opacity
-        self.hoverinfo = hoverinfo
-        self.hoverinfosrc = hoverinfosrc
-        self.hoverlabel = hoverlabel
-        self.hovertemplate = hovertemplate
-        self.hovertemplatesrc = hovertemplatesrc
-        self.hovertext = hovertext
-        self.hovertextsrc = hovertextsrc
-        self.ids = ids
 
 class LineNote(Note):
     def __init__(self,
@@ -99,7 +83,15 @@ class LineNote(Note):
                  line={},
                  width=1,
                  fillcolor = 'lightskyblue',
-                 opacity=.5
+                 opacity=.5,
+                 hoverinfo=None,
+                 hoverinfosrc=None,
+                 hoverlabel=None,
+                 hovertemplate=None,
+                 hovertemplatesrc=None,
+                 hovertext=None,
+                 hovertextsrc=None,
+                 ids=None
                  ):
 
         Note.__init__(self, *, line, width, fillcolor, opacity)
@@ -118,3 +110,11 @@ class LineNote(Note):
         self.line = line
         self.opacity = opacity
         self.fillcolor = fillcolor
+        self.hoverinfo = hoverinfo
+        self.hoverinfosrc = hoverinfosrc
+        self.hoverlabel = hoverlabel
+        self.hovertemplate = hovertemplate
+        self.hovertemplatesrc = hovertemplatesrc
+        self.hovertext = hovertext
+        self.hovertextsrc = hovertextsrc
+        self.ids = ids
