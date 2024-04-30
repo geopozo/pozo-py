@@ -1036,7 +1036,7 @@ class CrossPlot():
         layout["shapes"] = []
         layout["annotations"] = []
         for note in list(self.notes.values()):
-            if isinstance(note, pozo.Note):
+            if isinstance(note, (pozo.DepthNote, pozo.PolygonNote, LineNote)):
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
@@ -1319,7 +1319,7 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
     fade = tail.tolist() + [1]*(window_index-tail_size)
     for i, cursor in enumerate(frame_count):
         render_counter.value += 1
-        graph.notes['Depth Highlight-xxx'] = pozo.Note(
+        graph.notes['Depth Highlight-xxx'] = pozo.DepthNote(
                 (depth[cursor], depth[cursor+window_index]),
                 show_text=False,
                 )
