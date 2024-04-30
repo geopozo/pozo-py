@@ -55,7 +55,29 @@ class PolygonNote(Note):
                  line={},
                  width=1,
                  fillcolor = 'lightskyblue',
-                 opacity=.5
+                 fillgradient=None,
+                 fillpattern=None,
+                 opacity=.5,
+                 bgcolor=None,
+                 bgcolorsrc=None,
+                 bordercolor=None,
+                 bordercolorsrc=None,
+                 font=None,
+                 groupnorm=None,
+                 hoverinfo=None,
+                 hoverinfosrc=None,
+                 hoverlabel=None,
+                 hoveron=None,
+                 hovertemplate=None,
+                 hovertemplatesrc=None,
+                 hovertext=None,
+                 hovertextsrc=None,
+                 legend=None,
+                 legendgroup=None,
+                 legendgrouptitle=None,
+                 legendrank=None,
+                 legendwidth=None
+                 ids=None
                  ):
 
         Note.__init__(self, line, width, fillcolor, opacity)
@@ -68,8 +90,29 @@ class PolygonNote(Note):
         self.yaxis = xaxis
         self.xaxis = yaxis
         self.fill = fill
+        self.fillgradient=fillgradient,
+        self.fillpattern=fillpattern,
         self.line = line
         self.opacity = opacity
+        self.bgcolor=bgcolor,
+        self.bgcolorsrc=bgcolorsrc,
+        self.bordercolor=bordercolor,
+        self.bordercolorsrc=bordercolorsrc,
+        self.font=font,
+        self.groupnorm=groupnorm,
+        self.hoverinfo=hoverinfo,
+        self.hoverinfosrc=hoverinfosrc,
+        self.hoverlabel=hoverlabel,
+        self.hoveron=hoveron,
+        self.hovertemplate=hovertemplate,
+        self.hovertemplatesrc=hovertemplatesrc,
+        self.hovertext=hovertext,
+        self.hovertextsrc=hovertextsrc,
+        self.legend=legend,
+        self.legendgroup=legendgroup,
+        self.legendgrouptitle=legendgrouptitle,
+        self.legendrank=legendrank,
+        self.legendwidth=legendwidth
 
 class LineNote(Note):
     def __init__(self,
