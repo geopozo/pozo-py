@@ -33,8 +33,9 @@ class DepthNote(Note):
         self.width      = width
 
 class PolygonNote(Note):
-    def __init__(self, *, x=[], y=[], xaxis="xaxis1", yaxis="yaxis1", fill="toself", line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
-        Note.__init__(self, *, line, width, fillcolor, opacity)
+    def __init__(self, *, x=[], y=[], xaxis="xaxis1", yaxis="yaxis1", fill="toself", line={}, width=1, fillcolor = 'lightskyblue', opacity=.5,
+                 hoverinfo=None, hoverinfosrc=None, hoverlabel=None, hovertemplate=None, hovertemplatesrc=None, hovertext=None, hovertextsrc=None, ids=None):
+        Note.__init__(self, line, width, fillcolor, opacity)
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
@@ -46,6 +47,14 @@ class PolygonNote(Note):
         self.fill = fill
         self.line = line
         self.opacity = opacity
+        self.hoverinfo = hoverinfo
+        self.hoverinfosrc = hoverinfosrc
+        self.hoverlabel = hoverlabel
+        self.hovertemplate = hovertemplate
+        self.hovertemplatesrc = hovertemplatesrc
+        self.hovertext = hovertext
+        self.hovertextsrc = hovertextsrc
+        self.ids = ids
 
 class LineNote(Note):
     def __init__(self, *, x0=0, y0=0, x1=None, y1=None, xref="xaxis1", yref="yref1", line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
