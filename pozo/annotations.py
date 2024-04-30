@@ -16,7 +16,7 @@ class Note():
         self.opacity    = None
         self.width      = width
 
-class DepthNote(Note):
+class DepthNote(Note): #EN DESARROLLO
     def __init__(self,
                  depth,
                  *,
@@ -45,7 +45,7 @@ class DepthNote(Note):
         self.text       = text
         self.width      = width
 
-class PolygonNote(Note):
+class PolygonNote(Note): #EN DESARROLLO
     def __init__(self,
                  *,
                  x=[],
@@ -115,7 +115,7 @@ class PolygonNote(Note):
         self.legendrank=legendrank,
         self.legendwidth=legendwidth
 
-class LineNote(Note, go.Scatter):
+class LineNote(Note, go.Scatter): #EN DESARROLLO
     def __init__(self,
                  *,
                  x0=0,
