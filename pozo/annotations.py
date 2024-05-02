@@ -31,7 +31,7 @@ class DepthNote(Note):  # EN DESARROLLO
         opacity=0.5,
         show_text=True,
     ):
-        super().__init__(self, line, width, fillcolor, opacity)
+        super().__init__(line=line, width=width, fillcolor=fillcolor, opacity=opacity)
         if not (
             (pozo.is_array(depth) and len(depth) == 2) or pozo.is_scalar_number(depth)
         ):
@@ -84,7 +84,7 @@ class PolygonNote(Note):  # EN DESARROLLO
         legendwidth = kwargs.pop("legendwidth", None)
         ids = kwargs.pop("ids", None)
 
-        Note.__init__(self, line, width, fillcolor, opacity)
+        super().__init__(line=line, width=width, fillcolor=fillcolor, opacity=opacity)
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
@@ -150,10 +150,9 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
             raise ValueError("You must use values for x1 and y1")
 
         Note.__init__(
-            self, line=line, width=width, fillcolor=fillcolor, opacity=opacity
+             line=line, width=width, fillcolor=fillcolor, opacity=opacity
         )
         go.Scatter.__init__(
-            self,
             x0=x0,
             y0=y0,
             x1=x1,
