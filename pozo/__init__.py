@@ -8,7 +8,7 @@ from .traces import Trace # noqa
 from .axes import Axis # noqa
 from .tracks import Track # noqa
 from .graphs import Graph # noqa
-from .annotations import Note # noqa
+from .annotations import DepthNote, PolygonNote, LineNote # noqa
 
 import pozo.themes as themes # noqa
 import pozo.renderers as renderers # noqa
