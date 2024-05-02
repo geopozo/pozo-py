@@ -114,7 +114,6 @@ class PolygonNote(Note): #EN DESARROLLO
 
 class LineNote(Note, go.Scatter): #EN DESARROLLO
     def __init__(self,
-                 *,
                  x0=0,
                  y0=0,
                  x1=None,
@@ -122,18 +121,20 @@ class LineNote(Note, go.Scatter): #EN DESARROLLO
                  xref="xaxis1",
                  yref="yref1",
                  line={},
-                 width=1,
-                 fillcolor = 'lightskyblue',
-                 opacity=.5,
-                 hoverinfo=None,
-                 hoverinfosrc=None,
-                 hoverlabel=None,
-                 hovertemplate=None,
-                 hovertemplatesrc=None,
-                 hovertext=None,
-                 hovertextsrc=None,
-                 ids=None
+                 **kwargs
                  ):
+
+        width = kwargs.pop("width", 1)
+        fillcolor = kwargs.pop("fillcolor", 'lightskyblue')
+        opacity = kwargs.pop("opacity", .5)
+        hoverinfo = kwargs.pop("hoverinfo", None)
+        hoverinfosrc = kwargs.pop("hoverinfosrc", None)
+        hoverlabel = kwargs.pop("hoverlabel", None)
+        hovertemplate = kwargs.pop("hovertemplate", None)
+        hovertemplatesrc = kwargs.pop("hovertemplatesrc", None)
+        hovertext = kwargs.pop("hovertext", None)
+        hovertextsrc = kwargs.pop("hovertextsrc", None)
+        ids = kwargs.pop("ids", None)
 
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
