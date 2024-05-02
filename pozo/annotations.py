@@ -29,7 +29,7 @@ class DepthNote(Note): #EN DESARROLLO
                  show_text=True
                  ):
 
-        Note.__init__(self, *, line, width, fillcolor, opacity, show_text)
+        super().__init__(self, line, width, fillcolor, opacity)
         if not ((pozo.is_array(depth) and len(depth) == 2 ) or pozo.is_scalar_number(depth)):
             raise TypeError(
                 "depth must be two numbers in a tuple or list or just one number"
@@ -39,12 +39,8 @@ class DepthNote(Note): #EN DESARROLLO
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
         self.depth      = depth
-        self.line       = line
-        self.fillcolor  = fillcolor
-        self.opacity    = opacity
         self.show_text  = show_text
         self.text       = text
-        self.width      = width
 
 class PolygonNote(Note): #EN DESARROLLO
     def __init__(self,
