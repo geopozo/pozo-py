@@ -44,39 +44,40 @@ class DepthNote(Note): #EN DESARROLLO
 
 class PolygonNote(Note): #EN DESARROLLO
     def __init__(self,
-                 *,
                  x=[],
                  y=[],
                  xaxis="xaxis1",
                  yaxis="yaxis1",
                  fill="toself",
                  line={},
-                 width=1,
-                 fillcolor = 'lightskyblue',
-                 fillgradient=None,
-                 fillpattern=None,
-                 opacity=.5,
-                 bgcolor=None,
-                 bgcolorsrc=None,
-                 bordercolor=None,
-                 bordercolorsrc=None,
-                 font=None,
-                 groupnorm=None,
-                 hoverinfo=None,
-                 hoverinfosrc=None,
-                 hoverlabel=None,
-                 hoveron=None,
-                 hovertemplate=None,
-                 hovertemplatesrc=None,
-                 hovertext=None,
-                 hovertextsrc=None,
-                 legend=None,
-                 legendgroup=None,
-                 legendgrouptitle=None,
-                 legendrank=None,
-                 legendwidth=None
-                 ids=None
+                 **kwargs
                  ):
+
+        width = kwargs.pop("width", 1)
+        fillcolor = kwargs.pop("fillcolor", 'lightskyblue')
+        fillgradient = kwargs.pop("fillgradient", None)
+        fillpattern = kwargs.pop("fillpattern", None)
+        opacity = kwargs.pop("opacity", .5)
+        bgcolor = kwargs.pop("bgcolor", None)
+        bgcolorsrc = kwargs.pop("bgcolorsrc", None)
+        bordercolor = kwargs.pop("bordercolor", None)
+        bordercolorsrc = kwargs.pop("bordercolorsrc", None)
+        font = kwargs.pop("font", None)
+        groupnorm = kwargs.pop("groupnorm", None)
+        hoverinfo = kwargs.pop("hoverinfo", None)
+        hoverinfosrc = kwargs.pop("hoverinfosrc", None)
+        hoverlabel = kwargs.pop("hoverlabel", None)
+        hoveron = kwargs.pop("hoveron", None)
+        hovertemplate = kwargs.pop("hovertemplate", None)
+        hovertemplatesrc = kwargs.pop("hovertemplatesrc", None)
+        hovertext = kwargs.pop("hovertext", None)
+        hovertextsrc = kwargs.pop("hovertextsrc", None)
+        legend = kwargs.pop("legend", None)
+        legendgroup = kwargs.pop("legendgroup", None)
+        legendgrouptitle = kwargs.pop("legendgrouptitle", None)
+        legendrank = kwargs.pop("legendrank", None)
+        legendwidth = kwargs.pop("legendwidth", None)
+        ids = kwargs.pop("ids", None)
 
         Note.__init__(self, line, width, fillcolor, opacity)
         if not isinstance(line, dict):
@@ -90,8 +91,6 @@ class PolygonNote(Note): #EN DESARROLLO
         self.fill = fill
         self.fillgradient=fillgradient,
         self.fillpattern=fillpattern,
-        self.line = line
-        self.opacity = opacity
         self.bgcolor=bgcolor,
         self.bgcolorsrc=bgcolorsrc,
         self.bordercolor=bordercolor,
@@ -111,6 +110,7 @@ class PolygonNote(Note): #EN DESARROLLO
         self.legendgrouptitle=legendgrouptitle,
         self.legendrank=legendrank,
         self.legendwidth=legendwidth
+        self.ids=ids
 
 class LineNote(Note, go.Scatter): #EN DESARROLLO
     def __init__(self,
