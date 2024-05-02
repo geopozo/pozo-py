@@ -6,7 +6,7 @@ from abc import ABC
 #TODO xp doesn't handle units or check indices
 #TODO what else doesn't handle units
 class Note(ABC):
-    def __init__(self, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5,):
+    def __init__(self, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5):
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
@@ -14,7 +14,7 @@ class Note(ABC):
         # TODO add further constraints on changes
         self.line       = line
         self.fillcolor  = fillcolor
-        self.opacity    = None
+        self.opacity    = opacity
         self.width      = width
 
 class DepthNote(Note): #EN DESARROLLO
