@@ -140,7 +140,7 @@ class LineNote(Note, go.Scatter): #EN DESARROLLO
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
-        if y1 == None or x1 == None:
+        if y1 is None or x1 is None:
             raise ValueError("You must use values for x1 and y1")
 
         Note.__init__(self, line=line, width=width, fillcolor=fillcolor, opacity=opacity)
