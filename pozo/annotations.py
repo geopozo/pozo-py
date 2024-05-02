@@ -1,10 +1,11 @@
 import pozo
 import plotly.graph_objects as go
+from abc import ABC
 
 #TODO this doesn't handle units
 #TODO xp doesn't handle units or check indices
 #TODO what else doesn't handle units
-class Note():
+class Note(ABC):
     def __init__(self, *, line={}, width=1, fillcolor = 'lightskyblue', opacity=.5,):
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
