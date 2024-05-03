@@ -1043,52 +1043,52 @@ class CrossPlot():
             if isinstance(note, pozo.PolygonNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
-                    x=note["x"],
-                    y=note["y"],
+                    x=note.x,
+                    y=note.y,
                     xaxis=xaxis,
                     yaxis=yaxis,
-                    fill=note["fill"] if "fill" in note else "toself",
-                    mode=note["mode"] if "mode" in note else "lines",
+                    fill=note.fill,
+                    mode=note.mode,
                     line=dict(
-                        color=note["color"] if "color" in note else "RoyalBlue"
+                        color=note.line["color"] if "color" in note.line else "RoyalBlue"
                     ),
                 )
                 annotation = dict(
-                    text=note["text"],
+                    text=note.text,
                     axref=xaxis if xaxis != "paper" else None,
                     ayref=yaxis if yaxis != "paper" else None,
                     xref=xaxis,
-                    x=note["x"][0],
+                    x=note.x[0],
                     yref=yaxis,
-                    y=note["y"][0],
-                    yshift=note["yshift"] if "yshift" in note else -5,
-                    showarrow=note["showarrow"] if "showarrow" in note else False,
+                    y=note.y[0],
+                    yshift=note.yshift if "yshift" in note else -5,
+                    showarrow=note.showarrow if "showarrow" in note else False,
                 )
             elif isinstance(note, pozo.LineNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
-                    x0=note["x0"] if "x0" in note else 0,
-                    y0=note["y0"] if "y0" in note else 0,
-                    x1=note["x1"],
-                    y1=note["y1"],
+                    x0=note.x0,
+                    y0=note.y0,
+                    x1=note.x1,
+                    y1=note.y1,
                     xref=toTarget(xaxis),
                     yref=toTarget(yaxis),
                     line=dict(
-                        color=note["color"] if "color" in note else "RoyalBlue",
-                        width=note["width"] if "width" in note else 3,
-                        dash=note["dash"] if "dash" in note else "solid",
+                        color=note.line["color"] if "color" in note.line else "RoyalBlue",
+                        width=note.line["width"] if "width" in note.line else 3,
+                        dash=note.line["dash"] if "dash" in note.line else "solid",
                     ),
                 )
                 annotation = dict(
-                    text=note["text"],
+                    text=note.text,
                     axref=xaxis if xaxis != "paper" else None,
                     ayref=yaxis if yaxis != "paper" else None,
                     xref=xaxis,
-                    x=note["x0"],
+                    x=note.x0,
                     yref=yaxis,
-                    y=note["y0"],
-                    yshift=note["yshift"] if "yshift" in note else -5,
-                    showarrow=note["showarrow"] if "showarrow" in note else False,
+                    y=note.y0,
+                    yshift=note.yshift if "yshift" in note else -5,
+                    showarrow=note.showarrow if "showarrow" in note else False,
                 )
             elif isinstance(note, dict):
                 shape = note.shape
