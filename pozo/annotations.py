@@ -7,7 +7,7 @@ from abc import ABC
 # TODO xp doesn't handle units or check indices
 # TODO what else doesn't handle units
 class Note(ABC):
-    def __init__(self, *, line={}, width=1, fillcolor="lightskyblue", opacity=0.5):
+    def __init__(self, *, line={}, width=1, fillcolor="lightskyblue", opacity=0.5, text="", yshift=-5, showarrow=False):
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
@@ -17,6 +17,9 @@ class Note(ABC):
         self.fillcolor = fillcolor
         self.opacity = opacity
         self.width = width
+        self.text = text
+        self.yshift = yshift
+        self.showarrow = showarrow
 
 
 class DepthNote(Note):  # EN DESARROLLO
@@ -30,8 +33,10 @@ class DepthNote(Note):  # EN DESARROLLO
         fillcolor="lightskyblue",
         opacity=0.5,
         show_text=True,
+        yshift=-5,
+        showarrow=False
     ):
-        super().__init__(line=line, width=width, fillcolor=fillcolor, opacity=opacity)
+        super().__init__(line=line, width=width, fillcolor=fillcolor, opacity=opacity, text=text, yshift=yshift, showarrow=showarrow)
         if not (
             (pozo.is_array(depth) and len(depth) == 2) or pozo.is_scalar_number(depth)
         ):
@@ -56,6 +61,9 @@ class PolygonNote(Note):  # EN DESARROLLO
         yaxis="yaxis1",
         fill="toself",
         line={},
+        text="",
+        yshift=-5,
+        showarrow=False,
         **kwargs,
     ):
         mode = kwargs.pop("mode", "lines")
@@ -85,7 +93,7 @@ class PolygonNote(Note):  # EN DESARROLLO
         legendwidth = kwargs.pop("legendwidth", None)
         ids = kwargs.pop("ids", None)
 
-        super().__init__(line=line, width=width, fillcolor=fillcolor, opacity=opacity)
+        super().__init__(line=line, width=width, fillcolor=fillcolor, opacity=opacity, text=text, yshift=yshift, showarrow=showarrow)
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
         if width < -1 or width > 1:
@@ -130,6 +138,9 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
         xref="xaxis1",
         yref="yref1",
         line={},
+        text="",
+        yshift=-5,
+        showarrow=False,
         **kwargs,
     ):
         width = kwargs.pop("width", 1)
@@ -152,7 +163,7 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
             raise ValueError("You must use values for x1 and y1")
 
         Note.__init__(
-             self,line=line, width=width, fillcolor=fillcolor, opacity=opacity
+             self,line=line, width=width, fillcolor=fillcolor, opacity=opacity, text=text, yshift=yshift, showarrow=showarrow
         )
         go.Scatter.__init__(
             self,
