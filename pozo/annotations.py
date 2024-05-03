@@ -58,6 +58,7 @@ class PolygonNote(Note):  # EN DESARROLLO
         line={},
         **kwargs,
     ):
+        mode = kwargs.pop("mode", "lines")
         width = kwargs.pop("width", 1)
         fillcolor = kwargs.pop("fillcolor", "lightskyblue")
         fillgradient = kwargs.pop("fillgradient", None)
@@ -94,6 +95,7 @@ class PolygonNote(Note):  # EN DESARROLLO
         self.yaxis = xaxis
         self.xaxis = yaxis
         self.fill = fill
+        self.mode = mode
         self.fillgradient = fillgradient
         self.fillpattern = fillpattern
         self.bgcolor = bgcolor
@@ -150,9 +152,10 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
             raise ValueError("You must use values for x1 and y1")
 
         Note.__init__(
-             line=line, width=width, fillcolor=fillcolor, opacity=opacity
+             self,line=line, width=width, fillcolor=fillcolor, opacity=opacity
         )
         go.Scatter.__init__(
+            self,
             x0=x0,
             y0=y0,
             x1=x1,
