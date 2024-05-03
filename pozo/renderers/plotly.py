@@ -1061,8 +1061,8 @@ class CrossPlot():
                     x=note.x[0],
                     yref=yaxis,
                     y=note.y[0],
-                    yshift=note.yshift if "yshift" in note else -5,
-                    showarrow=note.showarrow if "showarrow" in note else False,
+                    yshift=note.yshift,
+                    showarrow=note.showarrow,
                 )
             elif isinstance(note, pozo.LineNote): #EN DESARROLLO
                 shape = dict(
@@ -1087,8 +1087,8 @@ class CrossPlot():
                     x=note.x0,
                     yref=yaxis,
                     y=note.y0,
-                    yshift=note.yshift if "yshift" in note else -5,
-                    showarrow=note.showarrow if "showarrow" in note else False,
+                    yshift=note.yshift,
+                    showarrow=note.showarrow,
                 )
             elif isinstance(note, dict):
                 shape = note.shape
