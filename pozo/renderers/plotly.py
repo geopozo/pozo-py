@@ -1055,11 +1055,11 @@ class CrossPlot():
                 )
                 annotation = dict(
                     text=note.text,
-                    axref=xaxis if xaxis != "paper" else None,
-                    ayref=yaxis if yaxis != "paper" else None,
-                    xref=xaxis,
+                    axref=note.xaxis if note.xaxis != "paper" else None,
+                    ayref=note.yaxis if note.yaxis != "paper" else None,
+                    xref=note.xaxis,
                     x=note.x[0],
-                    yref=yaxis,
+                    yref=note.yaxis,
                     y=note.y[0],
                     yshift=note.yshift,
                     showarrow=note.showarrow,
@@ -1081,11 +1081,11 @@ class CrossPlot():
                 )
                 annotation = dict(
                     text=note.text,
-                    axref=xaxis if xaxis != "paper" else None,
-                    ayref=yaxis if yaxis != "paper" else None,
-                    xref=xaxis,
+                    axref=note.xaxis if note.xaxis != "paper" else None,
+                    ayref=note.yaxis if note.yaxis != "paper" else None,
+                    xref=note.xaxis,
                     x=note.x0,
-                    yref=yaxis,
+                    yref=note.yaxis,
                     y=note.y0,
                     yshift=note.yshift,
                     showarrow=note.showarrow,
