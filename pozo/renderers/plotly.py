@@ -19,6 +19,7 @@ import pozo
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
+from pozo.annotations import DepthNote, PolygonNote, LineNote
 
 re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
@@ -1036,11 +1037,11 @@ class CrossPlot():
         layout["shapes"] = []
         layout["annotations"] = []
         for note in list(self.notes.values()):
-            if isinstance(note, pozo.DepthNote):
+            if isinstance(note, DepthNote):
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
-            if isinstance(note, pozo.PolygonNote): #EN DESARROLLO
+            if isinstance(note, PolygonNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
                     x=note.x,
@@ -1064,7 +1065,7 @@ class CrossPlot():
                     yshift=note.yshift,
                     showarrow=note.showarrow,
                 )
-            elif isinstance(note, pozo.LineNote): #EN DESARROLLO
+            elif isinstance(note, LineNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
                     x0=note.x0,
