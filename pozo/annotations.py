@@ -162,7 +162,7 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
         x1=None,
         y1=None,
         xref="xaxis1",
-        yref="yref1",
+        yref="yaxis1",
         line={},
         text="",
         yshift=-5,
