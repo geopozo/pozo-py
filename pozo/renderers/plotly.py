@@ -1054,17 +1054,19 @@ class CrossPlot():
                         color=note.line["color"] if "color" in note.line else "RoyalBlue"
                     ),
                 )
-                annotation = dict(
-                    text=note.text,
-                    axref=note.xaxis if note.xaxis != "paper" else None,
-                    ayref=note.yaxis if note.yaxis != "paper" else None,
-                    xref=note.xaxis,
-                    x=note.x[0],
-                    yref=note.yaxis,
-                    y=note.y[0],
-                    yshift=note.yshift,
-                    showarrow=note.showarrow,
-                )
+                annotation = None
+                if note.show_text:
+                    annotation = dict(
+                        text=note.text,
+                        axref="paper",
+                        ayref="y1",
+                        xref="paper",
+                        x=note.x[0],
+                        yref="y1",
+                        y=note.y[0],
+                        yshift=note.yshift,
+                        showarrow=note.showarrow,
+                    )
             elif isinstance(note, LineNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1080,17 +1082,19 @@ class CrossPlot():
                         dash=note.line["dash"] if "dash" in note.line else "solid",
                     ),
                 )
-                annotation = dict(
-                    text=note.text,
-                    axref=note.xaxis if note.xaxis != "paper" else None,
-                    ayref=note.yaxis if note.yaxis != "paper" else None,
-                    xref=note.xaxis,
-                    x=note.x0,
-                    yref=note.yaxis,
-                    y=note.y0,
-                    yshift=note.yshift,
-                    showarrow=note.showarrow,
-                )
+                annotation = None
+                if note.show_text:
+                    annotation = dict(
+                        text=note.text,
+                        axref=note.xaxis if note.xaxis != "paper" else None,
+                        ayref=note.yaxis if note.yaxis != "paper" else None,
+                        xref=note.xaxis,
+                        x=note.x0,
+                        yref=note.yaxis,
+                        y=note.y0,
+                        yshift=note.yshift,
+                        showarrow=note.showarrow,
+                    )
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
