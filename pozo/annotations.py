@@ -17,6 +17,7 @@ class Note(ABC):
         text="",
         yshift=-5,
         showarrow=False,
+        show_text=False
     ):
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
@@ -30,6 +31,7 @@ class Note(ABC):
         self.text = text
         self.yshift = yshift
         self.showarrow = showarrow
+        self.show_text = show_text
 
 
 class DepthNote(Note):  # EN DESARROLLO
@@ -82,6 +84,7 @@ class PolygonNote(Note):  # EN DESARROLLO
         text="",
         yshift=-5,
         showarrow=False,
+        show_text=False,
         **kwargs,
     ):
         mode = kwargs.pop("mode", "lines")
@@ -130,6 +133,7 @@ class PolygonNote(Note):  # EN DESARROLLO
         self.xaxis = yaxis
         self.fill = fill
         self.mode = mode
+        self.show_text = show_text
         self.fillgradient = fillgradient
         self.fillpattern = fillpattern
         self.bgcolor = bgcolor
@@ -167,6 +171,7 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
         text="",
         yshift=-5,
         showarrow=False,
+        show_text=False,
         **kwargs,
     ):
         width = kwargs.pop("width", 1)
@@ -197,6 +202,7 @@ class LineNote(Note, go.Scatter):  # EN DESARROLLO
             text=text,
             yshift=yshift,
             showarrow=showarrow,
+            show_text=show_text,
         )
         go.Scatter.__init__(
             self,
