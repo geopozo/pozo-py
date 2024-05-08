@@ -22,8 +22,9 @@ class Theme(): # Meant to be inherited
             raise NotImplementedError("Every Theme inheriter must supply a resolve(self, key, context)")
 
 class ThemeDict(Theme, dict): # Basically a dict
-    def copy(self):
-        return copy.deepcopy(self) # TODO: really don't know if this is a recursive issue, but we'll find out today!
+
+    def deepcopy(self):
+        return copy.deepcopy(self)
 
     def __repr__(self):
         return str(json.dumps(self, indent=2))
