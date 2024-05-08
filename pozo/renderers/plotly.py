@@ -1019,6 +1019,7 @@ class CrossPlot():
         static = kwargs.pop("static", False)
         layout = self.create_layout(**kwargs) # container_width, size
         traces = self.create_traces(**kwargs) # container_width, depth_range, size, static
+        display(traces)
 
         if static:
             self.last_fig = go.Figure(data=traces, layout=layout)
@@ -1032,6 +1033,33 @@ class CrossPlot():
     def create_layout(
         self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"
     ):
+        def get_shape_annotation(self, shape=None, annotation=None):
+            if shape:
+                layout["shapes"].append(shape)
+            if annotation:
+                layout["annotations"].append(annotation)
+
+            return {
+                "width": size,
+                "height": size,
+                xaxis: dict(
+                    title=self.x.get_name(),
+                    range=self.xrange,
+                    linecolor="#888",
+                    linewidth=1,
+                ),
+                yaxis: dict(
+                    title=self.y.get_name(),
+                    range=self.yrange,
+                    domain=(margin, 1),
+                    linecolor="#888",
+                    linewidth=1,
+                ),
+                "shapes": list(layout["shapes"]),
+                "annotations": list(layout["annotations"]),
+                "showlegend": True,
+            }
+
         if not size:
             size = self.size
         margin = (120) / size if container_width is not None else 0
@@ -1070,6 +1098,7 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
+                fig_obj = go.Scatter
             elif isinstance(note, LineNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1102,31 +1131,7 @@ class CrossPlot():
                 shape = note.shape
                 annotation = note.annotation
 
-            if shape:
-                layout["shapes"].append(shape)
-            if annotation:
-                layout["annotations"].append(annotation)
 
-        return {
-            "width": size,
-            "height": size,
-            xaxis: dict(
-                title=self.x.get_name(),
-                range=self.xrange,
-                linecolor="#888",
-                linewidth=1,
-            ),
-            yaxis: dict(
-                title=self.y.get_name(),
-                range=self.yrange,
-                domain=(margin, 1),
-                linecolor="#888",
-                linewidth=1,
-            ),
-            "shapes": list(layout["shapes"]),
-            "annotations": list(layout["annotations"]),
-            "showlegend": True,
-        }
 
     def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
         if not size: size = self.size
