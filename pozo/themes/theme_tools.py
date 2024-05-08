@@ -68,6 +68,26 @@ class MnemonicDictionary(pzt.DynamicTheme):
     def __len__(self):
         return len(self._lut)
 
+    def __delitem__(self, key):
+        del self._lut[key]
+
+    def clear(self):
+        self._lut = self._lut.clear()
+        return self
+
+    def has_key(self, k):
+        return k in self._lut
+
+    def update(self, *args, **kwargs):
+        self._lut = self._lut.update(*args, **kwargs)
+        return self
+
+    def keys(self):
+        return self._lut.keys()
+
+    def values(self):
+        return self._lut.values()
+
     def set_value(self, mnemonic, key, value):
         if mnemonic not in self._lut: self._lut[mnemonic] = {}
         self._lut[mnemonic][key] = value
