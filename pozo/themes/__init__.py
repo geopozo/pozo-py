@@ -20,10 +20,6 @@ def help():
     display("Themes set on more specific items (traces) will override those on less specific items (graphs)")
 
 class Theme(): # Meant to be inherited
-    def __new__(cls, *args, **kwargs):
-        if cls is BaseClass:
-            raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
-        return object.__new__(cls, *args, **kwargs)
     def __init__(self, *args, **kwargs):
         self._context = {}
         super().__init__(*args, **kwargs)
@@ -76,10 +72,6 @@ class ThemeDict(Theme, dict): # Basically a dict
         return self[key]
 
 class DynamicTheme(Theme): # Meant to be inherited
-    def __new__(cls, *args, **kwargs):
-        if cls is BaseClass:
-            raise TypeError(f"only children of '{cls.__name__}' may be instantiated")
-        return object.__new__(cls, *args, **kwargs)
     def resolve(self, key, contexts):
         raise NotImplementedError("Dynamic themes must implement get_value(self, key, args)")
 
