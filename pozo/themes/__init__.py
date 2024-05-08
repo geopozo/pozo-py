@@ -70,6 +70,7 @@ class Themeable(): # Meant to be inherited by objects
 from pozo.themes.theme_tools import * # should it be relative?
 # Below is implementations
 themes = {'cangrejo': MnemonicDictionary(tables.cangrejo)}
+cangrejo = MnemonicDictionary(tables.cangrejo)
 
 # ThemeList also has a theme, which is considered an override!
 class ThemeStack(Themeable):
