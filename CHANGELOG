@@ -1,3 +1,6 @@
+v0.9.25:
+ - TreeTable() renderer now better organized and with options
+ - cpus=1 on makemovie now turns off parallel library
 v0.9.24:
  - Add trial for fill options
  - Fix some bugs

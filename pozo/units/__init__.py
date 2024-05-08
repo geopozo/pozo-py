@@ -29,9 +29,17 @@ percent_general = [
         LasMapEntry((), "ppm", "catch all, ppm - LOW" ),
     ]
 
+registry.add_las_map('-',    'MM'  , 'millimeter'              , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'M'   , 'meter'                   , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'CM'  , 'centimeter'              , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'GAPI', 'gAPI'                    , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'DEG_C', 'celsius'                    , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'DEG_F', 'fahrenheit'                    , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'COUNTS/S', 'cps'                    , "decided without mnemonic- MEDIUM")
+registry.add_las_map('-',    'CPS', 'cps'                    , "decided without mnemonic- MEDIUM")
 registry.add_las_map('DEPT', 'M'   , 'meter'                   , "HIGH")
 registry.add_las_map('DEPT', 'FT'  , 'feet'                    , "HIGH")
-registry.add_las_map('DEPT', 'F'  , 'feet'                    , "HIGH")
+registry.add_las_map('DEPT', 'F'  ,  'feet'                    , "HIGH")
 registry.add_las_map('GR'  , 'GAPI', 'gAPI'                    , "HIGH")
 registry.add_las_map('GR'  , '',     'gAPI'                    , "HIGH")
 registry.add_las_map('CGR' , 'GAPI', 'gAPI'                    , "HIGH")
