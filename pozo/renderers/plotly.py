@@ -1033,7 +1033,9 @@ class CrossPlot():
     def create_layout(
         self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"
     ):
-        def get_shape_annotation(layout, x, xrange, y, yrange, shape=None, annotation=None):
+        def get_shape_annotation(
+            layout, x, xrange, y, yrange, shape=None, annotation=None
+        ):
             if shape:
                 layout["shapes"].append(shape)
             if annotation:
@@ -1072,6 +1074,7 @@ class CrossPlot():
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
+                fig_object = go.Scattergl()
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
@@ -1079,9 +1082,9 @@ class CrossPlot():
                     y=self.y,
                     yrange=self.yrange,
                     shape=shape,
-                    annotation=annotation
-                    )
-            if isinstance(note, PolygonNote): #EN DESARROLLO
+                    annotation=annotation,
+                ), fig_object
+            if isinstance(note, PolygonNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
                     x=note.x,
@@ -1091,7 +1094,9 @@ class CrossPlot():
                     fill=note.fill,
                     mode=note.mode,
                     line=dict(
-                        color=note.line["color"] if "color" in note.line else "RoyalBlue"
+                        color=note.line["color"]
+                        if "color" in note.line
+                        else "RoyalBlue"
                     ),
                 )
                 annotation = None
@@ -1107,6 +1112,7 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
+                fig_object = go.Scatter()
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
@@ -1114,9 +1120,9 @@ class CrossPlot():
                     y=self.y,
                     yrange=self.yrange,
                     shape=shape,
-                    annotation=annotation
-                    )
-            elif isinstance(note, LineNote): #EN DESARROLLO
+                    annotation=annotation,
+                ), fig_object
+            elif isinstance(note, LineNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
                     x0=note.x0,
@@ -1126,7 +1132,9 @@ class CrossPlot():
                     xref=toTarget(xaxis),
                     yref=toTarget(yaxis),
                     line=dict(
-                        color=note.line["color"] if "color" in note.line else "RoyalBlue",
+                        color=note.line["color"]
+                        if "color" in note.line
+                        else "RoyalBlue",
                         width=note.line["width"] if "width" in note.line else 3,
                         dash=note.line["dash"] if "dash" in note.line else "solid",
                     ),
@@ -1144,6 +1152,7 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
+                fig_object = go.Scattergl()
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
@@ -1151,11 +1160,12 @@ class CrossPlot():
                     y=self.y,
                     yrange=self.yrange,
                     shape=shape,
-                    annotation=annotation
-                    )
+                    annotation=annotation,
+                ), fig_object
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
+                fig_object = go.Scattergl()
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
@@ -1163,8 +1173,8 @@ class CrossPlot():
                     y=self.y,
                     yrange=self.yrange,
                     shape=shape,
-                    annotation=annotation
-                    )
+                    annotation=annotation,
+                ), fig_object
 
 
 
