@@ -1033,7 +1033,7 @@ class CrossPlot():
     def create_layout(
         self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"
     ):
-        def get_shape_annotation(self, shape=None, annotation=None):
+        def get_shape_annotation(layout, x, xrange, y, yrange, shape=None, annotation=None):
             if shape:
                 layout["shapes"].append(shape)
             if annotation:
@@ -1043,14 +1043,14 @@ class CrossPlot():
                 "width": size,
                 "height": size,
                 xaxis: dict(
-                    title=self.x.get_name(),
-                    range=self.xrange,
+                    title=x.get_name(),
+                    range=xrange,
                     linecolor="#888",
                     linewidth=1,
                 ),
                 yaxis: dict(
-                    title=self.y.get_name(),
-                    range=self.yrange,
+                    title=y.get_name(),
+                    range=yrange,
                     domain=(margin, 1),
                     linecolor="#888",
                     linewidth=1,
