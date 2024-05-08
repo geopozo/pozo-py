@@ -39,9 +39,19 @@ class MnemonicDictionary(pzt.DynamicTheme):
     def set_mnemonic(self, mnemonic, dictionary):
         self._lut[mnemonic] = dictionary
 
+    def __setitem__(self, mnemonic, dictionary):
+        self._lut[mnemonic] = dictionary
+
     def get_mnemonic(self, mnemonic):
         if mnemonic not in self._lut: return None
         return self._lut[mnemonic]
+
+    def __getitem__(self, mnemonic):
+        if mnemonic not in self._lut: raise KeyError(f"{mnemonic} not present")
+        return self._lut[mnemonic]
+
+    def __len__(self):
+        return len(self._lut)
 
     def set_value(self, mnemonic, key, value):
         if mnemonic not in self._lut: self._lut[mnemonic] = {}
