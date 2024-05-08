@@ -71,6 +71,7 @@ class ColorWheel(pzt.DynamicTheme):
 
     # ColorWheel is really married to graphs. Think about this during documentation.
     def resolve(self, key, contexts):
+        if key != "color": return None
         if not self._each:
             for context in contexts:
                 if "type" in context and (context["type"] == self._per or context["type"] in self._per):
