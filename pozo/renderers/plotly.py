@@ -990,6 +990,9 @@ class CrossPlot():
         self.y              = y if y is not None else self.y
         self.x              = x if x is not None else self.x
 
+    def __repr__(self):
+        return f"x: {self.x}\ny: {self.y}\ncolors: {self.colors}"
+
     def __init__(self, x=None, y=None, colors=[None], **kwargs):
         # rendering defaults
         self.size                = kwargs.pop("size", 500)

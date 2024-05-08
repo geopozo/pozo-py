@@ -1,4 +1,5 @@
 import colour
+import json
 
 import pozo.themes.mnemonic_tables as tables
 
@@ -20,6 +21,9 @@ class Theme(): # Meant to be inherited
             raise NotImplementedError("Every Theme inheriter must supply a resolve(self, key, context)")
 
 class ThemeDict(Theme, dict): # Basically a dict
+    def __repr__(self):
+        return str(json.dumps(self, indent=2))
+
     def resolve(self, key, contexts=None):
         if key not in self:
             return None
