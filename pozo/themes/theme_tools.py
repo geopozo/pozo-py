@@ -49,6 +49,9 @@ class MnemonicDictionary(pzt.DynamicTheme):
         self.set_value('-', key, value)
 
 class ColorWheel(pzt.DynamicTheme):
+    def copy(self):
+        return ColorWheel(color_list=self._color_list, each=self._each, per=self._per)
+
     def __init__(self, color_list=default_color_list, per=None, context=None, each=False):
         self._color_list=color_list
         self._each = each
