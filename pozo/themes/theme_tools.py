@@ -1,3 +1,5 @@
+import copy
+
 import pozo.themes as pzt
 import pozo.units as pzu
 import json
@@ -9,12 +11,21 @@ class MnemonicDictionary(pzt.DynamicTheme):
     def __repr__(self):
         return str(json.dumps(self._lut, indent=2))
 
+    def __copy__(self):
+        return self.copy()
+    def __deepcopy__(self):
+        return self.copy()
+
+    def copy(self):
+        return MnemonicDictionary(self._lut, registry=self._registry)
+
     def __init__(self, mnemonic_table, registry=pzu.registry):
+        self._registry = registry # only storing for copy, only used here
         if not isinstance(mnemonic_table, dict): raise ValueError("menmonic_table must be dictionary")
         for key, value in mnemonic_table.items():
             if "range_unit" in value:
-                pzu.registry.parse_units(value["range_unit"]) # just checking to see if its working
-        self._lut = mnemonic_table # renderer will have to do conversons
+                pzu.registry.parse_units(value["range_unit"])
+        self._lut = copy.deepcopy(mnemonic_table)
 
     def resolve(self, key, contexts):
         mnemonic = None
@@ -64,6 +75,13 @@ class MnemonicDictionary(pzt.DynamicTheme):
         self.set_value('+', key, value)
 
 class ColorWheel(pzt.DynamicTheme):
+
+    def __copy__(self):
+        return self.copy()
+
+    def __deepcopy__(self):
+        return self.copy()
+
     def copy(self):
         return ColorWheel(color_list=self._color_list, each=self._each, per=self._per)
 
