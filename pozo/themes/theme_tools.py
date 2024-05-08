@@ -23,12 +23,14 @@ class MnemonicDictionary(pzt.DynamicTheme):
                 mnemonic = context["mnemonic"]
             elif "mnemonics" in context and len(context["mnemonics"]) >= 1:
                     mnemonic = context["mnemonics"][0]
-        if mnemonic is None or mnemonic not in self._lut:
+        if '+' in self._lut and key in self._lut['+']:
+            return self._lut['+'][key]
+        elif mnemonic is None or mnemonic not in self._lut:
             if '-' in self._lut and key in self._lut['-']: return self._lut['-'][key]
             return None
-        if key in self._lut[mnemonic]:
+        elif key in self._lut[mnemonic]:
             return self._lut[mnemonic][key]
-        if '-' in self._lut and key in self._lut['-']: return self._lut['-'][key]
+        elif '-' in self._lut and key in self._lut['-']: return self._lut['-'][key]
         return None
 
     def get_dictionary(self):
@@ -47,6 +49,9 @@ class MnemonicDictionary(pzt.DynamicTheme):
 
     def set_fallback(self, key, value):
         self.set_value('-', key, value)
+
+    def set_override(self, key, value):
+        self.set_value('+', key, value)
 
 class ColorWheel(pzt.DynamicTheme):
     def copy(self):
