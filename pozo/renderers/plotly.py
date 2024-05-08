@@ -1072,6 +1072,15 @@ class CrossPlot():
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
+                return get_shape_annotation(
+                    layout=layout,
+                    x=self.x,
+                    xrange=self.xrange,
+                    y=self.y,
+                    yrange=self.yrange,
+                    shape=shape,
+                    annotation=annotation
+                    )
             if isinstance(note, PolygonNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1098,7 +1107,15 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_obj = go.Scatter
+                return get_shape_annotation(
+                    layout=layout,
+                    x=self.x,
+                    xrange=self.xrange,
+                    y=self.y,
+                    yrange=self.yrange,
+                    shape=shape,
+                    annotation=annotation
+                    )
             elif isinstance(note, LineNote): #EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1127,9 +1144,27 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
+                return get_shape_annotation(
+                    layout=layout,
+                    x=self.x,
+                    xrange=self.xrange,
+                    y=self.y,
+                    yrange=self.yrange,
+                    shape=shape,
+                    annotation=annotation
+                    )
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
+                return get_shape_annotation(
+                    layout=layout,
+                    x=self.x,
+                    xrange=self.xrange,
+                    y=self.y,
+                    yrange=self.yrange,
+                    shape=shape,
+                    annotation=annotation
+                    )
 
 
 
