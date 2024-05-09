@@ -1033,34 +1033,6 @@ class CrossPlot():
     def create_layout(
         self, container_width=None, size=None, xaxis="xaxis1", yaxis="yaxis1"
     ):
-        def get_shape_annotation(
-            layout, x, xrange, y, yrange, shape=None, annotation=None
-        ):
-            if shape:
-                layout["shapes"].append(shape)
-            if annotation:
-                layout["annotations"].append(annotation)
-
-            return {
-                "width": size,
-                "height": size,
-                xaxis: dict(
-                    title=x.get_name(),
-                    range=xrange,
-                    linecolor="#888",
-                    linewidth=1,
-                ),
-                yaxis: dict(
-                    title=y.get_name(),
-                    range=yrange,
-                    domain=(margin, 1),
-                    linecolor="#888",
-                    linewidth=1,
-                ),
-                "shapes": list(layout["shapes"]),
-                "annotations": list(layout["annotations"]),
-                "showlegend": True,
-            }
 
         if not size:
             size = self.size
@@ -1076,15 +1048,6 @@ class CrossPlot():
                     note, xref="paper", yref=toTarget(yaxis)
                 )
                 fig_object.append(go.Scattergl())
-                layout_dictionary = get_shape_annotation(
-                    layout=layout,
-                    x=self.x,
-                    xrange=self.xrange,
-                    y=self.y,
-                    yrange=self.yrange,
-                    shape=shape,
-                    annotation=annotation,
-                )
             if isinstance(note, PolygonNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1114,15 +1077,6 @@ class CrossPlot():
                         showarrow=note.showarrow,
                     )
                 fig_object.append(go.Scatter())
-                layout_dictionary = get_shape_annotation(
-                    layout=layout,
-                    x=self.x,
-                    xrange=self.xrange,
-                    y=self.y,
-                    yrange=self.yrange,
-                    shape=shape,
-                    annotation=annotation,
-                )
             elif isinstance(note, LineNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1154,28 +1108,36 @@ class CrossPlot():
                         showarrow=note.showarrow,
                     )
                 fig_object.append(go.Scattergl())
-                layout_dictionary = get_shape_annotation(
-                    layout=layout,
-                    x=self.x,
-                    xrange=self.xrange,
-                    y=self.y,
-                    yrange=self.yrange,
-                    shape=shape,
-                    annotation=annotation,
-                )
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
                 fig_object.append(go.Scattergl())
-                layout_dictionary = get_shape_annotation(
-                    layout=layout,
-                    x=self.x,
-                    xrange=self.xrange,
-                    y=self.y,
-                    yrange=self.yrange,
-                    shape=shape,
-                    annotation=annotation,
-                )
+
+            if shape:
+                layout["shapes"].append(shape)
+            if annotation:
+                layout["annotations"].append(annotation)
+
+            return {
+                "width": size,
+                "height": size,
+                xaxis: dict(
+                    title=self.x.get_name(),
+                    range=self.xrange,
+                    linecolor="#888",
+                    linewidth=1,
+                ),
+                yaxis: dict(
+                    title=self.y.get_name(),
+                    range=self.yrange,
+                    domain=(margin, 1),
+                    linecolor="#888",
+                    linewidth=1,
+                ),
+                "shapes": list(layout["shapes"]),
+                "annotations": list(layout["annotations"]),
+                "showlegend": True,
+            }
 
 
 
