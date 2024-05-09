@@ -1137,7 +1137,7 @@ class CrossPlot():
                 "shapes": list(layout["shapes"]),
                 "annotations": list(layout["annotations"]),
                 "showlegend": True,
-            }
+            }, fig_object
 
 
 
