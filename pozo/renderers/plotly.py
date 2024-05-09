@@ -1017,12 +1017,12 @@ class CrossPlot():
 
     def render(self, **kwargs):
         static = kwargs.pop("static", False)
-        layout = self.create_layout(**kwargs) # container_width, size
+        layout, fig_object = self.create_layout(**kwargs) # container_width, size
         traces = self.create_traces(**kwargs) # container_width, depth_range, size, static
         display(traces)
 
         if static:
-            self.last_fig = go.Figure(data=traces, layout=layout)
+            self.last_fig = go.Figure(data=fig_object(traces), layout=layout)
             return self.last_fig
         fig = xpFigureWidget(data=traces, layout=layout, renderer=self)
         self.add_figure(fig)
@@ -1066,6 +1066,7 @@ class CrossPlot():
             size = self.size
         margin = (120) / size if container_width is not None else 0
 
+        fig_object = []
         layout = {}
         layout["shapes"] = []
         layout["annotations"] = []
@@ -1074,7 +1075,7 @@ class CrossPlot():
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
-                fig_object = go.Scattergl()
+                fig_object.append(go.Scattergl())
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
@@ -1112,7 +1113,7 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_object = go.Scatter()
+                fig_object.append(go.Scatter())
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
@@ -1152,7 +1153,7 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_object = go.Scattergl()
+                fig_object.append(go.Scattergl())
                 return get_shape_annotation(
                     layout=layout,
                     x=self.x,
