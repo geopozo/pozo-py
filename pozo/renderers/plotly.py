@@ -1076,7 +1076,7 @@ class CrossPlot():
                     note, xref="paper", yref=toTarget(yaxis)
                 )
                 fig_object.append(go.Scattergl())
-                return get_shape_annotation(
+                layout_dictionary = get_shape_annotation(
                     layout=layout,
                     x=self.x,
                     xrange=self.xrange,
@@ -1084,7 +1084,7 @@ class CrossPlot():
                     yrange=self.yrange,
                     shape=shape,
                     annotation=annotation,
-                ), fig_object
+                )
             if isinstance(note, PolygonNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1114,7 +1114,7 @@ class CrossPlot():
                         showarrow=note.showarrow,
                     )
                 fig_object.append(go.Scatter())
-                return get_shape_annotation(
+                layout_dictionary = get_shape_annotation(
                     layout=layout,
                     x=self.x,
                     xrange=self.xrange,
@@ -1122,7 +1122,7 @@ class CrossPlot():
                     yrange=self.yrange,
                     shape=shape,
                     annotation=annotation,
-                ), fig_object
+                )
             elif isinstance(note, LineNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1154,7 +1154,7 @@ class CrossPlot():
                         showarrow=note.showarrow,
                     )
                 fig_object.append(go.Scattergl())
-                return get_shape_annotation(
+                layout_dictionary = get_shape_annotation(
                     layout=layout,
                     x=self.x,
                     xrange=self.xrange,
@@ -1162,12 +1162,12 @@ class CrossPlot():
                     yrange=self.yrange,
                     shape=shape,
                     annotation=annotation,
-                ), fig_object
+                )
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
-                fig_object = go.Scattergl()
-                return get_shape_annotation(
+                fig_object.append(go.Scattergl())
+                layout_dictionary = get_shape_annotation(
                     layout=layout,
                     x=self.x,
                     xrange=self.xrange,
@@ -1175,7 +1175,9 @@ class CrossPlot():
                     yrange=self.yrange,
                     shape=shape,
                     annotation=annotation,
-                ), fig_object
+                )
+
+
 
 
 
