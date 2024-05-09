@@ -27,7 +27,8 @@ re_power = re.compile(r'\*\*')
 warnings.filterwarnings("ignore", category=UserWarning, message="Message serialization failed with")
 
 def toTarget(axis):
-    return axis[0] + axis[-1]
+    suffix = axis[-1] if axis[-1] != "1" else ""
+    return axis[0] + suffix
 
 def javascript():
     add_scroll = '''var css = '.plot-container { overflow: auto; }',
