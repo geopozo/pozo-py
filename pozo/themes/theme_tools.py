@@ -14,8 +14,8 @@ class MnemonicDictionary(pzt.DynamicTheme):
     def __copy__(self):
         return self.copy()
 
-    def __deepcopy__(self):
-        return MnemonicDictionary(copy.deepcopy(self._lut), registry=self._registry) # don't deepcopy registry
+    def __deepcopy__(self, memo):
+        return MnemonicDictionary(copy.deepcopy(self._lut, memo), registry=self._registry) # don't deepcopy registry
 
     def deepcopy(self):
         return copy.deepcopy(self)
