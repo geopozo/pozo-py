@@ -567,7 +567,7 @@ class Plotly(pzr.Renderer):
                 track_index +=1
             for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
                 s, a = self._process_note(note,
-                                          xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
+                                          xref=toTarget('x'+str(posmap['tracks_axis_numbers'][track_index][0])) + ' domain',
                                           yref=toTarget(posmap['track_y']))
                 if s: layout['shapes'].append(s)
                 if a: layout['annotations'].append(a)
