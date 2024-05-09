@@ -422,7 +422,7 @@ class Plotly(pzr.Renderer):
 
 
                 if data_unit != range_unit:
-                    xrange = pzu.Q(xrange_raw, range_unit).m_as(data_unit)
+                    xrange = pzu.Q(xrange_raw, range_unit).m_as(data_unit) if xrange_raw else None
                 else:
                     xrange = xrange_raw
                 # So we've just created xrange which is the data_unit
@@ -446,7 +446,7 @@ class Plotly(pzr.Renderer):
 
                 axis_style['type'] = scale_type
                 if scale_type == "log":
-                    xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
+                    xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)] if xrange and xrange[0] and xrange[1] else None
                 if xrange is not None:
                     axis_style['range'] = xrange
 
