@@ -1018,11 +1018,11 @@ class CrossPlot():
     def render(self, **kwargs):
         static = kwargs.pop("static", False)
         layout, fig_object = self.create_layout(**kwargs) # container_width, size
-        traces = self.create_traces(**kwargs) # container_width, depth_range, size, static
+        traces = self.create_traces(fig_object=fig_object, **kwargs) # container_width, depth_range, size, static
         display(traces)
 
         if static:
-            self.last_fig = go.Figure(data=fig_object(traces), layout=layout)
+            self.last_fig = go.Figure(traces, layout=layout)
             return self.last_fig
         fig = xpFigureWidget(data=traces, layout=layout, renderer=self)
         self.add_figure(fig)
@@ -1143,7 +1143,7 @@ class CrossPlot():
 
 
 
-    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
+    def create_traces(self, depth_range=None, fig_object="go.Scattergl", container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
         if not size: size = self.size
         if not depth_range: depth_range = self.depth_range
         x_data = self.x.get_data()[slice(*depth_range)] if by_index else self.x.get_data(slice_by_depth=depth_range)
@@ -1181,7 +1181,10 @@ class CrossPlot():
         if trace_definitions and 'visible' in trace_definitions[0]: del trace_definitions[0]['visible']
 
         for trace in trace_definitions:
-            plotly_traces.append(go.Scattergl(trace))
+            if fig_object == "go.Scatter":
+                plotly_traces.append(go.Scatter(trace))
+            else:
+                plotly_traces.append(go.Scattergl(trace))
             if trace['name'] in color_lock:
                 # originally we did this post-process modification  because we didn't have plotly.colors.get_colorscale(str)
                 # we could now do it in create trace
