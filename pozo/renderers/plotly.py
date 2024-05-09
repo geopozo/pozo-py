@@ -315,7 +315,7 @@ class Plotly(pzr.Renderer):
             if axis_index == -1 and stack['force']:
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
-                posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
+                posmap['axis_number_to_Axis'][posmap['total_axes']] = "dummy" # worried about this
                 # there will be a trace here but it will be a dummy trace
             if not axes_exist:
                 effectively_hidden[id(track)] = True
@@ -558,12 +558,12 @@ class Plotly(pzr.Renderer):
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
         if self._hidden(themes): return {}
-        track_index = -1 + bool(posmap['with_xp'])# we can't use enumerate() becuase sometimes we skip iterations in the loop
+        track_index = -1
         for track in graph.get_tracks():
             themes.append(track.get_theme())
             if not themes['force'] and ( self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0 ): continue
             track_index += 1
-            if not bool(posmap['with_xp']) and posmap['tracks_axis_numbers'][track_index] == "depth":
+            if posmap['tracks_axis_numbers'][track_index] == "depth":
                 track_index +=1
             for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
                 s, a = self._process_note(note,
@@ -734,6 +734,7 @@ class Plotly(pzr.Renderer):
                 override_theme={"color": "black", "track_width": 300}
                 )
         for i, axis in posmap['axis_number_to_Axis'].items():
+            if not axis or axis == "dummy": continue
             trace = axis.get_trace()
             with warnings.catch_warnings():
                 warnings.simplefilter("default")
