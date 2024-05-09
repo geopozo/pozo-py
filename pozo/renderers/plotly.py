@@ -1047,7 +1047,7 @@ class CrossPlot():
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
-                fig_object.append(go.Scattergl())
+                fig_object.append("go.Scattergl")
             if isinstance(note, PolygonNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1076,7 +1076,7 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_object.append(go.Scatter())
+                fig_object.append("go.Scatter")
             elif isinstance(note, LineNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1107,11 +1107,11 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_object.append(go.Scattergl())
+                fig_object.append("go.Scattergl")
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
-                fig_object.append(go.Scattergl())
+                fig_object.append("go.Scattergl")
 
             if shape:
                 layout["shapes"].append(shape)
