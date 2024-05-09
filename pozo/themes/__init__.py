@@ -10,7 +10,10 @@ ThemeValues = dict(color="Can be a single color value or list of color values fr
                    hidden="If true, will not show the item",
                    range="Set's the default min and max x value for this item",
                    range_unit="Specifies the units of range",
-                   scale="Can be log or linear"
+                   scale="Can be log or linear",
+                   fill="a plotly fill description EXPERIMENTAL",
+                   fillcolor="color of the fill EXPERIMENTAL",
+                   cross_axis_fill="a fill between two separate axes EXPERIMENTAL"
         )
 def help():
     display(HTML(f"<pre>{json.dumps(ThemeValues, indent=4)}</pre>"))
