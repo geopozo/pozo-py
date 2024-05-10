@@ -1135,9 +1135,6 @@ class CrossPlot():
             }
 
 
-
-
-
     def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
         if not size: size = self.size
         if not depth_range: depth_range = self.depth_range
@@ -1178,7 +1175,8 @@ class CrossPlot():
         for trace in trace_definitions:
             plotly_traces.append(go.Scattergl(trace))
             if trace['name'] in color_lock:
-                # originally we did this post-process modification  because we didn't have plotly.colors.get_colorscale(str)
+                # originally we did this post-process modification
+                # because we didn't have plotly.colors.get_colorscale(str)
                 # we could now do it in create trace
                 color_range = color_lock[trace['name']]
                 cs_sel = plotly_traces[-1]['marker']['colorscale'] # this is the selected
