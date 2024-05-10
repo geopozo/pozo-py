@@ -1194,6 +1194,7 @@ class CrossPlot():
             note_obj = notes[note]
             if isinstance(note_obj, DepthNote):
                 shape, _ = process_note(note_obj, xref="paper", yref=toTarget(yaxis))
+                shape["name"]=note
                 plotly_traces.append(go.Scattergl(shape))
             elif isinstance(note_obj, PolygonNote):
                 shape = dict(
@@ -1209,6 +1210,7 @@ class CrossPlot():
                         if "color" in note_obj.line
                         else "RoyalBlue"
                     ),
+                    name=note,
                 )
                 plotly_traces.append(go.Scatter(shape))
             elif isinstance(note_obj, LineNote):
@@ -1227,6 +1229,7 @@ class CrossPlot():
                         width=note_obj.line["width"] if "width" in note_obj.line else 3,
                         dash=note_obj.line["dash"] if "dash" in note_obj.line else "solid",
                     ),
+                    name=note,
                 )
                 plotly_traces.append(go.Scattergl(shape))
             elif isinstance(note, dict):
