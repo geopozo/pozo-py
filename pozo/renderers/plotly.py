@@ -1196,41 +1196,43 @@ class CrossPlot():
                 plotly_traces[-1].meta['colorscale_selected'] = tuple(cs_sel)
                 # this should lock it, otherwise, it goes back to auto
 
-        for note in self.notes.values():
-            if isinstance(note, DepthNote):
-                shape, _ = process_note(note, xref="paper", yref=toTarget(yaxis))
+        notes = self.notes
+        for note in notes:
+            note_obj = notes[note]
+            if isinstance(note_obj, DepthNote):
+                shape, _ = process_note(note_obj, xref="paper", yref=toTarget(yaxis))
                 plotly_traces.append(go.Scattergl(shape))
-            elif isinstance(note, PolygonNote):
+            elif isinstance(note_obj, PolygonNote):
                 shape = dict(
                     type="line",
-                    x=note.x,
-                    y=note.y,
+                    x=note_obj.x,
+                    y=note_obj.y,
                     xaxis=xaxis,
                     yaxis=yaxis,
-                    fill=note.fill,
-                    mode=note.mode,
+                    fill=note_obj.fill,
+                    mode=note_obj.mode,
                     line=dict(
-                        color=note.line["color"]
-                        if "color" in note.line
+                        color=note_obj.line["color"]
+                        if "color" in note_obj.line
                         else "RoyalBlue"
                     ),
                 )
                 plotly_traces.append(go.Scatter(shape))
-            elif isinstance(note, LineNote):
+            elif isinstance(note_obj, LineNote):
                 shape = dict(
                     type="line",
-                    x0=note.x0,
-                    y0=note.y0,
-                    x1=note.x1,
-                    y1=note.y1,
+                    x0=note_obj.x0,
+                    y0=note_obj.y0,
+                    x1=note_obj.x1,
+                    y1=note_obj.y1,
                     xref=toTarget(xaxis),
                     yref=toTarget(yaxis),
                     line=dict(
-                        color=note.line["color"]
+                        color=note_obj.line["color"]
                         if "color" in note.line
                         else "RoyalBlue",
-                        width=note.line["width"] if "width" in note.line else 3,
-                        dash=note.line["dash"] if "dash" in note.line else "solid",
+                        width=note_obj.line["width"] if "width" in note_obj.line else 3,
+                        dash=note_obj.line["dash"] if "dash" in note_obj.line else "solid",
                     ),
                 )
                 plotly_traces.append(go.Scattergl(shape))
