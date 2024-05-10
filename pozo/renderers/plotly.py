@@ -1017,8 +1017,8 @@ class CrossPlot():
 
     def render(self, **kwargs):
         static = kwargs.pop("static", False)
-        layout, fig_object = self.create_layout(**kwargs) # container_width, size
-        traces = self.create_traces(fig_object=fig_object, **kwargs) # container_width, depth_range, size, static
+        layout= self.create_layout(**kwargs) # container_width, size
+        traces = self.create_traces(**kwargs) # container_width, depth_range, size, static
         display(traces)
 
         if static:
@@ -1038,7 +1038,6 @@ class CrossPlot():
             size = self.size
         margin = (120) / size if container_width is not None else 0
 
-        fig_object = []
         layout = {}
         layout["shapes"] = []
         layout["annotations"] = []
@@ -1047,7 +1046,6 @@ class CrossPlot():
                 shape, annotation = process_note(
                     note, xref="paper", yref=toTarget(yaxis)
                 )
-                fig_object.append("go.Scattergl")
             if isinstance(note, PolygonNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1076,7 +1074,6 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_object.append("go.Scatter")
             elif isinstance(note, LineNote):  # EN DESARROLLO
                 shape = dict(
                     type="line",
@@ -1107,11 +1104,9 @@ class CrossPlot():
                         yshift=note.yshift,
                         showarrow=note.showarrow,
                     )
-                fig_object.append("go.Scattergl")
             elif isinstance(note, dict):
                 shape = note.shape
                 annotation = note.annotation
-                fig_object.append("go.Scattergl")
 
             if shape:
                 layout["shapes"].append(shape)
@@ -1137,13 +1132,13 @@ class CrossPlot():
                 "shapes": list(layout["shapes"]),
                 "annotations": list(layout["annotations"]),
                 "showlegend": True,
-            }, fig_object
+            }
 
 
 
 
 
-    def create_traces(self, depth_range=None, fig_object="go.Scattergl", container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
+    def create_traces(self, depth_range=None, container_width=None, size=None, static=False, xaxis="xaxis1", yaxis="yaxis1", color_lock={}, by_index=False):
         if not size: size = self.size
         if not depth_range: depth_range = self.depth_range
         x_data = self.x.get_data()[slice(*depth_range)] if by_index else self.x.get_data(slice_by_depth=depth_range)
