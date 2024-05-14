@@ -300,10 +300,8 @@ class Trace(ood.Observed, pzt.Themeable):
 
     def get_interval(self):
         def isClose(n_1, n_2, default, percent):
-
             diff_percent = (abs(n_2 - n_1)/ ((n_2 + n_1)/2)) * 100
             step = n_2 - n_1
-
             if diff_percent > percent:
                 sample_rate_consistent = None
             else:
@@ -311,7 +309,6 @@ class Trace(ood.Observed, pzt.Themeable):
 
             if step == 0:
                 step = default
-
             return step, sample_rate_consistent
 
         intervals = []
@@ -322,15 +319,22 @@ class Trace(ood.Observed, pzt.Themeable):
             start = self.get_depth()[i]
             stop = self.get_depth()[i + 1]
             step, sample_rate_consistent = isClose(start, stop, .0001, .0001)
-            interval = {
-                "start": start,
-                "stop": stop,
-                "step": step,
-                "sample_rate_consistent": sample_rate_consistent
-            }
+            if sample_rate_consistent is None:
+                interval = {
+                    "start": start,
+                    "stop": stop,
+                    "step": step,
+                    "sample_rate_consistent": sample_rate_consistent
+                }
+            else:
+                interval = {
+                    "start": start,
+                    "stop": stop,
+                    "sample_rate_consistent": sample_rate_consistent
+                }
+            intervals["size"] = stop - step
             intervals.append(interval)
             depth_hash.append(hashlib.md5(str(i).encode()).hexdigest())
-            if sample_rate_consistent is None: break
         return intervals, depth_hash
 
     def __repr__(self):
