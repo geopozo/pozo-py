@@ -313,10 +313,11 @@ class Trace(ood.Observed, pzt.Themeable):
             interval = {
                 "start": start,
                 "stop": stop,
-                "step": step,
-                "sample_rate_consistent": sample_rate_consistent
+                "step": step
             }
+            interval["sample_rate_consistent"] = sample_rate_consistent if sample_rate_consistent else None
             intervals.append(interval)
+            if sample_rate_consistent is False: break
         return intervals
 
     def __repr__(self):
