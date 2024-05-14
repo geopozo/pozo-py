@@ -4,6 +4,7 @@ import numpy as np
 import ood
 import pozo.themes as pzt
 import pozo.units as pzu
+import hashlib
 
 
 class Trace(ood.Observed, pzt.Themeable):
@@ -314,6 +315,7 @@ class Trace(ood.Observed, pzt.Themeable):
             return step, sample_rate_consistent
 
         intervals = []
+        depth_hash = []
         sample_rate = round(self.get_depth()[1] - self.get_depth()[0], 4)
         for i in range(len(self.get_depth()) - 1):
             if self.get_depth()[i] == self.get_depth()[-1]:
@@ -328,8 +330,9 @@ class Trace(ood.Observed, pzt.Themeable):
                 "sample_rate_consistent": sample_rate_consistent
             }
             intervals.append(interval)
+            depth_hash.append(hashlib.md5(str(i).encode()).hexdigest())
             if sample_rate_consistent is None: break
-        return intervals
+        return intervals, depth_hash
 
     def __repr__(self):
         return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
