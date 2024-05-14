@@ -1,7 +1,26 @@
+import copy
 import colour
 import json
-
+from IPython.display import display, HTML
 import pozo.themes.mnemonic_tables as tables
+
+ThemeValues = dict(color="Can be a single color value or list of color values from colour package",
+                   track_width="A number in pixels",
+                   force="If true, will force show the item even if it has no children",
+                   hidden="If true, will not show the item",
+                   range="Set's the default min and max x value for this item",
+                   range_unit="Specifies the units of range",
+                   scale="Can be log or linear",
+                   fill="a plotly fill description EXPERIMENTAL",
+                   fillcolor="color of the fill EXPERIMENTAL",
+                   cross_axis_fill="a fill between two separate axes EXPERIMENTAL"
+        )
+def help():
+    display(HTML(f"<pre>{json.dumps(ThemeValues, indent=4)}</pre>"))
+    display("A dictionary with those values or less can be passed directly to set_theme(), or:")
+    display("Said dictionary can be the value in a key-->value dictionary (say \"myDict\") where")
+    display("keys represent mnemonics. set_theme(pozo.themes.MnemonicDictionary(myDict))")
+    display("Themes set on more specific items (traces) will override those on less specific items (graphs)")
 
 class Theme(): # Meant to be inherited
     def __init__(self, *args, **kwargs):
@@ -21,6 +40,32 @@ class Theme(): # Meant to be inherited
             raise NotImplementedError("Every Theme inheriter must supply a resolve(self, key, context)")
 
 class ThemeDict(Theme, dict): # Basically a dict
+    def __init__(self, *args, **kwargs):
+        for arg in args:
+            if isinstance(arg, dict):
+                for key in arg.keys():
+                    if key not in ThemeValues:
+                        raise KeyError(f"{key} is not a valid key. See pozo.themes.help()")
+            else:
+                raise ValueError("Can only pass dictionary like in pozo.themes.help() to constructor")
+        super().__init__(*args, **kwargs)
+
+
+    def update(self, *args, **kwargs):
+        for arg in args:
+            for key in arg.keys():
+                if key not in ThemeValues:
+                    raise KeyError(f"{key} is not a valid key. See pozo.themes.help()")
+        super().update(*args, **kwargs)
+
+    def __setitem__(self, k, v):
+        if k not in ThemeValues:
+            raise KeyError(f"{k} is not a valid key. See pozo.themes.help()")
+        super().__setitem__(k, v)
+
+    def deepcopy(self):
+        return copy.deepcopy(self)
+
     def __repr__(self):
         return str(json.dumps(self, indent=2))
 
@@ -66,6 +111,7 @@ class Themeable(): # Meant to be inherited by objects
 from pozo.themes.theme_tools import * # should it be relative?
 # Below is implementations
 themes = {'cangrejo': MnemonicDictionary(tables.cangrejo)}
+cangrejo = MnemonicDictionary(tables.cangrejo)
 
 # ThemeList also has a theme, which is considered an override!
 class ThemeStack(Themeable):
