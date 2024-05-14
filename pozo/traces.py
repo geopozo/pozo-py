@@ -298,20 +298,30 @@ class Trace(ood.Observed, pzt.Themeable):
         return self._get_theme(context=context)
 
     def get_interval(self):
-        def isClose(depth, i):
-            start = depth[i]
-            stop = depth[i + 1]
-            step = round(stop - start, 4)
-            return start, stop, step
+        def isClose(n_1, n_2, default, percent):
+
+            diff_percent = (abs(n_2 - n_1)/ ((n_2 + n_1)/2)) * 100
+            step = n_2 - n_1
+
+            if diff_percent > percent:
+                sample_rate_consistent = None
+            else:
+                sample_rate_consistent = True
+
+            if step == 0:
+                step = default
+
+            return step, sample_rate_consistent
+
         intervals = []
         sample_rate = round(self.get_depth()[1] - self.get_depth()[0], 4)
         for i in range(len(self.get_depth()) - 1):
             if self.get_depth()[i] == self.get_depth()[-1]:
                 break
-            start, stop, step = isClose(self.get_depth(), i)
+            start = self.get_depth()[i]
+            stop = self.get_depth()[i + 1]
+            step = round(stop - start, 4)
             sample_rate_consistent = step == sample_rate
-            if step == 0:
-                step = 0.0001
             interval = {
                 "start": start,
                 "stop": stop,
