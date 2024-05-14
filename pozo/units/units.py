@@ -62,6 +62,8 @@ class LasRegistry(pint.UnitRegistry):
         mnemonic = pozo.deLASio(mnemonic)
         if mnemonic in self._reverse_mnemonic_units and unit in self._reverse_mnemonic_units[mnemonic]:
             return self._reverse_mnemonic_units[mnemonic][unit]
+        elif unit in self._reverse_mnemonic_units["-"]:
+            return self._reverse_mnemonic_units["-"][unit]
         else: return None
 
 
@@ -70,8 +72,12 @@ class LasRegistry(pint.UnitRegistry):
         # unit = unit
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
+        ranges = None
         if mnemonic in self._mnemonic_units and unit in self._mnemonic_units[mnemonic]:
             ranges = self._mnemonic_units[mnemonic][unit]
+        elif unit in self._mnemonic_units["-"]:
+            ranges = self._mnemonic_units["-"][unit]
+        if ranges:
             for ra in ranges:
                 if ra.check(min_val, max_val):
                     return ra

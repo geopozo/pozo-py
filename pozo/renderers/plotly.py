@@ -27,7 +27,8 @@ re_power = re.compile(r'\*\*')
 warnings.filterwarnings("ignore", category=UserWarning, message="Message serialization failed with")
 
 def toTarget(axis):
-    return axis[0] + axis[-1]
+    suffix = axis[-1] if axis[-1] != "1" else ""
+    return axis[0] + suffix
 
 def javascript():
     add_scroll = '''var css = '.plot-container { overflow: auto; }',
@@ -318,7 +319,7 @@ class Plotly(pzr.Renderer):
             if axis_index == -1 and stack['force']:
                 posmap['total_axes'] += 1 # plotly axis indicies are base 1 so increment first
                 posmap['tracks_axis_numbers'][-1].append(posmap['total_axes'])
-                posmap['axis_number_to_Axis'][posmap['total_axes']] = axis
+                posmap['axis_number_to_Axis'][posmap['total_axes']] = "dummy" # worried about this
                 # there will be a trace here but it will be a dummy trace
             if not axes_exist:
                 effectively_hidden[id(track)] = True
@@ -426,7 +427,7 @@ class Plotly(pzr.Renderer):
 
 
                 if data_unit != range_unit:
-                    xrange = pzu.Q(xrange_raw, range_unit).m_as(data_unit)
+                    xrange = pzu.Q(xrange_raw, range_unit).m_as(data_unit) if xrange_raw else None
                 else:
                     xrange = xrange_raw
                 # So we've just created xrange which is the data_unit
@@ -450,7 +451,7 @@ class Plotly(pzr.Renderer):
 
                 axis_style['type'] = scale_type
                 if scale_type == "log":
-                    xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)]
+                    xrange = [math.log(xrange[0], 10), math.log(xrange[1], 10)] if xrange and xrange[0] and xrange[1] else None
                 if xrange is not None:
                     axis_style['range'] = xrange
 
@@ -561,16 +562,16 @@ class Plotly(pzr.Renderer):
         themes = pzt.ThemeStack(pzt.default_theme, theme = override_theme)
         themes.append(graph.get_theme())
         if self._hidden(themes): return {}
-        track_index = -1 + bool(posmap['with_xp'])# we can't use enumerate() becuase sometimes we skip iterations in the loop
+        track_index = -1
         for track in graph.get_tracks():
             themes.append(track.get_theme())
             if not themes['force'] and ( self._hidden(themes, id(track) in effectively_hidden) or len(track) == 0 ): continue
             track_index += 1
-            if not bool(posmap['with_xp']) and posmap['tracks_axis_numbers'][track_index] == "depth":
+            if posmap['tracks_axis_numbers'][track_index] == "depth":
                 track_index +=1
             for note in itertools.chain(list(track.note_dict.values()) + track.note_list):
                 s, a = self._process_note(note,
-                                          xref='x'+str(posmap['tracks_axis_numbers'][track_index][0]) + ' domain',
+                                          xref=toTarget('x'+str(posmap['tracks_axis_numbers'][track_index][0])) + ' domain',
                                           yref=toTarget(posmap['track_y']))
                 if s: layout['shapes'].append(s)
                 if a: layout['annotations'].append(a)
@@ -737,6 +738,7 @@ class Plotly(pzr.Renderer):
                 override_theme={"color": "black", "track_width": 300}
                 )
         for i, axis in posmap['axis_number_to_Axis'].items():
+            if not axis or axis == "dummy": continue
             trace = axis.get_trace()
             with warnings.catch_warnings():
                 warnings.simplefilter("default")
@@ -993,6 +995,9 @@ class CrossPlot():
         self.colors = colors
         self.y              = y if y is not None else self.y
         self.x              = x if x is not None else self.x
+
+    def __repr__(self):
+        return f"x: {self.x}\ny: {self.y}\ncolors: {self.colors}"
 
     def __init__(self, x=None, y=None, colors=[None], **kwargs):
         # rendering defaults
@@ -1269,18 +1274,26 @@ def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output=
                     )
                 )
     del graph.note_dict['Depth Highlight-xxx']
-    write_image_counter = multiprocessing.Value('I',0)
-    with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,), processes=cpus) as pool:
-        p = pool.map_async(write_image, gp)
-        while True:
-            p.wait(.5)
-            try:
-                p.successful()
-                break
-            except ValueError:
-                writer_counter.value = write_image_counter.value
-    writer_counter.value = len(frame_count)-1
-    del write_image_counter
+
+    if not cpus: cpus = multiprocessing.cpu_count()
+    if cpus == 1:
+        for g in gp:
+            g['graph'].write_image(g['path'], engine="kaleido")
+            writer_counter.value += 1
+
+    else:
+        write_image_counter = multiprocessing.Value('I',0)
+        with multiprocessing.Pool(initializer=init_write_image, initargs=(write_image_counter,), processes=cpus) as pool:
+            p = pool.map_async(write_image, gp)
+            while True:
+                p.wait(.5)
+                try:
+                    p.successful()
+                    break
+                except ValueError:
+                    writer_counter.value = write_image_counter.value
+        writer_counter.value = len(frame_count)-1
+        del write_image_counter
     if not output: return
     ims = [imageio.imread(p['path']) for p in gp]
     display("Writing movie from frames...")
