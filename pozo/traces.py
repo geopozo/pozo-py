@@ -323,13 +323,13 @@ class Trace(ood.Observed, pzt.Themeable):
                 interval = {
                     "start": start,
                     "stop": stop,
-                    "step": step,
                     "sample_rate_consistent": sample_rate_consistent
                 }
             else:
                 interval = {
                     "start": start,
                     "stop": stop,
+                    "step": step,
                     "sample_rate_consistent": sample_rate_consistent
                 }
             interval["size"] = stop - step
