@@ -332,7 +332,7 @@ class Trace(ood.Observed, pzt.Themeable):
                     "stop": stop,
                     "sample_rate_consistent": sample_rate_consistent
                 }
-            intervals["size"] = stop - step
+            interval["size"] = stop - step
             intervals.append(interval)
             depth_hash.append(hashlib.md5(str(i).encode()).hexdigest())
         return intervals, depth_hash
