@@ -316,7 +316,6 @@ class Trace(ood.Observed, pzt.Themeable):
 
         intervals = []
         depth_hash = []
-        sample_rate = round(self.get_depth()[1] - self.get_depth()[0], 4)
         for i in range(len(self.get_depth()) - 1):
             if self.get_depth()[i] == self.get_depth()[-1]:
                 break
