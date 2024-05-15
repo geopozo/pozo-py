@@ -17,7 +17,6 @@ import pozo.units as units # noqa
 def get_interval(depth):
     if not isinstance(depth, (list, tuple, np.ndarray)):
         raise ValueError("You must use for depth a list, tuple or an numpy array")
-
     starts = np.array([])
     stops = np.array([])
     steps = np.array([])
@@ -44,12 +43,7 @@ def get_interval(depth):
     interval["sample_rate_consistent"] = (
         False if sample_rate_consistent is False else True
     )
-    if isinstance(depth, np.ndarray):
-        depth_hash = hash(depth.tobytes())
-    else:
-        depth_array = np.array(depth)
-        depth_hash = hash(depth_array.tobytes())
-    return interval, depth_hash
+    return interval
 
 def isClose(n_1, n_2, sample_rate_consistent, default, percent):
     diff_percent = (abs(n_2 - n_1) / ((n_2 + n_1) / 2)) * 100
