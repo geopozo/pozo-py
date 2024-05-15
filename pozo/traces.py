@@ -297,7 +297,7 @@ class Trace(ood.Observed, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
-    def get_interval(self, depth):
+    def get_interval(depth):
         def isClose(n_1, n_2, sample_rate_consistent, default, percent):
             diff_percent = (abs(n_2 - n_1) / ((n_2 + n_1) / 2)) * 100
             step = n_2 - n_1
