@@ -315,6 +315,11 @@ class Trace(ood.Observed, pzt.Themeable):
         else:
             depth = self.get_depth()
 
+        if isinstance(depth, (list, tuple, np.array)):
+            pass
+        else:
+            raise ValueError("You must use for depth a list, tuple or an numpy array")
+
         starts = np.array([])
         stops = np.array([])
         steps = np.array([])
