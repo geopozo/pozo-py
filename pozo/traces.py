@@ -312,10 +312,10 @@ class Trace(ood.Observed, pzt.Themeable):
             return step, sample_rate_consistent
 
         depth_hash=[]
-        starts=[]
-        stops=[]
-        steps=[]
-        size=[]
+        starts=np.array([])
+        stops=np.array([])
+        steps=np.array([])
+        size=np.array([])
         sample_rate_consistent = True
         for i in range(len(self.get_depth()) - 1):
             if self.get_depth()[i] == self.get_depth()[-1]:
@@ -324,14 +324,14 @@ class Trace(ood.Observed, pzt.Themeable):
             stop = self.get_depth()[i + 1]
             step, sample_rate_consistent = isClose(start, stop, sample_rate_consistent, .0001, .0001)
             if sample_rate_consistent is False:
-                starts.append(start)
-                stops.append(stop)
+                starts=np.append(starts, start)
+                stops=np.append(stops, stop)
                 steps=None
             else:
-                starts.append(start)
-                stops.append(stop)
-                steps.append(step)
-            size.append(stop-step)
+                starts=np.append(starts, start)
+                stops=np.append(stops, stop)
+                steps=np.append(steps, step)
+            size=np.append(size, stop-step)
             depth_hash.append(hashlib.md5(str(i).encode()).hexdigest())
         interval = {
             "start":starts,
