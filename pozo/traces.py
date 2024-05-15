@@ -320,10 +320,11 @@ class Trace(ood.Observed, pzt.Themeable):
             start = self.get_depth()[i]
             stop = self.get_depth()[i + 1]
             step, sample_rate_consistent = isClose(start, stop, sample_rate_consistent, .0001, .0001)
-            if sample_rate_consistent is None:
+            if sample_rate_consistent is False:
                 interval = {
                     "start": start,
                     "stop": stop,
+                    "step": None,
                     "sample_rate_consistent": sample_rate_consistent
                 }
             else:
