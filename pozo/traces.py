@@ -311,8 +311,11 @@ class Trace(ood.Observed, pzt.Themeable):
                 step = default
             return step, sample_rate_consistent
 
-        intervals = []
-        depth_hash = []
+        depth_hash=[]
+        starts=[]
+        stops=[]
+        steps=[]
+        size=[]
         sample_rate_consistent = True
         for i in range(len(self.get_depth()) - 1):
             if self.get_depth()[i] == self.get_depth()[-1]:
@@ -321,23 +324,23 @@ class Trace(ood.Observed, pzt.Themeable):
             stop = self.get_depth()[i + 1]
             step, sample_rate_consistent = isClose(start, stop, sample_rate_consistent, .0001, .0001)
             if sample_rate_consistent is False:
-                interval = {
-                    "start": start,
-                    "stop": stop,
-                    "step": None,
-                    "sample_rate_consistent": sample_rate_consistent
-                }
+                starts.append(start)
+                stops.append(stop)
+                steps=None
             else:
-                interval = {
-                    "start": start,
-                    "stop": stop,
-                    "step": step,
-                    "sample_rate_consistent": sample_rate_consistent
-                }
-            interval["size"] = stop - step
-            intervals.append(interval)
+                starts.append(start)
+                stops.append(stop)
+                steps.append(step)
+            size.append(stop-step)
             depth_hash.append(hashlib.md5(str(i).encode()).hexdigest())
-        return intervals, depth_hash
+        interval = {
+            "start":starts,
+            "stop":stops,
+            "step":steps,
+            "size":size
+        }
+        interval["sample_rate_consistent"] = False if sample_rate_consistent is False else True
+        return interval, depth_hash
 
     def __repr__(self):
         return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
