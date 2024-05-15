@@ -297,7 +297,7 @@ class Trace(ood.Observed, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
-    def get_interval(self, depth=None):
+    def get_interval(self, depth):
         def isClose(n_1, n_2, sample_rate_consistent, default, percent):
             diff_percent = (abs(n_2 - n_1) / ((n_2 + n_1) / 2)) * 100
             step = n_2 - n_1
@@ -310,14 +310,7 @@ class Trace(ood.Observed, pzt.Themeable):
                 step = default
             return step, sample_rate_consistent
 
-        if depth:
-            pass
-        else:
-            depth = self.get_depth()
-
-        if isinstance(depth, (list, tuple, np.ndarray)):
-            pass
-        else:
+        if not isinstance(depth, (list, tuple, np.ndarray)):
             raise ValueError("You must use for depth a list, tuple or an numpy array")
 
         starts = np.array([])
