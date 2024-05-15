@@ -337,7 +337,11 @@ class Trace(ood.Observed, pzt.Themeable):
             "size":size
         }
         interval["sample_rate_consistent"] = False if sample_rate_consistent is False else True
-        depth_hash = hash(self.get_depth().tobytes())
+        if isinstance(self.get_depth(), np.array):
+            depth_hash = hash(self.get_depth().tobytes())
+        else:
+            depth_array = np.array(self.get_depth())
+            depth_hash = hash(depth_array.tobytes())
         return interval, depth_hash
 
     def __repr__(self):
