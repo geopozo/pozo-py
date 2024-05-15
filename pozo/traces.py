@@ -315,7 +315,7 @@ class Trace(ood.Observed, pzt.Themeable):
         else:
             depth = self.get_depth()
 
-        if isinstance(depth, (list, tuple, np.array)):
+        if isinstance(depth, (list, tuple, np.ndarray)):
             pass
         else:
             raise ValueError("You must use for depth a list, tuple or an numpy array")
@@ -346,7 +346,7 @@ class Trace(ood.Observed, pzt.Themeable):
         interval["sample_rate_consistent"] = (
             False if sample_rate_consistent is False else True
         )
-        if isinstance(depth, np.array):
+        if isinstance(depth, np.ndarray):
             depth_hash = hash(depth.tobytes())
         else:
             depth_array = np.array(depth)
