@@ -297,7 +297,7 @@ class Trace(ood.Observed, pzt.Themeable):
         }
         return self._get_theme(context=context)
 
-    def get_interval(self):
+    def get_interval(self, depth=None):
         def isClose(n_1, n_2, sample_rate_consistent, default, percent):
             diff_percent = (abs(n_2 - n_1)/ ((n_2 + n_1)/2)) * 100
             step = n_2 - n_1
@@ -310,16 +310,21 @@ class Trace(ood.Observed, pzt.Themeable):
                 step = default
             return step, sample_rate_consistent
 
+        if depth:
+            pass
+        else:
+            depth = self.get_depth()
+
         starts=np.array([])
         stops=np.array([])
         steps=np.array([])
         size=np.array([])
         sample_rate_consistent = True
-        for i in range(len(self.get_depth()) - 1):
-            if self.get_depth()[i] == self.get_depth()[-1]:
+        for i in range(len(depth) - 1):
+            if depth[i] == depth[-1]:
                 break
-            start = self.get_depth()[i]
-            stop = self.get_depth()[i + 1]
+            start = depth[i]
+            stop = depth[i + 1]
             step, sample_rate_consistent = isClose(start, stop, sample_rate_consistent, .0001, .0001)
             if sample_rate_consistent is False:
                 starts=np.append(starts, start)
@@ -337,10 +342,10 @@ class Trace(ood.Observed, pzt.Themeable):
             "size":size
         }
         interval["sample_rate_consistent"] = False if sample_rate_consistent is False else True
-        if isinstance(self.get_depth(), np.array):
-            depth_hash = hash(self.get_depth().tobytes())
+        if isinstance(depth, np.array):
+            depth_hash = hash(depth.tobytes())
         else:
-            depth_array = np.array(self.get_depth())
+            depth_array = np.array(depth)
             depth_hash = hash(depth_array.tobytes())
         return interval, depth_hash
 
