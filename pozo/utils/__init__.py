@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # get_interval has one parameter, this return dictionary with info about
 # start, stop, step, size and sample_rate_consistent from the depth intervals
 def get_interval(depth):
@@ -36,6 +37,7 @@ def get_interval(depth):
     )
     return interval
 
+
 # isClose has 4 parameters, this return a boolean value that verify the cosistent
 # from the depth data
 def isClose(n_1, n_2, sample_rate_consistent, percent):
@@ -46,12 +48,13 @@ def isClose(n_1, n_2, sample_rate_consistent, percent):
         sample_rate_consistent = True
     return sample_rate_consistent
 
+
 # hash_depth has one parameter, this return a hash from the depth data
 def hash_depth(depth):
     if isinstance(depth, np.ndarray):
         return hash(depth.tobytes())
-    elif hasattr(depth, "__len__")  and not isinstance(depth, str):
-            depth_array = np.array(depth)
-            return hash(depth_array.tobytes())
+    elif hasattr(depth, "__len__") and not isinstance(depth, str):
+        depth_array = np.array(depth)
+        return hash(depth_array.tobytes())
     else:
         raise ValueError("You must use for depth a list, tuple or an numpy array")
