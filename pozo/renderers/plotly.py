@@ -20,9 +20,20 @@ import pozo
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
+import pozo.renderers.hacks as hacks
 
 re_space = re.compile(' ')
 re_power = re.compile(r'\*\*')
+
+def get_dummy_trace(x, y):
+    return dict(x=[0],
+        y=[0],
+        mode='markers',
+        xaxis='x' + str(x),
+        yaxis=toTarget(y),
+        showlegend=False,
+        opacity=0,
+        hoverinfo='skip')
 
 warnings.filterwarnings("ignore", category=UserWarning, message="Message serialization failed with")
 
@@ -509,7 +520,7 @@ class Plotly(pzr.Renderer):
                                  fillcolor=defaults['plotly']['paper_bgcolor'],
                                  line= {'width':0}
                                  )
-                hackshapes.append(hackshape)
+                hackshapes.append(hackshape) # HACCKKK
             i += 1
             if 'overlaying' in axis:
                 axis['domain'] = axes_styles[i-1]['domain']
@@ -593,18 +604,7 @@ class Plotly(pzr.Renderer):
             themes.append(track.get_theme())
             if not themes['force'] and self._hidden(themes): continue
             if themes['force'] and len(track) == 0:
-                traces.append(
-                        go.Scatter(
-                            x=[0],
-                            y=[0],
-                            mode='markers',
-                            xaxis='x' + str(num_axes),
-                            yaxis=toTarget(yaxis),
-                            showlegend=False,
-                            opacity=0,
-                            hoverinfo='skip',
-                            )
-                        )
+                traces.append(go.Scatter(**get_dummy_trace(num_axes, yaxis)))
                 num_axes += 1
                 continue
             for axis in track:
@@ -632,48 +632,35 @@ class Plotly(pzr.Renderer):
                             else:
                                 fill = themes['fill']
                         elif 'cross_axis_fill' in themes:
+                            # absolutely awful hack
                             if isinstance(themes['cross_axis_fill'], (list, tuple)):
-                                assert id(trace) in self._last_posmap['trace_id_to_axis_number']
-                                caf_name = themes['cross_axis_fill'][0]
-                                assert caf_name in self._last_posmap['cross_axis_fills']
-                                sink_range = self._last_posmap['layout']['xaxis'+str(num_axes)]['range']
-                                source_trace = self._last_posmap['cross_axis_fills'][caf_name]['source']
-                                source_axis = self._last_posmap['trace_id_to_axis_number'][id(source_trace)]
-                                source_range = self._last_posmap['layout']['xaxis' + str(source_axis)]['range']
-                                sink_distance = sink_range[1] - sink_range[0]
-                                source_distance = source_range[1] - source_range[0]
-                                point_scale = sink_distance/source_distance
-                                point_shift = sink_range[0] - (source_range[0] * point_scale)
-                                shadow_data = source_trace.get_data(clean=True) * point_scale + point_shift
+                                shadow_trace = hacks.get_shadow_trace(
+                                    self._last_posmap,
+                                    themes,
+                                    trace,
+                                    num_axes,
+                                    toTarget(yaxis),
+                                    fillcolor)
                                 # we will lock both axes completely but it seems like mutual zoom operations are ok
                                 # notes above on how to do that
-
-                        all_traces.append(go.Scatter(
-                            x=trace.get_data(clean=True),
-                            y=trace.get_depth(clean=True),
-                            mode='lines', # nope, based on data w/ default
-                            line=dict(color=color, width=1), # needs to be better, based on data
-                            xaxis='x' + str(num_axes),
-                            yaxis=toTarget(yaxis),
-                            name = trace.get_mnemonic(),
-                            hovertemplate = default_hovertemplate,
-                            showlegend = False,
-                            fill = fill,
-                            fillcolor = fillcolor,
-                            ))
-                        if shadow_data is not None:
+                        if themes['intervals'] == 'category':
+                            pass
+                        else:
                             all_traces.append(go.Scatter(
-                                x=shadow_data,
+                                x=trace.get_data(clean=True),
                                 y=trace.get_depth(clean=True),
                                 mode='lines', # nope, based on data w/ default
-                                line=dict(color='black', width=0), # needs to be better, based on data
+                                line=dict(color=color, width=1), # needs to be better, based on data
                                 xaxis='x' + str(num_axes),
                                 yaxis=toTarget(yaxis),
-                                name = source_trace.get_mnemonic() + "-shadow",
+                                name = trace.get_mnemonic(),
+                                hovertemplate = default_hovertemplate,
                                 showlegend = False,
-                                fill = 'tonextx',
-                                fillcolor = fillcolor
+                                fill = fill,
+                                fillcolor = fillcolor,
                                 ))
+                        if shadow_data is not None:
+                            all_traces.append(go.Scatter(**shadow_trace))
                         if heatmap:
                             data = trace.get_data(clean=True)
                             min = np.nanmin(data)
@@ -1216,7 +1203,7 @@ class CrossPlot():
 
 
 def init_write_image(counter):
-    global write_image_counter
+    global write_image_counter # hiss, hate
     write_image_counter = counter
 
 def write_image(gp):
@@ -1226,7 +1213,7 @@ def write_image(gp):
 
 def make_xp_depth_video(folder_name, graph, start, window, end, xp=True, output="all.mp4", fps=30, cpus=None):
     try:
-        write_image_counter
+        write_image_counter # noqa we want to see if this error globals
         raise Exception("Please only run make_frames once at a time, or restart the kernel")
     except NameError:
         pass
