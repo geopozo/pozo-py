@@ -50,8 +50,8 @@ def isClose(n_1, n_2, sample_rate_consistent, percent):
 def hash_depth(depth):
     if isinstance(depth, np.ndarray):
         return hash(depth.tobytes())
-    elif isinstance(depth, (list, tuple)):
-        depth_array = np.array(depth)
-        return hash(depth_array.tobytes())
+    elif hasattr(depth, "__len__")  and not isinstance(depth, str):
+            depth_array = np.array(depth)
+            return hash(depth_array.tobytes())
     else:
         raise ValueError("You must use for depth a list, tuple or an numpy array")
