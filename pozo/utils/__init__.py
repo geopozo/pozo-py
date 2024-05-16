@@ -31,17 +31,13 @@ def get_interval(depth):
     )
     return interval
 
-def isClose(n_1, n_2, sample_rate_consistent, default, percent):
+def isClose(n_1, n_2, sample_rate_consistent, percent):
     diff_percent = (abs(n_2 - n_1) / ((n_2 + n_1) / 2)) * 100
-    step = n_2 - n_1
     if diff_percent > percent or sample_rate_consistent is False:
         sample_rate_consistent = False
     else:
         sample_rate_consistent = True
-
-    if step == 0:
-        step = default
-    return step, sample_rate_consistent
+    return sample_rate_consistent
 
 def hash_depth(depth):
     if isinstance(depth, np.ndarray):
