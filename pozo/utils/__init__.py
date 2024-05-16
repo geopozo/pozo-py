@@ -14,8 +14,11 @@ def get_interval(depth):
         start = depth[i]
         stop = depth[i + 1]
         step, sample_rate_consistent = isClose(
-            start, stop, sample_rate_consistent, 0.0001, 0.0001
+            start, stop, sample_rate_consistent, 0.0001
         )
+        step = stop - start
+        if step == 0:
+            step = 0.0001
         if sample_rate_consistent is False:
             starts = np.append(starts, start)
             stops = np.append(stops, stop)
