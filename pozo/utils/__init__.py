@@ -1,4 +1,5 @@
 import numpy as np
+import pint
 
 
 # get_interval has one parameter, this return dictionary with info about
@@ -58,3 +59,46 @@ def hash_depth(depth):
         return hash(depth_array.tobytes())
     else:
         raise ValueError("You must use for depth a list, tuple or an numpy array")
+
+
+# These are all utility functions
+# Taken by the principal __ini__.py
+def deLASio(mnemonic):
+    return mnemonic.split(":", 1)[0] if ":" in mnemonic else mnemonic
+
+
+# is_array use the input data to verify if is pint data or other type that has
+# __len__ and return a boolean. Be careful with this, it will return true for Pozo objects.
+# Taken by the principal __ini__.py
+def is_array(value):
+    if isinstance(value, str):
+        return False
+    if isinstance(value, pint.Quantity):
+        return is_array(value.magnitude)
+    return hasattr(value, "__len__")
+
+
+# is_scalar_number use the input data to verify if is a number data
+# Taken by the principal __ini__.py
+def is_scalar_number(value):
+    number_types = (
+        int,
+        float,
+        np.float16,
+        np.float32,
+        np.float64,
+        np.int16,
+        np.int32,
+        np.int64,
+    )
+    if isinstance(value, pint.Quantity):
+        return is_scalar_number(value.magnitude)
+    return isinstance(value, number_types)
+
+
+# verify_array_len use three inputs to verify the lenght in the data
+# Taken by the principal __ini__.py
+def verify_array_len(constant, data):
+    if is_array(constant) and len(constant) != len(data):
+        return False
+    return True
