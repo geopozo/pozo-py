@@ -1,5 +1,7 @@
 import numpy as np
 import pint
+import pandas as pd
+import polars as pl
 
 
 # get_interval has one parameter, this return dictionary with info about
@@ -102,3 +104,47 @@ def verify_array_len(constant, data):
     if is_array(constant) and len(constant) != len(data):
         return False
     return True
+
+
+def verify_data_type(data):
+    pass
+
+
+def min_data(data):
+    pass
+
+
+def max_data(data):
+    pass
+
+
+def abs_data(arg):
+    pass
+
+
+def isfinite_data(data):
+    pass
+
+
+def isnan_data(data):
+    pass
+
+
+def count_nonzero_data(data, axis=None, *, keepdims=False):
+    pass
+
+
+def nanquantile_data(data, q, axis = None):
+    pass
+
+
+def round_data(data):
+    pass
+
+
+def linspace_data(start, stop, num=50, endpoint=True, retstep=False, axis=0):
+    pass
+
+
+def append_data(arg, data):
+    pass
