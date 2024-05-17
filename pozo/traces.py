@@ -17,13 +17,11 @@ class Trace(Drawable):
         warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
         return super().get_name()
 
-
     def __len__(self):
         return len(self.get_data())
 
     def __init__(self, data, **kwargs):
-
-        self.original_data = None
+        self.original_data = kwargs.pop('original_data', None)
         unit = kwargs.pop('unit', None)
         depth = kwargs.pop('depth', None)
         depth_unit = kwargs.pop('depth_unit', None)
