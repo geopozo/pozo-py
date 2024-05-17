@@ -1,6 +1,9 @@
+import json
 import warnings
+
 import pint
 import numpy as np
+
 from .drawable import Drawable, VersionedProperty
 import pozo.units as pzu
 
@@ -53,7 +56,6 @@ class Trace(Drawable):
         self.set_data(data, unit=unit, depth=depth, depth_unit=depth_unit)
         self._unit = None
         self._depth_unit = None
-        self._mnemonic = mnemonic
 
     def find_nearest(self, value):
         array = np.asarray(self.get_depth()) # we're going to replace
@@ -172,21 +174,31 @@ class Trace(Drawable):
     def get_mnemonic(self):
         return super().get_name()
 
-    def get_named_tree(self):
+    def _get_context(self):
+        return {
+            "type": "trace",
+            "name": self._name,
+            "mnemonic": self._name
+        }
+
+    def get_dict(self):
         return {
             "trace": {
                 "name/mnemonic": self._name,
                 "length": len(self._values),
+                "type": type(self._data).__name__,
+                "unit": str(self.get_unit()),
+                "depth type": type(self._depth).__name__,
+                "depth unit": str(self.get_depth_unit()),
+                # "depth_hash": ??
+                "context": self._get_context(),
+                "theme": self.get_theme(),
+                "versions": self.get_version_dict()
             }
         }
 
     def get_theme(self):
-        context = {
-            "type": "trace",
-            "name": self._name,
-            "mnemonic": self._mnemonic,
-        }
-        return self._get_theme(context=context)
+        return self._get_theme(context=self._get_context())
 
     def __repr__(self):
         return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
