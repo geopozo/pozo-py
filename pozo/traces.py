@@ -201,9 +201,4 @@ class Trace(Drawable):
         return self._get_theme(context=self._get_context())
 
     def __repr__(self):
-        return f"{self.get_mnemonic()}: len: {len(self.get_data())} | unit: {self.get_unit()} | depth in: {self.get_depth_unit()} | id: {id(self)}"
-
-class Data(Trace):
-    def __init__(self, data, **kwargs):
-        warnings.warn("pozo.Data is deprecated, use pozo.Trace", DeprecationWarning)
-        super().__init__(self, data, **kwargs)
+        return json.dumps(self.get_dict())
