@@ -18,6 +18,16 @@ class Trace(Drawable):
     def __len__(self):
         return len(self.get_data())
 
+    def _check_unit(self, unit):
+        if not unit: return None
+        if isinstance(unit, str):
+            return pzu.registry.parse_units(unit)
+        elif not isinstance(unit, pint.Unit):
+            raise pint.UndefinedUnitError(str(type(unit))) from TypeError(
+                f"Unrecognized unit type: {unit}"
+            )
+        return unit
+
     def __init__(self, data, **kwargs):
         self.original_data = kwargs.pop('original_data', None)
         unit = kwargs.pop('unit', None)
@@ -125,43 +135,17 @@ class Trace(Drawable):
             depth = depth[np.isfinite(data)].copy()
         if force_unit:
             return pzu.Quantity(depth, self.get_depth_unit())
-        else:
-            return depth
-
-    def _check_unit(
-        self, unit
-    ):  # Call this early, in set_data, in set_depth, in init()
-        if isinstance(unit, str):
-            return pzu.registry.parse_units(unit)
-        elif not isinstance(unit, pint.Unit) and unit is not None:
-            raise pint.UndefinedUnitError(str(type(unit))) from TypeError(
-                f"Unrecognized unit type: {unit}"
-            )
-        return unit
+        return depth
 
     def set_unit(self, unit):
-        if isinstance(unit, str):
-            unit = pzu.registry.parse_units(unit)
-        elif isinstance(unit, pint.Unit) or unit is None:
-            pass
-        else:
-            raise pint.UndefinedUnitError(str(type(unit))) from TypeError(
-                f"Unrecognized unit type: {unit}"
-            )
+        unit = self._check_unit(unit)
         self._unit = unit
 
     def get_unit(self):
         return self._unit
 
     def set_depth_unit(self, unit):
-        if isinstance(unit, str):
-            unit = pzu.registry.parse_units(unit)
-        elif isinstance(unit, pint.Unit) or unit is None:
-            pass
-        else:
-            raise pint.UndefinedUnitError(str(type(unit))) from TypeError(
-                f"Unrecognized unit type: {unit}"
-            )
+        unit = self._check_unit(unit)
         self._depth_unit = unit
 
     def get_depth_unit(self):
