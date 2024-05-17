@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import polars as pl
-from pozo.utils import summarize_array, is_close, hash_depth, min_data, max_data, isfinite_data
+from pozo.utils import summarize_array, is_close, hash_array, min_data, max_data, isfinite_data
 
 list_data = [float('inf'), -float('inf'), None]
 list_data_irregular = [0, 20, 40, 50, 70, 90, 300, 301, 330, 400]
@@ -33,15 +33,15 @@ def test_is_close():
     assert is_close(df_polars_data_irregular[0], df_polars_data_irregular[-1], True, 0.001) is not None
     assert is_close(list_data_irregular[0], df_polars_data_irregular[-1], True, 0.001) is not None
 
-def test_hash_depth():
-    assert hash_depth(np_data) is not None
-    assert hash_depth(df) is not None
-    assert hash_depth(df_polars) is not None
-    assert hash_depth(list_data) is None
-    assert hash_depth(np_data_irregular) is not None
-    assert hash_depth(df_data_irregular) is not None
-    assert hash_depth(df_polars_data_irregular) is not None
-    assert hash_depth(list_data_irregular) is None
+def test_hash_array():
+    assert hash_array(np_data) is not None
+    assert hash_array(df) is not None
+    assert hash_array(df_polars) is not None
+    assert hash_array(list_data) is None
+    assert hash_array(np_data_irregular) is not None
+    assert hash_array(df_data_irregular) is not None
+    assert hash_array(df_polars_data_irregular) is not None
+    assert hash_array(list_data_irregular) is None
 
 
 def test_min_data():

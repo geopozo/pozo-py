@@ -53,8 +53,8 @@ def is_close(n_1, n_2, sample_rate_consistent, sample, percent):
     return sample_rate_consistent
 
 
-# hash_depth has one parameter, this return a hash from the depth data
-def hash_depth(depth):
+# hash_array has one parameter, this return a hash from the depth data
+def hash_array(depth):
     if isinstance(depth, np.ndarray):
         return hash(depth.tobytes())
     elif is_array(depth):
