@@ -14,6 +14,12 @@ import pozo.themes as themes # noqa
 import pozo.renderers as renderers # noqa
 import pozo.units as units # noqa
 
+def doc(docstring):
+    def decorate(obj):
+        obj.__doc__ = docstring
+        return obj
+    return decorate
+
 class PozoWarning(UserWarning):
     pass
 
