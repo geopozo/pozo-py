@@ -19,7 +19,7 @@ def get_interval(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        step, sample_rate_consistent = isClose(
+        step, sample_rate_consistent = is_close(
             start, stop, sample_rate_consistent, 0.0001
         )
         step = stop - start
@@ -41,9 +41,9 @@ def get_interval(depth):
     return interval
 
 
-# isClose has 4 parameters, this return a boolean value that verify the cosistent
+# is_close has 4 parameters, this return a boolean value that verify the cosistent
 # from the depth data
-def isClose(n_1, n_2, sample_rate_consistent, percent):
+def is_close(n_1, n_2, sample_rate_consistent, percent):
     diff_percent = (abs(n_2 - n_1) / ((n_2 + n_1) / 2)) * 100
     if diff_percent > percent or sample_rate_consistent is False:
         sample_rate_consistent = False
