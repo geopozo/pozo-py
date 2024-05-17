@@ -49,7 +49,7 @@ class Trace(Drawable):
             )
         kwargs["name"] = mnemonic
 
-        super().__init__(**kwargs)  # od.ChildObserved sets name
+        super().__init__(**kwargs)  # will init version logic before assining units that use it
         self.set_data(data, unit=unit, depth=depth, depth_unit=depth_unit)
         self._unit = None
         self._depth_unit = None
@@ -67,7 +67,6 @@ class Trace(Drawable):
             self.set_unit(unit)
         elif isinstance(data, pint.Quantity):
             self.set_unit(data.units)
-        # otherwise keeps old unit
 
         if depth is not None:
             self.set_depth(depth, depth_unit=depth_unit)  # this will set the depth unit
@@ -116,7 +115,6 @@ class Trace(Drawable):
             self.set_depth_unit(depth_unit)
         elif isinstance(depth, pint.Quantity):
             self.set_depth_unit(depth.units)
-        # else, keep old units
 
     def get_depth(self, slice_by_depth=None, force_unit=False, clean=False):
         if not slice_by_depth or slice_by_depth == [None]:
@@ -160,14 +158,13 @@ class Trace(Drawable):
         ):
             return
         if isinstance(self.get_depth(), pint.Quantity):
-            self.set_depth(self.get_depth().to(unit))  # This would be another version
+            self.set_depth(self.get_depth().to(unit))
         else:
             self.set_depth(
                 pzu.Q(self.get_depth(), self.get_depth_unit()).to(unit).magnitude
             )  # This would be another version
         self.set_depth_unit(unit)
 
-    # not tested
     def convert_unit(self, unit):
         unit = self._check_unit(unit)
         if unit == self.get_unit() or unit is None or self.get_unit() is None:
@@ -177,7 +174,7 @@ class Trace(Drawable):
         else:
             self.set_data(
                 pzu.Q(self.get_data(), self.get_unit()).to(unit).magnitude
-            )  # This would be another version
+            )
         self.set_unit(unit)
 
     def set_mnemonic(self, mnemonic):
