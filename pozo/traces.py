@@ -8,14 +8,12 @@ import pozo.units as pzu
 class Trace(Drawable):
     _data = VersionedProperty()
     _unit = VersionedProperty()
+
     def set_name(self, name):
-        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
-        self.set_mnemonic(name)
-        return super().set_name(name)
+        return self.set_mnemonic(name)
 
     def get_name(self):
-        warnings.warn("names are no longer used in pozo, use position. string selectors will search for mnemonics", DeprecationWarning)
-        return super().get_name()
+        return self.get_mnemonic()
 
     def __len__(self):
         return len(self.get_data())
@@ -31,13 +29,13 @@ class Trace(Drawable):
             raise ValueError("Depth and values have different length")
 
         mnemonic = kwargs.pop("mnemonic", None)
-        if 'name' in kwargs and mnemonic:
-            raise ValueError("mnemonic and name are the same thing, please specify only one")
-        elif 'name' in kwargs and not mnemonic:
+        if 'name' in kwargs:
+            if mnemonic:
+                raise ValueError("mnemonic and name are the same thing, please specify only one")
             mnemonic = kwargs.get('name', None)
         if not mnemonic:
             raise ValueError(
-                "You must supply 'mnemonic' as a name."
+                "You must supply 'mnemonic' or 'name' (never both)"
             )
         kwargs["name"] = mnemonic
 
@@ -200,16 +198,14 @@ class Trace(Drawable):
 
     def set_mnemonic(self, mnemonic):
         super().set_name(mnemonic)
-        self._mnemonic = mnemonic
 
     def get_mnemonic(self):
-        return self._mnemonic
+        return super().get_name()
 
     def get_named_tree(self):
         return {
             "trace": {
-                "name": self._name,
-                "mnemonic": self._mnemonic,
+                "name/mnemonic": self._name,
                 "length": len(self._values),
             }
         }
