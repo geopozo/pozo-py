@@ -14,13 +14,14 @@ def get_interval(depth):
     steps = np.array([])
     size = np.array([])
     sample_rate_consistent = True
+    sample = depth[1]-depth[0]
     for i in range(len(depth) - 1):
         if depth[i] == depth[-1]:
             break
         start = depth[i]
         stop = depth[i + 1]
         step, sample_rate_consistent = is_close(
-            start, stop, sample_rate_consistent, 0.0001
+            start, stop, sample_rate_consistent, sample, 0.0001
         )
         step = stop - start
         if step == 0:
@@ -43,8 +44,8 @@ def get_interval(depth):
 
 # is_close has 4 parameters, this return a boolean value that verify the cosistent
 # from the depth data
-def is_close(n_1, n_2, sample_rate_consistent, percent):
-    diff_percent = (abs(n_2 - n_1) / ((n_2 + n_1) / 2)) * 100
+def is_close(n_1, n_2, sample_rate_consistent, sample, percent):
+    diff_percent = (abs(n_2 - n_1) / sample) * 100
     if diff_percent > percent or sample_rate_consistent is False:
         sample_rate_consistent = False
     else:
