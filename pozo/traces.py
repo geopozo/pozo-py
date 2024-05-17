@@ -55,6 +55,11 @@ class Trace(Drawable):
         self._depth_unit = None
         self._mnemonic = mnemonic
 
+    def find_nearest(self, value):
+        array = np.asarray(self.get_depth()) # we're going to replace
+        idx = np.nanargmin((np.abs(array - value)))
+        return idx, array[idx]
+
     def set_data(self, data, unit=None, depth=None, depth_unit=None):
         unit = self._check_unit(unit)
         depth_unit = self._check_unit(depth_unit)
@@ -69,23 +74,7 @@ class Trace(Drawable):
             self.set_unit(data.units)
 
         if depth is not None:
-            self.set_depth(depth, depth_unit=depth_unit)  # this will set the depth unit
-
-    def _find_nearest(self, value):
-        # TODO: align units depth_range, assume same units, but check if pint
-        array = np.asarray(self.get_depth())
-        idx = np.nanargmin((np.abs(array - value)))
-        # if array[idx] != value:
-        #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
-        return idx
-
-    def find_nearest(self, value):
-        # TODO: align units depth_range, assume same units, but check if pint
-        array = np.asarray(self.get_depth())
-        idx = np.nanargmin((np.abs(array - value)))
-        # if array[idx] != value:
-        #    raise ValueError(f"Tried to find value {value} in {self.get_name()} but the closest value was {array[idx]}")
-        return idx, array[idx]
+            self.set_depth(depth, depth_unit=depth_unit)
 
     def get_data(self, slice_by_depth=None, force_unit=False, clean=False):
         if not slice_by_depth or slice_by_depth == [None]:
@@ -94,7 +83,7 @@ class Trace(Drawable):
             data = self._data[
                 slice(
                     *[
-                        self._find_nearest(val) if val is not None else val
+                        self.find_nearest(val)[0] if val is not None else val
                         for val in slice_by_depth
                     ]
                 )
@@ -123,7 +112,7 @@ class Trace(Drawable):
             depth = self._depth[
                 slice(
                     *[
-                        self._find_nearest(val) if val is not None else val
+                        self.find_nearest(val)[0] if val is not None else val
                         for val in slice_by_depth
                     ]
                 )
