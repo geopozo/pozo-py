@@ -1,14 +1,6 @@
 import ood
 import pozo.themes as pzt
 import warnings
-# test versions
-# do some string and object representations of everything
-# do some tests (fix themes)
-# do help
-# render this
-# separate renderer into renderTrace and renderInterval
-# write about mira geoscience
-# think more about versions and copies
 
 class VersionedProperty:
     def __set_name__(self, owner, name):
@@ -89,15 +81,6 @@ class Drawable(ood.Observed, pzt.Themeable):
         for prop in self._versioned_properties.values():
             prop.remove_version(self, version)
 
-    # list all versions
-    def list_version(self):
-        return [
-                { 'version': i,
-                 'data': d[0],
-                 'unit': d[1],
-                 'note': d[2]
-                 } for i, d in enumerate(zip(self.__data, self.__unit, self.__note))
-                ]
+    def get_version_dict(self):
+        return dict(enumerate(self._versioned_properties.items()))
 
-    # change versions (semi permanently)
-    # get data and unit w/ a version
