@@ -1,5 +1,4 @@
 import json
-import warnings
 
 import pint
 import numpy as np
