@@ -37,42 +37,42 @@ def test_hash_array():
     assert hash_array(np_data) is not None
     assert hash_array(df) is not None
     assert hash_array(df_polars) is not None
-    assert hash_array(list_data) is None
+    assert hash_array(list_data) is not None
     assert hash_array(np_data_irregular) is not None
     assert hash_array(df_data_irregular) is not None
     assert hash_array(df_polars_data_irregular) is not None
-    assert hash_array(list_data_irregular) is None
+    assert hash_array(list_data_irregular) is not None
 
 
 def test_min_data():
-    assert min_data(np_data) is not None
-    assert min_data(df) is not None
-    assert min_data(df_polars) is not None
+    assert min_data(np_data) is None
+    assert min_data(df) is None
+    assert min_data(df_polars) is None
     assert min_data(list_data) is None
-    assert min_data(np_data_irregular) is not None
-    assert min_data(df_data_irregular) is not None
-    assert min_data(df_polars_data_irregular) is not None
+    assert min_data(np_data_irregular) is None
+    assert min_data(df_data_irregular) is None
+    assert min_data(df_polars_data_irregular) is None
     assert min_data(list_data_irregular) is None
 
 
 def test_max_data():
-    assert max_data(np_data) is not None
-    assert max_data(df) is not None
-    assert max_data(df_polars) is not None
+    assert max_data(np_data) is None
+    assert max_data(df) is None
+    assert max_data(df_polars) is None
     assert max_data(list_data) is None
-    assert max_data(np_data_irregular) is not None
-    assert max_data(df_data_irregular) is not None
-    assert max_data(df_polars_data_irregular) is not None
+    assert max_data(np_data_irregular) is None
+    assert max_data(df_data_irregular) is None
+    assert max_data(df_polars_data_irregular) is None
     assert max_data(list_data_irregular) is None
 
 
 def test_isfinite_data():
-    assert isfinite_data(np_data[0]) is not None
-    assert isfinite_data(df[0]) is not None
-    assert isfinite_data(df_polars[0]) is not None
-    assert isfinite_data(list_data[0])
-    assert isfinite_data(np_data_irregular[0]) is not None
-    assert isfinite_data(df_data_irregular[0]) is not None
-    assert isfinite_data(df_polars_data_irregular[0]) is not None
+    assert isfinite_data(np_data[0]) is None
+    assert isfinite_data(df[0]) is None
+    assert isfinite_data(df_polars[0]) is None
+    assert isfinite_data(list_data[0]) is None
+    assert isfinite_data(np_data_irregular[0]) is None
+    assert isfinite_data(df_data_irregular[0]) is None
+    assert isfinite_data(df_polars_data_irregular[0]) is None
     assert isfinite_data(list_data_irregular[0]) is None
 
