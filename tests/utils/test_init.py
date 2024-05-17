@@ -24,14 +24,14 @@ def test_summarize_array():
     assert summarize_array(list_data_irregular) is None
 
 def test_is_close():
-    assert is_close(np_data[0], np_data[-1], True, 0.001) is not None
-    assert is_close(df[0], df[-1], True, 0.001) is not None
-    assert is_close(df_polars[0], df_polars[-1], True, 0.001) is not None
-    assert is_close(list_data[0], df_polars[-1], True, 0.001) is not None
-    assert is_close(np_data_irregular[0], np_data_irregular[-1], True, 0.001) is not None
-    assert is_close(df_data_irregular[0], df_data_irregular[-1], True, 0.001) is not None
-    assert is_close(df_polars_data_irregular[0], df_polars_data_irregular[-1], True, 0.001) is not None
-    assert is_close(list_data_irregular[0], df_polars_data_irregular[-1], True, 0.001) is not None
+    assert is_close(np_data[0], np_data[-1], True, np_data[1]-np_data[0], 0.001) is not None
+    assert is_close(df[0], df[-1], True, df[1]-df[0], 0.001) is not None
+    assert is_close(df_polars[0], df_polars[-1], True, df_polars[1]-df_polars[0], 0.001) is not None
+    assert is_close(list_data[0], list_data[-1], True, list_data[1]-list_data[0], 0.001) is not None
+    assert is_close(np_data_irregular[0], np_data_irregular[-1], True, np_data_irregular[1]-np_data_irregular[0], 0.001) is not None
+    assert is_close(df_data_irregular[0], df_data_irregular[-1], True, df_data_irregular[1]-df_data_irregular[0], 0.001) is not None
+    assert is_close(df_polars_data_irregular[0], df_polars_data_irregular[-1], True, df_polars_data_irregular[1]-df_polars_data_irregular[0], 0.001) is not None
+    assert is_close(list_data_irregular[0], list_data_irregular[-1], True, list_data_irregular[1]-list_data_irregular[0], 0.001) is not None
 
 def test_hash_array():
     assert hash_array(np_data) is not None
