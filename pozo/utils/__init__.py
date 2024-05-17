@@ -7,7 +7,7 @@ import polars as pl
 # summarize_array has one parameter, this return dictionary with info about
 # start, stop, step, size and sample_rate_consistent from the depth intervals
 def summarize_array(depth):
-    if not hasattr(depth, "__len__"):
+    if is_array(depth):
         raise ValueError("You must use for depth a list, tuple or an numpy array")
     starts = np.array([])
     stops = np.array([])
