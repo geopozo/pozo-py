@@ -4,9 +4,9 @@ import pandas as pd
 import polars as pl
 
 
-# get_interval has one parameter, this return dictionary with info about
+# summarize_array has one parameter, this return dictionary with info about
 # start, stop, step, size and sample_rate_consistent from the depth intervals
-def get_interval(depth):
+def summarize_array(depth):
     if not hasattr(depth, "__len__"):
         raise ValueError("You must use for depth a list, tuple or an numpy array")
     starts = np.array([])

@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import polars as pl
-from pozo.utils import get_interval, is_close, hash_depth, min_data, max_data, isfinite_data
+from pozo.utils import summarize_array, is_close, hash_depth, min_data, max_data, isfinite_data
 
 list_data = [float('inf'), -float('inf'), None]
 list_data_irregular = [0, 20, 40, 50, 70, 90, 300, 301, 330, 400]
@@ -13,15 +13,15 @@ df_data_irregular = pd.Series(np_data_irregular)
 df_polars = pl.Series(np_data)
 df_polars_data_irregular = pl.Series(np_data_irregular)
 
-def test_get_interval():
-    assert get_interval(np_data) is not None
-    assert get_interval(df) is not None
-    assert get_interval(df_polars) is not None
-    assert get_interval(list_data) is None
-    assert get_interval(np_data_irregular) is not None
-    assert get_interval(df_data_irregular) is not None
-    assert get_interval(df_polars_data_irregular) is not None
-    assert get_interval(list_data_irregular) is None
+def test_summarize_array():
+    assert summarize_array(np_data) is not None
+    assert summarize_array(df) is not None
+    assert summarize_array(df_polars) is not None
+    assert summarize_array(list_data) is None
+    assert summarize_array(np_data_irregular) is not None
+    assert summarize_array(df_data_irregular) is not None
+    assert summarize_array(df_polars_data_irregular) is not None
+    assert summarize_array(list_data_irregular) is None
 
 def test_is_close():
     assert is_close(np_data[0], np_data[-1], True, 0.001) is not None
