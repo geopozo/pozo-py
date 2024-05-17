@@ -91,10 +91,10 @@ class Trace(Drawable):
                 )
             ]
         if clean:
-            data = data[np.isfinite(data)].copy()
-        if force_unit:
-            return pzu.Quantity(data, self.get_unit()) # we could be checking first TODO
-        else: return data
+            data = data[np.isfinite(data)].copy() # bad
+        if force_unit and not isinstance(data, pint.Quantity):
+            return pzu.Quantity(data, self.get_unit())
+        return data
 
     def set_depth(self, depth, depth_unit=None):
         depth_unit = self._check_unit(depth_unit)
@@ -120,9 +120,9 @@ class Trace(Drawable):
                 )
             ]
         if clean:
-            data = self.get_data(slice_by_depth=slice_by_depth)
+            data = self.get_data(slice_by_depth=slice_by_depth) # cleans by NaN's in data- hate it
             depth = depth[np.isfinite(data)].copy()
-        if force_unit:
+        if force_unit and not isinstance(depth, pint.Quantity):
             return pzu.Quantity(depth, self.get_depth_unit())
         return depth
 
