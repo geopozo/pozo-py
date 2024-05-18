@@ -18,8 +18,8 @@ import pozo.units as units # noqa
 
 locale_dir = Path(__file__).resolve().parents[0] / "locale"
 es = gettext.translation('pozo', localedir=locale_dir, languages=['es'])
-en = gettext.translation('pozo', localedit=locale_dir, languages=['en'])
-
+en = gettext.translation('pozo', localedir=locale_dir, languages=['en'])
+en.install() # this could be made local according to https://stackoverflow.com/questions/246137/can-i-call-and-set-the-python-gettext-module-in-a-library-and-a-module-using-it
 def doc(docstring):
     def decorate(obj):
         obj.__doc__ = docstring
