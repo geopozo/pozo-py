@@ -1,12 +1,9 @@
 import json
-import gettext
 import pint
 import numpy as np
 
 from .drawable import Drawable, VersionedProperty
 import pozo.units as pzu
-
-_ = gettext.gettext
 
 class Trace(Drawable):
     _data = VersionedProperty()

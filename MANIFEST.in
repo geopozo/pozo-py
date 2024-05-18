@@ -1,1 +1,1 @@
-recursive-include locale/ *
+recursive-include pozo/locale/ *

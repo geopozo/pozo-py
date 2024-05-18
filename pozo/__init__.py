@@ -1,3 +1,5 @@
+import gettext
+from pathlib import Path
 import ood
 import pint
 import numpy as np
@@ -13,6 +15,10 @@ from .annotations import Note # noqa
 import pozo.themes as themes # noqa
 import pozo.renderers as renderers # noqa
 import pozo.units as units # noqa
+
+locale_dir = Path(__file__).resolve().parents[0] / "locale"
+es = gettext.translation('pozo', localedir=locale_dir, languages=['es'])
+en = gettext.translation('pozo', localedit=locale_dir, languages=['en'])
 
 def doc(docstring):
     def decorate(obj):
