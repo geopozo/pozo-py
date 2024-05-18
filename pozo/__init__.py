@@ -4,8 +4,21 @@ import ood
 import pint
 import numpy as np
 
+# This has to be defined as this, if we assign gettext directly to _,
+# then when we change what is assigned to _, packages that imported _
+# will still point to gettext. `from import as` is probably a regular assignment
+# operator under the hood and therefore _ becomes a new variable contain a copy of the
+# gettext.gettext reference. But this way _ is returning the variable (current_translator)
+# that we control
+# All of this can be moved into utilities eventually, remove no qa
+current_translator = gettext.gettext
+def _(string):
+    global current_translator
+    return current_translator(string)
+
 ood.exceptions.NameConflictException.default_level = ood.exceptions.ErrorLevel.IGNORE
 ood.exceptions.MultiParentException.default_level = ood.exceptions.ErrorLevel.IGNORE
+
 from .traces import Trace # noqa
 from .axes import Axis # noqa
 from .tracks import Track # noqa
@@ -17,9 +30,16 @@ import pozo.renderers as renderers # noqa
 import pozo.units as units # noqa
 
 locale_dir = Path(__file__).resolve().parents[0] / "locale"
-es = gettext.translation('pozo', localedir=locale_dir, languages=['es'])
-en = gettext.translation('pozo', localedir=locale_dir, languages=['en'])
-en.install() # this could be made local according to https://stackoverflow.com/questions/246137/can-i-call-and-set-the-python-gettext-module-in-a-library-and-a-module-using-it
+es_translations = gettext.translation('pozo', localedir=locale_dir, languages=['es'])
+en_translations = gettext.translation('pozo', localedir=locale_dir, languages=['en'])
+
+def es(t = es_translations):
+    global current_translator
+    current_translator = t.gettext
+def en(t = en_translations):
+    global current_translator
+    current_translator = t.gettext
+
 def doc(docstring):
     def decorate(obj):
         obj.__doc__ = docstring

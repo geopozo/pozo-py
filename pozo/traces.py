@@ -4,7 +4,7 @@ import numpy as np
 
 from .drawable import Drawable, VersionedProperty
 import pozo.units as pzu
-
+from . import _ as _
 class Trace(Drawable):
     _data = VersionedProperty()
     _unit = VersionedProperty()
