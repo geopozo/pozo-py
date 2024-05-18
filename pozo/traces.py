@@ -1,11 +1,12 @@
 import json
-
+import gettext
 import pint
 import numpy as np
 
 from .drawable import Drawable, VersionedProperty
 import pozo.units as pzu
 
+_ = gettext.gettext
 
 class Trace(Drawable):
     _data = VersionedProperty()
@@ -26,7 +27,7 @@ class Trace(Drawable):
             return pzu.registry.parse_units(unit)
         elif not isinstance(unit, pint.Unit):
             raise pint.UndefinedUnitError(str(type(unit))) from TypeError(
-                f"Unrecognized unit type: {unit}"
+                _("Unrecognized unit type: %s") % unit
             )
         return unit
 
@@ -36,18 +37,18 @@ class Trace(Drawable):
         depth = kwargs.pop('depth', None)
         depth_unit = kwargs.pop('depth_unit', None)
         if depth is None:
-            raise ValueError("`depth` cannot be None, you must supply a depth")
+            raise ValueError(_("`depth` cannot be `None`, you must supply a depth"))
         if len(depth) != len(data):
-            raise ValueError("Depth and values have different length")
+            raise ValueError(_("`depth` and `data` have different lengths. data/depth: %d/%d") % (len(data), len(depth)))
 
         mnemonic = kwargs.pop("mnemonic", None)
         if 'name' in kwargs:
             if mnemonic:
-                raise ValueError("mnemonic and name are the same thing, please specify only one")
+                raise ValueError(_("`mnemonic` and `name` are the same thing, please specify only one"))
             mnemonic = kwargs.get('name', None)
         if not mnemonic:
             raise ValueError(
-                "You must supply 'mnemonic' or 'name' (never both)"
+                _("You must supply `mnemonic` or `name` (not both)")
             )
         kwargs["name"] = mnemonic
 
@@ -66,7 +67,7 @@ class Trace(Drawable):
         depth_unit = self._check_unit(depth_unit)
         depth_len = len(depth) if depth is not None else len(self._depth)
         if depth_len != len(data):
-            raise ValueError("Depth and values have different length.")
+            raise ValueError(_("`depth` and `data` have different lengths. data/depth: %d/%d") % (len(data), len(depth_len)))
 
         self._data = data
         if unit is not None:
@@ -98,7 +99,7 @@ class Trace(Drawable):
     def set_depth(self, depth, depth_unit=None):
         depth_unit = self._check_unit(depth_unit)
         if len(self._data) != len(depth):
-            raise ValueError(f"Depth and values have different length: data/depth: {len(self._data)}/{len(depth)}.")
+            raise ValueError(_("`depth` and `data` have different lengths. data/depth: %d/%d") % (len(self._data), len(depth)))
 
         self._depth = depth
         if depth_unit is not None:
@@ -152,7 +153,7 @@ class Trace(Drawable):
         else:
             self.set_depth(
                 pzu.Q(self.get_depth(), self.get_depth_unit()).to(unit).magnitude
-            )  # This would be another version
+            )
         self.set_depth_unit(unit)
 
     def convert_unit(self, unit):
