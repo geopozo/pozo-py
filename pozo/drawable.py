@@ -9,6 +9,9 @@ class VersionedProperty:
         self._private_name = "_" + name
         self._name = name
 
+    def __get_certain__(self, obj, version):
+        return getattr(obj, self._private_name)[version]
+
     def __get__(self, obj, objtype=None):
         if obj is None:
             return AttributeError(f"{self._name} can only be accessed from instantiated ojects, not classes")
@@ -82,5 +85,8 @@ class Drawable(ood.Observed, pzt.Themeable):
             prop.remove_version(self, version)
 
     def get_version_dict(self):
-        return dict(enumerate(self._versioned_properties.items()))
+        ret = []
+        for i in range(0, self._latest_version+1):
+            ret.append({v._name:v.__get_certain__(self, i) for v in self._versioned_properties.values()})
+        return dict(enumerate(ret))
 

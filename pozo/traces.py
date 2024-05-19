@@ -182,7 +182,7 @@ class Trace(Drawable):
         return {
             "trace": {
                 "name/mnemonic": self._name,
-                "length": len(self._values),
+                "length": len(self._data),
                 "type": type(self._data).__name__,
                 "unit": str(self.get_unit()),
                 "depth type": type(self._depth).__name__,
@@ -198,4 +198,4 @@ class Trace(Drawable):
         return self._get_theme(context=self._get_context())
 
     def __repr__(self):
-        return json.dumps(self.get_dict())
+        return json.dumps(self.get_dict(), indent=2)
