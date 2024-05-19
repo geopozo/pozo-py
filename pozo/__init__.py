@@ -1,55 +1,22 @@
-import gettext
-from pathlib import Path
-
 import ood
 import pint
 import numpy as np
 
-# This has to be defined as this, if we assign gettext directly to _,
-# then when we change what is assigned to _, packages that imported _
-# will still point to gettext. `from import as` is probably a regular assignment
-# operator under the hood and therefore _ becomes a new variable contain a copy of the
-# gettext.gettext reference. But this way _ is returning the variable (current_translator)
-# that we control
-# All of this can be moved into utilities eventually, remove no qa
-current_translator = gettext.gettext
-def _(string):
-    global current_translator
-    return current_translator(string)
+from .utils.language import _, es, en
+from .utils.configuration import config_info # there is actually nothing here, but running this import sets some globals all packages need
+from .utils.docs import doc
+from .traces import Trace
+from .axes import Axis
+from .tracks import Track
+from .graphs import Graph
+from .annotations import Note
 
-ood.exceptions.NameConflictException.default_level = ood.exceptions.ErrorLevel.IGNORE
-ood.exceptions.MultiParentException.default_level = ood.exceptions.ErrorLevel.IGNORE
+import pozo.themes as themes
+import pozo.renderers as renderers
+import pozo.units as units
+import pozo.utils as utils
 
-from .traces import Trace # noqa
-from .axes import Axis # noqa
-from .tracks import Track # noqa
-from .graphs import Graph # noqa
-from .annotations import Note # noqa
-
-import pozo.themes as themes # noqa
-import pozo.renderers as renderers # noqa
-import pozo.units as units # noqa
-
-locale_dir = Path(__file__).resolve().parents[0] / "locale"
-es_translations = gettext.translation('pozo', localedir=locale_dir, languages=['es'])
-en_translations = gettext.translation('pozo', localedir=locale_dir, languages=['en'])
-
-# es() is a shortcut to set the language to spanish
-def es(t = es_translations):
-    global current_translator
-    current_translator = t.gettext
-
-# en is a shortcut to set the language to english
-def en(t = en_translations):
-    global current_translator
-    current_translator = t.gettext
-
-# doc() decorate allows us to use @doc(_("documentation")) so that we can use gettext with pydoc/docstrings
-def doc(docstring):
-    def decorate(obj):
-        obj.__doc__ = docstring
-        return obj
-    return decorate
+__all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, utils, _, config_info, doc]
 
 # PozoWarning is jsut a UserWarning but we can detect if we raise it with isinstance
 class PozoWarning(UserWarning):
@@ -77,7 +44,7 @@ def is_scalar_number(value):
         return is_scalar_number(value.magnitude)
     return isinstance(value, number_types)
 
-# HasLog is a selector which will traverse through all children every generation of an object
+# HasLog is a Selector which will recurse through all children of an object
 # and look for those that have a certain mnemonic
 class HasLog(ood.selectors.Selector):
     def __init__(self, mnemonic):
