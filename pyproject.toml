@@ -28,10 +28,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest",
-  "pandas >= 2.0.0",
-  "numpy >= 1.26.0",
-  "polars >= 0.20.26",
-  "lasio"
+  "polars >= 0.20.26"
   ]
 
 [tool.ruff.lint]
