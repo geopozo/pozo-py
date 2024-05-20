@@ -23,6 +23,45 @@ __all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, ut
 class PozoWarning(UserWarning):
     pass
 
+__doc__ = _("""package pozo: the visualization engine, pozo
+
+Para cambiar a español: `pozo.es()`
+
+API objects and functions have their own .help(), variables are described in the .help() of their containing class/package.
+For example, `pozo.Graph.help()`. Or `pozo.units.check_las.help()`.
+
+pozo creates a tree structure to describe your graph:
+
+───Graph─┬─Track───Axis─┬─Trace: "CALI"
+         │              └─Trace: "CGR"
+         ├─Track─┬─Axis─┬─Trace: "RHOB"
+         │       │      ├─Trace: "NPHI"
+         │       │      ├─Trace: "LLD"
+         │       │      └─Trace: "LLS"
+         │       └─Axis───Trace: "ARP"
+         └─Track───Axis───Trace: "RPA"
+
+
+Main Objects:
+            pozo.Graph              - The main object.
+            pozo.Track
+            pozo.Axis
+            pozo.Trace              - What stores data point and line data.
+Advanced Sub Packages:
+            pozo.themes
+            pozo.renderers
+            pozo.units
+
+Highlighted Items:
+            pozo.themes.cangrejo    - A basic theme to jump-start styling.
+            pozo.units.check_las()  - Print basic data analysis and sanitizing on your las files.
+""")
+
+def help():
+    print(__doc__)
+
+# TODO: all this will be moved out in Neyberson's commit before release
+
 # deLASio extracts the actual mnemonic from the kinverity1/lasio suffixed mnemonic
 def deLASio(mnemonic):
     return mnemonic.split(":", 1)[0] if ":" in mnemonic else mnemonic
