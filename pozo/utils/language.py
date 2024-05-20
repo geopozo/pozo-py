@@ -11,6 +11,23 @@ def _(string):
     global current_translator
     return current_translator(string)
 
+# _d class is like _, except it makes sure it calls _ when the variable is accessed, not when it is assigned.
+# this is useful since docs are generated at import time, but we may want to allow language to change at runtime
+class _d(str):
+    def __init__(self, string):
+        self.gettext_key = string
+
+    def __str__(self):
+        return _(self.gettext_key)
+
+    def __repr__(self):
+        return _(self.gettext_key)
+
+    def __eq__(self, lvalue):
+        return lvalue == self.gettext_key
+
+
+
 locale_dir = Path(__file__).resolve().parents[1] / "locale"
 es_translations = gettext.translation('pozo', localedir=locale_dir, languages=['es'])
 en_translations = gettext.translation('pozo', localedir=locale_dir, languages=['en'])

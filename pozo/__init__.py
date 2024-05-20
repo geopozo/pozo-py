@@ -2,7 +2,7 @@ import ood
 import pint
 import numpy as np
 
-from .utils.language import _, es, en
+from .utils.language import _, _d, es, en
 # nothing in config_info yet, but this import also sets some globals in ood
 from .utils.configuration import config_info
 import pozo.utils.docs as docs
@@ -23,7 +23,7 @@ __all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, ut
 class PozoWarning(UserWarning):
     pass
 
-__doc__ = _("""package pozo: the visualization engine, pozo
+__doc__ = _d("""package pozo: the visualization engine, pozo
 
 Para cambiar a español: `pozo.es()`
 
