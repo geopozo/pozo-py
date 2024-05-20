@@ -2,7 +2,8 @@ import json
 import pint
 import numpy as np
 
-from . import _, doc # string gettext language import from __init__.py
+from pozo.utils.language import _
+from pozo.utils.docs import doc # string gettext language import from __init__.py
 from .drawable import Drawable, VersionedProperty
 import pozo.units as pzu
 @doc(_("""class Trace: contains one drawable data array

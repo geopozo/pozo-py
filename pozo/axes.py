@@ -1,8 +1,11 @@
 import ood
 import pozo
 import pozo.themes as pzt
+from .utils.language import _
 
 
+@pozo.docs.doc(_("""class Axis: part of a coordinate system and contains various pozo.Trace (and other drawables)
+"""))
 class Axis(ood.Item, pzt.Themeable):
 
     def set_name(self, name):

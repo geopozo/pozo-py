@@ -5,7 +5,7 @@ import numpy as np
 from .utils.language import _, es, en
 # nothing in config_info yet, but this import also sets some globals in ood
 from .utils.configuration import config_info
-from .utils.docs import doc
+import pozo.utils.docs as docs
 from .traces import Trace
 from .axes import Axis
 from .tracks import Track
@@ -17,7 +17,7 @@ import pozo.renderers as renderers
 import pozo.units as units
 import pozo.utils as utils
 
-__all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, utils, _, config_info, doc]
+__all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, utils, config_info]
 
 # PozoWarning is jsut a UserWarning but we can detect if we raise it with isinstance
 class PozoWarning(UserWarning):
@@ -27,8 +27,9 @@ __doc__ = _("""package pozo: the visualization engine, pozo
 
 Para cambiar a español: `pozo.es()`
 
-API objects and functions have their own .help(), variables are described in the .help() of their containing class/package.
-For example, `pozo.Graph.help()`. Or `pozo.units.check_las.help()`.
+https://github.com/geopozo/pozo-demo is a good learning template and quickstart.
+
+***** Description:
 
 pozo creates a tree structure to describe your graph:
 
@@ -41,24 +42,18 @@ pozo creates a tree structure to describe your graph:
          │       └─Axis───Trace: "ARP"
          └─Track───Axis───Trace: "RPA"
 
+***** Highlighted sub-Objects:
 
-Main Objects:
-            pozo.Graph              - The main object.
-            pozo.Track
-            pozo.Axis
-            pozo.Trace              - What stores data point and line data.
-Advanced Sub Packages:
-            pozo.themes
-            pozo.renderers
-            pozo.units
+    Main Objects:
+                pozo.Graph              - The main object.
+                pozo.Trace              - What stores data point and line data.
 
-Highlighted Items:
-            pozo.themes.cangrejo    - A basic theme to jump-start styling.
-            pozo.units.check_las()  - Print basic data analysis and sanitizing on your las files.
+    Highlighted Items:
+                pozo.themes.cangrejo    - A basic theme to jump-start styling. e.g. `myGraph.set_theme("cangrejo")`
+                pozo.units.check_las()  - Print basic data analysis and sanitizing on your las files.
 """)
 
-def help():
-    print(__doc__)
+docs.decorate_package(__name__)
 
 # TODO: all this will be moved out in Neyberson's commit before release
 
