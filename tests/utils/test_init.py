@@ -95,14 +95,14 @@ def test_is_close():
 
 
 def test_hash_array():
-    assert pzutils.hash_array(np_data) is not None
-    assert pzutils.hash_array(series) is not None
-    assert pzutils.hash_array(series_polars) is not None
-    assert pzutils.hash_array(list_data) is not None
-    assert pzutils.hash_array(np_data_irregular) is not None
-    assert pzutils.hash_array(series_data_irregular) is not None
-    assert pzutils.hash_array(series_polars_data_irregular) is not None
-    assert pzutils.hash_array(list_data_irregular) is not None
+    assert pzutils.hash_array(np_data) == 7568175179752105114
+    assert pzutils.hash_array(series) == 7568175179752105114
+    assert pzutils.hash_array(series_polars) == 7568175179752105114
+    assert pzutils.hash_array(list_data) == 4361568316307471912 # This have components like [float("inf"), -float("inf"), None]
+    assert pzutils.hash_array(np_data_irregular) == 889220209666011938
+    assert pzutils.hash_array(series_data_irregular) == 889220209666011938
+    assert pzutils.hash_array(series_polars_data_irregular) == 889220209666011938
+    assert pzutils.hash_array(list_data_irregular) == 889220209666011938
 
 
 def test_min_data():
