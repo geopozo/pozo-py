@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-20 21:18+0000\n"
+"POT-Creation-Date: 2024-05-20 21:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgid "If true, will not show the item"
 msgstr ""
 
 #: pozo/themes/__init__.py:15
-msgid "Set's the default min and max x value for this item"
+msgid "Sets the default min and max x value for this item"
 msgstr ""
 
 #: pozo/themes/__init__.py:16
