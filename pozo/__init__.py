@@ -3,7 +3,8 @@ import pint
 import numpy as np
 
 from .utils.language import _, es, en
-from .utils.configuration import config_info # there is actually nothing here, but running this import sets some globals all packages need
+# nothing in config_info yet, but this import also sets some globals in ood
+from .utils.configuration import config_info
 from .utils.docs import doc
 from .traces import Trace
 from .axes import Axis
