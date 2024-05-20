@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pint
 import pandas as pd
@@ -55,6 +56,7 @@ def is_close(n_1, n_2, sample_rate_consistent, sample, percent):
 
 # hash_array has one parameter, this return a hash from the depth data
 def hash_array(depth):
+    os.environ['PYTHONHASHSEED'] = '0'
     if isinstance(depth, np.ndarray):
         return hash(depth.tobytes())
     elif is_array(depth):
