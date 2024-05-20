@@ -1,0 +1,41 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-05-17 20:00+0000\n"
+"PO-Revision-Date: 2024-05-17 23:00-0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+
+#: pozo/traces.py:30
+#, python-format
+msgid "Unrecognized unit type: %s"
+msgstr "Tipo de unidad desconocido: %s"
+
+#: pozo/traces.py:40
+msgid "`depth` cannot be `None`, you must supply a depth"
+msgstr "`depth` no se puede ser `None`, debe haber una profundidad"
+
+#: pozo/traces.py:42 pozo/traces.py:70 pozo/traces.py:102
+#, python-format
+msgid "`depth` and `data` have different lengths. data/depth: %d/%d"
+msgstr "`depth` y `data` tienen tamaños diferentes. data/depth: %d/%d"
+
+#: pozo/traces.py:47
+msgid "`mnemonic` and `name` are the same thing, please specify only one"
+msgstr "`menmonic` y `name` son los mismos: se especifca solo uno"
+
+#: pozo/traces.py:51
+msgid "You must supply `mnemonic` or `name` (not both)"
+msgstr "Se debe dar o `mnemonic`o `name`, y no los dos"
