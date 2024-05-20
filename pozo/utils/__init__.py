@@ -107,45 +107,45 @@ def verify_array_len(constant, data):
     return True
 
 
-def verify_data_type(data):
+def verify_type(data):
     pass
 
 
-def min_data(data):
+def min(data):
     pass
 
 
-def max_data(data):
+def max(data):
     pass
 
 
-def abs_data(arg):
+def abs(arg):
     pass
 
 
-def isfinite_data(data):
+def isfinite(data):
     pass
 
 
-def isnan_data(data):
+def isnan(data):
     pass
 
 
-def count_nonzero_data(data, axis=None, *, keepdims=False):
+def count_nonzero(data, axis=None, *, keepdims=False):
     pass
 
 
-def nanquantile_data(data, q, axis = None):
+def nanquantile(data, q, axis = None):
     pass
 
 
-def round_data(data):
+def round(data):
     pass
 
 
-def linspace_data(start, stop, num=50, endpoint=True, retstep=False, axis=0):
+def linspace(start, stop, num=50, endpoint=True, retstep=False, axis=0):
     pass
 
 
-def append_data(arg, data):
+def append(arg, data):
     pass
