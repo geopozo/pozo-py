@@ -1,8 +1,8 @@
-import os
 import numpy as np
 import pint
 import pandas as pd
 import polars as pl
+import hashlib
 
 
 # summarize_array has one parameter, this return dictionary with info about
@@ -56,12 +56,11 @@ def is_close(n_1, n_2, sample_rate_consistent, sample, percent):
 
 # hash_array has one parameter, this return a hash from the depth data
 def hash_array(depth):
-    os.environ['PYTHONHASHSEED'] = '0'
     if isinstance(depth, np.ndarray):
-        return hash(depth.tobytes())
+        return hashlib.md5(str((depth.tobytes())).encode()).hexdigest()
     elif is_array(depth):
         depth_array = np.array(depth)
-        return hash(depth_array.tobytes())
+        return hashlib.md5(str((depth_array.tobytes())).encode()).hexdigest()
     else:
         raise ValueError("You must use for depth a list, tuple or an numpy array")
 
