@@ -4,7 +4,7 @@ import pandas as pd
 import polars as pl
 import pozo.utils as pzutils
 
-list_data = [float("inf"), -float("inf"), None]
+list_data = [float("inf"), -float("inf"), float("nan")]
 list_data_irregular = [0, 20, 40, 50, 70, 90, 300, 301, 330, 400]
 np_data = np.linspace(0, 2000, num=50, endpoint=True)
 np_data_irregular = np.array(list_data_irregular)
@@ -121,7 +121,7 @@ def test_hash_array():
     assert pzutils.hash_array(df_pandas["depth"]) == '744578fc32c6e5300c7c0784a88a4fdb'
     assert pzutils.hash_array(series) == 'fa965b73eaa75caaadcecd13d1df6aff'
     assert pzutils.hash_array(series_polars) == 'fa965b73eaa75caaadcecd13d1df6aff'
-    #assert pzutils.hash_array(list_data) == 'e027998a032a686fdf6b0208f134da18' # This has components like [float("inf"), -float("inf"), None] # This has conflicts
+    assert pzutils.hash_array(list_data) == '16e83a215505f98e905476615a56cc40' # This has components like [float("inf"), -float("inf"), None] # This has conflicts
     assert pzutils.hash_array(np_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
     assert pzutils.hash_array(df_polars["depth"]) == '744578fc32c6e5300c7c0784a88a4fdb'
     assert pzutils.hash_array(series_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
