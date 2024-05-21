@@ -61,10 +61,10 @@ class Drawable(ood.Observed, pzt.Themeable):
         self._versioned_properties = {}
         super().__init__(*args, **kwargs)
 
+    @property # makes it read only
     @doc(_d("""method latest_version: returns the latest version for versioned properties
 Returns:
     The index of the latest version"""))
-    @property # makes it read only
     def latest_version(self):
         return self._latest_version
 
