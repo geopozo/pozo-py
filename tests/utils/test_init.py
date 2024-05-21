@@ -26,7 +26,7 @@ def test_summarize_array():
     assert pzutils.summarize_array(df_pandas["depth"]) is not None
     assert pzutils.summarize_array(series_data_irregular) is not None
     assert pzutils.summarize_array(series_polars_data_irregular) is not None
-    assert pzutils.summarize_array(list_data_irregular) is None
+    assert pzutils.summarize_array(list_data_irregular) is not None
 
 
 def test_is_close():
