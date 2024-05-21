@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-20 21:49+0000\n"
-"PO-Revision-Date: 2024-05-21 00:57-0400\n"
+"POT-Creation-Date: 2024-05-21 17:43+0000\n"
+"PO-Revision-Date: 2024-05-21 13:45-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -27,8 +27,8 @@ msgid "A number in pixels"
 msgstr "Un número en píxeles"
 
 #: pozo/themes/__init__.py:13
-msgid "If true, will force show the item even if it has no children"
-msgstr "Si \"True\", hará la unidad visible, incluso si no tiene hijos"
+msgid "If true, will force show the item even if it has no data"
+msgstr "Si \"True\", hará la unidad visible, incluso si no tiene datos"
 
 #: pozo/themes/__init__.py:14
 msgid "If true, will not show the item"
@@ -39,7 +39,7 @@ msgid "Sets the default min and max x value for this item"
 msgstr "Se pone el mínimo y el máximo del valor para esta unidad"
 
 #: pozo/themes/__init__.py:16
-msgid "Specifies the units of range"
+msgid "Specifies the range units"
 msgstr "Se ponen las unidades del rango \"range\""
 
 #: pozo/themes/__init__.py:17
@@ -47,16 +47,16 @@ msgid "Can be log or linear"
 msgstr "Se puede ser \"log\" o \"linear\""
 
 #: pozo/themes/__init__.py:18
-msgid "a plotly fill description EXPERIMENTAL"
-msgstr "un relleno de estilo plotly EXPERIMENTAL"
+msgid "A plotly fill description EXPERIMENTAL"
+msgstr "Un relleno de estilo plotly EXPERIMENTAL"
 
 #: pozo/themes/__init__.py:19
-msgid "color of the fill EXPERIMENTAL"
-msgstr "color del relleno EXPERIMENTAL"
+msgid "Color of the fill EXPERIMENTAL"
+msgstr "Color del relleno EXPERIMENTAL"
 
 #: pozo/themes/__init__.py:20
-msgid "a fill between two separate axes EXPERIMENTAL"
-msgstr "un relleno entres dos ejes diferentes EXPERIMENTAL"
+msgid "A fill between two separate axes EXPERIMENTAL"
+msgstr "Un relleno entres dos ejes diferentes EXPERIMENTAL"
 
 #: pozo/themes/__init__.py:23
 msgid ""
@@ -84,8 +84,14 @@ msgid "Possible theme keys:\n"
 msgstr "Claves de tema posibles:\n"
 
 #: pozo/themes/__init__.py:95
+#, fuzzy
+#| msgid ""
+#| "method set_theme sets the theme of object\n"
+#| "\n"
+#| "Args:\n"
+#| "    theme (Theme or dict): The theme you'd like to set"
 msgid ""
-"method set_theme sets the theme of object\n"
+"method set_theme: sets the theme of object\n"
 "\n"
 "Args:\n"
 "    theme (Theme or dict): The theme you'd like to set"
@@ -97,7 +103,7 @@ msgstr ""
 
 #: pozo/themes/__init__.py:118
 msgid ""
-"method get_theme returns a context-less theme definition\n"
+"method get_theme: returns a context-less theme definition\n"
 "\n"
 "Returns:\n"
 "    A theme, no context attached"
@@ -208,7 +214,7 @@ msgid ""
 "    **kwargs:\n"
 "        mnemonic (str): REQUIRED: the name/mnemonic of the trace\n"
 "        name (str): synonym for mnemonic, don't include both\n"
-"        unit (str or pint.Unit): describes the depth unit\n"
+"        unit (str or pint.Unit): describes the data unit\n"
 "        depth (array): another array that must be the same size as data, can "
 "also be pint.Quantity\n"
 "        depth_unit (str or pint.Unit): describes the depth unit\n"
@@ -297,7 +303,7 @@ msgid ""
 "input\n"
 "\n"
 "If you're looking for a value at 1000ft, but we only have a value at 998 ft "
-"and 1001 ft, you would use this.\n"
+"and 1001 ft, will return 1001 ft and its index\n"
 "\n"
 "Args:\n"
 "    value (number): The depth value you are looking for\n"
