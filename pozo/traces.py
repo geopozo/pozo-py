@@ -10,7 +10,7 @@ import pozo.units as pzu
 
 Trace is a unit-aware pointer for a data and depth array. It also stores a mnemonic (name). It is not supposed to store data, but point to the data and then render that data into a graph later using the depth as the Y-axis. Depth and data must be the same shape at all times, they can be replaced together.
 
-Data and its unit are versioned properties. That is, if you want to change the data without losing the original, you can use the functions as they are described below (new_version() etc). You can set the version with `mytrace.version =`. The depth and its unit are expected to be constants.
+Data and its unit are versioned properties. That is, if you want to change the data without losing the original, you can use the functions as they are described below (new_version() etc). You can set the version with `mytrace.version =`. The depth and its unit are not versioned, only data and unit. It always starts at .version == 0.
 
 Pozo attempts to be agnostic towards array type: series, nparrays, polars, pandas, lists are all accepted. pint.Quantity wrappers are often accepted as well.
 
