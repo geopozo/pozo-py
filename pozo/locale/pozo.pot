@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-20 21:49+0000\n"
+"POT-Creation-Date: 2024-05-21 17:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgid "A number in pixels"
 msgstr ""
 
 #: pozo/themes/__init__.py:13
-msgid "If true, will force show the item even if it has no children"
+msgid "If true, will force show the item even if it has no data"
 msgstr ""
 
 #: pozo/themes/__init__.py:14
@@ -38,7 +38,7 @@ msgid "Sets the default min and max x value for this item"
 msgstr ""
 
 #: pozo/themes/__init__.py:16
-msgid "Specifies the units of range"
+msgid "Specifies the range units"
 msgstr ""
 
 #: pozo/themes/__init__.py:17
@@ -46,15 +46,15 @@ msgid "Can be log or linear"
 msgstr ""
 
 #: pozo/themes/__init__.py:18
-msgid "a plotly fill description EXPERIMENTAL"
+msgid "A plotly fill description EXPERIMENTAL"
 msgstr ""
 
 #: pozo/themes/__init__.py:19
-msgid "color of the fill EXPERIMENTAL"
+msgid "Color of the fill EXPERIMENTAL"
 msgstr ""
 
 #: pozo/themes/__init__.py:20
-msgid "a fill between two separate axes EXPERIMENTAL"
+msgid "A fill between two separate axes EXPERIMENTAL"
 msgstr ""
 
 #: pozo/themes/__init__.py:23
@@ -75,7 +75,7 @@ msgstr ""
 
 #: pozo/themes/__init__.py:95
 msgid ""
-"method set_theme sets the theme of object\n"
+"method set_theme: sets the theme of object\n"
 "\n"
 "Args:\n"
 "    theme (Theme or dict): The theme you'd like to set"
@@ -83,7 +83,7 @@ msgstr ""
 
 #: pozo/themes/__init__.py:118
 msgid ""
-"method get_theme returns a context-less theme definition\n"
+"method get_theme: returns a context-less theme definition\n"
 "\n"
 "Returns:\n"
 "    A theme, no context attached"
@@ -157,7 +157,7 @@ msgid ""
 "    **kwargs:\n"
 "        mnemonic (str): REQUIRED: the name/mnemonic of the trace\n"
 "        name (str): synonym for mnemonic, don't include both\n"
-"        unit (str or pint.Unit): describes the depth unit\n"
+"        unit (str or pint.Unit): describes the data unit\n"
 "        depth (array): another array that must be the same size as data, can "
 "also be pint.Quantity\n"
 "        depth_unit (str or pint.Unit): describes the depth unit\n"
@@ -207,7 +207,7 @@ msgid ""
 "input\n"
 "\n"
 "If you're looking for a value at 1000ft, but we only have a value at 998 ft "
-"and 1001 ft, you would use this.\n"
+"and 1001 ft, will return 1001 ft and its index\n"
 "\n"
 "Args:\n"
 "    value (number): The depth value you are looking for\n"

@@ -20,7 +20,7 @@ Args:
     **kwargs:
         mnemonic (str): REQUIRED: the name/mnemonic of the trace
         name (str): synonym for mnemonic, don't include both
-        unit (str or pint.Unit): describes the depth unit
+        unit (str or pint.Unit): describes the data unit
         depth (array): another array that must be the same size as data, can also be pint.Quantity
         depth_unit (str or pint.Unit): describes the depth unit
         original_data (any): A pointer to where the original data was extracted from, useful if planning to re-output to a LAS file
@@ -83,7 +83,7 @@ Returns:
 
     @doc(_d("""method find_nearest: retrieve index and actual value of depth closes to input
 
-If you're looking for a value at 1000ft, but we only have a value at 998 ft and 1001 ft, you would use this.
+If you're looking for a value at 1000ft, but we only have a value at 998 ft and 1001 ft, will return 1001 ft and its index
 
 Args:
     value (number): The depth value you are looking for

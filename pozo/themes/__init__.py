@@ -10,14 +10,14 @@ import pozo.utils.docs as docs
 ThemeValues = dict(
                color=_d("Can be a single color value or list of color values from colour package"),
                track_width=_d("A number in pixels"),
-               force=_d("If true, will force show the item even if it has no children"),
+               force=_d("If true, will force show the item even if it has no data"),
                hidden=_d("If true, will not show the item"),
                range=_d("Sets the default min and max x value for this item"),
-               range_unit=_d("Specifies the units of range"),
+               range_unit=_d("Specifies the range units"),
                scale=_d("Can be log or linear"),
-               fill=_d("a plotly fill description EXPERIMENTAL"),
-               fillcolor=_d("color of the fill EXPERIMENTAL"),
-               cross_axis_fill=_d("a fill between two separate axes EXPERIMENTAL")
+               fill=_d("A plotly fill description EXPERIMENTAL"),
+               fillcolor=_d("Color of the fill EXPERIMENTAL"),
+               cross_axis_fill=_d("A fill between two separate axes EXPERIMENTAL")
                )
 
 __doc__ = _d("""package theme: a theme engine for pozo
@@ -92,7 +92,7 @@ class Themeable():
     def __init__(self, *args, **kwargs):
         self.set_theme(kwargs.pop("theme", {}))
         super().__init__(*args, **kwargs)
-    @docs.doc(_d("""method set_theme sets the theme of object
+    @docs.doc(_d("""method set_theme: sets the theme of object
 
 Args:
     theme (Theme or dict): The theme you'd like to set"""))
@@ -115,7 +115,7 @@ Args:
         return self._theme
 
     # You may override this
-    @docs.doc(_d("""method get_theme returns a context-less theme definition
+    @docs.doc(_d("""method get_theme: returns a context-less theme definition
 
 Returns:
     A theme, no context attached"""))
