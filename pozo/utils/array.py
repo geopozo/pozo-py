@@ -18,7 +18,10 @@ def summarize_array(depth):
     sample_rate_consistent = True
     sample = depth[1]-depth[0]
     for i in range(len(depth) - 1):
-        if depth[i] == depth[-1]:
+        if isinstance(depth, (pd.Series, pd.DataFrame)):
+            if depth[i] == depth.iloc[-1]:
+                break
+        elif depth[i] == depth[-1]:
             break
         start = depth[i]
         stop = depth[i + 1]
