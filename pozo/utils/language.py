@@ -26,6 +26,9 @@ class _d(str):
     def __eq__(self, lvalue):
         return lvalue == self.gettext_key
 
+    def __json__(self):
+        return _(self.gettext_key)
+
 
 
 locale_dir = Path(__file__).resolve().parents[1] / "locale"

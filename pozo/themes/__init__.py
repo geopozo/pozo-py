@@ -27,7 +27,7 @@ __doc__ = _d("""package theme: a theme engine for pozo
 """)
 
 def _help():
-    print(_("Possible theme keys:\n") + json.dumps(ThemeValues, indent=4))
+    print(_("Possible theme keys:\n") + json.dumps({k:str(v) for k, v in ThemeValues.items()}, indent=4, ensure_ascii=False))
 
 docs.decorate_package(__name__)
 
