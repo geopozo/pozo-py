@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-21 22:42+0000\n"
-"PO-Revision-Date: 2024-05-21 19:01-0400\n"
+"PO-Revision-Date: 2024-05-21 19:28-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: pozo/themes/__init__.py:11
 msgid "Can be a single color value or list of color values from colour package"
-msgstr "Se puede un color o lista de colores del paquete \"colour\""
+msgstr "Se puede un color o lista de colores del paquete 'colour'"
 
 #: pozo/themes/__init__.py:12
 msgid "A number in pixels"
@@ -28,11 +28,11 @@ msgstr "Un número en píxeles"
 
 #: pozo/themes/__init__.py:13
 msgid "If true, will force show the item even if it has no data"
-msgstr "Si \"True\", hará la unidad visible, incluso si no tiene datos"
+msgstr "Si 'True', hará la unidad visible, incluso si no tiene datos"
 
 #: pozo/themes/__init__.py:14
 msgid "If true, will not show the item"
-msgstr "Si \"True\", no hará la unidad visible"
+msgstr "Si 'True', no hará la unidad visible"
 
 #: pozo/themes/__init__.py:15
 msgid "Sets the default min and max x value for this item"
@@ -40,11 +40,11 @@ msgstr "Se pone el mínimo y el máximo del valor para esta unidad"
 
 #: pozo/themes/__init__.py:16
 msgid "Specifies the range units"
-msgstr "Se ponen las unidades del rango \"range\""
+msgstr "Se ponen las unidades del rango 'range'"
 
 #: pozo/themes/__init__.py:17
 msgid "Can be log or linear"
-msgstr "Se puede ser \"log\" o \"linear\""
+msgstr "Se puede ser 'log' o 'linear'"
 
 #: pozo/themes/__init__.py:18
 msgid "A plotly fill description EXPERIMENTAL"
@@ -71,7 +71,7 @@ msgid ""
 msgstr ""
 "paquete theme (tema): un motor de tema\n"
 "\n"
-"    El paquete \"theme\" provee varios objetos de tema, lo que se pueden "
+"    El paquete 'theme' provee varios objetos de tema, lo que se pueden "
 "adjuntar a pozo.Graph, pozo.Track, pozo.Axis, y pozo.trace (`.set_theme()`) "
 "para proveer información del estilo sobre la renderización. Dicionarrios "
 "sencillos se pueden usar como objetos de tema, y sus claves posibles se "
