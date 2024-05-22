@@ -123,7 +123,12 @@ def verify_type(data):
 
 
 def min(data):
-    pass
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        return data.min(skipna=True)
+    elif isinstance(data, np.ndarray):
+        return data.nanmin()
+    else:
+        return data.min()
 
 
 def max(data):
