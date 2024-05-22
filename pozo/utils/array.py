@@ -4,6 +4,7 @@ import pint
 import pandas as pd
 import polars as pl
 import hashlib
+import warnings
 
 
 # summarize_array has one parameter, this return dictionary with info about
@@ -124,19 +125,25 @@ def verify_type(data):
 
 def min(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
+        warnings.warn("You must import pandas to use this method")
         return data.min(skipna=True)
     elif isinstance(data, np.ndarray):
+        warnings.warn("You must import numpy to use this method")
         return np.nanmin(data)
     else:
+        warnings.warn("You must import polars to use this method")
         return data.min()
 
 
 def max(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
+        warnings.warn("You must import pandas to use this method")
         return data.max(skipna=True)
     elif isinstance(data, np.ndarray):
+        warnings.warn("You must import numpy to use this method")
         return np.nanmax(data)
     else:
+        warnings.warn("You must import polars to use this method")
         return data.max()
 
 
