@@ -19,7 +19,7 @@ def summarize_array(depth):
     sample = depth[1]-depth[0]
     for i in range(len(depth) - 1):
         if isinstance(depth, (pd.Series, pd.DataFrame)):
-            if depth[i] == depth.iloc[-1]:
+            if depth.iloc[i] == depth.iloc[-1]:
                 break
         elif depth[i] == depth[-1]:
             break
