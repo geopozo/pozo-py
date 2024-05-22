@@ -126,7 +126,7 @@ def min(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         return data.min(skipna=True)
     elif isinstance(data, np.ndarray):
-        return data.nanmin()
+        return np.nanmin(data)
     else:
         return data.min()
 
@@ -135,7 +135,7 @@ def max(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         return data.max(skipna=True)
     elif isinstance(data, np.ndarray):
-        return data.nanmax()
+        return np.nanmax(data)
     else:
         return data.max()
 
