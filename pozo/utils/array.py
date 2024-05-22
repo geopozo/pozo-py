@@ -109,12 +109,12 @@ def verify_array_len(constant, data):
 
 
 def verify_type(data):
-    for i in data:
-        if isinstance(data, (pd.Series, pd.DataFrame)):
-            if data.iloc[i] == float("inf") or data.iloc[i] == -float("inf") or data.iloc[i] == float("nan"):
-                raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
-        else:
-            if data[i] == float("inf") or data[i] == -float("inf") or data[i] == float("nan"):
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        if data.isin([np.inf, -np.inf]).any() or data.isna().any():
+            raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
+    else:
+        for item in data:
+            if item == float("inf") or item == -float("inf") or item == float("nan"):
                 raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
 
 
