@@ -35,15 +35,15 @@ def test_is_close():
         is not None
     )
     assert (
-        pzutils.is_close(series[0], series[-1], True, series[1] - series[0], 0.001)
+        pzutils.is_close(series.iloc[0], series.iloc[-1], True, series[1] - series[0], 0.001)
         is not None
     )
     assert (
         pzutils.is_close(
-            df_pandas["depth"][0],
-            df_pandas["depth"][9],
+            df_pandas["depth"].iloc[0],
+            df_pandas["depth"].iloc[-1],
             True,
-            df_pandas[9] - df_pandas[0],
+            df_pandas["depth"].iloc[1] - df_pandas["depth"].iloc[0],
             0.001,
         )
         is not None
@@ -77,19 +77,19 @@ def test_is_close():
     assert (
         pzutils.is_close(
             df_polars["depth"][0],
-            df_polars["depth"][9],
+            df_polars["depth"][-1],
             True,
-            df_polars[9] - df_polars[0],
+            df_polars["depth"][1] - df_polars["depth"][0],
             0.001,
         )
         is not None
     )
     assert (
         pzutils.is_close(
-            series_data_irregular[0],
-            series_data_irregular[-1],
+            series_data_irregular.iloc[0],
+            series_data_irregular.iloc[-1],
             True,
-            series_data_irregular[1] - series_data_irregular[0],
+            series_data_irregular.iloc[1] - series_data_irregular.iloc[0],
             0.001,
         )
         is not None
