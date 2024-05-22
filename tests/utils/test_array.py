@@ -142,16 +142,16 @@ def test_verify_type():
 
 
 def test_min():
-    assert pzutils.min(np_data)
-    assert pzutils.min(df_pandas["depth"])
-    assert pzutils.min(series)
-    assert pzutils.min(series_polars)
-    assert pzutils.min(list_data)
-    assert pzutils.min(np_data_irregular)
-    assert pzutils.min(df_polars["depth"])
-    assert pzutils.min(series_data_irregular)
-    assert pzutils.min(series_polars_data_irregular)
-    assert pzutils.min(list_data_irregular)
+    assert pzutils.min(np_data) is not None
+    assert pzutils.min(df_pandas["depth"]) is not None
+    assert pzutils.min(series) is not None
+    assert pzutils.min(series_polars) is not None
+    assert pzutils.min(list_data) is not None
+    assert pzutils.min(np_data_irregular) is not None
+    assert pzutils.min(df_polars["depth"]) is not None
+    assert pzutils.min(series_data_irregular) is not None
+    assert pzutils.min(series_polars_data_irregular) is not None
+    assert pzutils.min(list_data_irregular) is not None
 
 
 def test_max():

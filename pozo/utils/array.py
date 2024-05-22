@@ -127,24 +127,28 @@ def min(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         warnings.warn("You must import pandas to use this method")
         return data.min(skipna=True)
-    elif isinstance(data, np.ndarray):
-        warnings.warn("You must import numpy to use this method")
-        return np.nanmin(data)
-    else:
+    elif isinstance(data, (pl.Series, pl.DataFrame)):
         warnings.warn("You must import polars to use this method")
         return data.min()
+    else:
+        warnings.warn("You must import numpy to use this method")
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.nanmin(data)
 
 
 def max(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         warnings.warn("You must import pandas to use this method")
         return data.max(skipna=True)
-    elif isinstance(data, np.ndarray):
-        warnings.warn("You must import numpy to use this method")
-        return np.nanmax(data)
-    else:
+    elif isinstance(data, (pl.Series, pl.DataFrame)):
         warnings.warn("You must import polars to use this method")
         return data.max()
+    else:
+        warnings.warn("You must import numpy to use this method")
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.nanmax(data)
 
 
 def abs(arg):
