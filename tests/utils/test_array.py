@@ -129,6 +129,18 @@ def test_hash_array():
     assert pzutils.hash_array(list_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
 
 
+def test_verify_type():
+    assert pzutils.verify_type(np_data) is None
+    assert pzutils.verify_type(df_pandas["depth"]) is None
+    assert pzutils.verify_type(series) is None
+    assert pzutils.verify_type(series_polars) is None
+    assert pzutils.verify_type(np_data_irregular) is None
+    assert pzutils.verify_type(df_polars["depth"]) is None
+    assert pzutils.verify_type(series_data_irregular) is None
+    assert pzutils.verify_type(series_polars_data_irregular) is None
+    assert pzutils.verify_type(list_data_irregular) is None
+
+
 def test_min():
     assert pzutils.min(np_data) is None
     assert pzutils.min(df_pandas["depth"]) is None
