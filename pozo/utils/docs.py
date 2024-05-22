@@ -13,7 +13,8 @@ def generate_directory(obj):
         subobj = getattr(obj, subobj_name)
         if hasattr(subobj, "help") and hasattr(subobj, "__doc__") and subobj.__doc__:
             empty = False
-            directory += indent + subobj.__doc__.partition('\n')[0]
+            # the str() forces it to render language before .partition
+            directory += indent + str(subobj.__doc__).partition('\n')[0]
             if directory[-2:-1] != "\n": directory += "\n"
     if empty: return ""
     return directory
