@@ -142,29 +142,29 @@ def test_verify_type():
 
 
 def test_min():
-    assert pzutils.min(np_data) is None
-    assert pzutils.min(df_pandas["depth"]) is None
-    assert pzutils.min(series) is None
-    assert pzutils.min(series_polars) is None
-    assert pzutils.min(list_data) is None
-    assert pzutils.min(np_data_irregular) is None
-    assert pzutils.min(df_polars["depth"]) is None
-    assert pzutils.min(series_data_irregular) is None
-    assert pzutils.min(series_polars_data_irregular) is None
-    assert pzutils.min(list_data_irregular) is None
+    assert pzutils.min(np_data)
+    assert pzutils.min(df_pandas["depth"])
+    assert pzutils.min(series)
+    assert pzutils.min(series_polars)
+    assert pzutils.min(list_data)
+    assert pzutils.min(np_data_irregular)
+    assert pzutils.min(df_polars["depth"])
+    assert pzutils.min(series_data_irregular)
+    assert pzutils.min(series_polars_data_irregular)
+    assert pzutils.min(list_data_irregular)
 
 
 def test_max():
-    assert pzutils.max(np_data) is None
-    assert pzutils.max(df_pandas["depth"]) is None
-    assert pzutils.max(series) is None
-    assert pzutils.max(series_polars) is None
-    assert pzutils.max(list_data) is None
-    assert pzutils.max(np_data_irregular) is None
-    assert pzutils.max(df_polars["depth"]) is None
-    assert pzutils.max(series_data_irregular) is None
-    assert pzutils.max(series_polars_data_irregular) is None
-    assert pzutils.max(list_data_irregular) is None
+    assert pzutils.max(np_data)
+    assert pzutils.max(df_pandas["depth"])
+    assert pzutils.max(series)
+    assert pzutils.max(series_polars)
+    assert pzutils.max(list_data)
+    assert pzutils.max(np_data_irregular)
+    assert pzutils.max(df_polars["depth"])
+    assert pzutils.max(series_data_irregular)
+    assert pzutils.max(series_polars_data_irregular)
+    assert pzutils.max(list_data_irregular)
 
 
 def test_isfinite():
