@@ -12,6 +12,7 @@ from .array import (
     min,
     nanquantile,
     summarize_array,
+    verify_type,
 )
 
 
