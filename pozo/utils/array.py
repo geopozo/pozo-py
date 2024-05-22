@@ -11,6 +11,8 @@ import hashlib
 def summarize_array(depth):
     if not is_array(depth):
         raise ValueError("You must use for depth a list, tuple or an numpy array")
+    verify_type(depth)
+
     starts = np.array([])
     stops = np.array([])
     steps = np.array([])
