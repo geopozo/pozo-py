@@ -132,7 +132,12 @@ def min(data):
 
 
 def max(data):
-    pass
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        return data.max(skipna=True)
+    elif isinstance(data, np.ndarray):
+        return data.nanmax()
+    else:
+        return data.max()
 
 
 def abs(arg):
