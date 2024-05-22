@@ -18,7 +18,7 @@ def summarize_array(depth):
     steps = np.array([])
     size = np.array([])
     sample_rate_consistent = True
-    sample = depth[1]-depth[0]
+    sample = depth[1] - depth[0]
     for i in range(len(depth) - 1):
         if isinstance(depth, (pd.Series, pd.DataFrame)):
             if depth.iloc[i] == depth.iloc[-1]:
@@ -111,11 +111,15 @@ def verify_array_len(constant, data):
 def verify_type(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         if data.isin([np.inf, -np.inf]).any() or data.isna().any():
-            raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
+            raise ValueError(
+                "You mustn't use float('inf'), -float('inf'), float('nan')"
+            )
     else:
         for item in data:
             if item == float("inf") or item == -float("inf") or item == float("nan"):
-                raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
+                raise ValueError(
+                    "You mustn't use float('inf'), -float('inf'), float('nan')"
+                )
 
 
 def min(data):
@@ -142,7 +146,7 @@ def count_nonzero(data, axis=None, *, keepdims=False):
     pass
 
 
-def nanquantile(data, q, axis = None):
+def nanquantile(data, q, axis=None):
     pass
 
 
