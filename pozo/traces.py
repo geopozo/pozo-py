@@ -77,9 +77,9 @@ Returns:
         kwargs["name"] = mnemonic
 
         super().__init__(**kwargs)  # will init version logic before assining units that use it
-        self.set_data(data, unit=unit, depth=depth, depth_unit=depth_unit)
         self._unit = None
         self._depth_unit = None
+        self.set_data(data, unit=unit, depth=depth, depth_unit=depth_unit)
 
     @doc(_d("""method find_nearest: retrieve index and actual value of depth closes to input
 
