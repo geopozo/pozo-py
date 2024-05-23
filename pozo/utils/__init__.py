@@ -13,6 +13,7 @@ from .array import (
     nanquantile,
     summarize_array,
     verify_type,
+    abs
 )
 
 
