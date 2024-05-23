@@ -190,16 +190,16 @@ def test_abs():
 
 
 def test_isfinite():
-    assert pzutils.isfinite(np_data[0]) is None
-    assert pzutils.isfinite(df_pandas["depth"]) is None
-    assert pzutils.isfinite(series[0]) is None
-    assert pzutils.isfinite(series_polars[0]) is None
-    assert pzutils.isfinite(list_data[0]) is None
-    assert pzutils.isfinite(np_data_irregular[0]) is None
-    assert pzutils.isfinite(df_polars["depth"]) is None
-    assert pzutils.isfinite(series_data_irregular[0]) is None
-    assert pzutils.isfinite(series_polars_data_irregular[0]) is None
-    assert pzutils.isfinite(list_data_irregular[0]) is None
+    assert pzutils.isfinite(np_data).all()
+    assert pzutils.isfinite(df_pandas["depth"]).all()
+    assert pzutils.isfinite(series).all()
+    assert pzutils.isfinite(series_polars).all()
+    assert pzutils.isfinite(list_data) is not None
+    assert pzutils.isfinite(np_data_irregular).all()
+    assert pzutils.isfinite(df_polars["depth"]).all()
+    assert pzutils.isfinite(series_data_irregular).all()
+    assert pzutils.isfinite(series_polars_data_irregular).all()
+    assert pzutils.isfinite(list_data_irregular).all()
 
 
 def test_isnan():
