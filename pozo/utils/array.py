@@ -178,7 +178,7 @@ def isnan(data):
         return data.is_null()
     elif isinstance(data, pl.DataFrame):
         warnings.warn("You must import polars to use this function")
-        return True if data.null_count() > 0 else False
+        return data.null_count() > 0
     else:
         warnings.warn("You must import numpy to use this function")
         if not isinstance(data, np.ndarray):
