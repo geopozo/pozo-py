@@ -166,7 +166,20 @@ def abs(data):
 
 
 def isfinite(data):
-    pass
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        warnings.warn("You must import pandas and numpy to use this function")
+        return ~data.isin([np.inf, -np.inf])
+    elif isinstance(data, pl.Series):
+        warnings.warn("You must import polars to use this function")
+        return data.is_finite()
+    elif isinstance(data, pl.DataFrame):
+        warnings.warn("You must import polars and numpy to use this function")
+        return pl.DataFrame({data.columns[0]:(np.isfinite(data))})
+    else:
+        warnings.warn("You must import numpy to use this function")
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.isfinite(data)
 
 
 def isnan(data):
