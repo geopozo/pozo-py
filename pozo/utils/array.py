@@ -170,7 +170,20 @@ def isfinite(data):
 
 
 def isnan(data):
-    pass
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        warnings.warn("You must import pandas to use this function")
+        return data.isnull().any().any()
+    elif isinstance(data, pl.Series):
+        warnings.warn("You must import polars to use this function")
+        return data.is_null()
+    elif isinstance(data, pl.DataFrame):
+        warnings.warn("You must import polars to use this function")
+        return True if data.null_count() > 0 else False
+    else:
+        warnings.warn("You must import numpy to use this function")
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.isnan(data)
 
 
 def count_nonzero(data, axis=None, *, keepdims=False):
