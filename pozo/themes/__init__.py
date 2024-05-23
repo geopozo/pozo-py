@@ -1,26 +1,35 @@
 import copy
 import colour
 import json
-from IPython.display import display, HTML
-import pozo.themes.mnemonic_tables as tables
 
-ThemeValues = dict(color="Can be a single color value or list of color values from colour package",
-                   track_width="A number in pixels",
-                   force="If true, will force show the item even if it has no children",
-                   hidden="If true, will not show the item",
-                   range="Set's the default min and max x value for this item",
-                   range_unit="Specifies the units of range",
-                   scale="Can be log or linear",
-                   fill="a plotly fill description EXPERIMENTAL",
-                   fillcolor="color of the fill EXPERIMENTAL",
-                   cross_axis_fill="a fill between two separate axes EXPERIMENTAL"
-        )
-def help():
-    display(HTML(f"<pre>{json.dumps(ThemeValues, indent=4)}</pre>"))
-    display("A dictionary with those values or less can be passed directly to set_theme(), or:")
-    display("Said dictionary can be the value in a key-->value dictionary (say \"myDict\") where")
-    display("keys represent mnemonics. set_theme(pozo.themes.MnemonicDictionary(myDict))")
-    display("Themes set on more specific items (traces) will override those on less specific items (graphs)")
+import pozo.themes.mnemonic_tables as tables
+from pozo.utils.language import _d, _
+import pozo.utils.docs as docs
+
+# ThemeValues will get english description, it just serves as the checker to see if a theme value is allowed
+ThemeValues = dict(
+               color=_d("Can be a single color value or list of color values from colour package"),
+               track_width=_d("A number in pixels"),
+               force=_d("If true, will force show the item even if it has no data"),
+               hidden=_d("If true, will not show the item"),
+               range=_d("Sets the default min and max x value for this item"),
+               range_unit=_d("Specifies the range units"),
+               scale=_d("Can be log or linear"),
+               fill=_d("A plotly fill description EXPERIMENTAL"),
+               fillcolor=_d("Color of the fill EXPERIMENTAL"),
+               cross_axis_fill=_d("A fill between two separate axes EXPERIMENTAL")
+               )
+
+__doc__ = _d("""package theme: a theme engine for pozo
+
+    The theme package provides several theme objects, which can be attached to pozo graphs, tracks, axes, and traces (.set_theme()) to provide information about styling during rendering. Regular dictionaries can be theme objects, and their possible keys are described here. Other theme objects are described in their own documentation.
+
+""")
+
+def _help():
+    print(_("Possible theme keys:\n") + json.dumps({k:str(v) for k, v in ThemeValues.items()}, indent=4, ensure_ascii=False))
+
+docs.decorate_package(__name__)
 
 class Theme(): # Meant to be inherited
     def __init__(self, *args, **kwargs):
@@ -78,13 +87,15 @@ class DynamicTheme(Theme): # Meant to be inherited
     def resolve(self, key, contexts):
         raise NotImplementedError("Dynamic themes must implement get_value(self, key, args)")
 
-# A themeable is something that stores a theme. It accepts either a theme or a dict. It sets its metadata on the theme
-# When
-class Themeable(): # Meant to be inherited by objects
+# Themeable is meant to be an abstract class. Therefor it doesn't have a public doc.
+class Themeable():
     def __init__(self, *args, **kwargs):
         self.set_theme(kwargs.pop("theme", {}))
         super().__init__(*args, **kwargs)
+    @docs.doc(_d("""method set_theme: sets the theme of object
 
+Args:
+    theme (Theme or dict): The theme you'd like to set"""))
     def set_theme(self, theme):
         if isinstance(theme, str):
             if theme not in themes:
@@ -104,6 +115,10 @@ class Themeable(): # Meant to be inherited by objects
         return self._theme
 
     # You may override this
+    @docs.doc(_d("""method get_theme: returns a context-less theme definition
+
+Returns:
+    A theme, no context attached"""))
     def get_theme(self):
         return self._get_theme()
 

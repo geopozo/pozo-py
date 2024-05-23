@@ -2,9 +2,10 @@ import ood
 import pint
 import numpy as np
 
-from .utils.language import _, es, en
-from .utils.configuration import config_info # there is actually nothing here, but running this import sets some globals all packages need
-from .utils.docs import doc
+from .utils.language import _, _d, es, en
+# nothing in config_info yet, but this import also sets some globals in ood
+from .utils.configuration import config_info
+import pozo.utils.docs as docs
 from .traces import Trace
 from .axes import Axis
 from .tracks import Track
@@ -16,11 +17,45 @@ import pozo.renderers as renderers
 import pozo.units as units
 import pozo.utils as utils
 
-__all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, utils, _, config_info, doc]
+__all__ = [es, en, Trace, Axis, Track, Graph, Note, themes, renderers, units, utils, config_info]
 
 # PozoWarning is jsut a UserWarning but we can detect if we raise it with isinstance
 class PozoWarning(UserWarning):
     pass
+
+__doc__ = _d("""package pozo: the visualization engine, pozo
+
+Para cambiar a español: `pozo.es()`
+
+https://github.com/geopozo/pozo-demo is a good learning template and quickstart.
+
+***** Description:
+
+pozo creates a tree structure to describe your graph:
+
+───Graph─┬─Track───Axis─┬─Trace: "CALI"
+         │              └─Trace: "CGR"
+         ├─Track─┬─Axis─┬─Trace: "RHOB"
+         │       │      ├─Trace: "NPHI"
+         │       │      ├─Trace: "LLD"
+         │       │      └─Trace: "LLS"
+         │       └─Axis───Trace: "ARP"
+         └─Track───Axis───Trace: "RPA"
+
+***** Highlighted sub-Objects:
+
+    Main Objects:
+                pozo.Graph              - The main object.
+                pozo.Trace              - What stores data point and line data.
+
+    Highlighted Items:
+                pozo.themes.cangrejo    - A basic theme to jump-start styling. e.g. `myGraph.set_theme("cangrejo")`
+                pozo.units.check_las()  - Print basic data analysis and sanitizing on your las files.
+""")
+
+docs.decorate_package(__name__)
+
+# TODO: all this will be moved out in Neyberson's commit before release
 
 # deLASio extracts the actual mnemonic from the kinverity1/lasio suffixed mnemonic
 def deLASio(mnemonic):
