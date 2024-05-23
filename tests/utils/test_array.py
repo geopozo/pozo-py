@@ -21,7 +21,7 @@ def test_summarize_array():
     assert pzutils.summarize_array(df_polars["depth"]) is not None
     assert pzutils.summarize_array(series) is not None
     assert pzutils.summarize_array(series_polars) is not None
-    #assert pzutils.summarize_array(list_data) is None #This function doesn't use elements like inf or NaN
+    # assert pzutils.summarize_array(list_data) is None #This function doesn't use elements like inf or NaN
     assert pzutils.summarize_array(np_data_irregular) is not None
     assert pzutils.summarize_array(df_pandas["depth"]) is not None
     assert pzutils.summarize_array(series_data_irregular) is not None
@@ -35,7 +35,9 @@ def test_is_close():
         is not None
     )
     assert (
-        pzutils.is_close(series.iloc[0], series.iloc[-1], True, series[1] - series[0], 0.001)
+        pzutils.is_close(
+            series.iloc[0], series.iloc[-1], True, series[1] - series[0], 0.001
+        )
         is not None
     )
     assert (
@@ -117,16 +119,23 @@ def test_is_close():
 
 
 def test_hash_array():
-    assert pzutils.hash_array(np_data) == 'fa965b73eaa75caaadcecd13d1df6aff'
-    assert pzutils.hash_array(df_pandas["depth"]) == '744578fc32c6e5300c7c0784a88a4fdb'
-    assert pzutils.hash_array(series) == 'fa965b73eaa75caaadcecd13d1df6aff'
-    assert pzutils.hash_array(series_polars) == 'fa965b73eaa75caaadcecd13d1df6aff'
-    assert pzutils.hash_array(list_data) == '16e83a215505f98e905476615a56cc40' # This has components like [float("inf"), -float("inf"), float("nan")]
-    assert pzutils.hash_array(np_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
-    assert pzutils.hash_array(df_polars["depth"]) == '744578fc32c6e5300c7c0784a88a4fdb'
-    assert pzutils.hash_array(series_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
-    assert pzutils.hash_array(series_polars_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
-    assert pzutils.hash_array(list_data_irregular) == 'd8cd63104ec584b4d83928cb8ba88639'
+    assert pzutils.hash_array(np_data) == "fa965b73eaa75caaadcecd13d1df6aff"
+    assert pzutils.hash_array(df_pandas["depth"]) == "744578fc32c6e5300c7c0784a88a4fdb"
+    assert pzutils.hash_array(series) == "fa965b73eaa75caaadcecd13d1df6aff"
+    assert pzutils.hash_array(series_polars) == "fa965b73eaa75caaadcecd13d1df6aff"
+    assert (
+        pzutils.hash_array(list_data) == "16e83a215505f98e905476615a56cc40"
+    )  # This has components like [float("inf"), -float("inf"), float("nan")]
+    assert pzutils.hash_array(np_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
+    assert pzutils.hash_array(df_polars["depth"]) == "744578fc32c6e5300c7c0784a88a4fdb"
+    assert (
+        pzutils.hash_array(series_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
+    )
+    assert (
+        pzutils.hash_array(series_polars_data_irregular)
+        == "d8cd63104ec584b4d83928cb8ba88639"
+    )
+    assert pzutils.hash_array(list_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
 
 
 def test_verify_type():
@@ -165,6 +174,19 @@ def test_max():
     assert pzutils.max(series_data_irregular)
     assert pzutils.max(series_polars_data_irregular)
     assert pzutils.max(list_data_irregular)
+
+
+def test_abs():
+    assert pzutils.abs(np_data) is not None
+    assert pzutils.abs(df_pandas["depth"]) is not None
+    assert pzutils.abs(series) is not None
+    assert pzutils.abs(series_polars) is not None
+    assert pzutils.abs(list_data) is not None
+    assert pzutils.abs(np_data_irregular) is not None
+    assert pzutils.abs(df_polars["depth"]) is not None
+    assert pzutils.abs(series_data_irregular) is not None
+    assert pzutils.abs(series_polars_data_irregular) is not None
+    assert pzutils.abs(list_data_irregular) is not None
 
 
 def test_isfinite():
