@@ -151,8 +151,21 @@ def max(data):
         return np.nanmax(data)
 
 
-def abs(arg):
-    pass
+def abs(data):
+    if isinstance(data, (pd.Series, pd.DataFrame)):
+        warnings.warn("You must import pandas to use this function")
+        return data.abs()
+    elif isinstance(data, pl.Series):
+        warnings.warn("You must import polars to use this function")
+        return data.abs()
+    elif isinstance(data, pl.DataFrame):
+        warnings.warn("You must import polars to use this function")
+        return data.abs()
+    else:
+        warnings.warn("You must import numpy to use this function")
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.absolute(data)
 
 
 def isfinite(data):
