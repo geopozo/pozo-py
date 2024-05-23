@@ -155,10 +155,7 @@ def abs(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         warnings.warn("You must import pandas to use this function")
         return data.abs()
-    elif isinstance(data, pl.Series):
-        warnings.warn("You must import polars to use this function")
-        return data.abs()
-    elif isinstance(data, pl.DataFrame):
+    elif isinstance(data, (pl.Series, pl.DataFrame)):
         warnings.warn("You must import polars to use this function")
         return data.abs()
     else:
