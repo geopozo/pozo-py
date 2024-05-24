@@ -70,7 +70,7 @@ def is_close(n_1, n_2, sample_rate_consistent, sample, percent):
 
 # hash_array has one parameter, this return a hash from the depth data
 def hash_array(depth):
-    if isinstance(depth, np.ndarray):
+    if hasattr(depth, "tobytes"):
         return hashlib.md5(str((depth.tobytes())).encode()).hexdigest()
     elif is_array(depth):
         depth_array = np.array(depth)
