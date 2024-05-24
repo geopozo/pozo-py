@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import polars as pl
-import pozo.utils as pzutils
+import pozo.utils.array as pzutils
 
 list_data = [float("inf"), -float("inf"), float("nan")]
 list_data_irregular = [0, 20, 40, 50, 70, 90, 300, 301, 330, 400]
