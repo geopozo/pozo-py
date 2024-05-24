@@ -28,16 +28,14 @@ def summarize_array(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        sample_rate_consistent = is_close(
-            start, stop, sample_rate_consistent, sample, 0.0001
-        )
         step = stop - start
         if step == 0:
             step = 0.0001
-        if sample_rate_consistent is False:
+        if not is_close(start, stop, sample_rate_consistent, sample, 0.0001):
             starts = starts.append(start)
             stops = stops.append(stop)
             steps = None
+            sample_rate_consistent = False
         else:
             starts = starts.append(start)
             stops = stops.append(stop)
