@@ -14,10 +14,10 @@ def summarize_array(depth):
         raise ValueError("You must use for depth a list, tuple or an numpy array")
     verify_type(depth)
 
-    starts = np.array([])
-    stops = np.array([])
-    steps = np.array([])
-    size = np.array([])
+    starts = []
+    stops = []
+    steps = []
+    size = []
     sample_rate_consistent = True
     sample = depth[1] - depth[0]
     for i in range(len(depth) - 1):
@@ -35,14 +35,14 @@ def summarize_array(depth):
         if step == 0:
             step = 0.0001
         if sample_rate_consistent is False:
-            starts = np.append(starts, start)
-            stops = np.append(stops, stop)
+            starts = starts.append(start)
+            stops = stops.append(stop)
             steps = None
         else:
-            starts = np.append(starts, start)
-            stops = np.append(stops, stop)
-            steps = np.append(steps, step)
-        size = np.append(size, stop - step)
+            starts = starts.append(start)
+            stops = stops.append(stop)
+            steps = steps.append(step)
+        size = size.append(stop - step)
     interval = {"start": starts, "stop": stops, "step": steps, "size": size}
     interval["sample_rate_consistent"] = (
         False if sample_rate_consistent is False else True
