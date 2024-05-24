@@ -28,18 +28,11 @@ def summarize_array(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        step = stop - start # REVISAR
+        step = stop - start if is_close(start, stop, sample_rate_consistent, sample, 0.0001) else None # REVISAR
         if step == 0:
             step = 0.0001
-
-        if i>1:
-            if steps is None:
-                steps = None
-                sample_rate_consistent = False
-        elif is_close(start, stop, sample_rate_consistent, sample, 0.0001):
-            steps.append(step)
-        else:
-            steps = None
+        steps.append(step)
+        if not is_close(start, stop, sample_rate_consistent, sample, 0.0001):
             sample_rate_consistent = False
 
         starts.append(start)
@@ -49,7 +42,7 @@ def summarize_array(depth):
     interval = {
         "start": np.array(starts),
         "stop": np.array(stops),
-        "step": np.array(steps),
+        "step": np.array(steps) if not np.any(steps == None) else None,
         "size": np.array(size),
         "sample_rate_consistent": sample_rate_consistent
     }
@@ -59,12 +52,20 @@ def summarize_array(depth):
 
 # is_close has 4 parameters, this return a boolean value that verify the cosistent
 # from the depth data
-def is_close(n_1, n_2, sample_rate_consistent, sample, percent):
-    diff_percent = (math.fabs(n_2 - n_1) / sample) * 100
-    if diff_percent > percent or sample_rate_consistent is False:
-        sample_rate_consistent = False
-    else:
-        sample_rate_consistent = True
+def is_close(depth, sample_rate_consistent, sample, percent):
+    for i in range(len(depth) - 1):
+        if isinstance(depth, (pd.Series, pd.DataFrame)):
+            if depth.iloc[i] == depth.iloc[-1]:
+                break
+        elif depth[i] == depth[-1]:
+            break
+        start = depth[i]
+        stop = depth[i + 1]
+        diff_percent = (math.fabs(stop - start) / sample) * 100
+        if diff_percent > percent or sample_rate_consistent is False:
+            sample_rate_consistent = False
+        else:
+            sample_rate_consistent = True
     return sample_rate_consistent
 
 
