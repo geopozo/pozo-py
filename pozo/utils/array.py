@@ -31,20 +31,24 @@ def summarize_array(depth):
         step = stop - start
         if step == 0:
             step = 0.0001
-        if not is_close(start, stop, sample_rate_consistent, sample, 0.0001):
-            starts = starts.append(start)
-            stops = stops.append(stop)
+        if is_close(start, stop, sample_rate_consistent, sample, 0.0001):
+            steps.append(step)
+        else:
             steps = None
             sample_rate_consistent = False
-        else:
-            starts = starts.append(start)
-            stops = stops.append(stop)
-            steps = steps.append(step)
-        size = size.append(stop - step)
-    interval = {"start": starts, "stop": stops, "step": steps, "size": size}
-    interval["sample_rate_consistent"] = (
-        False if sample_rate_consistent is False else True
-    )
+
+        starts.append(start)
+        stops.append(stop)
+        size.append(stop - step)
+
+    interval = {
+        "start": np.array(starts),
+        "stop": np.array(stops),
+        "step": np.array(steps),
+        "size": np.array(size),
+        "sample_rate_consistent": sample_rate_consistent
+    }
+
     return interval
 
 
