@@ -31,7 +31,12 @@ def summarize_array(depth):
         step = stop - start
         if step == 0:
             step = 0.0001
-        if is_close(start, stop, sample_rate_consistent, sample, 0.0001):
+
+        if i>1:
+            if steps is None:
+                steps = None
+                sample_rate_consistent = False
+        elif is_close(start, stop, sample_rate_consistent, sample, 0.0001):
             steps.append(step)
         else:
             steps = None
