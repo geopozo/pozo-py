@@ -28,7 +28,7 @@ def summarize_array(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        step = stop - start
+        step = stop - start # REVISAR
         if step == 0:
             step = 0.0001
 
@@ -44,7 +44,7 @@ def summarize_array(depth):
 
         starts.append(start)
         stops.append(stop)
-        size.append(stop - step)
+        size.append(stop - step) # REVISAR
 
     interval = {
         "start": np.array(starts),
