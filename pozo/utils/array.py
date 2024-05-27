@@ -145,7 +145,10 @@ def max(data):
     if isinstance(data, (pd.Series, pd.DataFrame)):
         warnings.warn("You must import pandas to use this function")
         return data.max(skipna=True)
-    elif isinstance(data, (pl.Series, pl.DataFrame)):
+    elif hasattr(data, "nan_max"):
+        warnings.warn("You must import polars to use this function")
+        return data.nan_max()
+    elif isinstance(data, pl.DataFrame):
         warnings.warn("You must import polars to use this function")
         return data.max()
     else:
