@@ -102,24 +102,6 @@ def is_array(value):
     return hasattr(value, "__len__")
 
 
-# is_scalar_number use the input data to verify if is a number data
-# Taken by the principal __ini__.py
-def is_scalar_number(value):
-    number_types = (
-        int,
-        float,
-        np.float16,
-        np.float32,
-        np.float64,
-        np.int16,
-        np.int32,
-        np.int64,
-    )
-    if isinstance(value, pint.Quantity):
-        return is_scalar_number(value.magnitude)
-    return isinstance(value, number_types)
-
-
 # verify_array_len use three inputs to verify the lenght in the data
 # Taken by the principal __ini__.py
 def verify_array_len(constant, data):
