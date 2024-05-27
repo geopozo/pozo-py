@@ -109,7 +109,8 @@ def verify_array_len(constant, data):
         return False
     return True
 
-
+# check_numpy verify if numpy is at the global scope, so this function try to
+# import it, but if you do not have this installed, raise an import error
 def check_numpy():
     if 'np' not in globals():
         try:
