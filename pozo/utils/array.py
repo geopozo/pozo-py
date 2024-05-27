@@ -137,20 +137,21 @@ def min(data):
 
 
 def max(data):
-    if isinstance(data, (pd.Series, pd.DataFrame)):
-        warnings.warn("You must import pandas to use this function")
-        return data.max(skipna=True)
+    if hasattr(data, "min"):
+        try:
+            return data.max(skipna=True)
+        except ValueError:
+            return data.max()
     elif hasattr(data, "nan_max"):
-        warnings.warn("You must import polars to use this function")
         return data.nan_max()
-    elif isinstance(data, pl.DataFrame):
-        warnings.warn("You must import polars to use this function")
-        return data.max()
     else:
-        warnings.warn("You must import numpy to use this function")
-        if not isinstance(data, np.ndarray):
-            data = np.array(data)
-        return np.nanmax(data)
+        try:
+            import numpy as np
+            if not isinstance(data, np.ndarray):
+                data = np.array(data)
+            return np.nanmin(data)
+        except ImportError:
+            raise ImportError("Please install numpy. It must be installed like: pip install numpy")
 
 
 def abs(data):
