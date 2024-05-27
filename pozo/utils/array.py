@@ -118,15 +118,14 @@ def verify_type(data):
 
 
 def min(data):
-    if isinstance(data, (pd.Series, pd.DataFrame)):
-        warnings.warn("You must import pandas to use this function")
-        return data.min(skipna=True)
-    elif hasattr(data, "nan_min"):
+    if hasattr(data, "min"):
+        try:
+            return data.min(skipna=True)
+        except ValueError:
+            return data.min()
+    if hasattr(data, "nan_min"):
         warnings.warn("You must import polars to use this function")
         return data.nan_min()
-    elif isinstance(data, pl.DataFrame):
-        warnings.warn("You must import polars to use this function")
-        return data.min()
     else:
         warnings.warn("You must import numpy to use this function")
         if not isinstance(data, np.ndarray):
