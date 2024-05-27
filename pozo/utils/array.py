@@ -123,13 +123,17 @@ def min(data):
             return data.min(skipna=True)
         except ValueError:
             return data.min()
-    if hasattr(data, "nan_min"):
+    elif hasattr(data, "nan_min"):
         return data.nan_min()
     else:
-        warnings.warn("You must import numpy to use this function")
-        if not isinstance(data, np.ndarray):
-            data = np.array(data)
-        return np.nanmin(data)
+        try:
+            import numpy as np
+            if not isinstance(data, np.ndarray):
+                data = np.array(data)
+            return np.nanmin(data)
+        except ImportError:
+            raise ImportError("Please install numpy. It must be installed like: pip install numpy")
+
 
 
 def max(data):
