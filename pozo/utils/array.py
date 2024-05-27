@@ -136,13 +136,10 @@ def min(data):
     elif hasattr(data, "nan_min"):
         return data.nan_min()
     else:
-        try:
-            import numpy as np
-            if not isinstance(data, np.ndarray):
-                data = np.array(data)
-            return np.nanmin(data)
-        except ImportError:
-            raise ImportError("Please install numpy. It must be installed like: pip install numpy")
+        check_numpy()
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.nanmin(data)
 
 
 
@@ -155,13 +152,10 @@ def max(data):
     elif hasattr(data, "nan_max"):
         return data.nan_max()
     else:
-        try:
-            import numpy as np
-            if not isinstance(data, np.ndarray):
-                data = np.array(data)
-            return np.nanmin(data)
-        except ImportError:
-            raise ImportError("Please install numpy. It must be installed like: pip install numpy")
+        check_numpy()
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
+        return np.nanmax(data)
 
 
 def abs(data):
