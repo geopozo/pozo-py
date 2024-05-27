@@ -5,6 +5,8 @@ import pandas as pd
 import polars as pl
 import hashlib
 import warnings
+import pozo
+import pozo.drawable
 
 
 # summarize_array has one parameter, this return dictionary with info about
@@ -84,6 +86,17 @@ def hash_array(depth):
 # __len__ and return a boolean. Be careful with this, it will return true for Pozo objects.
 # Taken by the principal __ini__.py
 def is_array(value):
+    if isinstance(value,
+                  (pozo.Track,
+                   pozo.Trace,
+                   pozo.Axis,
+                   pozo.Graph,
+                   pozo.Drawable,
+                   pozo.Note
+                   )
+                  ):
+        raise ValueError("You mustn't use pozo objects for this function")
+
     if isinstance(value, str):
         return False
     if isinstance(value, pint.Quantity):
