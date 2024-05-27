@@ -110,6 +110,15 @@ def verify_array_len(constant, data):
     return True
 
 
+def check_numpy():
+    if 'np' not in globals():
+        try:
+            import numpy as np
+            globals()['np'] = np
+        except ImportError:
+            raise ImportError("Please install numpy. It must be installed like: pip install numpy")
+
+
 def verify_type(data):
     if not isfinite(data):
         raise ValueError(
