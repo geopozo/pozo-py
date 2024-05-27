@@ -124,7 +124,6 @@ def min(data):
         except ValueError:
             return data.min()
     if hasattr(data, "nan_min"):
-        warnings.warn("You must import polars to use this function")
         return data.nan_min()
     else:
         warnings.warn("You must import numpy to use this function")
