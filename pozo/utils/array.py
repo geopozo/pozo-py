@@ -30,7 +30,11 @@ def summarize_array(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        step = stop - start if is_close(start, stop, sample_rate_consistent, sample, 0.0001) else None # REVISAR
+        step = (
+            stop - start
+            if is_close(start, stop, sample_rate_consistent, sample, 0.0001)
+            else None
+        )  # REVISAR
         if step == 0:
             step = 0.0001
         steps.append(step)
@@ -39,14 +43,14 @@ def summarize_array(depth):
 
         starts.append(start)
         stops.append(stop)
-        size.append(stop - step) # REVISAR
+        size.append(stop - step)  # REVISAR
 
     interval = {
         "start": np.array(starts),
         "stop": np.array(stops),
         "step": np.array(steps) if not np.any(steps == None) else None,
         "size": np.array(size),
-        "sample_rate_consistent": sample_rate_consistent
+        "sample_rate_consistent": sample_rate_consistent,
     }
 
     return interval
@@ -86,15 +90,9 @@ def hash_array(depth):
 # __len__ and return a boolean. Be careful with this, it will return true for Pozo objects.
 # Taken by the principal __ini__.py
 def is_array(value):
-    if isinstance(value,
-                  (pozo.Track,
-                   pozo.Trace,
-                   pozo.Axis,
-                   pozo.Graph,
-                   pozo.Drawable,
-                   pozo.Note
-                   )
-                  ):
+    if isinstance(
+        value, (pozo.Track, pozo.Trace, pozo.Axis, pozo.Graph, pozo.Drawable, pozo.Note)
+    ):
         raise ValueError("You mustn't use pozo objects for this function")
 
     if isinstance(value, str):
@@ -195,7 +193,7 @@ def isfinite(data):
         return data.is_finite()
     elif isinstance(data, pl.DataFrame):
         warnings.warn("You must import polars and numpy to use this function")
-        return pl.DataFrame({data.columns[0]:(np.isfinite(data))})
+        return pl.DataFrame({data.columns[0]: (np.isfinite(data))})
     else:
         warnings.warn("You must import numpy to use this function")
         if not isinstance(data, np.ndarray):
