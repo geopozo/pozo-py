@@ -185,18 +185,15 @@ def isfinite(data):
 
 
 def isnan(data):
-    if isinstance(data, (pd.Series, pd.DataFrame)):
-        warnings.warn("You must import pandas to use this function")
+    if hasattr(data, "isnull"):
         return data.isnull().any().any()
-    elif isinstance(data, pl.Series):
-        warnings.warn("You must import polars to use this function")
+    elif hasattr(data, "is_null"):
         return data.is_null()
-    elif isinstance(data, pl.DataFrame):
-        warnings.warn("You must import polars to use this function")
+    elif hasattr(data, "null_count"):
         return data.null_count() > 0
     else:
-        warnings.warn("You must import numpy to use this function")
-        if not isinstance(data, np.ndarray):
+        check_numpy()
+        if isinstance(data, (list, tuple)):
             data = np.array(data)
         return np.isnan(data)
 
