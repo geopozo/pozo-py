@@ -125,6 +125,20 @@ def check_numpy():
             )
 
 
+# check_pandas verify if pandas is at the global scope, so this function try to
+# import it, but if you do not have this installed, raise an import error
+def check_pandas():
+    if "np" not in globals():
+        try:
+            import pandas as pd
+
+            globals()["pd"] = pd
+        except ImportError:
+            raise ImportError(
+                "Please install pandas. It must be installed like: pip install pandas"
+            )
+
+
 def verify_type(data):
     if not isfinite(data):
         raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
