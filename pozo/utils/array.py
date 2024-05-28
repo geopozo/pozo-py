@@ -139,7 +139,10 @@ def min(data):
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
-        return np.nanmin(data)
+        try:
+            return np.nanmin(data)
+        except ValueError:
+            raise ValueError("Pozo does not support this object for this function")
 
 
 
@@ -155,7 +158,10 @@ def max(data):
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
-        return np.nanmax(data)
+        try:
+            return np.nanmax(data)
+        except ValueError:
+            raise ValueError("Pozo does not support this object for this function")
 
 
 def abs(data):
@@ -165,7 +171,10 @@ def abs(data):
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
-        return np.absolute(data)
+        try:
+            return np.absolute(data)
+        except ValueError:
+            raise ValueError("Pozo does not support this object for this function")
 
 
 def isfinite(data):
@@ -181,7 +190,10 @@ def isfinite(data):
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
-        return np.isfinite(data)
+        try:
+            return np.isfinite(data)
+        except ValueError:
+            raise ValueError("Pozo does not support this object for this function")
 
 
 def isnan(data):
@@ -195,7 +207,10 @@ def isnan(data):
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
-        return np.isnan(data)
+        try:
+            return np.isnan(data)
+        except ValueError:
+            raise ValueError("Pozo does not support this object for this function")
 
 
 def count_nonzero(data, axis=None, *, keepdims=False):
