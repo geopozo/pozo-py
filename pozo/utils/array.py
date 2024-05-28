@@ -109,22 +109,24 @@ def verify_array_len(constant, data):
         return False
     return True
 
+
 # check_numpy verify if numpy is at the global scope, so this function try to
 # import it, but if you do not have this installed, raise an import error
 def check_numpy():
-    if 'np' not in globals():
+    if "np" not in globals():
         try:
             import numpy as np
-            globals()['np'] = np
+
+            globals()["np"] = np
         except ImportError:
-            raise ImportError("Please install numpy. It must be installed like: pip install numpy")
+            raise ImportError(
+                "Please install numpy. It must be installed like: pip install numpy"
+            )
 
 
 def verify_type(data):
     if not isfinite(data):
-        raise ValueError(
-            "You mustn't use float('inf'), -float('inf'), float('nan')"
-        )
+        raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
 
 
 def min(data):
@@ -143,7 +145,6 @@ def min(data):
             return np.nanmin(data)
         except ValueError:
             raise ValueError("Pozo does not support this object for this function")
-
 
 
 def max(data):
