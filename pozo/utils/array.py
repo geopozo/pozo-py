@@ -163,7 +163,7 @@ def abs(data):
         return data.abs()
     else:
         check_numpy()
-        if not isinstance(data, np.ndarray):
+        if isinstance(data, (list, tuple)):
             data = np.array(data)
         return np.absolute(data)
 
