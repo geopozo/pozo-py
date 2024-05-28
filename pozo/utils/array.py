@@ -59,6 +59,7 @@ def summarize_array(depth):
 # is_close has 4 parameters, this return a boolean value that verify the cosistent
 # from the depth data
 def is_close(depth, sample_rate_consistent, sample, percent):
+    sample_rate_consistent_list = []
     for i in range(len(depth) - 1):
         if isinstance(depth, (pd.Series, pd.DataFrame)):
             if depth.iloc[i] == depth.iloc[-1]:
@@ -69,10 +70,10 @@ def is_close(depth, sample_rate_consistent, sample, percent):
         stop = depth[i + 1]
         diff_percent = (math.fabs(stop - start) / sample) * 100
         if diff_percent > percent or sample_rate_consistent is False:
-            sample_rate_consistent = False
+            sample_rate_consistent_list.append(False)
         else:
-            sample_rate_consistent = True
-    return sample_rate_consistent
+            sample_rate_consistent_list.append(True)
+    return sample_rate_consistent_list
 
 
 # hash_array has one parameter, this return a hash from the depth data
