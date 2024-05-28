@@ -14,7 +14,6 @@ import pozo.drawable
 def summarize_array(depth):
     if not is_array(depth):
         raise ValueError("You must use for depth a list, tuple or an numpy array")
-    verify_type(depth)
 
     starts = []
     stops = []
@@ -138,11 +137,6 @@ def check_polars():
             raise ImportError(
                 "Please install polars. It must be installed like: pip install polars"
             )
-
-
-def verify_type(data):
-    if not isfinite(data):
-        raise ValueError("You mustn't use float('inf'), -float('inf'), float('nan')")
 
 
 def min(data):
