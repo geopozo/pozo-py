@@ -73,7 +73,7 @@ def is_close(depth, sample_rate_consistent, sample, percent):
             sample_rate_consistent_list.append(False)
         else:
             sample_rate_consistent_list.append(True)
-    return sample_rate_consistent_list
+    return ~False in sample_rate_consistent_list
 
 
 # hash_array has one parameter, this return a hash from the depth data
