@@ -128,7 +128,7 @@ def check_numpy():
 # check_pandas verify if pandas is at the global scope, so this function try to
 # import it, but if you do not have this installed, raise an import error
 def check_pandas():
-    if "np" not in globals():
+    if "pd" not in globals():
         try:
             import pandas as pd
 
