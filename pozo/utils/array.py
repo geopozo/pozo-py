@@ -62,7 +62,9 @@ def summarize_array(depth):
     _d("""is_close has 4 parameters, this return a boolean value that verify the cosistent
  from the depth data""")
 )
-def is_close(a, b, rel_tol, abs_tol):
+def is_close(a, b, **kwargs):
+    rel_tol = kwargs.pop("rel_tol", 1e-9)
+    abs_tol = kwargs.pop("abs_tol", 0)
     return math.isclose(a=a, b=b, rel_tol=rel_tol, abs_tol=abs_tol)
 
 
