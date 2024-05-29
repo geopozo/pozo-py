@@ -24,7 +24,7 @@ def summarize_array(depth):
     stops = []
     steps = []
     size = []
-    sample_rate_consistent = True
+    sample_rate_consistent_list = []
     sample = depth[1] - depth[0]
     for i in range(len(depth) - 1):
         if hasattr(depth, "iloc"):
@@ -32,25 +32,26 @@ def summarize_array(depth):
                 break
         elif depth[i] == depth[-1]:
             break
+
         start = depth[i]
         stop = depth[i + 1]
-        step = stop - start if is_close(sample, stop-start, 0.0001) else None
+        sample_rate_consistent = is_close(sample, stop-start, 0.0001)
+        step = stop - start if sample_rate_consistent else None
         if step == 0:
             step = 0.0001
-        steps.append(step)
-        if not is_close(sample, stop-start, 0.0001):
-            sample_rate_consistent = False
 
         starts.append(start)
         stops.append(stop)
+        steps.append(step)
         size.append(stop - step) # REVISAR
+        sample_rate_consistent_list.append(sample_rate_consistent)
 
     interval = {
         "start": np.array(starts),
         "stop": np.array(stops),
         "step": np.array(steps) if not np.any(steps == None) else None,
         "size": np.array(size),
-        "sample_rate_consistent": sample_rate_consistent,
+        "sample_rate_consistent": ~False in sample_rate_consistent,
     }
 
     return interval
