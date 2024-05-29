@@ -111,11 +111,9 @@ def verify_array_len(constant, data):
  import it, but if you do not have this installed, raise an import error""")
 )
 def check_numpy():  # EN DESARROLLO
-    if "np" not in globals():
+    if "np" not in (globals(), locals()):
         try:
-            import numpy as np
-
-            globals()["np"] = np
+            globals()["np"] = __import__('numpy')
         except ImportError:
             raise ImportError(
                 _("Please install numpy. It must be installed like: pip install numpy")
