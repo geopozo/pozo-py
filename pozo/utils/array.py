@@ -33,13 +33,13 @@ def summarize_array(depth):
         stop = depth[i + 1]
         step = (
             stop - start
-            if is_close(start, stop, sample_rate_consistent, sample, 0.0001)
+            if is_close(start, stop, sample, 0.0001)
             else None
         )  # REVISAR
         if step == 0:
             step = 0.0001
         steps.append(step)
-        if not is_close(start, stop, sample_rate_consistent, sample, 0.0001):
+        if not is_close(start, stop, sample, 0.0001):
             sample_rate_consistent = False
 
         starts.append(start)
