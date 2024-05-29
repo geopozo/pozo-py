@@ -30,71 +30,27 @@ def test_summarize_array():
 
 
 def test_is_close():
+    assert pzutils.is_close(np_data[0], np_data[-1]) is not None
+    assert pzutils.is_close(series.iloc[0], series.iloc[-1]) is not None
     assert (
-        pzutils.is_close(np_data[0], np_data[-1])
+        pzutils.is_close(df_pandas["depth"].iloc[0], df_pandas["depth"].iloc[-1])
+        is not None
+    )
+    assert pzutils.is_close(series_polars[0], series_polars[-1]) is not None
+    assert pzutils.is_close(list_data[0], list_data[-1]) is not None
+    assert pzutils.is_close(np_data_irregular[0], np_data_irregular[-1]) is not None
+    assert pzutils.is_close(df_polars["depth"][0], df_polars["depth"][-1]) is not None
+    assert (
+        pzutils.is_close(series_data_irregular.iloc[0], series_data_irregular.iloc[-1])
         is not None
     )
     assert (
         pzutils.is_close(
-            series.iloc[0], series.iloc[-1]
+            series_polars_data_irregular[0], series_polars_data_irregular[-1]
         )
         is not None
     )
-    assert (
-        pzutils.is_close(
-            df_pandas["depth"].iloc[0],
-            df_pandas["depth"].iloc[-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            series_polars[0],
-            series_polars[-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            list_data[0], list_data[-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            np_data_irregular[0],
-            np_data_irregular[-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            df_polars["depth"][0],
-            df_polars["depth"][-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            series_data_irregular.iloc[0],
-            series_data_irregular.iloc[-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            series_polars_data_irregular[0],
-            series_polars_data_irregular[-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            list_data_irregular[0],
-            list_data_irregular[-1]
-        )
-        is not None
-    )
+    assert pzutils.is_close(list_data_irregular[0], list_data_irregular[-1]) is not None
 
 
 def test_hash_array():
@@ -115,7 +71,6 @@ def test_hash_array():
         == "d8cd63104ec584b4d83928cb8ba88639"
     )
     assert pzutils.hash_array(list_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
-
 
 
 def test_min():
