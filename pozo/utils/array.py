@@ -187,7 +187,7 @@ def abs(data):
 
 
 def isfinite(data):
-    if hasattr(data, "is_infinite"):
+    if hasattr(data, "is_finite"):
         return data.is_finite()
     elif hasattr(data, "isin"):
         return ~data.isin([np.inf, -np.inf])
