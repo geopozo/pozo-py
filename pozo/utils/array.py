@@ -37,7 +37,7 @@ def summarize_array(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        step = stop - start if is_close(start, stop, sample, 0.0001) else None
+        step = stop - start if is_close(sample, stop-start, 0.0001) else None
         if step == 0:
             step = 0.0001
         steps.append(step)
