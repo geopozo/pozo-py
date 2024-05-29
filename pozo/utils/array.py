@@ -26,6 +26,7 @@ def summarize_array(depth):
     size = []
     sample_rate_consistent_list = []
     sample = depth[1] - depth[0]
+
     for i in range(len(depth) - 1):
         if hasattr(depth, "iloc"):
             if depth.iloc[i] == depth.iloc[-1]:
@@ -35,7 +36,7 @@ def summarize_array(depth):
 
         start = depth[i]
         stop = depth[i + 1]
-        sample_rate_consistent = is_close(sample, stop-start, 0.0001)
+        sample_rate_consistent = is_close(sample, stop - start, 0.0001)
         step = stop - start if sample_rate_consistent else None
         if step == 0:
             step = 0.0001
@@ -43,7 +44,7 @@ def summarize_array(depth):
         starts.append(start)
         stops.append(stop)
         steps.append(step)
-        size.append(stop - step) # REVISAR
+        size.append(stop - step)  # REVISAR
         sample_rate_consistent_list.append(sample_rate_consistent)
 
     interval = {
@@ -111,7 +112,7 @@ def verify_array_len(constant, data):
 def check_numpy():
     if "np" not in (globals(), locals()):
         try:
-            globals()["np"] = __import__('numpy')
+            globals()["np"] = __import__("numpy")
         except ImportError:
             raise ImportError(
                 _("Please install numpy. It must be installed like: pip install numpy")
@@ -125,7 +126,7 @@ def check_numpy():
 def check_pandas():
     if "pd" not in (globals(), locals()):
         try:
-            globals()["pd"] = __import__('pandas')
+            globals()["pd"] = __import__("pandas")
         except ImportError:
             raise ImportError(
                 _(
@@ -141,7 +142,7 @@ def check_pandas():
 def check_polars():
     if "pl" not in (globals(), locals()):
         try:
-            globals()["pl"] = __import__('polars')
+            globals()["pl"] = __import__("polars")
         except ImportError:
             raise ImportError(
                 _(
