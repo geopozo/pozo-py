@@ -11,13 +11,17 @@ from .language import _, _d
 from .docs import doc
 
 
-@doc(_d("""summarize_array has one parameter, this return dictionary with info about
- start, stop, step, size and sample_rate_consistent from the depth intervals"""))
+@doc(
+    _d("""summarize_array has one parameter, this return dictionary with info about
+ start, stop, step, size and sample_rate_consistent from the depth intervals""")
+)
 def summarize_array(depth):
     if not is_array(depth):
         raise ValueError(_("You must use for depth a list, tuple or an numpy array"))
     if not isfinite(depth):
-        raise ValueError(_("You mustn't use float('inf'), -float('inf') and/or float('nan')"))
+        raise ValueError(
+            _("You mustn't use float('inf'), -float('inf') and/or float('nan')")
+        )
 
     starts = []
     stops = []
@@ -33,11 +37,7 @@ def summarize_array(depth):
             break
         start = depth[i]
         stop = depth[i + 1]
-        step = (
-            stop - start
-            if is_close(start, stop, sample, 0.0001)
-            else None
-        )
+        step = stop - start if is_close(start, stop, sample, 0.0001) else None
         if step == 0:
             step = 0.0001
         steps.append(step)
@@ -59,8 +59,10 @@ def summarize_array(depth):
     return interval
 
 
-@doc(_d("""is_close has 4 parameters, this return a boolean value that verify the cosistent
- from the depth data"""))
+@doc(
+    _d("""is_close has 4 parameters, this return a boolean value that verify the cosistent
+ from the depth data""")
+)
 def is_close(a, b, rel_tol, abs_tol):
     return math.isclose(a=a, b=b, rel_tol=rel_tol, abs_tol=abs_tol)
 
@@ -76,9 +78,11 @@ def hash_array(depth):
         raise ValueError(_("You must use for depth a list, tuple or an numpy array"))
 
 
-@doc(_d("""is_array use the input data to verify if is pint data or other type that has
+@doc(
+    _d("""is_array use the input data to verify if is pint data or other type that has
  __len__ and return a boolean. Be careful with this, it will return true for Pozo objects.
- Taken by the principal __ini__.py """))
+ Taken by the principal __ini__.py """)
+)
 def is_array(value):
     if isinstance(
         value, (pozo.Track, pozo.Trace, pozo.Axis, pozo.Graph, pozo.Drawable, pozo.Note)
@@ -92,17 +96,21 @@ def is_array(value):
     return hasattr(value, "__len__")
 
 
-@doc(_d("""verify_array_len use three inputs to verify the lenght in the data
- Taken by the principal __ini__.py"""))
+@doc(
+    _d("""verify_array_len use three inputs to verify the lenght in the data
+ Taken by the principal __ini__.py""")
+)
 def verify_array_len(constant, data):
     if is_array(constant) and len(constant) != len(data):
         return False
     return True
 
 
-@doc(_d("""check_numpy verify if numpy is at the global scope, so this function try to
- import it, but if you do not have this installed, raise an import error"""))
-def check_numpy(): # EN DESARROLLO
+@doc(
+    _d("""check_numpy verify if numpy is at the global scope, so this function try to
+ import it, but if you do not have this installed, raise an import error""")
+)
+def check_numpy():  # EN DESARROLLO
     if "np" not in globals():
         try:
             import numpy as np
@@ -114,9 +122,11 @@ def check_numpy(): # EN DESARROLLO
             )
 
 
-@doc(_d("""check_pandas verify if pandas is at the global scope, so this function try to
- import it, but if you do not have this installed, raise an import error"""))
-def check_pandas(): # EN DESARROLLO
+@doc(
+    _d("""check_pandas verify if pandas is at the global scope, so this function try to
+ import it, but if you do not have this installed, raise an import error""")
+)
+def check_pandas():  # EN DESARROLLO
     if "pd" not in globals():
         try:
             import pandas as pd
@@ -124,13 +134,17 @@ def check_pandas(): # EN DESARROLLO
             globals()["pd"] = pd
         except ImportError:
             raise ImportError(
-                _("Please install pandas. It must be installed like: pip install pandas")
+                _(
+                    "Please install pandas. It must be installed like: pip install pandas"
+                )
             )
 
 
-@doc(_d("""check_polars verify if polars is at the global scope, so this function try to
- import it, but if you do not have this installed, raise an import error"""))
-def check_polars(): #EN DESARROLLO
+@doc(
+    _d("""check_polars verify if polars is at the global scope, so this function try to
+ import it, but if you do not have this installed, raise an import error""")
+)
+def check_polars():  # EN DESARROLLO
     if "pl" not in globals():
         try:
             import polars as pl
@@ -138,7 +152,9 @@ def check_polars(): #EN DESARROLLO
             globals()["pl"] = pl
         except ImportError:
             raise ImportError(
-                _("Please install polars. It must be installed like: pip install polars")
+                _(
+                    "Please install polars. It must be installed like: pip install polars"
+                )
             )
 
 
@@ -154,7 +170,11 @@ def min(data):
         try:
             return np.nanmin(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                )
+            )
 
 
 def max(data):
@@ -169,7 +189,11 @@ def max(data):
         try:
             return np.nanmax(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                )
+            )
 
 
 def abs(data):
@@ -182,7 +206,11 @@ def abs(data):
         try:
             return np.absolute(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                )
+            )
 
 
 def isfinite(data):
@@ -197,7 +225,11 @@ def isfinite(data):
         try:
             return np.isfinite(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                )
+            )
 
 
 def isnan(data):
@@ -214,7 +246,11 @@ def isnan(data):
         try:
             return np.isnan(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                )
+            )
 
 
 def count_nonzero(data, axis=None, *, keepdims=False):
