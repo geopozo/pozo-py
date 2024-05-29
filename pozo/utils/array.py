@@ -154,7 +154,7 @@ def min(data):
         try:
             return np.nanmin(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function"))
+            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
 
 
 def max(data):
@@ -169,7 +169,7 @@ def max(data):
         try:
             return np.nanmax(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function"))
+            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
 
 
 def abs(data):
@@ -182,7 +182,7 @@ def abs(data):
         try:
             return np.absolute(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function"))
+            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
 
 
 def isfinite(data):
@@ -197,7 +197,7 @@ def isfinite(data):
         try:
             return np.isfinite(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function"))
+            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
 
 
 def isnan(data):
@@ -214,7 +214,7 @@ def isnan(data):
         try:
             return np.isnan(data)
         except ValueError:
-            raise ValueError(_("Pozo does not support this object for this function"))
+            raise ValueError(_("Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"))
 
 
 def count_nonzero(data, axis=None, *, keepdims=False):
