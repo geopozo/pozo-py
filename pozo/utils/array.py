@@ -52,7 +52,7 @@ def summarize_array(depth):
         "stop": np.array(stops),
         "step": np.array(steps) if not np.any(steps == None) else None,
         "size": np.array(size),
-        "sample_rate_consistent": ~False in sample_rate_consistent,
+        "sample_rate_consistent": False not in sample_rate_consistent,
     }
 
     return interval
@@ -220,7 +220,7 @@ def isfinite(data):
     if hasattr(data, "is_finite"):
         return data.is_finite()
     elif hasattr(data, "isin"):
-        return ~data.isin([np.inf, -np.inf])
+        return not data.isin([np.inf, -np.inf])
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
