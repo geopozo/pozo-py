@@ -31,88 +31,67 @@ def test_summarize_array():
 
 def test_is_close():
     assert (
-        pzutils.is_close(np_data[0], np_data[-1], True, np_data[1] - np_data[0], 0.001)
+        pzutils.is_close(np_data[0], np_data[-1])
         is not None
     )
     assert (
         pzutils.is_close(
-            series.iloc[0], series.iloc[-1], True, series[1] - series[0], 0.001
+            series.iloc[0], series.iloc[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             df_pandas["depth"].iloc[0],
-            df_pandas["depth"].iloc[-1],
-            True,
-            df_pandas["depth"].iloc[1] - df_pandas["depth"].iloc[0],
-            0.001,
+            df_pandas["depth"].iloc[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             series_polars[0],
-            series_polars[-1],
-            True,
-            series_polars[1] - series_polars[0],
-            0.001,
+            series_polars[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
-            list_data[0], list_data[-1], True, list_data[1] - list_data[0], 0.001
+            list_data[0], list_data[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             np_data_irregular[0],
-            np_data_irregular[-1],
-            True,
-            np_data_irregular[1] - np_data_irregular[0],
-            0.001,
+            np_data_irregular[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             df_polars["depth"][0],
-            df_polars["depth"][-1],
-            True,
-            df_polars["depth"][1] - df_polars["depth"][0],
-            0.001,
+            df_polars["depth"][-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             series_data_irregular.iloc[0],
-            series_data_irregular.iloc[-1],
-            True,
-            series_data_irregular.iloc[1] - series_data_irregular.iloc[0],
-            0.001,
+            series_data_irregular.iloc[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             series_polars_data_irregular[0],
-            series_polars_data_irregular[-1],
-            True,
-            series_polars_data_irregular[1] - series_polars_data_irregular[0],
-            0.001,
+            series_polars_data_irregular[-1]
         )
         is not None
     )
     assert (
         pzutils.is_close(
             list_data_irregular[0],
-            list_data_irregular[-1],
-            True,
-            list_data_irregular[1] - list_data_irregular[0],
-            0.001,
+            list_data_irregular[-1]
         )
         is not None
     )
