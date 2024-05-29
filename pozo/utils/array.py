@@ -172,7 +172,7 @@ def min(data):
         except ValueError:
             raise ValueError(
                 _(
-                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
             )
 
@@ -191,7 +191,7 @@ def max(data):
         except ValueError:
             raise ValueError(
                 _(
-                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
             )
 
@@ -208,7 +208,7 @@ def abs(data):
         except ValueError:
             raise ValueError(
                 _(
-                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
             )
 
@@ -227,7 +227,7 @@ def isfinite(data):
         except ValueError:
             raise ValueError(
                 _(
-                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
             )
 
@@ -248,7 +248,7 @@ def isnan(data):
         except ValueError:
             raise ValueError(
                 _(
-                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polar Series"
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
             )
 
