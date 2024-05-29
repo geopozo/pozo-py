@@ -46,7 +46,7 @@ def summarize_array(depth):
 
         starts.append(start)
         stops.append(stop)
-        size.append(stop - step)
+        size.append(stop - step) # REVISAR
 
     interval = {
         "start": np.array(starts),
