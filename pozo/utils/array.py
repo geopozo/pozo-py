@@ -37,7 +37,7 @@ def summarize_array(depth):
             stop - start
             if is_close(start, stop, sample, 0.0001)
             else None
-        )  # REVISAR
+        )
         if step == 0:
             step = 0.0001
         steps.append(step)
@@ -46,7 +46,7 @@ def summarize_array(depth):
 
         starts.append(start)
         stops.append(stop)
-        size.append(stop - step)  # REVISAR
+        size.append(stop - step)
 
     interval = {
         "start": np.array(starts),
