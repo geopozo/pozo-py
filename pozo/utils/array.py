@@ -110,7 +110,7 @@ def verify_array_len(constant, data):
     _d("""check_numpy verify if numpy is at the global scope, so this function try to
  import it, but if you do not have this installed, raise an import error""")
 )
-def check_numpy():  # EN DESARROLLO
+def check_numpy():
     if "np" not in (globals(), locals()):
         try:
             globals()["np"] = __import__('numpy')
@@ -124,7 +124,7 @@ def check_numpy():  # EN DESARROLLO
     _d("""check_pandas verify if pandas is at the global scope, so this function try to
  import it, but if you do not have this installed, raise an import error""")
 )
-def check_pandas():  # EN DESARROLLO
+def check_pandas():
     if "pd" not in (globals(), locals()):
         try:
             globals()["pd"] = __import__('pandas')
@@ -140,7 +140,7 @@ def check_pandas():  # EN DESARROLLO
     _d("""check_polars verify if polars is at the global scope, so this function try to
  import it, but if you do not have this installed, raise an import error""")
 )
-def check_polars():  # EN DESARROLLO
+def check_polars():
     if "pl" not in (globals(), locals()):
         try:
             globals()["pl"] = __import__('polars')
