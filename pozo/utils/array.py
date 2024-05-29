@@ -25,7 +25,7 @@ def summarize_array(depth):
     steps = []
     size = []
     sample_rate_consistent_list = []
-    sample = depth[1] - depth[0]
+    sample = depth.iloc[1] - depth.iloc[0] if hasattr(depth, "iloc") else depth[1] - depth[0]
 
     for i in range(len(depth) - 1):
         if hasattr(depth, "iloc"):
