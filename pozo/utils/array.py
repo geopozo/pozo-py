@@ -52,7 +52,7 @@ def summarize_array(depth):
         "stop": np.array(stops),
         "step": np.array(steps) if not np.any(steps == None) else None,
         "size": np.array(size),
-        "sample_rate_consistent": False not in sample_rate_consistent,
+        "sample_rate_consistent": False not in sample_rate_consistent_list,
     }
 
     return interval
