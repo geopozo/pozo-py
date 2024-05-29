@@ -62,7 +62,6 @@ def summarize_array(depth):
 @doc(_d("""is_close has 4 parameters, this return a boolean value that verify the cosistent
  from the depth data"""))
 def is_close(a, b, rel_tol, abs_tol):
-    warnings.warn("You must import math to use this function")
     return math.isclose(a=a, b=b, rel_tol=rel_tol, abs_tol=abs_tol)
 
 
