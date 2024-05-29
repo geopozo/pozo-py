@@ -15,7 +15,7 @@ from .docs import doc
 def summarize_array(depth):
     if not is_array(depth):
         raise ValueError(_("You must use for depth a list, tuple or an numpy array"))
-    if not isfinite(depth):
+    if False in isfinite(depth):
         raise ValueError(
             _("You mustn't use float('inf'), -float('inf') and/or float('nan')")
         )
