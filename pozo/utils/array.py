@@ -145,10 +145,7 @@ def check_polars(): #EN DESARROLLO
 
 def min(data):
     if hasattr(data, "min"):
-        try:
-            return data.min(skipna=True)
-        except ValueError:
-            return data.min()
+        return data.min(skipna=True)
     elif hasattr(data, "nan_min"):
         return data.nan_min()
     else:
@@ -163,10 +160,7 @@ def min(data):
 
 def max(data):
     if hasattr(data, "min"):
-        try:
-            return data.max(skipna=True)
-        except ValueError:
-            return data.max()
+        return data.max(skipna=True)
     elif hasattr(data, "nan_max"):
         return data.nan_max()
     else:
@@ -197,10 +191,6 @@ def isfinite(data):
         return data.is_finite()
     elif hasattr(data, "isin"):
         return ~data.isin([np.inf, -np.inf])
-    elif isinstance(data, pl.DataFrame):
-        check_numpy()
-        warnings.warn(_("You must import polars to use this function"))
-        return pl.DataFrame({data.columns[0]: (np.isfinite(data))})
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
@@ -213,7 +203,7 @@ def isfinite(data):
 
 def isnan(data):
     if hasattr(data, "isnull"):
-        return data.isnull().any().any()
+        return data.isnull().any()
     elif hasattr(data, "is_null"):
         return data.is_null()
     elif hasattr(data, "null_count"):
