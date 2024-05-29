@@ -152,18 +152,22 @@ def check_polars():
 
 
 def min(data):
-    if hasattr(data, "min"):
-        return data.min(skipna=True)
-    elif hasattr(data, "nan_min"):
+    if hasattr(data, "nan_min"):
         return data.nan_min()
+    elif hasattr(data, "min"):
+        try:
+            return data.min(skipna=True)
+        except TypeError:
+            check_numpy()
+            return np.nanmin(data)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
         try:
             return np.nanmin(data)
-        except ValueError:
-            raise ValueError(
+        except TypeError:
+            raise TypeError(
                 _(
                     "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
@@ -171,18 +175,22 @@ def min(data):
 
 
 def max(data):
-    if hasattr(data, "max"):
-        return data.max(skipna=True)
-    elif hasattr(data, "nan_max"):
+    if hasattr(data, "nan_max"):
         return data.nan_max()
+    elif hasattr(data, "max"):
+        try:
+            return data.max(skipna=True)
+        except  TypeError:
+            check_numpy()
+            return np.nanmax(data)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
         try:
             return np.nanmax(data)
-        except ValueError:
-            raise ValueError(
+        except TypeError:
+            raise TypeError(
                 _(
                     "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
                 )
