@@ -141,11 +141,9 @@ def check_pandas():  # EN DESARROLLO
  import it, but if you do not have this installed, raise an import error""")
 )
 def check_polars():  # EN DESARROLLO
-    if "pl" not in globals():
+    if "pl" not in (globals(), locals()):
         try:
-            import polars as pl
-
-            globals()["pl"] = pl
+            globals()["pl"] = __import__('polars')
         except ImportError:
             raise ImportError(
                 _(
