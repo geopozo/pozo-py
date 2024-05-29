@@ -36,7 +36,7 @@ def summarize_array(depth):
 
         start = depth[i]
         stop = depth[i + 1]
-        sample_rate_consistent = is_close(sample, stop - start, 0.0001)
+        sample_rate_consistent = is_close(sample, stop - start, rel_tol=0.0001)
         step = stop - start if sample_rate_consistent else None
         if step == 0:
             step = 0.0001
