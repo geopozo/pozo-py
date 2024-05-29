@@ -38,7 +38,7 @@ def summarize_array(depth):
         if step == 0:
             step = 0.0001
         steps.append(step)
-        if not is_close(start, stop, sample, 0.0001):
+        if not is_close(sample, stop-start, 0.0001):
             sample_rate_consistent = False
 
         starts.append(start)
