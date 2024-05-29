@@ -159,7 +159,7 @@ def min(data):
 
 
 def max(data):
-    if hasattr(data, "min"):
+    if hasattr(data, "max"):
         return data.max(skipna=True)
     elif hasattr(data, "nan_max"):
         return data.nan_max()
