@@ -3,7 +3,7 @@ import math
 import pint
 import hashlib
 import pozo
-import pozo.drawable
+from pozo.drawable import Drawable
 from .language import _, _d
 from .docs import doc
 
@@ -84,7 +84,7 @@ def hash_array(depth):
 )
 def is_array(value):
     if isinstance(
-        value, (pozo.Track, pozo.Trace, pozo.Axis, pozo.Graph, pozo.Drawable, pozo.Note)
+        value, (pozo.Track, pozo.Trace, pozo.Axis, pozo.Graph, Drawable, pozo.Note)
     ):
         raise ValueError(_("You mustn't use pozo objects for this function"))
 
