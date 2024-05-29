@@ -1,10 +1,7 @@
 import numpy as np
 import math
 import pint
-import pandas as pd
-import polars as pl
 import hashlib
-import warnings
 import pozo
 import pozo.drawable
 from .language import _, _d
