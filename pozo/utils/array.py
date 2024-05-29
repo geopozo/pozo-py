@@ -220,7 +220,7 @@ def isfinite(data):
     if hasattr(data, "is_finite"):
         return data.is_finite()
     elif hasattr(data, "isin"):
-        return not data.isin([np.inf, -np.inf])
+        return ~data.isin([np.inf, -np.inf])
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
