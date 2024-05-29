@@ -125,11 +125,9 @@ def check_numpy():  # EN DESARROLLO
  import it, but if you do not have this installed, raise an import error""")
 )
 def check_pandas():  # EN DESARROLLO
-    if "pd" not in globals():
+    if "pd" not in (globals(), locals()):
         try:
-            import pandas as pd
-
-            globals()["pd"] = pd
+            globals()["pd"] = __import__('pandas')
         except ImportError:
             raise ImportError(
                 _(
