@@ -51,10 +51,12 @@ def summarize_array(depth):
         steps.append(step)
         sample_rate_consistent_list.append(sample_rate_consistent)
 
+    is_none = np.vectorize(lambda x: x is None)
+
     interval = {
         "start": np.array(starts),
         "stop": np.array(stops),
-        "step": np.array(steps) if not np.any(steps == None) else None,
+        "step": np.array(steps) if not is_none(np.array(steps)).any() else None,
         "sample_rate_consistent": False not in sample_rate_consistent_list,
     }
 
