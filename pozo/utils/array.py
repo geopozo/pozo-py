@@ -21,7 +21,7 @@ def summarize_array(depth):
                 _("You mustn't use float('inf'), -float('inf') and/or float('nan')")
             )
     except TypeError:
-        if isfinite(depth).isin([False]).any():
+        if isfinite(depth).eq(False).any():
             raise ValueError(
                 _("You mustn't use float('inf'), -float('inf') and/or float('nan')")
             )
@@ -29,7 +29,6 @@ def summarize_array(depth):
     starts = []
     stops = []
     steps = []
-    size = []
     sample_rate_consistent_list = []
     sample = depth.iloc[1] - depth.iloc[0] if hasattr(depth, "iloc") else depth[1] - depth[0]
 
@@ -50,14 +49,12 @@ def summarize_array(depth):
         starts.append(start)
         stops.append(stop)
         steps.append(step)
-        size.append(stop - step)  # REVISAR
         sample_rate_consistent_list.append(sample_rate_consistent)
 
     interval = {
         "start": np.array(starts),
         "stop": np.array(stops),
         "step": np.array(steps) if not np.any(steps == None) else None,
-        "size": np.array(size),
         "sample_rate_consistent": False not in sample_rate_consistent_list,
     }
 
