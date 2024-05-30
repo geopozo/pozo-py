@@ -34,8 +34,8 @@ def summarize_array(depth):
         elif depth[i] == depth[-1]:
             break
 
-        start = depth[i]
-        stop = depth[i + 1]
+        start = depth.iloc[i] if hasattr(depth, "iloc") else depth[i]
+        stop = depth.iloc[i + 1] if hasattr(depth, "iloc") else depth[i + 1]
         sample_rate_consistent = is_close(sample, stop - start, rel_tol=0.0001)
         step = stop - start if sample_rate_consistent else None
         if step == 0:
@@ -220,7 +220,7 @@ def isfinite(data):
     if hasattr(data, "is_finite"):
         return data.is_finite()
     elif hasattr(data, "isin"):
-        return ~data.isin([np.inf, -np.inf, np.nan])
+        return ~data.isin([np.inf, -np.inf, float("nan")])
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
