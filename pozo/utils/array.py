@@ -160,6 +160,22 @@ def check_polars():
             )
 
 
+@doc(
+    _d("""check_xarray verify if xarray is at the global scope, so this function try to
+ import it, but if you do not have this installed, raise an import error""")
+)
+def check_xarray():
+    if "xr" not in (globals(), locals()):
+        try:
+            globals()["xr"] = __import__("xarray")
+        except ImportError:
+            raise ImportError(
+                _(
+                    "Please install xarray. It must be installed like: pip install xarray"
+                )
+            )
+
+
 def min(data):
     if hasattr(data, "nan_min"):
         return data.nan_min()
