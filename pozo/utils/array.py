@@ -176,6 +176,9 @@ def check_xarray():
             )
 
 
+@doc(
+    _d("""min use 1 parameter to find the min value""")
+)
 def min(data):
     if hasattr(data, "nan_min"):
         return data.nan_min()
@@ -199,6 +202,9 @@ def min(data):
             )
 
 
+@doc(
+    _d("""min use 1 parameter to find the max value""")
+)
 def max(data):
     if hasattr(data, "nan_max"):
         return data.nan_max()
@@ -222,6 +228,9 @@ def max(data):
             )
 
 
+@doc(
+    _d("""abs use 1 parameter to calculate the absolute value""")
+)
 def abs(data):
     if hasattr(data, "abs"):
         return data.abs()
@@ -239,6 +248,10 @@ def abs(data):
             )
 
 
+@doc(
+    _d("""isfinite use 1 parameter to return boolean value, this verify if the
+       data has finite value""")
+)
 def isfinite(data):
     if hasattr(data, "is_finite"):
         return data.is_finite()
@@ -258,6 +271,10 @@ def isfinite(data):
             )
 
 
+@doc(
+    _d("""isnan use 1 parameter to return boolean value, this verify if the
+       data has NaN value""")
+)
 def isnan(data):
     if hasattr(data, "isnull"):
         return data.isnull().any()
