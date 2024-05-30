@@ -30,7 +30,9 @@ def summarize_array(depth):
     stops = []
     steps = []
     sample_rate_consistent_list = []
-    sample = depth.iloc[1] - depth.iloc[0] if hasattr(depth, "iloc") else depth[1] - depth[0]
+    sample = (
+        depth.iloc[1] - depth.iloc[0] if hasattr(depth, "iloc") else depth[1] - depth[0]
+    )
 
     for i in range(len(depth) - 1):
         if hasattr(depth, "iloc"):
@@ -187,7 +189,7 @@ def max(data):
     elif hasattr(data, "max"):
         try:
             return data.max(skipna=True)
-        except  TypeError:
+        except TypeError:
             check_numpy()
             return np.nanmax(data)
     else:
