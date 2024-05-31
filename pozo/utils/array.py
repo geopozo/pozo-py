@@ -234,6 +234,8 @@ def max(data):
 def abs(data):
     if hasattr(data, "abs"):
         return data.abs()
+    elif hasattr(data, "coords"):
+        return np.fabs(data)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
