@@ -298,8 +298,25 @@ def isnan(data):
             )
 
 
-def count_nonzero(data, axis=None, *, keepdims=False):
-    pass
+def count_nonzero(data):
+    if hasattr(data, "coords"):
+        return np.count_nonzero(data.values)
+    elif hasattr(data, "isnull"):
+        return np.count_nonzero(data.to_numpy())
+    elif hasattr(data, "is_null"):
+        return np.count_nonzero(data.to_numpy())
+    else:
+        check_numpy()
+        if isinstance(data, (list, tuple)):
+            data = np.array(data)
+        try:
+            return np.count_nonzero(data)
+        except ValueError:
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
+                )
+            )
 
 
 def nanquantile(data, q, axis=None):
