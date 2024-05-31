@@ -178,9 +178,7 @@ def check_xarray():
             )
 
 
-@doc(
-    _d("""min use 1 parameter to find the min value""")
-)
+@doc(_d("""min use 1 parameter to find the min value"""))
 def min(data):
     if hasattr(data, "nan_min"):
         return data.nan_min()
@@ -204,9 +202,7 @@ def min(data):
             )
 
 
-@doc(
-    _d("""min use 1 parameter to find the max value""")
-)
+@doc(_d("""min use 1 parameter to find the max value"""))
 def max(data):
     if hasattr(data, "nan_max"):
         return data.nan_max()
@@ -230,9 +226,7 @@ def max(data):
             )
 
 
-@doc(
-    _d("""abs use 1 parameter to calculate the absolute value""")
-)
+@doc(_d("""abs use 1 parameter to calculate the absolute value"""))
 def abs(data):
     if hasattr(data, "abs"):
         return data.abs()
@@ -340,7 +334,7 @@ def append(data, arg):
     else:
         check_numpy()
         if isinstance(data, (list, tuple, int, float)):
-                data = np.array(data)
+            data = np.array(data)
         if arg_obj:
             arg = np.array(arg, dtype=data.dtype)
         try:
