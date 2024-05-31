@@ -301,7 +301,7 @@ def isnan(data):
 @doc(
     _d("""count_nonzero use 1 parameter to return how many numbers are greater than 0""")
 )
-def count_nonzero(data): #EN DESARROLLO
+def count_nonzero(data):
     if hasattr(data, "coords"):
         return np.count_nonzero(data.values)
     elif hasattr(data, "isnull"):
