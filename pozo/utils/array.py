@@ -318,24 +318,24 @@ def append(data, arg):
     arg_obj = isinstance(arg, (list, tuple, int, float))
     if hasattr(data, "coords"):
         check_numpy()
-        if arg_obj:
+        if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.dtype)
         return np.append(data.values, arg)
     elif hasattr(data, "concat"):
         check_pandas()
-        if arg_obj:
+        if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.to_numpy().dtype)
         return pd.concat([data, pd.Series(arg)], ignore_index=True)
     elif hasattr(data, "is_null"):
         check_polars()
-        if arg_obj:
+        if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.to_numpy().dtype)
         return data.append(pl.Series(arg))
     else:
         check_numpy()
         if isinstance(data, (list, tuple, int, float)):
             data = np.array(data)
-        if arg_obj:
+        if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.dtype)
         try:
             return np.append(data, arg)
