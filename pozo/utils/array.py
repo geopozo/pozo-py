@@ -324,7 +324,7 @@ def append(data, arg):
     if hasattr(data, "coords"):
         check_numpy()
         return np.append(data.values, arg)
-    elif hasattr(data, "isnull"):
+    elif hasattr(data, "concat"):
         check_pandas()
         return pd.concat([data, pd.Series(arg)], ignore_index=True)
     elif hasattr(data, "is_null"):
