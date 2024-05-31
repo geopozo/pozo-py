@@ -329,12 +329,12 @@ def append(data, arg):
     elif hasattr(data, "concat"):
         check_pandas()
         if isinstance(arg, (list, tuple, int, float)):
-            arg = np.array(arg, dtype=data.dtype)
+            arg = np.array(arg, dtype=data.to_numpy().dtype)
         return pd.concat([data, pd.Series(arg)], ignore_index=True)
     elif hasattr(data, "is_null"):
         check_polars()
         if isinstance(arg, (list, tuple, int, float)):
-            arg = np.array(arg, dtype=data.dtype)
+            arg = np.array(arg, dtype=data.to_numpy().dtype)
         return data.append(pl.Series(arg))
     else:
         check_numpy()
