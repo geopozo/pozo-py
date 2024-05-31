@@ -298,7 +298,7 @@ def isnan(data):
             )
 
 
-def count_nonzero(data):
+def count_nonzero(data): #EN DESARROLLO
     if hasattr(data, "coords"):
         return np.count_nonzero(data.values)
     elif hasattr(data, "isnull"):
