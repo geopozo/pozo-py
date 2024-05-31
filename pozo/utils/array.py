@@ -280,7 +280,9 @@ def isfinite(data):
        data has NaN value""")
 )
 def isnan(data):
-    if hasattr(data, "isnull"):
+    if hasattr(data, "coords"):
+        return data.isnull()
+    elif hasattr(data, "isnull"):
         return data.isnull().any()
     elif hasattr(data, "is_null"):
         return data.is_null()
