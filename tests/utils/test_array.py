@@ -18,6 +18,7 @@ df_polars = pl.DataFrame({"depth": np_data})
 df_polars_irregular = pl.DataFrame({"depth": list_data_irregular})
 
 
+
 def test_summarize_array():
     assert pzutils.summarize_array(np_data) is not None
     assert pzutils.summarize_array(df_polars["depth"]) is not None
@@ -140,3 +141,16 @@ def test_isnan():
     assert pzutils.isnan(series_data_irregular) is not None
     assert pzutils.isnan(series_polars_data_irregular) is not None
     assert pzutils.isnan(list_data_irregular) is not None
+
+
+def test_append():
+    assert pzutils.append(np_data, 1) is not None
+    assert pzutils.append(df_pandas_irregular["depth"], [2,3,4]) is not None
+    assert pzutils.append(series, (2,3,4,5,6,7)) is not None
+    assert pzutils.append(series_polars, 8) is not None
+    assert pzutils.append(list_data, np.array(1,2,3,4)) is not None
+    assert pzutils.append(np_data_irregular, (2,3,4,5,6,7)) is not None
+    assert pzutils.append(df_polars_irregular["depth"], np.array(1,2,3,4)) is not None
+    assert pzutils.append(series_data_irregular, np.array(1,2,3,4)) is not None
+    assert pzutils.append(series_polars_data_irregular, (2,3,4,5,6,7)) is not None
+    assert pzutils.append(list_data_irregular, 1000) is not None
