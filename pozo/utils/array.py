@@ -259,6 +259,8 @@ def isfinite(data):
         return data.is_finite()
     elif hasattr(data, "isin"):
         return ~data.isin([np.inf, -np.inf, float("nan")])
+    elif hasattr(data, "coords"):
+        return np.isfinite(data.values)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
