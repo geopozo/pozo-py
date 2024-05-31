@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import polars as pl
 import math
 import pint
 import hashlib
@@ -318,5 +320,25 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, axis=0):
     pass
 
 
-def append(arg, data):
-    pass
+def append(data, arg):
+    if hasattr(data, "coords"):
+        check_numpy()
+        return np.append(data.values, arg)
+    elif hasattr(data, "isnull"):
+        check_pandas()
+        return pd.concat([data, pd.Series(arg)], ignore_index=True)
+    elif hasattr(data, "is_null"):
+        check_polars()
+        return data.append(pl.Series(arg))
+    else:
+        check_numpy()
+        if isinstance(data, (list, tuple)):
+            data = np.array(data)
+        try:
+            return np.append(data, arg)
+        except ValueError:
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
+                )
+            )
