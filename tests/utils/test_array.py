@@ -154,3 +154,16 @@ def test_append():
     assert pzutils.append(series_data_irregular, np.array([1,2,3,4])) is not None
     assert pzutils.append(series_polars_data_irregular, (2,3,4,5,6,7)) is not None
     assert pzutils.append(list_data_irregular, 1000) is not None
+
+
+def test_count_nonzero():
+    assert pzutils.count_nonzero(np_data)
+    assert pzutils.count_nonzero(df_pandas_irregular["depth"])
+    assert pzutils.count_nonzero(series)
+    assert pzutils.count_nonzero(series_polars)
+    assert pzutils.count_nonzero(list_data)
+    assert pzutils.count_nonzero(np_data_irregular)
+    assert pzutils.count_nonzero(df_polars_irregular["depth"])
+    assert pzutils.count_nonzero(series_data_irregular)
+    assert pzutils.count_nonzero(series_polars_data_irregular)
+    assert pzutils.count_nonzero(list_data_irregular)
