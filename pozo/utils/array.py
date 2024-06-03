@@ -299,7 +299,9 @@ def isnan(data):
 
 
 @doc(
-    _d("""count_nonzero use 1 parameter to return how many numbers are greater than 0""")
+    _d(
+        """count_nonzero use 1 parameter to return how many numbers are greater than 0"""
+    )
 )
 def count_nonzero(data):
     if hasattr(data, "coords"):
@@ -335,7 +337,9 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, axis=0):
 
 
 @doc(
-    _d("""append use 2 parameters, this return one object with the original data and the arg that you want to add""")
+    _d(
+        """append use 2 parameters, this return one object with the original data and the arg that you want to add"""
+    )
 )
 def append(data, arg):
     arg_obj = isinstance(arg, (list, tuple, int, float))
