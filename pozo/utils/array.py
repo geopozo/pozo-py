@@ -309,7 +309,7 @@ def count_nonzero(data):
     elif hasattr(data, "isnull"):
         return np.count_nonzero(data.to_numpy())
     elif hasattr(data, "is_null"):
-        return np.count_nonzero(data.to_numpy())
+        return np.count_nonzero(data.to_numpy()) #EN DESARROLLO
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
