@@ -331,7 +331,7 @@ def nanquantile(data, q, axis=None):
     elif hasattr(data, "isnull"):
         return data.quantile(q)
     elif hasattr(data, "is_null"):
-        return data.quantile(q)
+        return data.quantile(q, interpolation="linear")
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
