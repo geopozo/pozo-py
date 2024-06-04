@@ -329,8 +329,23 @@ def nanquantile(data, q, axis=None):
     pass
 
 
-def round(data):
-    pass
+def round(data, decimals=0):
+    if hasattr(data, "coords"):
+        return data.values.round(decimals=decimals)
+    elif hasattr(data, "isnull") or hasattr(data, "is_null"):
+        return data.round(decimals=decimals)
+    else:
+        check_numpy()
+        if isinstance(data, (list, tuple)):
+            data = np.array(data)
+        try:
+            return data.round(decimals=decimals)
+        except ValueError:
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
+                )
+            )
 
 
 @doc(
