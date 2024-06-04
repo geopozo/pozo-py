@@ -326,7 +326,24 @@ def count_nonzero(data):
 
 
 def nanquantile(data, q, axis=None):
-    pass
+    if hasattr(data, "coords"): #xarray
+        return np.nanquantile(data.values, q=q)
+    elif hasattr(data, "isnull"):
+        return data.quantile(q)
+    elif hasattr(data, "is_null"):
+        return data.quantile(q)
+    else:
+        check_numpy()
+        if isinstance(data, (list, tuple)):
+            data = np.array(data)
+        try:
+            return np.nanquantile(data, q=q, axis=axis)
+        except ValueError:
+            raise ValueError(
+                _(
+                    "Pozo does not support this object for this function. Please try with list, tuple, numpy array, pandas Series or polars Series"
+                )
+            )
 
 
 def round(data, decimals=0):
