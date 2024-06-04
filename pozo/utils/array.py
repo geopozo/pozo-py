@@ -332,7 +332,7 @@ def nanquantile(data, q, axis=None):
 def round(data, decimals=0):
     if hasattr(data, "coords"):
         return data.values.round(decimals=decimals)
-    elif hasattr(data, "isnull") or hasattr(data, "is_null"):
+    elif hasattr(data, "round"): #series
         return data.round(decimals=decimals)
     else:
         check_numpy()
