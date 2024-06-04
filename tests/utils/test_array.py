@@ -167,3 +167,16 @@ def test_count_nonzero():
     assert pzutils.count_nonzero(series_data_irregular) == 9
     #assert pzutils.count_nonzero(series_polars_data_irregular) == 9 #Error con polars
     assert pzutils.count_nonzero(list_data_irregular) == 9
+
+
+def test_nanquantile():
+    assert pzutils.nanquantile(np_data, .5) == 1000
+    assert pzutils.nanquantile(df_pandas_irregular["depth"], .5) == 80
+    assert pzutils.nanquantile(series, .5) == 1000
+    assert pzutils.nanquantile(series_polars, .5) == 1000
+    assert pzutils.nanquantile(list_data, .5) == float('nan')
+    assert pzutils.nanquantile(np_data_irregular, .5) == 80
+    assert pzutils.nanquantile(df_polars_irregular["depth"], .5) == 80
+    assert pzutils.nanquantile(series_data_irregular, .5) == 80
+    assert pzutils.nanquantile(series_polars_data_irregular, .5) == 80
+    assert pzutils.nanquantile(list_data_irregular, .5) == 80
