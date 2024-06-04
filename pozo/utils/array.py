@@ -309,6 +309,7 @@ def count_nonzero(data):
     elif hasattr(data, "isnull"):
         return np.count_nonzero(data.to_numpy())
     elif hasattr(data, "is_null"):
+        print(np.count_nonzero(data.to_numpy()))
         return np.count_nonzero(data.to_numpy()) #EN DESARROLLO
     else:
         check_numpy()
@@ -329,10 +330,6 @@ def nanquantile(data, q, axis=None):
 
 
 def round(data):
-    pass
-
-
-def linspace(start, stop, num=50, endpoint=True, retstep=False, axis=0):
     pass
 
 
