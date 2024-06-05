@@ -278,9 +278,9 @@ def isfinite(data):
 def isnan(data):
     if hasattr(data, "coords"):  # xarray
         return data.isnull()
-    elif hasattr(data, "isnull"):
+    elif hasattr(data, "isnull"): # pandas
         return data.isnull().any()
-    elif hasattr(data, "is_null"):
+    elif hasattr(data, "is_null"): # polars
         return data.is_null()
     elif hasattr(data, "null_count"):
         return data.null_count() > 0
@@ -306,9 +306,9 @@ def isnan(data):
 def count_nonzero(data):
     if hasattr(data, "coords"):  # xarray
         return np.count_nonzero(data.values)
-    elif hasattr(data, "isnull"):
+    elif hasattr(data, "isnull"): # pandas
         return np.count_nonzero(data.to_numpy())
-    elif hasattr(data, "is_null"):
+    elif hasattr(data, "is_null"): # polars
         print(np.count_nonzero(data.to_numpy()))
         return np.count_nonzero(data.to_numpy())  # EN DESARROLLO
     else:
@@ -328,9 +328,9 @@ def count_nonzero(data):
 def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
     if hasattr(data, "coords"):  # xarray
         return np.nanquantile(data.values, q=q, **kargs)
-    elif hasattr(data, "isnull"):
+    elif hasattr(data, "isnull"): # pandas
         return data.quantile(q)
-    elif hasattr(data, "is_null"):
+    elif hasattr(data, "is_null"): # polars
         return data.quantile(q, interpolation=interpolation, **kargs)
     else:
         check_numpy()
@@ -349,9 +349,9 @@ def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
 def round(data, decimals=0, **kargs):
     if hasattr(data, "coords"):  # xarray
         return data.values.round(decimals=decimals, **kargs)
-    elif hasattr(data, "isnull"):
+    elif hasattr(data, "isnull"): # pandas
         return data.round(decimals=decimals, **kargs)
-    elif hasattr(data, "is_null"):
+    elif hasattr(data, "is_null"): # polars
         check_polars()
         if str(data.dtype) != "Float64":
             data = np.asarray(data.to_numpy(), dtype=np.float64)
@@ -389,7 +389,7 @@ def append(data, arg):
         if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.to_numpy().dtype)
         return pd.concat([data, pd.Series(arg)], ignore_index=True)
-    elif hasattr(data, "is_null"):
+    elif hasattr(data, "is_null"): # polars
         check_polars()
         if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.to_numpy().dtype)
