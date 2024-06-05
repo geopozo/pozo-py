@@ -346,17 +346,17 @@ def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
             )
 
 
-def round(data, decimals=0):
+def round(data, decimals=0, **kargs):
     if hasattr(data, "coords"):  # xarray
-        return data.values.round(decimals=decimals)
+        return data.values.round(decimals=decimals, **kargs)
     elif hasattr(data, "round"):  # series and array
-        return data.round(decimals=decimals)
+        return data.round(decimals=decimals, **kargs)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
         try:
-            return data.round(decimals=decimals)
+            return data.round(decimals=decimals, **kargs)
         except ValueError:
             raise ValueError(
                 _(
