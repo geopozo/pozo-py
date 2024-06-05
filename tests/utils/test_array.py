@@ -173,12 +173,12 @@ def test_round():
     assert pzutils.round(np_data).any()
     assert pzutils.round(df_pandas_irregular["depth"]).any()
     assert pzutils.round(series).any()
-    assert pzutils.round(series_polars).any()
+    assert (pzutils.round(series_polars) != 0).any()
     assert pzutils.round(list_data).any()
     assert pzutils.round(np_data_irregular).any()
-    assert pzutils.round(df_polars_irregular["depth"]).any()
+    assert (pzutils.round(df_polars_irregular["depth"]) != 0).any()
     assert pzutils.round(series_data_irregular).any()
-    assert pzutils.round(series_polars_data_irregular).any()
+    assert (pzutils.round(series_polars_data_irregular) != 0).any()
     assert pzutils.round(list_data_irregular).any()
 
 
