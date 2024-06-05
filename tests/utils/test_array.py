@@ -143,6 +143,45 @@ def test_isnan():
     assert pzutils.isnan(list_data_irregular) is not None
 
 
+def test_count_nonzero():
+    assert pzutils.count_nonzero(np_data) == 49
+    assert pzutils.count_nonzero(df_pandas_irregular["depth"]) == 9
+    assert pzutils.count_nonzero(series) == 49
+    assert pzutils.count_nonzero(series_polars) == 49 #Error con polars
+    assert pzutils.count_nonzero(list_data) == 3
+    assert pzutils.count_nonzero(np_data_irregular) == 9
+    assert pzutils.count_nonzero(df_polars_irregular["depth"]) == 9 #Error con polars
+    assert pzutils.count_nonzero(series_data_irregular) == 9
+    assert pzutils.count_nonzero(series_polars_data_irregular) == 9 #Error con polars
+    assert pzutils.count_nonzero(list_data_irregular) == 9
+
+
+def test_nanquantile():
+    assert pzutils.nanquantile(np_data, .5) == 1000
+    assert pzutils.nanquantile(df_pandas_irregular["depth"], .5) == 80
+    assert pzutils.nanquantile(series, .5) == 1000
+    assert pzutils.nanquantile(series_polars, .5) == 1000 #Error con polars
+    assert str(pzutils.nanquantile(list_data, .5)) == 'nan'
+    assert pzutils.nanquantile(np_data_irregular, .5) == 80
+    assert pzutils.nanquantile(df_polars_irregular["depth"], .5) == 80 #Error con polars
+    assert pzutils.nanquantile(series_data_irregular, .5) == 80
+    assert pzutils.nanquantile(series_polars_data_irregular, .5) == 80 #Error con polars
+    assert pzutils.nanquantile(list_data_irregular, .5) == 80
+
+
+def test_round():
+    assert pzutils.round(np_data).any()
+    assert pzutils.round(df_pandas_irregular["depth"]).any()
+    assert pzutils.round(series).any()
+    assert pzutils.round(series_polars).any() #Error con polars
+    assert pzutils.round(list_data).any()
+    assert pzutils.round(np_data_irregular).any()
+    assert pzutils.round(df_polars_irregular["depth"]).any() #Error con polars
+    assert pzutils.round(series_data_irregular).any()
+    assert pzutils.round(series_polars_data_irregular).any() #Error con polars
+    assert pzutils.round(list_data_irregular).any()
+
+
 def test_append():
     assert pzutils.append(np_data, 1) is not None
     assert pzutils.append(df_pandas_irregular["depth"], [2,3,4]) is not None
@@ -154,42 +193,3 @@ def test_append():
     assert pzutils.append(series_data_irregular, np.array([1,2,3,4])) is not None
     assert pzutils.append(series_polars_data_irregular, (2,3,4,5,6,7)) is not None
     assert pzutils.append(list_data_irregular, 1000) is not None
-
-
-def test_count_nonzero():
-    assert pzutils.count_nonzero(np_data) == 49
-    assert pzutils.count_nonzero(df_pandas_irregular["depth"]) == 9
-    assert pzutils.count_nonzero(series) == 49
-    #assert pzutils.count_nonzero(series_polars) == 49 #Error con polars
-    assert pzutils.count_nonzero(list_data) == 3
-    assert pzutils.count_nonzero(np_data_irregular) == 9
-    #assert pzutils.count_nonzero(df_polars_irregular["depth"]) == 9 #Error con polars
-    assert pzutils.count_nonzero(series_data_irregular) == 9
-    #assert pzutils.count_nonzero(series_polars_data_irregular) == 9 #Error con polars
-    assert pzutils.count_nonzero(list_data_irregular) == 9
-
-
-def test_nanquantile():
-    assert pzutils.nanquantile(np_data, .5) == 1000
-    assert pzutils.nanquantile(df_pandas_irregular["depth"], .5) == 80
-    assert pzutils.nanquantile(series, .5) == 1000
-    #assert pzutils.nanquantile(series_polars, .5) == 1000 #Error con polars
-    assert str(pzutils.nanquantile(list_data, .5)) == 'nan'
-    assert pzutils.nanquantile(np_data_irregular, .5) == 80
-    #assert pzutils.nanquantile(df_polars_irregular["depth"], .5) == 80 #Error con polars
-    assert pzutils.nanquantile(series_data_irregular, .5) == 80
-    #assert pzutils.nanquantile(series_polars_data_irregular, .5) == 80 #Error con polars
-    assert pzutils.nanquantile(list_data_irregular, .5) == 80
-
-
-def test_round():
-    assert pzutils.round(np_data).any()
-    assert pzutils.round(df_pandas_irregular["depth"]).any()
-    assert pzutils.round(series).any()
-    #assert pzutils.round(series_polars).any() #Error con polars
-    assert pzutils.round(list_data).any()
-    assert pzutils.round(np_data_irregular).any()
-    #assert pzutils.round(df_polars_irregular["depth"]).any() #Error con polars
-    assert pzutils.round(series_data_irregular).any()
-    #assert pzutils.round(series_polars_data_irregular).any() #Error con polars
-    assert pzutils.round(list_data_irregular).any()
