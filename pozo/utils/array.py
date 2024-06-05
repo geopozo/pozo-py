@@ -230,7 +230,7 @@ def max(data):
 def abs(data):
     if hasattr(data, "abs"):
         return data.abs()
-    elif hasattr(data, "coords"): #xarray
+    elif hasattr(data, "coords"):  # xarray
         return np.fabs(data)
     else:
         check_numpy()
@@ -255,7 +255,7 @@ def isfinite(data):
         return data.is_finite()
     elif hasattr(data, "isin"):
         return ~data.isin([np.inf, -np.inf, float("nan")])
-    elif hasattr(data, "coords"): #xarray
+    elif hasattr(data, "coords"):  # xarray
         return np.isfinite(data.values)
     else:
         check_numpy()
@@ -276,7 +276,7 @@ def isfinite(data):
        data has NaN value""")
 )
 def isnan(data):
-    if hasattr(data, "coords"): #xarray
+    if hasattr(data, "coords"):  # xarray
         return data.isnull()
     elif hasattr(data, "isnull"):
         return data.isnull().any()
@@ -304,13 +304,13 @@ def isnan(data):
     )
 )
 def count_nonzero(data):
-    if hasattr(data, "coords"): #xarray
+    if hasattr(data, "coords"):  # xarray
         return np.count_nonzero(data.values)
     elif hasattr(data, "isnull"):
         return np.count_nonzero(data.to_numpy())
     elif hasattr(data, "is_null"):
         print(np.count_nonzero(data.to_numpy()))
-        return np.count_nonzero(data.to_numpy()) #EN DESARROLLO
+        return np.count_nonzero(data.to_numpy())  # EN DESARROLLO
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
@@ -326,7 +326,7 @@ def count_nonzero(data):
 
 
 def nanquantile(data, q, axis=None):
-    if hasattr(data, "coords"): #xarray
+    if hasattr(data, "coords"):  # xarray
         return np.nanquantile(data.values, q=q)
     elif hasattr(data, "isnull"):
         return data.quantile(q)
@@ -347,9 +347,9 @@ def nanquantile(data, q, axis=None):
 
 
 def round(data, decimals=0):
-    if hasattr(data, "coords"): #xarray
+    if hasattr(data, "coords"):  # xarray
         return data.values.round(decimals=decimals)
-    elif hasattr(data, "round"): #series and array
+    elif hasattr(data, "round"):  # series and array
         return data.round(decimals=decimals)
     else:
         check_numpy()
@@ -372,7 +372,7 @@ def round(data, decimals=0):
 )
 def append(data, arg):
     arg_obj = isinstance(arg, (list, tuple, int, float))
-    if hasattr(data, "coords"): #xarray
+    if hasattr(data, "coords"):  # xarray
         check_numpy()
         if arg_obj or arg.dtype != data.dtype:
             arg = np.array(arg, dtype=data.dtype)
