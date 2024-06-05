@@ -325,19 +325,19 @@ def count_nonzero(data):
             )
 
 
-def nanquantile(data, q, axis=None):
+def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
     if hasattr(data, "coords"):  # xarray
-        return np.nanquantile(data.values, q=q)
+        return np.nanquantile(data.values, q=q, **kargs)
     elif hasattr(data, "isnull"):
         return data.quantile(q)
     elif hasattr(data, "is_null"):
-        return data.quantile(q, interpolation="linear")
+        return data.quantile(q, interpolation=interpolation, **kargs)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
             data = np.array(data)
         try:
-            return np.nanquantile(data, q=q, axis=axis)
+            return np.nanquantile(data, q=q, axis=axis, **kargs)
         except ValueError:
             raise ValueError(
                 _(
