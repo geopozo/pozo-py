@@ -349,8 +349,14 @@ def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
 def round(data, decimals=0, **kargs):
     if hasattr(data, "coords"):  # xarray
         return data.values.round(decimals=decimals, **kargs)
-    elif hasattr(data, "round"):  # series and array
+    elif hasattr(data, "isnull"):
         return data.round(decimals=decimals, **kargs)
+    elif hasattr(data, "is_null"):
+        check_polars()
+        if str(data.dtype) != 'Float64':
+            data = np.asarray(data.to_numpy(), dtype=np.float64)
+        else: data = data.to_numpy()
+        return pl.Series(data).round(decimals=decimals, **kargs)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
