@@ -310,7 +310,7 @@ def count_nonzero(data):
         return np.count_nonzero(data.to_numpy())
     elif hasattr(data, "is_null"): # polars
         print(np.count_nonzero(data.to_numpy()))
-        return np.count_nonzero(data.to_numpy())  # EN DESARROLLO
+        return np.count_nonzero(data.to_numpy())
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
