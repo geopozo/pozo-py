@@ -355,7 +355,7 @@ def round(data, decimals=0, **kargs):
             data = np.asarray(data.to_numpy(), dtype=np.float64)
         else:
             data = data.to_numpy()
-        return pl.Series(data).round(decimals=decimals, **kargs)
+        return pl.Series(data).round(decimals=decimals, **kargs) #noqa
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
@@ -386,12 +386,12 @@ def append(data, arg):
         check_pandas()
         if arg_obj or (arg.dtype != data.dtype):
             arg = np.array(arg, dtype=data.to_numpy().dtype)
-        return pd.concat([data, pd.Series(arg)], ignore_index=True)
+        return pd.concat([data, pd.Series(arg)], ignore_index=True) #noqa
     elif hasattr(data, "is_null"):  # polars
         check_polars()
         if arg_obj or (arg.dtype != data.dtype):
             arg = np.array(arg, dtype=data.to_numpy().dtype)
-        return data.append(pl.Series(arg))
+        return data.append(pl.Series(arg)) #noqa
     else:
         check_numpy()
         if isinstance(data, (list, tuple, int, float)):
