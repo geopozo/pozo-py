@@ -183,13 +183,13 @@ def test_round():
 
 
 def test_append():
-    assert pzutils.append(np_data, 1) is not None
-    assert pzutils.append(df_pandas_irregular["depth"], [2,3,4]) is not None
-    assert pzutils.append(series, (2,3,4,5,6,7)) is not None
-    assert pzutils.append(series_polars, 8) is not None
-    assert pzutils.append(list_data, np.array([1,2,3,4])) is not None
-    assert pzutils.append(np_data_irregular, (2,3,4,5,6,7)) is not None
-    assert pzutils.append(df_polars_irregular["depth"], np.array([1,2,3,4])) is not None
-    assert pzutils.append(series_data_irregular, np.array([1,2,3,4])) is not None
-    assert pzutils.append(series_polars_data_irregular, (2,3,4,5,6,7)) is not None
-    assert pzutils.append(list_data_irregular, 1000) is not None
+    assert (pzutils.append(np_data, 1))[-1] == 1
+    assert (pzutils.append(df_pandas_irregular["depth"], [2,3,4])).iloc[-1] == 4
+    assert (pzutils.append(series, (2,3,4,5,6,7))).iloc[-1] == 7
+    assert (pzutils.append(series_polars, 8))[-1] == 8
+    assert (pzutils.append(list_data, np.array([1,2,3,4])))[-1] == 4
+    assert (pzutils.append(np_data_irregular, (2,3,4,5,6,7)))[-1] == 7
+    assert (pzutils.append(df_polars_irregular["depth"], np.array([1,2,3,4])))[-1] == 4
+    assert (pzutils.append(series_data_irregular, np.array([1,2,3,4]))).iloc[-1] == 4
+    assert (pzutils.append(series_polars_data_irregular, (2,3,4,5,6,7)))[-1] == 7
+    assert (pzutils.append(list_data_irregular, 1000))[-1] == 1000
