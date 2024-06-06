@@ -200,7 +200,7 @@ def min(data):
             )
 
 
-@doc(_d("""min use 1 parameter to find the max value"""))
+@doc(_d("""max use 1 parameter to find the max value"""))
 def max(data):
     if hasattr(data, "nan_max"):
         return data.nan_max()
