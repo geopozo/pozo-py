@@ -379,7 +379,7 @@ def append(data, arg):
         if arg_obj or (arg.dtype != data.dtype):
             arg = np.array(arg, dtype=data.dtype)
         return np.append(data.values, arg)
-    elif hasattr(data, "concat"):
+    elif hasattr(data, "isnull"):
         check_pandas()
         if arg_obj or (arg.dtype != data.dtype):
             arg = np.array(arg, dtype=data.to_numpy().dtype)
