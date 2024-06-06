@@ -228,7 +228,7 @@ def abs(data):
     if hasattr(data, "abs"):
         return data.abs()
     elif hasattr(data, "coords"):  # xarray
-        return np.fabs(data)
+        return np.fabs(data.values)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
