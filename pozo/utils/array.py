@@ -95,8 +95,7 @@ def is_array(value):
     if isinstance(
         value, (pozo.Track, pozo.Trace, pozo.Axis, pozo.Graph, Drawable, pozo.Note)
     ):
-        raise ValueError(_("You mustn't use pozo objects for this function"))
-
+        return False
     if isinstance(value, str):
         return False
     if isinstance(value, pint.Quantity):
