@@ -79,16 +79,16 @@ def test_hash_array():
 
 
 def test_min():
-    assert pzutils.min(np_data) is not None
-    assert pzutils.min(df_pandas_irregular["depth"]) is not None
-    assert pzutils.min(series) is not None
-    assert pzutils.min(series_polars) is not None
-    assert pzutils.min(list_data) is not None
-    assert pzutils.min(np_data_irregular) is not None
-    assert pzutils.min(df_polars_irregular["depth"]) is not None
-    assert pzutils.min(series_data_irregular) is not None
-    assert pzutils.min(series_polars_data_irregular) is not None
-    assert pzutils.min(list_data_irregular) is not None
+    assert pzutils.min(np_data) == 0
+    assert pzutils.min(df_pandas_irregular["depth"]) == 0
+    assert pzutils.min(series) == 0
+    assert pzutils.min(series_polars) == 0
+    assert str(pzutils.min(list_data)) == '-inf'
+    assert pzutils.min(np_data_irregular) == 0
+    assert pzutils.min(df_polars_irregular["depth"]) == 0
+    assert pzutils.min(series_data_irregular) == 0
+    assert pzutils.min(series_polars_data_irregular) == 0
+    assert pzutils.min(list_data_irregular) == 0
 
 
 def test_max():
