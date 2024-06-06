@@ -92,16 +92,16 @@ def test_min():
 
 
 def test_max():
-    assert pzutils.max(np_data)
-    assert pzutils.max(df_pandas_irregular["depth"])
-    assert pzutils.max(series)
-    assert pzutils.max(series_polars)
-    assert pzutils.max(list_data)
-    assert pzutils.max(np_data_irregular)
-    assert pzutils.max(df_polars_irregular["depth"])
-    assert pzutils.max(series_data_irregular)
-    assert pzutils.max(series_polars_data_irregular)
-    assert pzutils.max(list_data_irregular)
+    assert pzutils.max(np_data) == 2000
+    assert pzutils.max(df_pandas_irregular["depth"]) == 400
+    assert pzutils.max(series) == 2000
+    assert pzutils.max(series_polars) == 2000
+    assert str(pzutils.max(list_data)) == 'inf'
+    assert pzutils.max(np_data_irregular) == 400
+    assert pzutils.max(df_polars_irregular["depth"]) == 400
+    assert pzutils.max(series_data_irregular) == 400
+    assert pzutils.max(series_polars_data_irregular) == 400
+    assert pzutils.max(list_data_irregular) == 400
 
 
 def test_abs():
