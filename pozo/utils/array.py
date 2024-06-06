@@ -304,10 +304,7 @@ def isnan(data):
 def count_nonzero(data):
     if hasattr(data, "coords"):  # xarray
         return np.count_nonzero(data.values)
-    elif hasattr(data, "isnull"):  # pandas
-        return np.count_nonzero(data.to_numpy())
-    elif hasattr(data, "is_null"):  # polars
-        print(np.count_nonzero(data.to_numpy()))
+    elif hasattr(data, "to_numpy"):  # series
         return np.count_nonzero(data.to_numpy())
     else:
         check_numpy()
