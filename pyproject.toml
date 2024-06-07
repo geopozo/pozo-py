@@ -29,6 +29,7 @@ dependencies = [
 dev = [
   "pytest",
   "polars >= 0.20.26"
+  "xarray >= 3.0"
   ]
 
 [tool.ruff.lint]
