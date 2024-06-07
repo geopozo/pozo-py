@@ -28,7 +28,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pytest",
-  "polars >= 0.20.26"
+  "polars >= 0.20.26",
   "xarray >= 3.0"
   ]
 
