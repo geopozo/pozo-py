@@ -319,6 +319,8 @@ def count_nonzero(data):
             )
 
 
+# nanquantile function use 4 parameters and kwargs, this calculate the quantile
+# that you want
 def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
     if hasattr(data, "coords"):  # xarray
         return np.nanquantile(data.values, q=q, **kargs)
@@ -338,6 +340,8 @@ def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
             )
 
 
+# round use 2 parameters and kwargs, this return one object with the absolute
+# value about the original data
 def round(data, decimals=0, **kargs):
     if hasattr(data, "coords"):  # xarray
         return data.values.round(decimals=decimals, **kargs)
