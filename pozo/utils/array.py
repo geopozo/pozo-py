@@ -322,9 +322,7 @@ def count_nonzero(data):
 def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
     if hasattr(data, "coords"):  # xarray
         return np.nanquantile(data.values, q=q, **kargs)
-    elif hasattr(data, "isnull"):  # pandas
-        return data.quantile(q)
-    elif hasattr(data, "is_null"):  # polars
+    elif hasattr(data, "quantile"):  # series
         return data.quantile(q, interpolation=interpolation, **kargs)
     else:
         check_numpy()
