@@ -176,6 +176,7 @@ def check_xarray():
 
 
 @doc(_d("""min use 1 parameter to find the min value"""))
+# This is used in plotly.py, unit.py
 def min(data):
     if hasattr(data, "nan_min"):
         return data.nan_min()
@@ -200,6 +201,7 @@ def min(data):
 
 
 @doc(_d("""max use 1 parameter to find the max value"""))
+# This is used in plotly.py, units.py
 def max(data):
     if hasattr(data, "nan_max"):
         return data.nan_max()
@@ -224,6 +226,7 @@ def max(data):
 
 
 @doc(_d("""abs use 1 parameter to calculate the absolute value"""))
+# This is used in traces.py
 def abs(data):
     if hasattr(data, "abs"):
         return data.abs()
@@ -247,6 +250,7 @@ def abs(data):
     _d("""isfinite use 1 parameter to return boolean value, this verify if the
        data has finite value""")
 )
+# This is used in traces.py
 def isfinite(data):
     if hasattr(data, "is_finite"):
         return data.is_finite()
@@ -272,6 +276,7 @@ def isfinite(data):
     _d("""isnan use 1 parameter to return boolean value, this verify if the
        data has NaN value""")
 )
+# This used in plotly.py and units/__init__.py
 def isnan(data):
     if hasattr(data, "coords"):  # xarray
         return data.isnull()
@@ -300,6 +305,7 @@ def isnan(data):
         """count_nonzero use 1 parameter to return how many numbers are greater than 0"""
     )
 )
+# This used in units/__init__.py
 def count_nonzero(data):
     if hasattr(data, "coords"):  # xarray
         return np.count_nonzero(data.values)
@@ -321,6 +327,7 @@ def count_nonzero(data):
 
 # nanquantile function use 4 parameters and kwargs, this calculate the quantile
 # that you want
+# This is used in units/__init__.py
 def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
     if hasattr(data, "coords"):  # xarray
         return np.nanquantile(data.values, q=q, **kargs)
@@ -342,6 +349,7 @@ def nanquantile(data, q, axis=None, interpolation="linear", **kargs):
 
 # round use 2 parameters and kwargs, this return one object with the absolute
 # value about the original data
+#This is used in plotly.py
 def round(data, decimals=0, **kargs):
     if hasattr(data, "coords"):  # xarray
         return data.values.round(decimals=decimals, **kargs)
@@ -373,6 +381,7 @@ def round(data, decimals=0, **kargs):
         """append use 2 parameters, this return one object with the original data and the arg that you want to add"""
     )
 )
+# No se usa
 def append(data, arg):
     arg_obj = isinstance(arg, (list, tuple, int, float))
     if hasattr(data, "coords"):  # xarray
