@@ -1,6 +1,5 @@
 import pytest
 import random
-import pozo.utils.array as pzutils
 import numpy as np
 import pandas as pd
 import polars as pl
@@ -28,7 +27,7 @@ def pytest_generate_tests(metafunc):
 ## Data class to supply some random data and provide methods to analyze and change it
 class Data:
     def __init__(self, *, data=None, size=5):
-        if pzutils.is_array(data):
+        if isinstance(data, list): # we are responsible for testing, we can enforce use of lists
             self.data = data
         elif size  and size >= 5:
             self.data = random.shuffle(
