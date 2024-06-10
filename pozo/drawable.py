@@ -15,8 +15,8 @@ import warnings
 # But beware spooky behavior (like prints not making it to stdout sometimes)
 class VersionedProperty:
     def __set_name__(self, owner, name):
-        if isinstance(owner, Drawable):
-            raise AttributeError(f"{name} must be a member of a class inheriting pozo.drawable.Drawable, not {owner}. Is type {type(owner)}.")
+        if not issubclass(owner, Drawable):
+            raise AttributeError(f"{name} must be a member of a class inheriting pozo.drawable.Drawable.")
             # TODO, BUG, PYTHON: This doesn't work and the current theory is that some part of inheritance is not calculated
             # until after class variabels are declared
         self._private_name = "_" + name
