@@ -53,7 +53,7 @@ class Data:
 
     def conversion(self, string):
         if string in self.conversion_lut:
-            return self.conversion_lut[string](self.data)
+            return self.conversion_lut[string](self)
         elif string == "list":
             return list(self.data)
         elif string == "tuple":
