@@ -69,9 +69,9 @@ class Data:
 
 
 @pytest.fixture
-def new_Data(request=None):
-    if request:
-        return Data(request.param)
+def new_Data(request):
+    if hasattr(request, "param"):
+        return Data(**request.param)
     return Data()
 
 # If we want to pass an argument to the above fixture, we pretend we have a parameter
