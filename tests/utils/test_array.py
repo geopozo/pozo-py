@@ -4,7 +4,21 @@ import pandas as pd
 import polars as pl
 import pozo.utils.array as pzutils
 
-list_data_irregular = [0, 20, 40, 50, 70, 90, 300, 301, 330, 400, float("inf"), -float("inf"), float("nan")]
+list_data_irregular = [
+    0,
+    20,
+    40,
+    50,
+    70,
+    90,
+    300,
+    301,
+    330,
+    400,
+    float("inf"),
+    -float("inf"),
+    float("nan"),
+]
 np_data = np.linspace(0, 2000, num=50, endpoint=True)
 np_data_irregular = np.array(list_data_irregular)
 series = pd.Series(np_data)
@@ -15,7 +29,6 @@ series_polars = pl.Series(np_data)
 series_polars_data_irregular = pl.Series(np_data_irregular)
 df_polars = pl.DataFrame({"depth": np_data})
 df_polars_irregular = pl.DataFrame({"depth": list_data_irregular})
-
 
 
 def test_summarize_array():
@@ -36,12 +49,19 @@ def test_is_close():
     assert pzutils.is_close(np_data[0], np_data[-1]) is not None
     assert pzutils.is_close(series.iloc[0], series.iloc[-1]) is not None
     assert (
-        pzutils.is_close(df_pandas_irregular["depth"].iloc[0], df_pandas_irregular["depth"].iloc[-1])
+        pzutils.is_close(
+            df_pandas_irregular["depth"].iloc[0], df_pandas_irregular["depth"].iloc[-1]
+        )
         is not None
     )
     assert pzutils.is_close(series_polars[0], series_polars[-1]) is not None
     assert pzutils.is_close(np_data_irregular[0], np_data_irregular[-1]) is not None
-    assert pzutils.is_close(df_polars_irregular["depth"][0], df_polars_irregular["depth"][-1]) is not None
+    assert (
+        pzutils.is_close(
+            df_polars_irregular["depth"][0], df_polars_irregular["depth"][-1]
+        )
+        is not None
+    )
     assert (
         pzutils.is_close(series_data_irregular.iloc[0], series_data_irregular.iloc[-1])
         is not None
@@ -55,21 +75,45 @@ def test_is_close():
     assert pzutils.is_close(list_data_irregular[0], list_data_irregular[-1]) is not None
 
 
-def test_hash_array():
-    assert pzutils.hash_array(np_data) == "fa965b73eaa75caaadcecd13d1df6aff"
-    assert pzutils.hash_array(df_pandas_irregular["depth"]) == "744578fc32c6e5300c7c0784a88a4fdb"
-    assert pzutils.hash_array(series) == "fa965b73eaa75caaadcecd13d1df6aff"
-    assert pzutils.hash_array(series_polars) == "fa965b73eaa75caaadcecd13d1df6aff"
-    assert pzutils.hash_array(np_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
-    assert pzutils.hash_array(df_polars_irregular["depth"]) == "744578fc32c6e5300c7c0784a88a4fdb"
-    assert (
-        pzutils.hash_array(series_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
-    )
-    assert (
-        pzutils.hash_array(series_polars_data_irregular)
-        == "d8cd63104ec584b4d83928cb8ba88639"
-    )
-    assert pzutils.hash_array(list_data_irregular) == "d8cd63104ec584b4d83928cb8ba88639"
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (
+            (
+                np_data,
+                df_pandas_irregular["depth"],
+                series,
+                series_polars,
+                np_data_irregular,
+                df_polars_irregular["depth"],
+                series_data_irregular,
+                series_polars_data_irregular,
+                list_data_irregular,
+            ),
+            (
+                "fa965b73eaa75caaadcecd13d1df6aff",
+                "744578fc32c6e5300c7c0784a88a4fdb",
+                "fa965b73eaa75caaadcecd13d1df6aff",
+                "fa965b73eaa75caaadcecd13d1df6aff",
+                "d8cd63104ec584b4d83928cb8ba88639",
+                "744578fc32c6e5300c7c0784a88a4fdb",
+                "d8cd63104ec584b4d83928cb8ba88639",
+                "d8cd63104ec584b4d83928cb8ba88639",
+                "d8cd63104ec584b4d83928cb8ba88639",
+            ),
+        )
+    ],
+)
+def test_hash_array(test_input, expected):
+    assert pzutils.hash_array(test_input[0]) == expected[0]
+    assert pzutils.hash_array(test_input[1]) == expected[1]
+    assert pzutils.hash_array(test_input[2]) == expected[2]
+    assert pzutils.hash_array(test_input[3]) == expected[3]
+    assert pzutils.hash_array(test_input[4]) == expected[4]
+    assert pzutils.hash_array(test_input[5]) == expected[5]
+    assert pzutils.hash_array(test_input[6]) == expected[6]
+    assert pzutils.hash_array(test_input[7]) == expected[7]
+    assert pzutils.hash_array(test_input[8]) == expected[8]
 
 
 def test_min():
@@ -145,15 +189,15 @@ def test_count_nonzero():
 
 
 def test_nanquantile():
-    assert pzutils.nanquantile(np_data, .5) == 1000
-    assert pzutils.nanquantile(df_pandas_irregular["depth"], .5) == 80
-    assert pzutils.nanquantile(series, .5) == 1000
-    assert pzutils.nanquantile(series_polars, .5) == 1000
-    assert pzutils.nanquantile(np_data_irregular, .5) == 80
-    assert pzutils.nanquantile(df_polars_irregular["depth"], .5) == 80
-    assert pzutils.nanquantile(series_data_irregular, .5) == 80
-    assert pzutils.nanquantile(series_polars_data_irregular, .5) == 80
-    assert pzutils.nanquantile(list_data_irregular, .5) == 80
+    assert pzutils.nanquantile(np_data, 0.5) == 1000
+    assert pzutils.nanquantile(df_pandas_irregular["depth"], 0.5) == 80
+    assert pzutils.nanquantile(series, 0.5) == 1000
+    assert pzutils.nanquantile(series_polars, 0.5) == 1000
+    assert pzutils.nanquantile(np_data_irregular, 0.5) == 80
+    assert pzutils.nanquantile(df_polars_irregular["depth"], 0.5) == 80
+    assert pzutils.nanquantile(series_data_irregular, 0.5) == 80
+    assert pzutils.nanquantile(series_polars_data_irregular, 0.5) == 80
+    assert pzutils.nanquantile(list_data_irregular, 0.5) == 80
 
 
 def test_round():
@@ -170,11 +214,13 @@ def test_round():
 
 def test_append():
     assert (pzutils.append(np_data, 1))[-1] == 1
-    assert (pzutils.append(df_pandas_irregular["depth"], [2,3,4])).iloc[-1] == 4
-    assert (pzutils.append(series, (2,3,4,5,6,7))).iloc[-1] == 7
+    assert (pzutils.append(df_pandas_irregular["depth"], [2, 3, 4])).iloc[-1] == 4
+    assert (pzutils.append(series, (2, 3, 4, 5, 6, 7))).iloc[-1] == 7
     assert (pzutils.append(series_polars, 8))[-1] == 8
-    assert (pzutils.append(np_data_irregular, (2,3,4,5,6,7)))[-1] == 7
-    assert (pzutils.append(df_polars_irregular["depth"], np.array([1,2,3,4])))[-1] == 4
-    assert (pzutils.append(series_data_irregular, np.array([1,2,3,4]))).iloc[-1] == 4
-    assert (pzutils.append(series_polars_data_irregular, (2,3,4,5,6,7)))[-1] == 7
+    assert (pzutils.append(np_data_irregular, (2, 3, 4, 5, 6, 7)))[-1] == 7
+    assert (pzutils.append(df_polars_irregular["depth"], np.array([1, 2, 3, 4])))[
+        -1
+    ] == 4
+    assert (pzutils.append(series_data_irregular, np.array([1, 2, 3, 4]))).iloc[-1] == 4
+    assert (pzutils.append(series_polars_data_irregular, (2, 3, 4, 5, 6, 7)))[-1] == 7
     assert (pzutils.append(list_data_irregular, 1000))[-1] == 1000
