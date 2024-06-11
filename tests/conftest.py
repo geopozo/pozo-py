@@ -30,10 +30,9 @@ class Data:
         if isinstance(data, list): # we are responsible for testing, we can enforce use of lists
             self.data = data
         elif size  and size >= 5:
-            self.data = random.shuffle(
-                    list(np.random.randint(low = 0, high = 10**5, size=size))
-                    .extend([float("nan"), float("inf"), -float("inf")])
-                    )
+            self.data = list(np.random.randint(low = 0, high = 10**5, size=size))
+            self.data.extend([float("nan"), float("inf"), -float("inf")])
+            random.shuffle(self.data)
         else:
             raise ValueError("You must supply data or size (at least of 5) to initiate a data class")
 
@@ -41,10 +40,10 @@ class Data:
         return np.array(self.data)
 
     def to_pandas(self):
-        return pd.Serie(self.data)
+        return pd.Series(self.data)
 
     def to_polars(self):
-        return pl.Serie(self.data)
+        return pl.Series(self.data, dtype=pl.Float64)
 
     conversion_lut = {
         "np": to_numpy,
@@ -54,7 +53,7 @@ class Data:
 
     def conversion(self, string):
         if string in self.conversion_lut:
-            return self.conversion_lut[string](self.data)
+            return self.conversion_lut[string](self)
         elif string == "list":
             return list(self.data)
         elif string == "tuple":
@@ -70,9 +69,9 @@ class Data:
 
 
 @pytest.fixture
-def new_Data(request=None):
-    if request:
-        return Data(request.param)
+def new_Data(request):
+    if hasattr(request, "param"):
+        return Data(**request.param)
     return Data()
 
 # If we want to pass an argument to the above fixture, we pretend we have a parameter
