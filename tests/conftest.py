@@ -30,10 +30,9 @@ class Data:
         if isinstance(data, list): # we are responsible for testing, we can enforce use of lists
             self.data = data
         elif size  and size >= 5:
-            self.data = random.shuffle(
-                    list(np.random.randint(low = 0, high = 10**5, size=size))
-                    .extend([float("nan"), float("inf"), -float("inf")])
-                    )
+            self.data = list(np.random.randint(low = 0, high = 10**5, size=size))
+            self.data.extend([float("nan"), float("inf"), -float("inf")])
+            random.shuffle(self.data)
         else:
             raise ValueError("You must supply data or size (at least of 5) to initiate a data class")
 
