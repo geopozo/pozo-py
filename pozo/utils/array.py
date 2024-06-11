@@ -178,14 +178,12 @@ def check_xarray():
 @doc(_d("""min use 1 parameter to find the min value"""))
 # This is used in plotly.py, unit.py
 def min(data):
-    if hasattr(data, "nan_min"):
-        return data.nan_min()
-    elif hasattr(data, "min"):
+    if hasattr(data, "to_numpy"):
         try:
-            return data.min(skipna=True)
+            return data.min()
         except TypeError:
-            check_numpy()
-            return np.nanmin(data)
+            check_pandas()
+            return data.min(skipna=True)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
