@@ -133,16 +133,33 @@ def test_min(test_input, expected):
     assert pzutils.min(test_input) == expected
 
 
-def test_max():
-    assert pzutils.max(np_data) == 2000
-    assert pzutils.max(df_pandas_irregular["depth"]) == 400
-    assert pzutils.max(series) == 2000
-    assert pzutils.max(series_polars) == 2000
-    assert pzutils.max(np_data_irregular) == 400
-    assert pzutils.max(df_polars_irregular["depth"]) == 400
-    assert pzutils.max(series_data_irregular) == 400
-    assert pzutils.max(series_polars_data_irregular) == 400
-    assert pzutils.max(list_data_irregular) == 400
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, 2000),
+        (df_pandas_irregular["depth"], float("inf")),
+        (series, 2000),
+        (series_polars, 2000),
+        (np_data_irregular, float("inf")),
+        (df_polars_irregular["depth"], float("inf")),
+        (series_data_irregular, float("inf")),
+        (series_polars_data_irregular, float("inf")),
+        (list_data_irregular, float("-inf")),
+    ],
+    ids=[
+        "max_01",
+        "max_02",
+        "max_03",
+        "max_04",
+        "max_05",
+        "max_06",
+        "max_07",
+        "max_08",
+        "max_09",
+    ],
+)
+def test_max(test_input, expected):
+    assert pzutils.max(test_input) == expected
 
 
 def test_abs():
