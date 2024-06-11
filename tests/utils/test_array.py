@@ -78,42 +78,19 @@ def test_is_close():
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        (
-            (
-                np_data,
-                df_pandas_irregular["depth"],
-                series,
-                series_polars,
-                np_data_irregular,
-                df_polars_irregular["depth"],
-                series_data_irregular,
-                series_polars_data_irregular,
-                list_data_irregular,
-            ),
-            (
-                "fa965b73eaa75caaadcecd13d1df6aff",
-                "744578fc32c6e5300c7c0784a88a4fdb",
-                "fa965b73eaa75caaadcecd13d1df6aff",
-                "fa965b73eaa75caaadcecd13d1df6aff",
-                "d8cd63104ec584b4d83928cb8ba88639",
-                "744578fc32c6e5300c7c0784a88a4fdb",
-                "d8cd63104ec584b4d83928cb8ba88639",
-                "d8cd63104ec584b4d83928cb8ba88639",
-                "d8cd63104ec584b4d83928cb8ba88639",
-            ),
-        )
+        (np_data, "fa965b73eaa75caaadcecd13d1df6aff"),
+        (df_pandas_irregular["depth"], "744578fc32c6e5300c7c0784a88a4fdb"),
+        (series, "fa965b73eaa75caaadcecd13d1df6aff"),
+        (series_polars, "fa965b73eaa75caaadcecd13d1df6aff"),
+        (np_data_irregular, "d8cd63104ec584b4d83928cb8ba88639"),
+        (df_polars_irregular["depth"], "744578fc32c6e5300c7c0784a88a4fdb"),
+        (series_data_irregular, "d8cd63104ec584b4d83928cb8ba88639"),
+        (series_polars_data_irregular, "d8cd63104ec584b4d83928cb8ba88639"),
+        (list_data_irregular, "d8cd63104ec584b4d83928cb8ba88639"),
     ],
 )
 def test_hash_array(test_input, expected):
-    assert pzutils.hash_array(test_input[0]) == expected[0]
-    assert pzutils.hash_array(test_input[1]) == expected[1]
-    assert pzutils.hash_array(test_input[2]) == expected[2]
-    assert pzutils.hash_array(test_input[3]) == expected[3]
-    assert pzutils.hash_array(test_input[4]) == expected[4]
-    assert pzutils.hash_array(test_input[5]) == expected[5]
-    assert pzutils.hash_array(test_input[6]) == expected[6]
-    assert pzutils.hash_array(test_input[7]) == expected[7]
-    assert pzutils.hash_array(test_input[8]) == expected[8]
+    assert pzutils.hash_array(test_input) == expected
 
 
 def test_min():
