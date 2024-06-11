@@ -1,14 +1,24 @@
 import ood
 import pozo.themes as pzt
 import warnings
+# test versions
+# do some string and object representations of everything
+# do some tests (fix themes)
+# do help
+# render this
+# separate renderer into renderTrace and renderInterval
+# write about mira geoscience
+# think more about versions and copies
 
-from pozo.utils.language import _d
-from pozo.utils.docs import doc
-# VersionProperty is a python "descriptor", it allows us to create class variables but define how they behave when they are set, accessed, and declared. See drawable for how to use it.
+# VersionedProperty is a descriptor, and it is weird.
+# Look at traces.py to see how it is used- it controls how variabels are gotten and accessed.
+# But beware spooky behavior (like prints not making it to stdout sometimes)
 class VersionedProperty:
     def __set_name__(self, owner, name):
-        if type(owner) == str(Drawable):
-            raise AttributeError(f"{name} must be a member of a class inheriting pozo.drawable.Drawable, not {owner}. Is type {type(owner)}.")
+        if not issubclass(owner, Drawable):
+            raise AttributeError(f"{name} must be a member of a class inheriting pozo.drawable.Drawable.")
+            # TODO, BUG, PYTHON: This doesn't work and the current theory is that some part of inheritance is not calculated
+            # until after class variabels are declared
         self._private_name = "_" + name
         self._name = name
 
