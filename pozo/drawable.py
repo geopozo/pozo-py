@@ -1,6 +1,8 @@
 import ood
 import pozo.themes as pzt
 import warnings
+from .utils.language import _, _d
+from .utils.docs import doc
 # test versions
 # do some string and object representations of everything
 # do some tests (fix themes)
