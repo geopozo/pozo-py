@@ -104,16 +104,33 @@ def test_hash_array(test_input, expected):
     assert pzutils.hash_array(test_input) == expected
 
 
-def test_min():
-    assert pzutils.min(np_data) == 0
-    assert pzutils.min(df_pandas_irregular["depth"]) == 0
-    assert pzutils.min(series) == 0
-    assert pzutils.min(series_polars) == 0
-    assert pzutils.min(np_data_irregular) == 0
-    assert pzutils.min(df_polars_irregular["depth"]) == 0
-    assert pzutils.min(series_data_irregular) == 0
-    assert pzutils.min(series_polars_data_irregular) == 0
-    assert pzutils.min(list_data_irregular) == 0
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, 0),
+        (df_pandas_irregular["depth"], float("-inf")),
+        (series, 0),
+        (series_polars, 0),
+        (np_data_irregular, float("-inf")),
+        (df_polars_irregular["depth"], float("-inf")),
+        (series_data_irregular, float("-inf")),
+        (series_polars_data_irregular, float("-inf")),
+        (list_data_irregular, float("-inf")),
+    ],
+    ids=[
+        "min_01",
+        "min_02",
+        "min_03",
+        "min_04",
+        "min_05",
+        "min_06",
+        "min_07",
+        "min_08",
+        "min_09",
+    ],
+)
+def test_min(test_input, expected):
+    assert pzutils.min(test_input) == expected
 
 
 def test_max():
