@@ -40,10 +40,10 @@ class Data:
         return np.array(self.data)
 
     def to_pandas(self):
-        return pd.Serie(self.data)
+        return pd.Series(self.data)
 
     def to_polars(self):
-        return pl.Serie(self.data)
+        return pl.Series(self.data, dtype=pl.Float64)
 
     conversion_lut = {
         "np": to_numpy,
