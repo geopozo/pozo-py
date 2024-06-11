@@ -201,14 +201,12 @@ def min(data):
 @doc(_d("""max use 1 parameter to find the max value"""))
 # This is used in plotly.py, units.py
 def max(data):
-    if hasattr(data, "nan_max"):
-        return data.nan_max()
-    elif hasattr(data, "max"):
+    if hasattr(data, "to_numpy"):
         try:
-            return data.max(skipna=True)
+            return data.max()
         except TypeError:
-            check_numpy()
-            return np.nanmax(data)
+            check_pandas()
+            return data.max(skipna=True)
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
