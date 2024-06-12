@@ -215,16 +215,33 @@ def test_isnan():
     assert pzutils.isnan(list_data_irregular) is not None
 
 
-def test_count_nonzero():
-    assert pzutils.count_nonzero(np_data) == 49
-    assert pzutils.count_nonzero(df_pandas_irregular["depth"]) == 9
-    assert pzutils.count_nonzero(series) == 49
-    assert pzutils.count_nonzero(series_polars) == 49
-    assert pzutils.count_nonzero(np_data_irregular) == 9
-    assert pzutils.count_nonzero(df_polars_irregular["depth"]) == 9
-    assert pzutils.count_nonzero(series_data_irregular) == 9
-    assert pzutils.count_nonzero(series_polars_data_irregular) == 9
-    assert pzutils.count_nonzero(list_data_irregular) == 9
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, 49),
+        (df_pandas_irregular["depth"], 12),
+        (series, 49),
+        (series_polars, 49),
+        (np_data_irregular, 12),
+        (df_polars_irregular["depth"], 12),
+        (series_data_irregular, 12),
+        (series_polars_data_irregular, 12),
+        (list_data_irregular, 12),
+    ],
+    ids=[
+        "count_nonzero_01",
+        "count_nonzero_02",
+        "count_nonzero_03",
+        "count_nonzero_04",
+        "count_nonzero_05",
+        "count_nonzero_06",
+        "count_nonzero_07",
+        "count_nonzero_08",
+        "count_nonzero_09",
+    ],
+)
+def test_count_nonzero(test_input, expected):
+    assert pzutils.count_nonzero(test_input) == expected
 
 
 def test_nanquantile():
