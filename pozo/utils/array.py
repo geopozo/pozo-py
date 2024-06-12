@@ -180,10 +180,9 @@ def check_xarray():
 def min(data):
     if hasattr(data, "to_numpy"):
         try:
-            return data.min()
-        except TypeError:
-            check_pandas()
             return data.min(skipna=True)
+        except TypeError:
+            return data.min()
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
@@ -203,10 +202,9 @@ def min(data):
 def max(data):
     if hasattr(data, "to_numpy"):
         try:
-            return data.max()
-        except TypeError:
-            check_pandas()
             return data.max(skipna=True)
+        except TypeError:
+            return data.max()
     else:
         check_numpy()
         if isinstance(data, (list, tuple)):
