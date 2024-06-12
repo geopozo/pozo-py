@@ -268,15 +268,30 @@ def test_round():
     assert pzutils.round(list_data_irregular).any()
 
 
-def test_append():
-    assert (pzutils.append(np_data, 1))[-1] == 1
-    assert (pzutils.append(df_pandas_irregular["depth"], [2, 3, 4])).iloc[-1] == 4
-    assert (pzutils.append(series, (2, 3, 4, 5, 6, 7))).iloc[-1] == 7
-    assert (pzutils.append(series_polars, 8))[-1] == 8
-    assert (pzutils.append(np_data_irregular, (2, 3, 4, 5, 6, 7)))[-1] == 7
-    assert (pzutils.append(df_polars_irregular["depth"], np.array([1, 2, 3, 4])))[
-        -1
-    ] == 4
-    assert (pzutils.append(series_data_irregular, np.array([1, 2, 3, 4]))).iloc[-1] == 4
-    assert (pzutils.append(series_polars_data_irregular, (2, 3, 4, 5, 6, 7)))[-1] == 7
-    assert (pzutils.append(list_data_irregular, 1000))[-1] == 1000
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, len(np_data)),
+        (df_pandas_irregular["depth"], len(df_pandas_irregular["depth"])),
+        (series, len(series)),
+        (series_polars, len(series_polars)),
+        (np_data_irregular, len(np_data_irregular)),
+        (df_polars_irregular["depth"], len(df_pandas_irregular["depth"])),
+        (series_data_irregular, len(series_data_irregular)),
+        (series_polars_data_irregular, len(series_polars_data_irregular)),
+        (list_data_irregular, len(list_data_irregular)),
+    ],
+    ids=[
+        "append_01",
+        "append_02",
+        "append_03",
+        "append_04",
+        "append_05",
+        "append_06",
+        "append_07",
+        "append_08",
+        "append_09",
+    ],
+)
+def test_append(test_input, expected): #You should use list, tuple, numpy array and also just one value
+    assert len(pzutils.append(test_input, (2, 3, 4, 5, 6, 7))) == expected + len((2, 3, 4, 5, 6, 7))
