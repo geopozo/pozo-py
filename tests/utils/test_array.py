@@ -174,16 +174,33 @@ def test_abs():
     assert pzutils.abs(list_data_irregular) is not None
 
 
-def test_isfinite():
-    assert pzutils.isfinite(np_data).all()
-    assert pzutils.isfinite(df_pandas_irregular["depth"]).all()
-    assert pzutils.isfinite(series).all()
-    assert pzutils.isfinite(series_polars).all()
-    assert pzutils.isfinite(np_data_irregular).all()
-    assert pzutils.isfinite(df_polars_irregular["depth"]).all()
-    assert pzutils.isfinite(series_data_irregular).all()
-    assert pzutils.isfinite(series_polars_data_irregular).all()
-    assert pzutils.isfinite(list_data_irregular).all()
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, True),
+        (df_pandas_irregular["depth"], False),
+        (series, True),
+        (series_polars, True),
+        (np_data_irregular, False),
+        (df_polars_irregular["depth"], False),
+        (series_data_irregular, False),
+        (series_polars_data_irregular, False),
+        (list_data_irregular, False),
+    ],
+    ids=[
+        "isfinite_01",
+        "isfinite_02",
+        "isfinite_03",
+        "isfinite_04",
+        "isfinite_05",
+        "isfinite_06",
+        "isfinite_07",
+        "isfinite_08",
+        "isfinite_09",
+    ],
+)
+def test_isfinite(test_input, expected):
+    assert pzutils.isfinite(test_input).all() == expected
 
 
 def test_isnan():
