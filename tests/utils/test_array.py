@@ -144,7 +144,7 @@ def test_min(test_input, expected):
         (df_polars_irregular["depth"], float("inf")),
         (series_data_irregular, float("inf")),
         (series_polars_data_irregular, float("inf")),
-        (list_data_irregular, float("-inf")),
+        (list_data_irregular, float("inf")),
     ],
     ids=[
         "max_01",
