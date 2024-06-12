@@ -162,16 +162,33 @@ def test_max(test_input, expected):
     assert pzutils.max(test_input) == expected
 
 
-def test_abs():
-    assert pzutils.abs(np_data) is not None
-    assert pzutils.abs(df_pandas_irregular["depth"]) is not None
-    assert pzutils.abs(series) is not None
-    assert pzutils.abs(series_polars) is not None
-    assert pzutils.abs(np_data_irregular) is not None
-    assert pzutils.abs(df_polars_irregular["depth"]) is not None
-    assert pzutils.abs(series_data_irregular) is not None
-    assert pzutils.abs(series_polars_data_irregular) is not None
-    assert pzutils.abs(list_data_irregular) is not None
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        (np_data),
+        (df_pandas_irregular["depth"]),
+        (series),
+        (series_polars),
+        (np_data_irregular),
+        (df_polars_irregular["depth"]),
+        (series_data_irregular),
+        (series_polars_data_irregular),
+        (list_data_irregular),
+    ],
+    ids=[
+        "abs_01",
+        "abs_02",
+        "abs_03",
+        "abs_04",
+        "abs_05",
+        "abs_06",
+        "abs_07",
+        "abs_08",
+        "abs_09",
+    ],
+)
+def test_abs(test_input):
+    assert pzutils.abs(test_input).all() >= 0
 
 
 @pytest.mark.parametrize(
