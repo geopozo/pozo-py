@@ -218,16 +218,33 @@ def test_isfinite(test_input, expected):
     assert pzutils.isfinite(test_input).all() == expected
 
 
-def test_isnan():
-    assert pzutils.isnan(np_data) is not None
-    assert pzutils.isnan(df_pandas_irregular["depth"]) is not None
-    assert pzutils.isnan(series) is not None
-    assert pzutils.isnan(series_polars) is not None
-    assert pzutils.isnan(np_data_irregular) is not None
-    assert pzutils.isnan(df_polars_irregular["depth"]) is not None
-    assert pzutils.isnan(series_data_irregular) is not None
-    assert pzutils.isnan(series_polars_data_irregular) is not None
-    assert pzutils.isnan(list_data_irregular) is not None
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, False),
+        (df_pandas_irregular["depth"], True),
+        (series, False),
+        (series_polars, False),
+        (np_data_irregular, True),
+        (df_polars_irregular["depth"], True),
+        (series_data_irregular, True),
+        (series_polars_data_irregular, True),
+        (list_data_irregular, True),
+    ],
+    ids=[
+        "isnan_01",
+        "isnan_02",
+        "isnan_03",
+        "isnan_04",
+        "isnan_05",
+        "isnan_06",
+        "isnan_07",
+        "isnan_08",
+        "isnan_09",
+    ],
+)
+def test_isnan(test_input, expected):
+    assert pzutils.isnan(test_input).any() == expected
 
 
 @pytest.mark.parametrize(
