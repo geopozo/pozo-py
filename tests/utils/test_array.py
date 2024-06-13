@@ -31,18 +31,29 @@ df_polars = pl.DataFrame({"depth": np_data})
 df_polars_irregular = pl.DataFrame({"depth": list_data_irregular})
 
 
-def test_summarize_array():
-    assert pzutils.summarize_array(np_data) is not None
-    assert pzutils.summarize_array(df_polars["depth"]) is not None
-    assert pzutils.summarize_array(df_polars_irregular["depth"]) is not None
-    assert pzutils.summarize_array(series) is not None
-    assert pzutils.summarize_array(series_polars) is not None
-    assert pzutils.summarize_array(np_data_irregular) is not None
-    assert pzutils.summarize_array(df_pandas["depth"]) is not None
-    assert pzutils.summarize_array(df_pandas_irregular["depth"]) is not None
-    assert pzutils.summarize_array(series_data_irregular) is not None
-    assert pzutils.summarize_array(series_polars_data_irregular) is not None
-    assert pzutils.summarize_array(list_data_irregular) is not None
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        (np_data),
+        (series),
+        (series_polars),
+    ],
+    ids=[
+        "summarize_array_01",
+        "summarize_array_02",
+        "summarize_array_03",
+    ],
+)
+def test_summarize_array(test_input):
+    assert pzutils.summarize_array(test_input)
+
+    with pytest.raises(Exception):
+        assert pzutils.summarize_array(list_data_irregular)
+        assert pzutils.summarize_array(df_polars_irregular["depth"])
+        assert pzutils.summarize_array(np_data_irregular)
+        assert pzutils.summarize_array(df_pandas_irregular["depth"])
+        assert pzutils.summarize_array(series_data_irregular)
+        assert pzutils.summarize_array(series_polars_data_irregular)
 
 
 def test_is_close():
