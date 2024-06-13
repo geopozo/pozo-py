@@ -56,34 +56,21 @@ def test_summarize_array(test_input):
         assert pzutils.summarize_array(series_polars_data_irregular)
 
 
-def test_is_close():
-    assert pzutils.is_close(np_data[0], np_data[-1]) is not None
-    assert pzutils.is_close(series.iloc[0], series.iloc[-1]) is not None
-    assert (
-        pzutils.is_close(
-            df_pandas_irregular["depth"].iloc[0], df_pandas_irregular["depth"].iloc[-1]
-        )
-        is not None
-    )
-    assert pzutils.is_close(series_polars[0], series_polars[-1]) is not None
-    assert pzutils.is_close(np_data_irregular[0], np_data_irregular[-1]) is not None
-    assert (
-        pzutils.is_close(
-            df_polars_irregular["depth"][0], df_polars_irregular["depth"][-1]
-        )
-        is not None
-    )
-    assert (
-        pzutils.is_close(series_data_irregular.iloc[0], series_data_irregular.iloc[-1])
-        is not None
-    )
-    assert (
-        pzutils.is_close(
-            series_polars_data_irregular[0], series_polars_data_irregular[-1]
-        )
-        is not None
-    )
-    assert pzutils.is_close(list_data_irregular[0], list_data_irregular[-1]) is not None
+@pytest.mark.parametrize(
+    "test_input_1,test_input_2,expected",
+    [
+        (np_data[0], np_data[-1], False),
+        (series.iloc[0], series.iloc[-1], False),
+        (series_polars[0], series_polars[-1], False),
+    ],
+    ids=[
+        "is_close_01",
+        "is_close_02",
+        "is_close_03",
+    ],
+)
+def test_is_close(test_input_1, test_input_2, expected):
+    assert pzutils.is_close(test_input_1, test_input_2) == expected
 
 
 @pytest.mark.parametrize(
