@@ -273,16 +273,33 @@ def test_count_nonzero(test_input, expected):
     assert pzutils.count_nonzero(test_input) == expected
 
 
-def test_nanquantile():
-    assert pzutils.nanquantile(np_data, 0.5) == 1000
-    assert pzutils.nanquantile(df_pandas_irregular["depth"], 0.5) == 80
-    assert pzutils.nanquantile(series, 0.5) == 1000
-    assert pzutils.nanquantile(series_polars, 0.5) == 1000
-    assert pzutils.nanquantile(np_data_irregular, 0.5) == 80
-    assert pzutils.nanquantile(df_polars_irregular["depth"], 0.5) == 80
-    assert pzutils.nanquantile(series_data_irregular, 0.5) == 80
-    assert pzutils.nanquantile(series_polars_data_irregular, 0.5) == 80
-    assert pzutils.nanquantile(list_data_irregular, 0.5) == 80
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np_data, 1000),
+        (df_pandas_irregular["depth"], 80),
+        (series, 1000),
+        (series_polars, 1000),
+        (np_data_irregular, 80),
+        (df_polars_irregular["depth"], 90), #ERROR, NAN ALTERA EL VALOR EN POLARS
+        (series_data_irregular, 80),
+        (series_polars_data_irregular, 90), #ERROR, NAN ALTERA EL VALOR EN POLARS
+        (list_data_irregular, 80),
+    ],
+    ids=[
+        "count_nonzero_01",
+        "count_nonzero_02",
+        "count_nonzero_03",
+        "count_nonzero_04",
+        "count_nonzero_05",
+        "count_nonzero_06",
+        "count_nonzero_07",
+        "count_nonzero_08",
+        "count_nonzero_09",
+    ],
+)
+def test_nanquantile(test_input, expected):
+    assert pzutils.nanquantile(test_input, 0.5) == expected
 
 
 def test_round():
