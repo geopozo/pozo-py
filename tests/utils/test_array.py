@@ -166,11 +166,8 @@ def test_max(test_input, expected):
         (np_data),
         (df_pandas_irregular["depth"]),
         (series),
-        (series_polars),
         (np_data_irregular),
-        (df_polars_irregular["depth"]),
         (series_data_irregular),
-        (series_polars_data_irregular),
         (list_data_irregular),
     ],
     ids=[
@@ -180,13 +177,13 @@ def test_max(test_input, expected):
         "abs_04",
         "abs_05",
         "abs_06",
-        "abs_07",
-        "abs_08",
-        "abs_09",
     ],
 )
 def test_abs(test_input):
     assert pzutils.abs(test_input).all() >= 0
+    assert (pzutils.abs(series_polars) >= 0).all()
+    assert (pzutils.abs(df_polars_irregular["depth"]) >= 0).all()
+    assert (pzutils.abs(series_polars_data_irregular) >= 0).all()
 
 
 @pytest.mark.parametrize(
