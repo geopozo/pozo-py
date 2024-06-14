@@ -302,16 +302,30 @@ def test_nanquantile(test_input, expected):
     assert pzutils.nanquantile(test_input, 0.5) == expected
 
 
-def test_round():
-    assert pzutils.round(np_data).any()
-    assert pzutils.round(df_pandas_irregular["depth"]).any()
-    assert pzutils.round(series).any()
-    assert (pzutils.round(series_polars) != 0).any()
-    assert pzutils.round(np_data_irregular).any()
-    assert (pzutils.round(df_polars_irregular["depth"]) != 0).any()
-    assert pzutils.round(series_data_irregular).any()
-    assert (pzutils.round(series_polars_data_irregular) != 0).any()
-    assert pzutils.round(list_data_irregular).any()
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        (np_data),
+        (df_pandas_irregular["depth"]),
+        (series),
+        (np_data_irregular),
+        (series_data_irregular),
+        (list_data_irregular),
+    ],
+    ids=[
+        "round_01",
+        "round_02",
+        "round_03",
+        "round_04",
+        "round_05",
+        "round_06",
+    ],
+)
+def test_round(test_input):
+    assert pzutils.round(test_input).all() != 0
+    assert (pzutils.round(series_polars) != 0).all()
+    assert (pzutils.round(df_polars_irregular["depth"]) != 0).all()
+    assert (pzutils.round(series_polars_data_irregular) != 0).all()
 
 
 @pytest.mark.parametrize(
