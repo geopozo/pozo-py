@@ -1,4 +1,4 @@
-name: ruff
+name: ruff-wf
 on: pull_request
 jobs:
   ruff:
