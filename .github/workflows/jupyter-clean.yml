@@ -1,6 +1,3 @@
-name: Ensure Clean Jupyter Notebooks
+name: jupyter-clean
 on: pull_request
-jobs:
-  check-jupyter:
-    steps:
-      - uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@1.1
+uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@1.1
