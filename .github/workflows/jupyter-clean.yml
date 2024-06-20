@@ -1,0 +1,5 @@
+- name: Ensure Clean Jupyter Notebooks
+  on:
+    pull_request:
+      branches: [ "main" ]
+  uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@1.1
