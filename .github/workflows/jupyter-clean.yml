@@ -1,7 +1,5 @@
 name: Ensure Clean Jupyter Notebooks
-on:
-    pull_request:
-      branches: [ "main" ]
+on: pull_request
 jobs:
   check-jupyter:
     steps:
