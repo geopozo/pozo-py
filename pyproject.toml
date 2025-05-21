@@ -22,8 +22,9 @@ dependencies = [
  "kaleido >=0.2.1",
  "ipywidgets",
  "nbformat",
- "lasio"
- ]
+ "lasio",
+ "anywidget>=0.9.18",
+]
 
 [project.optional-dependencies]
 dev = ["pytest"]
