@@ -639,7 +639,7 @@ class Plotly(pzr.Renderer):
                                     fillcolor)
                                 # we will lock both axes completely but it seems like mutual zoom operations are ok
                                 # notes above on how to do that
-                        if themes['intervals'] == 'category':
+                        if False:
                             pass
                         else:
                             all_traces.append(go.Scatter(
