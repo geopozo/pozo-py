@@ -2,9 +2,11 @@ import os
 import warnings
 
 import numpy as np
+import pint  # noqa
+
 import pozo
+
 os.environ['PINT_ARRAY_PROTOCOL_FALLBACK'] = "0" # from numpy/pint documentation
-import pint # noqa
 
 class MissingLasUnitWarning(UserWarning):
     pass

@@ -5,8 +5,13 @@ from IPython.display import HTML, display
 from io import StringIO
 import pandas as pd
 
-from .units import MissingRangeError, LasMapEntry
-from .units import LasRegistry, UnitException, MissingLasUnitWarning
+from .units import (
+    MissingRangeError,
+    LasMapEntry,
+    LasRegistry,
+    UnitException,
+    MissingLasUnitWarning,
+)
 import re
 
 
@@ -102,7 +107,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
                 parsed = registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
                 if resolved is None: raise MissingLasUnitWarning("Parsed directly from LAS, probably wrong")
             except (pint.UndefinedUnitError, MissingRangeError, UnitException, MissingLasUnitWarning) as e:
-                confidence = " - " + str(e) + " - NONE"
+                confidence = f" - {str(e)} - NONE"
             find_desc = desc_wo_num.findall(curve.descr)
             desc = find_desc[0] if len(find_desc) > 0 else curve.descr
             [v_min, v_med, v_max] = [str(x) for x in np.nanquantile(curve.data, [0, .5, 1])]
@@ -136,7 +141,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             display(str(e))
             display(HTML("<br>".join(result)))
 
-# Just a shorcut to make the API nice
+# Just a shortcut to make the API nice
 def parse_unit_from_curve(curve, registry=registry):
     try:
         return registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
