@@ -16,23 +16,23 @@ class MissingRangeError(Exception):
     pass
 
 class LasMapEntry():
-    def  __init__(self, boundries, unit, confidence):
-        if not isinstance(boundries, tuple) or not (len(boundries) == 0 or len(boundries) == 2):
+    def  __init__(self, boundaries, unit, confidence):
+        if not isinstance(boundaries, tuple) or not (len(boundaries) == 0 or len(boundaries) == 2):
             raise TypeError("add_las_map ranges should contain a tuple with (min, max) or () catch-all")
-        self.boundries = boundries
+        self.boundaries = boundaries
         self.unit = unit
         self.confidence = confidence
 
     def check(self, min_val, max_val):
-        if len(self.boundries) == 0:
+        if len(self.boundaries) == 0:
             return True
-        elif min_val > self.boundries[0] and max_val < self.boundries[1]:
+        elif min_val > self.boundaries[0] and max_val < self.boundaries[1]:
             return True
         return False
 
 # Namespace would be nicer and I could hide registries if this wasn't overriden
 # But would the map be global?
-# Or would we just use a default registery like in init
+# Or would we just use a default register like in init
 class LasRegistry(pint.UnitRegistry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
