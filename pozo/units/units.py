@@ -22,8 +22,9 @@ class MissingRangeError(Exception):
 
 class LasMapEntry():
     def  __init__(self, boundaries, unit, confidence):
-        if not isinstance(boundaries, tuple) or not (len(boundaries) == 0 or len(boundaries) == 2):
+        if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError("add_las_map ranges should contain a tuple with (min, max) or () catch-all")
+
         self.boundaries = boundaries
         self.unit = unit
         self.confidence = confidence
