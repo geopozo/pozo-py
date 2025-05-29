@@ -107,7 +107,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
                 current_match = match.group()
                 colored = '<td style="color:#B95000">' + current_match[4:]
                 output = output.replace(current_match, colored)
-            display(HTML('<div id="' + divid + '">' + output + "</div>"))
+            display(HTML(f'<div id="{divid}">{output}</div>'))
         except Exception as e:
             display(str(e))
             display(HTML("<br>".join(result)))
