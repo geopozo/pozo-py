@@ -36,8 +36,8 @@ class RangeBoundaries:
 class LasUnitRegistry(pint.UnitRegistry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._mnemonic_units = {}
-        self._reverse_mnemonic_units = {}
+        self._mnemonic_to_units = {}
+        self._units_to_mnemonic = {}
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
@@ -55,14 +55,14 @@ class LasUnitRegistry(pint.UnitRegistry):
             # Can't check in LasMapEntry because don't have registry
             self.parse_units(ra.unit)
 
-        if mnemonic not in self._mnemonic_units:
-            self._mnemonic_units[mnemonic] = {}
-            self._reverse_mnemonic_units[mnemonic] = {}
+        if mnemonic not in self._mnemonic_to_units:
+            self._mnemonic_to_units[mnemonic] = {}
+            self._units_to_mnemonic[mnemonic] = {}
 
-        self._mnemonic_units[mnemonic][unit] = ranges
+        self._mnemonic_to_units[mnemonic][unit] = ranges
 
         for ra in ranges:
-            self._reverse_mnemonic_units[mnemonic][self.parse_units(ra.unit)] = (
+            self._units_to_mnemonic[mnemonic][self.parse_units(ra.unit)] = (
                 unit  # doesn't this override
             )
 
@@ -71,12 +71,12 @@ class LasUnitRegistry(pint.UnitRegistry):
         # TODO: looking up the dimension would be nice
         mnemonic = pozo.deLASio(mnemonic)
         if (
-            mnemonic in self._reverse_mnemonic_units
-            and unit in self._reverse_mnemonic_units[mnemonic]
+            mnemonic in self._units_to_mnemonic
+            and unit in self._units_to_mnemonic[mnemonic]
         ):
-            return self._reverse_mnemonic_units[mnemonic][unit]
-        elif unit in self._reverse_mnemonic_units["-"]:
-            return self._reverse_mnemonic_units["-"][unit]
+            return self._units_to_mnemonic[mnemonic][unit]
+        elif unit in self._units_to_mnemonic["-"]:
+            return self._units_to_mnemonic["-"][unit]
         else:
             return None
 
@@ -86,10 +86,10 @@ class LasUnitRegistry(pint.UnitRegistry):
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
         ranges = None
-        if mnemonic in self._mnemonic_units and unit in self._mnemonic_units[mnemonic]:
-            ranges = self._mnemonic_units[mnemonic][unit]
-        elif unit in self._mnemonic_units["-"]:
-            ranges = self._mnemonic_units["-"][unit]
+        if mnemonic in self._mnemonic_to_units and unit in self._mnemonic_to_units[mnemonic]:
+            ranges = self._mnemonic_to_units[mnemonic][unit]
+        elif unit in self._mnemonic_to_units["-"]:
+            ranges = self._mnemonic_to_units["-"][unit]
         if ranges:
             for ra in ranges:
                 if ra.is_within_range(min_val, max_val):
