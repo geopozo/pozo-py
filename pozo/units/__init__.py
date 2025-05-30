@@ -50,10 +50,18 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
         warnings.simplefilter("default")
         warnings.filterwarnings("error", category=MissingLasUnitWarning)
 
-        d = chr(0X1e) # delimiter
+        d = chr(0x1E)  # delimiter
         col_names = [
-            "mnemonic", "las unit", "pozo mapping", "confidence",
-            "parsed", "description", "min", "med", "max", "#NaN"
+            "mnemonic",
+            "las unit",
+            "pozo mapping",
+            "confidence",
+            "parsed",
+            "description",
+            "min",
+            "med",
+            "max",
+            "#NaN",
         ]
         result = [f"{d}".join(col_names)] if HTML_out else []
         for curve in las.curves:
@@ -85,7 +93,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
 
             find_desc = desc_wo_num.findall(curve.descr)
             desc = find_desc[0] if len(find_desc) > 0 else curve.descr
-            
+
             v_min, v_med, v_max = map(str, np.nanquantile(curve.data, [0, 0.5, 1]))
             n_nan = np.count_nonzero(np.isnan(curve.data))
 
@@ -111,21 +119,20 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
 
         try:
             post_result = "\n".join(result)
-            output = pd.read_csv(
-                StringIO(post_result), delimiter=d, na_filter=False
-            ).to_html()
+            output = pd.read_csv(StringIO(post_result), delimiter=d, na_filter=False)
+            output_html = output.to_html()
 
-            for match in red_low.finditer(output):
+            for match in red_low.finditer(output_html):
                 current_match = match.group()
                 colored = '<td style="color:red">' + current_match[4:]
-                output = output.replace(current_match, colored)
-                
-            for match in orange_medium.finditer(output):
+                output_html = output_html.replace(current_match, colored)
+
+            for match in orange_medium.finditer(output_html):
                 current_match = match.group()
                 colored = '<td style="color:#B95000">' + current_match[4:]
-                output = output.replace(current_match, colored)
+                output_html = output_html.replace(current_match, colored)
 
-            display(HTML(f'<div id="{divid}">{output}</div>'))
+            display(HTML(f'<div id="{divid}">{output_html}</div>'))
 
         except Exception as e:
             display(str(e))
