@@ -30,14 +30,30 @@ class RangeBoundaries:
         return False
 
 
+class UnitMapper:
+    def __init__(self):
+        self._mnemonic_to_units = {}
+        self._units_to_mnemonic = {}
+
+    def register_mapping(self, mnemonic, unit, ranges):
+        if mnemonic not in self._mnemonic_to_units:
+            self._mnemonic_to_units[mnemonic] = {}
+            self._units_to_mnemonic[mnemonic] = {}
+
+        self._mnemonic_to_units[mnemonic][unit] = ranges
+
+        for ra in ranges:
+            parsed_unit = ra.unit
+            self._units_to_mnemonic[mnemonic][parsed_unit] = unit
+
+
 # Namespace would be nicer and I could hide registries if this wasn't overriden
 # But would the map be global?
 # Or would we just use a default register like in init
 class LasUnitRegistry(pint.UnitRegistry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._mnemonic_to_units = {}
-        self._units_to_mnemonic = {}
+        self.mapper = UnitMapper()
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
@@ -49,22 +65,10 @@ class LasUnitRegistry(pint.UnitRegistry):
 
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
-                raise TypeError(
-                    "Improperly formated map for LasMap, should be type LasMapEntry"
-                )
-            # Can't check in LasMapEntry because don't have registry
+                raise TypeError("All entries must be of type RangeBoundaries.")
             self.parse_units(ra.unit)
 
-        if mnemonic not in self._mnemonic_to_units:
-            self._mnemonic_to_units[mnemonic] = {}
-            self._units_to_mnemonic[mnemonic] = {}
-
-        self._mnemonic_to_units[mnemonic][unit] = ranges
-
-        for ra in ranges:
-            self._units_to_mnemonic[mnemonic][self.parse_units(ra.unit)] = (
-                unit  # doesn't this override
-            )
+        self.mapper.register_mapping(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
         unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
@@ -86,7 +90,10 @@ class LasUnitRegistry(pint.UnitRegistry):
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
         ranges = None
-        if mnemonic in self._mnemonic_to_units and unit in self._mnemonic_to_units[mnemonic]:
+        if (
+            mnemonic in self._mnemonic_to_units
+            and unit in self._mnemonic_to_units[mnemonic]
+        ):
             ranges = self._mnemonic_to_units[mnemonic][unit]
         elif unit in self._mnemonic_to_units["-"]:
             ranges = self._mnemonic_to_units["-"][unit]
