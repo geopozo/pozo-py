@@ -16,21 +16,10 @@ from .units import (
 )
 
 registry = LasRegistry()
-Quantity = Q = (
-    registry.Quantity
-)  # Overriding the registry and all this is a little weird
+Quantity = Q = (registry.Quantity)  # Overriding the registry and all this is a little weird
 
 registry_defines(registry)
 registry_mapping(registry)
-
-
-# TODO: Beginning of a database, has to go online
-# mnemonics, synonyms (resolve- matching in theme,
-# matching in recipe, matching for unit determination)
-# relationships between mnemonics? tolerances? tools?
-# annotating reg files w/ corrections that the file doesn't support
-# versioning, searching
-# also want it to point to posts
 
 desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
 red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
@@ -52,18 +41,12 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
 
         d = chr(0x1E)  # delimiter
         col_names = [
-            "mnemonic",
-            "las unit",
-            "pozo mapping",
-            "confidence",
-            "parsed",
-            "description",
-            "min",
-            "med",
-            "max",
-            "#NaN",
+            "mnemonic", "las unit", "pozo mapping", "confidence",
+            "parsed", "description", "min", "med", "max", "#NaN"
         ]
+
         result = [f"{d}".join(col_names)] if HTML_out else []
+
         for curve in las.curves:
             resolved = None
             pozo_match = None
@@ -79,6 +62,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
                 parsed = registry.parse_unit_from_context(
                     curve.mnemonic, curve.unit, curve.data
                 )
+
                 if resolved is None:
                     raise MissingLasUnitWarning(
                         "Parsed directly from LAS, probably wrong"
@@ -91,8 +75,8 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             ) as e:
                 confidence = f" - {str(e)} - NONE"
 
-            find_desc = desc_wo_num.findall(curve.descr)
-            desc = find_desc[0] if len(find_desc) > 0 else curve.descr
+            desc_match = desc_wo_num.findall(curve.descr)
+            desc = desc_match[0] if len(desc_match) > 0 else curve.descr
 
             v_min, v_med, v_max = map(str, np.nanquantile(curve.data, [0, 0.5, 1]))
             n_nan = np.count_nonzero(np.isnan(curve.data))
