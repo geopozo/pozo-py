@@ -49,9 +49,13 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
     with warnings.catch_warnings():
         warnings.simplefilter("default")
         warnings.filterwarnings("error", category=MissingLasUnitWarning)
+
         d = chr(0X1e) # delimiter
-        col_names = f"mnemonic{d}las unit{d}pozo mapping{d}confidence{d}parsed{d}description{d}min{d}med{d}max{d}#NaN"
-        result = [col_names] if HTML_out else []
+        col_names = [
+            "mnemonic", "las unit", "pozo mapping", "confidence",
+            "parsed", "description", "min", "med", "max", "#NaN"
+        ]
+        result = [f"{d}".join(col_names)] if HTML_out else []
         for curve in las.curves:
             resolved = None
             pozo_match = None
@@ -114,7 +118,9 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
                 current_match = match.group()
                 colored = '<td style="color:#B95000">' + current_match[4:]
                 output = output.replace(current_match, colored)
+
             display(HTML(f'<div id="{divid}">{output}</div>'))
+
         except Exception as e:
             display(str(e))
             display(HTML("<br>".join(result)))
