@@ -114,11 +114,12 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             output = pd.read_csv(
                 StringIO(post_result), delimiter=d, na_filter=False
             ).to_html()
-            
+
             for match in red_low.finditer(output):
                 current_match = match.group()
                 colored = '<td style="color:red">' + current_match[4:]
                 output = output.replace(current_match, colored)
+                
             for match in orange_medium.finditer(output):
                 current_match = match.group()
                 colored = '<td style="color:#B95000">' + current_match[4:]
