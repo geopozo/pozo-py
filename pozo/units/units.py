@@ -110,7 +110,6 @@ class LasUnitRegistry(pint.UnitRegistry):
             )
         return None
 
-    # this just gives you a result
     def parse_unit_from_context(self, mnemonic, unit, data):
         resolved = None
         try:
@@ -136,6 +135,3 @@ class LasUnitRegistry(pint.UnitRegistry):
                 raise UnitException(
                     f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
                 ) from e
-
-
-# we now don't get confidence from string
