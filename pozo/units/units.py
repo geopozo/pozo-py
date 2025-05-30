@@ -56,6 +56,16 @@ class UnitMapper:
             return self._mnemonic_to_units["-"][unit]
         return None
 
+    def get_las_unit(self, mnemonic, si_unit):
+        if (
+            mnemonic in self._units_to_mnemonic
+            and si_unit in self._units_to_mnemonic[mnemonic]
+        ):
+            return self._units_to_mnemonic[mnemonic][si_unit]
+        if "-" in self._units_to_mnemonic and si_unit in self._units_to_mnemonic["-"]:
+            return self._units_to_mnemonic["-"][si_unit]
+        return None
+
 
 # Namespace would be nicer and I could hide registries if this wasn't overriden
 # But would the map be global?
@@ -82,17 +92,8 @@ class LasUnitRegistry(pint.UnitRegistry):
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
         unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
-        # TODO: looking up the dimension would be nice
         mnemonic = pozo.deLASio(mnemonic)
-        if (
-            mnemonic in self._units_to_mnemonic
-            and unit in self._units_to_mnemonic[mnemonic]
-        ):
-            return self._units_to_mnemonic[mnemonic][unit]
-        elif unit in self._units_to_mnemonic["-"]:
-            return self._units_to_mnemonic["-"][unit]
-        else:
-            return None
+        return self.mapper.get_las_unit(mnemonic, unit)
 
     def resolve_las_unit(self, mnemonic, unit, data):
         mnemonic = pozo.deLASio(mnemonic)
