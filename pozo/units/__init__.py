@@ -24,7 +24,24 @@ registry_mapping(registry)
 desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
 red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
 orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
+d = chr(0x1E)  # delimiter
 
+def generate_html_table(data):
+    post_result = "\n".join(data)
+    output = pd.read_csv(StringIO(post_result), delimiter=d, na_filter=False)
+    output_html = output.to_html()
+
+    for match in red_low.finditer(output_html):
+        current_match = match.group()
+        colored = '<td style="color:red">' + current_match[4:]
+        output_html = output_html.replace(current_match, colored)
+
+    for match in orange_medium.finditer(output_html):
+        current_match = match.group()
+        colored = '<td style="color:#B95000">' + current_match[4:]
+        output_html = output_html.replace(current_match, colored)
+
+    return output_html
 
 def check_las(las, registry=registry, HTML_out=True, divid=""):
     def n0(s):  # If None, convert to ""
@@ -39,7 +56,6 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
         warnings.simplefilter("default")
         warnings.filterwarnings("error", category=MissingLasUnitWarning)
 
-        d = chr(0x1E)  # delimiter
         col_names = [
             "mnemonic", "las unit", "pozo mapping", "confidence",
             "parsed", "description", "min", "med", "max", "#NaN"
@@ -102,20 +118,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             return result
 
         try:
-            post_result = "\n".join(result)
-            output = pd.read_csv(StringIO(post_result), delimiter=d, na_filter=False)
-            output_html = output.to_html()
-
-            for match in red_low.finditer(output_html):
-                current_match = match.group()
-                colored = '<td style="color:red">' + current_match[4:]
-                output_html = output_html.replace(current_match, colored)
-
-            for match in orange_medium.finditer(output_html):
-                current_match = match.group()
-                colored = '<td style="color:#B95000">' + current_match[4:]
-                output_html = output_html.replace(current_match, colored)
-
+            output_html = generate_html_table(result)
             display(HTML(f'<div id="{divid}">{output_html}</div>'))
 
         except Exception as e:
