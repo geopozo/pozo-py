@@ -111,27 +111,29 @@ class LasUnitRegistry(pint.UnitRegistry):
         return None
 
     def parse_unit_from_context(self, mnemonic, unit, data):
-        resolved = None
         try:
             resolved = self.resolve_las_unit(mnemonic, unit, data)
+            if resolved is not None:
+                return self._try_parse_unit(resolved.unit)
         except MissingRangeError as e:
             warnings.warn(str(e))
-        if resolved is not None:
-            try:
-                return self.parse_units(resolved.unit)
-            except Exception as e:
-                warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
-                return None
-        else:
-            try:
-                if not unit or unit == "":
-                    raise UnitException("Empty unit not allowed- please map it")
-                try:
-                    return self.parse_units(unit)
-                except Exception as e:
-                    warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
-                    return None
-            except pint.UndefinedUnitError as e:
-                raise UnitException(
-                    f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
-                ) from e
+
+        if not unit or unit == "":
+            raise UnitException("Empty unit not allowed- please map it")
+
+        return self._try_parse_unit_with_fallback(unit, mnemonic)
+            
+    def _try_parse_unit(self, unit_str):
+        try:
+            return self.parse_units(unit_str)
+        except Exception as e:
+            warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+            return None
+        
+    def _try_parse_unit_with_fallback(self, unit, mnemonic):
+        try:
+            return self._try_parse_unit(unit)
+        except pint.UndefinedUnitError as e:
+            raise UnitException(
+                f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
+            ) from e
