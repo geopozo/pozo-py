@@ -22,7 +22,7 @@ class RangeBoundaries:
         self.unit = unit
         self.confidence = confidence
 
-    def check(self, min_val, max_val):
+    def is_within_range(self, min_val, max_val):
         if len(self.boundaries) == 0:
             return True
         elif min_val > self.boundaries[0] and max_val < self.boundaries[1]:
@@ -92,7 +92,7 @@ class LasUnitRegistry(pint.UnitRegistry):
             ranges = self._mnemonic_units["-"][unit]
         if ranges:
             for ra in ranges:
-                if ra.check(min_val, max_val):
+                if ra.is_within_range(min_val, max_val):
                     return ra
             raise MissingRangeError(
                 f"{unit} for {mnemonic} found but not in range: {ranges}."
