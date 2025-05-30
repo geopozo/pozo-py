@@ -82,11 +82,13 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
                 MissingLasUnitWarning,
             ) as e:
                 confidence = f" - {str(e)} - NONE"
+
             find_desc = desc_wo_num.findall(curve.descr)
             desc = find_desc[0] if len(find_desc) > 0 else curve.descr
-            [v_min, v_med, v_max] = [
-                str(x) for x in np.nanquantile(curve.data, [0, 0.5, 1])
-            ]
+            
+            v_min, v_med, v_max = map(str, np.nanquantile(curve.data, [0, 0.5, 1]))
+            n_nan = np.count_nonzero(np.isnan(curve.data))
+
             curve_data = dict(
                 mnemonic=curve.mnemonic,
                 las_unit=curve.unit,
@@ -97,19 +99,22 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
                 v_min=v_min,
                 v_med=v_med,
                 v_max=v_max,
-                n_nan=np.count_nonzero(np.isnan(curve.data)),
+                n_nan=n_nan,
             )
             if not HTML_out:
                 result.append(curve_data)
             else:
                 result.append(d.join([n0(x) for x in curve_data.values()]))
+
         if not HTML_out:
             return result
+
         try:
             post_result = "\n".join(result)
             output = pd.read_csv(
                 StringIO(post_result), delimiter=d, na_filter=False
             ).to_html()
+            
             for match in red_low.finditer(output):
                 current_match = match.group()
                 colored = '<td style="color:red">' + current_match[4:]
