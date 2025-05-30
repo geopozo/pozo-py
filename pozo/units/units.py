@@ -46,6 +46,16 @@ class UnitMapper:
             parsed_unit = ra.unit
             self._units_to_mnemonic[mnemonic][parsed_unit] = unit
 
+    def get_entries(self, mnemonic, unit):
+        if (
+            mnemonic in self._mnemonic_to_units
+            and unit in self._mnemonic_to_units[mnemonic]
+        ):
+            return self._mnemonic_to_units[mnemonic][unit]
+        if "-" in self._mnemonic_to_units and unit in self._mnemonic_to_units["-"]:
+            return self._mnemonic_to_units["-"][unit]
+        return None
+
 
 # Namespace would be nicer and I could hide registries if this wasn't overriden
 # But would the map be global?
@@ -86,17 +96,10 @@ class LasUnitRegistry(pint.UnitRegistry):
 
     def resolve_las_unit(self, mnemonic, unit, data):
         mnemonic = pozo.deLASio(mnemonic)
-        # unit = unit
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
-        ranges = None
-        if (
-            mnemonic in self._mnemonic_to_units
-            and unit in self._mnemonic_to_units[mnemonic]
-        ):
-            ranges = self._mnemonic_to_units[mnemonic][unit]
-        elif unit in self._mnemonic_to_units["-"]:
-            ranges = self._mnemonic_to_units["-"][unit]
+        ranges = self.mapper.get_entries(mnemonic, unit)
+
         if ranges:
             for ra in ranges:
                 if ra.is_within_range(min_val, max_val):
