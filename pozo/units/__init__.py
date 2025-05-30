@@ -1,19 +1,19 @@
-import numpy as np
-import pint
+import re
 import warnings
-from IPython.display import HTML, display
 from io import StringIO
+
+import numpy as np
 import pandas as pd
+import pint
+from IPython.display import HTML, display
 
 from .registry_config import registry_defines, registry_mapping
-
 from .units import (
+    LasRegistry,
+    MissingLasUnitWarning,
     MissingRangeError,
     UnitException,
-    MissingLasUnitWarning,
-    LasRegistry,
 )
-import re
 
 registry = LasRegistry()
 Quantity = Q = (
