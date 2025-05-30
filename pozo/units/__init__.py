@@ -9,13 +9,13 @@ from IPython.display import HTML, display
 
 from .registry_config import registry_defines, registry_mapping
 from .units import (
-    LasRegistry,
+    LasUnitRegistry,
     MissingLasUnitWarning,
     MissingRangeError,
     UnitException,
 )
 
-registry = LasRegistry()
+registry = LasUnitRegistry()
 Quantity = Q = (registry.Quantity)  # Overriding the registry and all this is a little weird
 
 registry_defines(registry)

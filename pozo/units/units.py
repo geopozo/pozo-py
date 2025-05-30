@@ -5,6 +5,7 @@ import numpy as np
 import pint  # noqa
 
 import pozo
+
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
@@ -32,7 +33,7 @@ class LasMapEntry:
 # Namespace would be nicer and I could hide registries if this wasn't overriden
 # But would the map be global?
 # Or would we just use a default register like in init
-class LasRegistry(pint.UnitRegistry):
+class LasUnitRegistry(pint.UnitRegistry):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._mnemonic_units = {}
