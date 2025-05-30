@@ -11,7 +11,7 @@ from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
 
-class LasMapEntry:
+class RangeBoundaries:
     def __init__(self, boundaries, unit, confidence):
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
@@ -42,13 +42,13 @@ class LasUnitRegistry(pint.UnitRegistry):
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
             ranges = (
-                [LasMapEntry((), ranges, confidence)]
-                if not isinstance(ranges, LasMapEntry)
+                [RangeBoundaries((), ranges, confidence)]
+                if not isinstance(ranges, RangeBoundaries)
                 else [ranges]
             )
 
         for ra in ranges:
-            if not isinstance(ra, LasMapEntry):
+            if not isinstance(ra, RangeBoundaries):
                 raise TypeError(
                     "Improperly formated map for LasMap, should be type LasMapEntry"
                 )

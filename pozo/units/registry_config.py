@@ -1,15 +1,15 @@
-from .units import LasMapEntry
+from .units import RangeBoundaries
 
 
 PU = [
-    LasMapEntry((-50, 80), "pu", "decide by range - MEDIUM"),
-    LasMapEntry((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
-    LasMapEntry((), "puAPI", "catch all, legacy unit - LOW"),
+    RangeBoundaries((-50, 80), "pu", "decide by range - MEDIUM"),
+    RangeBoundaries((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
+    RangeBoundaries((), "puAPI", "catch all, legacy unit - LOW"),
 ]
 percent_general = [
-    LasMapEntry((-100, 100), "percent", "decide by range, verify - LOW"),
-    LasMapEntry((-1, 1), "of_1", "decide by range, verify - LOW"),
-    LasMapEntry((), "ppm", "catch all, ppm - LOW"),
+    RangeBoundaries((-100, 100), "percent", "decide by range, verify - LOW"),
+    RangeBoundaries((-1, 1), "of_1", "decide by range, verify - LOW"),
+    RangeBoundaries((), "ppm", "catch all, ppm - LOW"),
 ]
 
 
