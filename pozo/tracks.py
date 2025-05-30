@@ -2,16 +2,17 @@ import ood
 import pozo
 import pozo.themes as pzt
 
-class Track(ood.Item, pzt.Themeable):
 
+class Track(ood.Item, pzt.Themeable):
     def set_name(self, name):
         return super().set_name(name)
 
     def get_name(self):
         return super().get_name()
 
-    _type="track"
-    _child_type="axis"
+    _type = "track"
+    _child_type = "axis"
+
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
         self.note_dict = {}
@@ -26,7 +27,9 @@ class Track(ood.Item, pzt.Themeable):
             if isinstance(axis, (list)):
                 raw_return.extend(self._check_types(*axis))
             elif not isinstance(axis, accepted_types):
-                raise TypeError(f"Axis.add_axes() only accepts axes, and traces: pozo objects, not {type(axis)}")
+                raise TypeError(
+                    f"Axis.add_axes() only accepts axes, and traces: pozo objects, not {type(axis)}"
+                )
             elif isinstance(axis, pozo.Trace):
                 raw_return.append(pozo.Axis(axis, name=axis.get_name()))
             else:
@@ -34,12 +37,14 @@ class Track(ood.Item, pzt.Themeable):
         return raw_return
 
     def replace_axes(self, *axes, **kwargs):
-       mnemonics = []
-       for axis in axes:
-           for trace in axis.get_traces():
-               mnemonics.append(trace.get_mnemonic())
-       self.pop_axes(*mnemonics, strict_index=False, exclude=kwargs.get('exclude', None))
-       self.add_axes(*axes, **kwargs)
+        mnemonics = []
+        for axis in axes:
+            for trace in axis.get_traces():
+                mnemonics.append(trace.get_mnemonic())
+        self.pop_axes(
+            *mnemonics, strict_index=False, exclude=kwargs.get("exclude", None)
+        )
+        self.add_axes(*axes, **kwargs)
 
     # add_items
     def add_axes(self, *axes, **kwargs):
@@ -84,11 +89,13 @@ class Track(ood.Item, pzt.Themeable):
 
     def get_trace(self, selector=0, **kwargs):
         ret = self.get_traces(selector, **kwargs)
-        if len(ret) == 0: return None
+        if len(ret) == 0:
+            return None
         return ret[0]
 
     def get_theme(self):
-        context = { "type":"track",
-                   "name": self._name,
-                   }
+        context = {
+            "type": "track",
+            "name": self._name,
+        }
         return self._get_theme(context=context)
