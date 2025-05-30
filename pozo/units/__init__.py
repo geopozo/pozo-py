@@ -16,7 +16,7 @@ from .units import (
 )
 
 registry = LasUnitRegistry()
-Quantity = Q = (registry.Quantity)  # Overriding the registry and all this is a little weird
+Quantity = Q = registry.Quantity
 
 registry_defines(registry)
 registry_mapping(registry)
@@ -26,22 +26,25 @@ red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
 orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
 d = chr(0x1E)  # delimiter
 
+
+def apply_color_styling(html, pattern, color):
+    for match in pattern.finditer(html):
+        current_match = match.group()
+        colored = f'<td style="color:{color}">' + current_match[4:]
+        html = html.replace(current_match, colored)
+    return html
+
+
 def generate_html_table(data):
     post_result = "\n".join(data)
     output = pd.read_csv(StringIO(post_result), delimiter=d, na_filter=False)
     output_html = output.to_html()
 
-    for match in red_low.finditer(output_html):
-        current_match = match.group()
-        colored = '<td style="color:red">' + current_match[4:]
-        output_html = output_html.replace(current_match, colored)
-
-    for match in orange_medium.finditer(output_html):
-        current_match = match.group()
-        colored = '<td style="color:#B95000">' + current_match[4:]
-        output_html = output_html.replace(current_match, colored)
+    output_html = apply_color_styling(output_html, red_low, "red")
+    output_html = apply_color_styling(output_html, orange_medium, "#B95000")
 
     return output_html
+
 
 def check_las(las, registry=registry, HTML_out=True, divid=""):
     def n0(s):  # If None, convert to ""
@@ -57,8 +60,16 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
         warnings.filterwarnings("error", category=MissingLasUnitWarning)
 
         col_names = [
-            "mnemonic", "las unit", "pozo mapping", "confidence",
-            "parsed", "description", "min", "med", "max", "#NaN"
+            "mnemonic",
+            "las unit",
+            "pozo mapping",
+            "confidence",
+            "parsed",
+            "description",
+            "min",
+            "med",
+            "max",
+            "#NaN",
         ]
 
         result = [f"{d}".join(col_names)] if HTML_out else []
