@@ -63,8 +63,8 @@ def verify_array_len(constant, data):
 def str_to_has_log(argument):
     if isinstance(argument, (list, tuple)):
         return [str_to_has_log(item) for item in argument]
-    elif isinstance(argument, str):
+    if isinstance(argument, str):
         return HasLog(argument)
-    elif isinstance(argument, dict) and 'name' in argument:
+    if isinstance(argument, dict) and 'name' in argument:
         return argument['name']
     return argument
