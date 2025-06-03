@@ -24,7 +24,7 @@ registry_mapping(registry)
 desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
 red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
 orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
-d = chr(0x1E)  # delimiter
+delimiter = chr(0x1E)
 
 
 def apply_color_styling(html, pattern, color):
@@ -37,7 +37,7 @@ def apply_color_styling(html, pattern, color):
 
 def generate_html_table(data):
     post_result = "\n".join(data)
-    output = pd.read_csv(StringIO(post_result), delimiter=d, na_filter=False)
+    output = pd.read_csv(StringIO(post_result), delimiter=delimiter, na_filter=False)
     output_html = output.to_html()
 
     output_html = apply_color_styling(output_html, red_low, "red")
@@ -72,7 +72,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             "#NaN",
         ]
 
-        result = [f"{d}".join(col_names)] if HTML_out else []
+        result = [f"{delimiter}".join(col_names)] if HTML_out else []
 
         for curve in las.curves:
             resolved = None
@@ -123,7 +123,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             if not HTML_out:
                 result.append(curve_data)
             else:
-                result.append(d.join([n0(x) for x in curve_data.values()]))
+                result.append(delimiter.join([n0(x) for x in curve_data.values()]))
 
         if not HTML_out:
             return result
