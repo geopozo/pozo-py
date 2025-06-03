@@ -38,12 +38,12 @@ def apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
 def generate_html_table(data):
     post_result = "\n".join(data)
     output = pd.read_csv(StringIO(post_result), delimiter=delimiter, na_filter=False)
-    output_html = output.to_html()
+    html_output = output.to_html()
 
-    output_html = apply_color_styling(output_html, red_low, "red")
-    output_html = apply_color_styling(output_html, orange_medium, "#B95000")
+    html_output = apply_color_styling(html_output, red_low, "red")
+    html_output = apply_color_styling(html_output, orange_medium, "#B95000")
 
-    return output_html
+    return html_output
 
 
 def check_las(las, registry=registry, HTML_out=True, divid=""):
@@ -129,8 +129,8 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             return result
 
         try:
-            output_html = generate_html_table(result)
-            display(HTML(f'<div id="{divid}">{output_html}</div>'))
+            html_output = generate_html_table(result)
+            display(HTML(f'<div id="{divid}">{html_output}</div>'))
 
         except Exception as e:
             display(str(e))
