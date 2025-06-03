@@ -60,11 +60,11 @@ def verify_array_len(constant, data):
     if is_array(constant) and len(constant) != len(data): return False
     return True
 
-def str_to_HasLog(argument):
+def str_to_has_log(argument):
     if isinstance(argument, (list, tuple)):
         ret = []
         for selector in argument:
-                ret.append(str_to_HasLog(selector))
+                ret.append(str_to_has_log(selector))
         return ret
     elif isinstance(argument, str):
         return HasLog(argument)

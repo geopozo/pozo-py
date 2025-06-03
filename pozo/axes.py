@@ -46,30 +46,30 @@ class Axis(ood.Item, pzt.Themeable):
 
     # get_items
     def get_traces(self, *selectors, **kwargs):
-        selectors = pozo.str_to_HasLog(selectors)
+        selectors = pozo.str_to_has_log(selectors)
         return super().get_items(*selectors, **kwargs)
 
     # get_item
     def get_trace(self, selector=0, **kwargs):
-        selector = pozo.str_to_HasLog(selector)
+        selector = pozo.str_to_has_log(selector)
         return super().get_item(selector, **kwargs)
 
     # pop items
     def pop_traces(self,  *selectors, **kwargs):
-        selectors = pozo.str_to_HasLog(selectors)
+        selectors = pozo.str_to_has_log(selectors)
         return super().pop_items(*selectors, **kwargs)
 
     # what about whitelabelling all the other stuff
     def has_trace(self, selector):
-        selector = pozo.str_to_HasLog(selector)
+        selector = pozo.str_to_has_log(selector)
         return super().has_item(selector)
 
     def reorder_all_traces(self, order):
-        order = pozo.str_to_HasLog(order)
+        order = pozo.str_to_has_log(order)
         super().reorder_all_items(order)
 
     def move_traces(self, *selectors, **kwargs):
-        selectors = pozo.str_to_HasLog(selectors)
+        selectors = pozo.str_to_has_log(selectors)
         super().move_items(*selectors, **kwargs)
 
     def get_named_tree(self):
