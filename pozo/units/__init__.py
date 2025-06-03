@@ -27,12 +27,12 @@ orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
 delimiter = chr(0x1E)
 
 
-def apply_color_styling(html, pattern, color):
-    for match in pattern.finditer(html):
+def apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
+    for match in pattern.finditer(html_str):
         current_match = match.group()
         colored = f'<td style="color:{color}">' + current_match[4:]
-        html = html.replace(current_match, colored)
-    return html
+        html_str = html_str.replace(current_match, colored)
+    return html_str
 
 
 def generate_html_table(data):
