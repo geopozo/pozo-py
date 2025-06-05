@@ -18,9 +18,8 @@ class Note:
     ):
         self._validate_depth(depth)
         self._validate_line(line)
+        self._validate_width(width)
 
-        if width < -1 or width > 1:
-            raise ValueError("width must be between -1 and 1")
         # TODO add further constraints on changes
         self.depth = depth
         self.line = line
@@ -41,3 +40,7 @@ class Note:
     def _validate_line(line):
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
+
+    def _validate_width(width):
+        if width < -1 or width > 1:
+            raise ValueError("width must be between -1 and 1")
