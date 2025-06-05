@@ -17,8 +17,8 @@ class Note:
         show_text=True,
     ):
         self._validate_depth(depth)
-        if not isinstance(line, dict):
-            raise TypeError("line must be a dictionary")
+        self._validate_line(line)
+
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
         # TODO add further constraints on changes
@@ -37,3 +37,7 @@ class Note:
             raise TypeError(
                 "depth must be two numbers in a tuple or list or just one number"
             )
+
+    def _validate_line(line):
+        if not isinstance(line, dict):
+            raise TypeError("line must be a dictionary")
