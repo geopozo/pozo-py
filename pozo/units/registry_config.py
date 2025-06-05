@@ -1,4 +1,4 @@
-from .units import RangeBoundaries
+from .units import LasUnitRegistry, RangeBoundaries
 
 
 PU = [
@@ -13,14 +13,14 @@ percent_general = [
 ]
 
 
-def registry_defines(registry):
+def registry_defines(registry: LasUnitRegistry):
     registry.define("gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI")
     registry.define("porosity_unit = percent = pu")
     registry.define("of_1 = 100 * percent = fraction")
     registry.define("legacy_api_porosity_unit = [Legacy_API_Porosity_Unit] = puAPI")
 
 
-def registry_mapping(registry):
+def registry_mapping(registry: LasUnitRegistry):
     registry.add_las_map("-", "MM", "millimeter", "decided without mnemonic- MEDIUM")
     registry.add_las_map("-", "M", "meter", "decided without mnemonic- MEDIUM")
     registry.add_las_map("-", "CM", "centimeter", "decided without mnemonic- MEDIUM")
