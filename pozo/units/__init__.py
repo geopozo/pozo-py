@@ -27,7 +27,7 @@ orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
 delimiter = chr(0x1E)
 
 
-def apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
+def _apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
     for match in pattern.finditer(html_str):
         current_match = match.group()
         colored = f'<td style="color:{color}">' + current_match[4:]
@@ -40,8 +40,8 @@ def generate_html_table(data):
     output = pd.read_csv(StringIO(post_result), delimiter=delimiter, na_filter=False)
     html_output = output.to_html()
 
-    html_output = apply_color_styling(html_output, red_low, "red")
-    html_output = apply_color_styling(html_output, orange_medium, "#B95000")
+    html_output = _apply_color_styling(html_output, red_low, "red")
+    html_output = _apply_color_styling(html_output, orange_medium, "#B95000")
 
     return html_output
 
@@ -72,7 +72,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             "#NaN",
         ]
 
-        result = [f"{delimiter}".join(col_names)] if HTML_out else []
+        result = [delimiter.join(col_names)] if HTML_out else []
 
         for curve in las.curves:
             resolved = None
