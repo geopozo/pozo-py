@@ -1,22 +1,46 @@
 import pozo
 
-#TODO this doesn't handle units
-#TODO xp doesn't handle units or check indices
-#TODO what else doesn't handle units
-class Note():
-    def __init__(self, depth, *, line={}, text="", width=1, fillcolor = 'lightskyblue', opacity=.5, show_text=True):
-        if not ( ( pozo.is_array(depth) and len(depth) == 2 ) or pozo.is_scalar_number(depth) ):
-            raise TypeError("depth must be two numbers in a tuple or list or just one number")
+
+# TODO this doesn't handle units
+# TODO xp doesn't handle units or check indices
+# TODO what else doesn't handle units
+class Note:
+    def __init__(
+        self,
+        depth,
+        *,
+        line={},
+        text="",
+        width=1,
+        fillcolor="lightskyblue",
+        opacity=0.5,
+        show_text=True,
+    ):
+        self._validate_depth(depth)
+        self._validate_line(line)
+        self._validate_width(width)
+
+        # TODO add further constraints on changes
+        self.depth = depth
+        self.line = line
+        self.fillcolor = fillcolor
+        self.opacity = None
+        self.show_text = True
+        self.text = text
+        self.width = width
+
+    def _validate_depth(depth):
+        if not (
+            (pozo.is_array(depth) and len(depth) == 2) or pozo.is_scalar_number(depth)
+        ):
+            raise TypeError(
+                "depth must be two numbers in a tuple or list or just one number"
+            )
+
+    def _validate_line(line):
         if not isinstance(line, dict):
             raise TypeError("line must be a dictionary")
+
+    def _validate_width(width):
         if width < -1 or width > 1:
             raise ValueError("width must be between -1 and 1")
-        # TODO add further constraints on changes
-        self.depth      = depth
-        self.line       = line
-        self.fillcolor  = fillcolor
-        self.opacity    = None
-        self.show_text  = True
-        self.text       = text
-        self.width      = width
-
