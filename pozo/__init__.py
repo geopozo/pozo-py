@@ -60,9 +60,9 @@ def verify_array_len(constant, data):
     if is_array(constant) and len(constant) != len(data): return False
     return True
 
-def str_to_has_log(argument):
+def str_to_HasLog(argument):
     if isinstance(argument, (list, tuple)):
-        return [str_to_has_log(item) for item in argument]
+        return [str_to_HasLog(item) for item in argument]
     if isinstance(argument, str):
         return HasLog(argument)
     if isinstance(argument, dict) and 'name' in argument:
