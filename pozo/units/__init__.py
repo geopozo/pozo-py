@@ -35,7 +35,7 @@ def _apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
     return html_str
 
 
-def generate_html_table(data):
+def _generate_html_table(data):
     post_result = "\n".join(data)
     output = pd.read_csv(StringIO(post_result), delimiter=delimiter, na_filter=False)
     html_output = output.to_html()
@@ -129,7 +129,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
             return result
 
         try:
-            html_output = generate_html_table(result)
+            html_output = _generate_html_table(result)
             display(HTML(f'<div id="{divid}">{html_output}</div>'))
 
         except Exception as e:
