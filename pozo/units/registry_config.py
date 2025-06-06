@@ -14,10 +14,10 @@ percent_general = [
 
 
 def registry_defines(registry: LasUnitRegistry):
-    registry.define("gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI")
-    registry.define("porosity_unit = percent = pu")
-    registry.define("of_1 = 100 * percent = fraction")
-    registry.define("legacy_api_porosity_unit = [Legacy_API_Porosity_Unit] = puAPI")
+    registry._ureg.define("gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI")
+    registry._ureg.define("porosity_unit = percent = pu")
+    registry._ureg.define("of_1 = 100 * percent = fraction")
+    registry._ureg.define("legacy_api_porosity_unit = [Legacy_API_Porosity_Unit] = puAPI")
 
 
 def registry_mapping(registry: LasUnitRegistry):

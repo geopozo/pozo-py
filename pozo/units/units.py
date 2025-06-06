@@ -67,12 +67,10 @@ class UnitMapper:
         return None
 
 
-# Namespace would be nicer and I could hide registries if this wasn't overriden
-# But would the map be global?
-# Or would we just use a default register like in init
-class LasUnitRegistry(pint.UnitRegistry):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class LasUnitRegistry:
+    def __init__(self):
+        # I'm not sure if it's the best option to replace the inheritance.
+        self._ureg = pint.UnitRegistry()
         self.mapper = UnitMapper()
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
@@ -86,12 +84,12 @@ class LasUnitRegistry(pint.UnitRegistry):
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self.parse_units(ra.unit)
+            self._ureg.parse_units(ra.unit)
 
         self.mapper.register_mapping(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
-        unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
+        unit = unit if isinstance(unit, pint.Unit) else self._ureg.parse_units(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self.mapper.get_las_unit(mnemonic, unit)
 
@@ -122,14 +120,14 @@ class LasUnitRegistry(pint.UnitRegistry):
             raise UnitException("Empty unit not allowed- please map it")
 
         return self._try_parse_unit_with_fallback(unit, mnemonic)
-            
+
     def _try_parse_unit(self, unit_str):
         try:
-            return self.parse_units(unit_str)
+            return self._ureg.parse_units(unit_str)
         except Exception as e:
             warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
             return None
-        
+
     def _try_parse_unit_with_fallback(self, unit, mnemonic):
         try:
             return self._try_parse_unit(unit)

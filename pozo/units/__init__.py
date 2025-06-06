@@ -16,7 +16,7 @@ from .units import (
 )
 
 registry = LasUnitRegistry()
-Quantity = Q = registry.Quantity
+Quantity = Q = registry._ureg.Quantity
 
 registry_config.registry_defines(registry)
 registry_config.registry_mapping(registry)
