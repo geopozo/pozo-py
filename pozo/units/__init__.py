@@ -46,7 +46,7 @@ def _generate_html_table(data):
     return html_output
 
 
-def check_las(las, registry=registry, HTML_out=True, divid=""):
+def check_las(las, registry=registry, HTML_out=True, div_id=""):
     def n0(s):  # If None, convert to ""
         return "" if s is None else str(s)
 
@@ -130,7 +130,7 @@ def check_las(las, registry=registry, HTML_out=True, divid=""):
 
         try:
             html_output = _generate_html_table(result)
-            display(HTML(f'<div id="{divid}">{html_output}</div>'))
+            display(HTML(f'<div id="{div_id}">{html_output}</div>'))
 
         except Exception as e:
             display(str(e))
