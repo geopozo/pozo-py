@@ -62,12 +62,9 @@ def verify_array_len(constant, data):
 
 def str_to_HasLog(argument):
     if isinstance(argument, (list, tuple)):
-        ret = []
-        for selector in argument:
-                ret.append(str_to_HasLog(selector))
-        return ret
-    elif isinstance(argument, str):
+        return [str_to_HasLog(item) for item in argument]
+    if isinstance(argument, str):
         return HasLog(argument)
-    elif isinstance(argument, dict) and 'name' in argument:
+    if isinstance(argument, dict) and 'name' in argument:
         return argument['name']
     return argument
