@@ -7,7 +7,7 @@ import pandas as pd
 import pint
 from IPython.display import HTML, display
 
-from .registry_config import registry_defines, registry_mapping
+from . import registry_config
 from .units import (
     LasUnitRegistry,
     MissingLasUnitWarning,
@@ -18,8 +18,8 @@ from .units import (
 registry = LasUnitRegistry()
 Quantity = Q = registry.Quantity
 
-registry_defines(registry)
-registry_mapping(registry)
+registry_config.registry_defines(registry)
+registry_config.registry_mapping(registry)
 
 desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
 red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
