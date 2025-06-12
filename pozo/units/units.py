@@ -37,14 +37,17 @@ class LasUnitRegistry:
         self._units_to_mnemonic = {}
 
     def set_unit_registry(self, unit_registry):
+        """Set a new unit registry."""
         self.unit_registry = unit_registry
 
     def parse_units(self, unit):
+        """Parse a unit string using the current unit registry."""
         if not hasattr(self.unit_registry, "parse_units"):
             raise AttributeError("unit_registry does not have a 'parse_units' method")
         return self.unit_registry.parse_units(unit)
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
+        """Add a mapping between a mnemonic and a unit with associated ranges."""
         if not isinstance(ranges, list):
             ranges = (
                 [RangeBoundaries((), ranges, confidence)]
@@ -60,11 +63,13 @@ class LasUnitRegistry:
         self._mnemonic_to_units_mapper(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
+        """Resolve a SI unit to its corresponding LAS unit for a given mnemonic."""
         unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self._las_unit_mapper(mnemonic, unit)
 
     def resolve_las_unit(self, mnemonic, unit, data):
+        """Resolve the appropriate LAS unit based on data range and mnemonic."""
         mnemonic = pozo.deLASio(mnemonic)
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
