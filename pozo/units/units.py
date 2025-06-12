@@ -40,7 +40,7 @@ class LasUnitRegistry:
         """Set a new unit registry."""
         self.unit_registry = unit_registry
 
-    def parse_units(self, unit):
+    def parse(self, unit):
         """Parse a unit string using the current unit registry."""
         if not hasattr(self.unit_registry, "parse_units"):
             raise AttributeError("unit_registry does not have a 'parse_units' method")
@@ -58,13 +58,13 @@ class LasUnitRegistry:
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self.parse_units(ra.unit)
+            self.parse(ra.unit)
 
         self._mnemonic_to_units_mapper(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
         """Resolve a SI unit to its corresponding LAS unit for a given mnemonic."""
-        unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
+        unit = unit if isinstance(unit, pint.Unit) else self.parse(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self._si_unit_to_las_unit_mapper(mnemonic, unit)
 
@@ -99,7 +99,7 @@ class LasUnitRegistry:
 
     def _try_parse_unit(self, unit_str):
         try:
-            return self.parse_units(unit_str)
+            return self.parse(unit_str)
         except Exception as e:
             warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
             return None
