@@ -75,6 +75,9 @@ class LasUnitRegistry:
     def set_ureg(self, new_ureg):
         self.unit_registry = new_ureg
 
+    def parse_units(self, unit):
+        return self.unit_registry.parse_units(unit)
+
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
             ranges = (
@@ -86,12 +89,12 @@ class LasUnitRegistry:
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self.unit_registry.parse_units(ra.unit)
+            self.parse_units(ra.unit)
 
         self.mapper.register_mapping(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
-        unit = unit if isinstance(unit, pint.Unit) else self.unit_registry.parse_units(unit)
+        unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self.mapper.get_las_unit(mnemonic, unit)
 
@@ -125,7 +128,7 @@ class LasUnitRegistry:
 
     def _try_parse_unit(self, unit_str):
         try:
-            return self.unit_registry.parse_units(unit_str)
+            return self.parse_units(unit_str)
         except Exception as e:
             warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
             return None
