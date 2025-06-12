@@ -60,7 +60,7 @@ class LasUnitRegistry:
     def resolve_SI_unit_to_las(self, mnemonic, unit):
         unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
         mnemonic = pozo.deLASio(mnemonic)
-        return self._get_las_unit_mapper(mnemonic, unit)
+        return self._las_unit_mapper(mnemonic, unit)
 
     def resolve_las_unit(self, mnemonic, unit, data):
         mnemonic = pozo.deLASio(mnemonic)
@@ -126,7 +126,7 @@ class LasUnitRegistry:
             return self._mnemonic_to_units["-"][unit]
         return None
 
-    def _get_las_unit_mapper(self, mnemonic, si_unit):
+    def _las_unit_mapper(self, mnemonic, si_unit):
         if (
             mnemonic in self._units_to_mnemonic
             and si_unit in self._units_to_mnemonic[mnemonic]
