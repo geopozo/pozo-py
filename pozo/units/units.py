@@ -31,15 +31,17 @@ class RangeBoundaries:
 
 
 class LasUnitRegistry:
-    def __init__(self, *, ureg=pint.UnitRegistry()):
-        self.unit_registry = ureg
+    def __init__(self, *, unit_registry):
+        self.unit_registry = unit_registry
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}
 
-    def set_ureg(self, new_ureg):
-        self.unit_registry = new_ureg
+    def set_ureg(self, unit_registry):
+        self.unit_registry = unit_registry
 
     def parse_units(self, unit):
+        if not hasattr(self.unit_registry, "parse_units"):
+            raise AttributeError("unit_registry does not have a 'parse_units' method")
         return self.unit_registry.parse_units(unit)
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
