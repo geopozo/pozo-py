@@ -389,7 +389,7 @@ class Plotly(pzr.Renderer):
                     themes.pop()
 
                 if range_unit_raw is not None:
-                    range_unit = pzu.registry._ureg.parse_units(range_unit_raw)
+                    range_unit = pzu.registry.ureg.parse_units(range_unit_raw)
                 else:
                     range_unit = None
                 data_unit = None

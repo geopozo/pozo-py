@@ -68,9 +68,8 @@ class UnitMapper:
 
 
 class LasUnitRegistry:
-    def __init__(self):
-        # I'm not sure if it's the best option to replace the inheritance.
-        self._ureg = pint.UnitRegistry()
+    def __init__(self, *, ureg=pint.UnitRegistry()):
+        self.ureg = ureg
         self.mapper = UnitMapper()
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
@@ -84,12 +83,12 @@ class LasUnitRegistry:
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self._ureg.parse_units(ra.unit)
+            self.ureg.parse_units(ra.unit)
 
         self.mapper.register_mapping(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
-        unit = unit if isinstance(unit, pint.Unit) else self._ureg.parse_units(unit)
+        unit = unit if isinstance(unit, pint.Unit) else self.ureg.parse_units(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self.mapper.get_las_unit(mnemonic, unit)
 
@@ -123,7 +122,7 @@ class LasUnitRegistry:
 
     def _try_parse_unit(self, unit_str):
         try:
-            return self._ureg.parse_units(unit_str)
+            return self.ureg.parse_units(unit_str)
         except Exception as e:
             warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
             return None
