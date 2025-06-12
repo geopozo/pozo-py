@@ -36,7 +36,7 @@ class LasUnitRegistry:
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}
 
-    def set_ureg(self, unit_registry):
+    def set_unit_registry(self, unit_registry):
         self.unit_registry = unit_registry
 
     def parse_units(self, unit):
