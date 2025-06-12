@@ -68,9 +68,20 @@ class UnitMapper:
 
 
 class LasUnitRegistry:
+    def _validate_basic_ureg_methods(self, new_ureg):
+        required_methods = ["parse_units", "Quantity", "define"]
+        for method in required_methods:
+            if not hasattr(new_ureg, method):
+                raise TypeError(f"The new ureg must implement '{method}'")
+
     def __init__(self, *, ureg=pint.UnitRegistry()):
+        self._validate_basic_ureg_methods(ureg)
         self.ureg = ureg
         self.mapper = UnitMapper()
+
+    def set_ureg(self, new_ureg):
+        self._validate_basic_ureg_methods(new_ureg)
+        self.ureg = new_ureg
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
