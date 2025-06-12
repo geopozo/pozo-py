@@ -107,7 +107,7 @@ class LasUnitRegistry:
     def _try_parse_unit_with_fallback(self, unit, mnemonic):
         try:
             return self._try_parse_unit(unit)
-        except pint.UndefinedUnitError as e:
+        except Exception as e:
             raise UnitException(
                 f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
             ) from e
