@@ -68,20 +68,12 @@ class UnitMapper:
 
 
 class LasUnitRegistry:
-    def _validate_basic_ureg_methods(self, new_ureg):
-        required_methods = ["parse_units", "Quantity", "define"]
-        for method in required_methods:
-            if not hasattr(new_ureg, method):
-                raise TypeError(f"The new ureg must implement '{method}'")
-
     def __init__(self, *, ureg=pint.UnitRegistry()):
-        self._validate_basic_ureg_methods(ureg)
-        self.ureg = ureg
+        self.unit_registry = ureg
         self.mapper = UnitMapper()
 
     def set_ureg(self, new_ureg):
-        self._validate_basic_ureg_methods(new_ureg)
-        self.ureg = new_ureg
+        self.unit_registry = new_ureg
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         if not isinstance(ranges, list):
@@ -94,12 +86,12 @@ class LasUnitRegistry:
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self.ureg.parse_units(ra.unit)
+            self.unit_registry.parse_units(ra.unit)
 
         self.mapper.register_mapping(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
-        unit = unit if isinstance(unit, pint.Unit) else self.ureg.parse_units(unit)
+        unit = unit if isinstance(unit, pint.Unit) else self.unit_registry.parse_units(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self.mapper.get_las_unit(mnemonic, unit)
 
@@ -133,7 +125,7 @@ class LasUnitRegistry:
 
     def _try_parse_unit(self, unit_str):
         try:
-            return self.ureg.parse_units(unit_str)
+            return self.unit_registry.parse_units(unit_str)
         except Exception as e:
             warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
             return None

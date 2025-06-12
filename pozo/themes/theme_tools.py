@@ -28,7 +28,7 @@ class MnemonicDictionary(pzt.DynamicTheme):
         if not isinstance(mnemonic_table, dict): raise ValueError("menmonic_table must be dictionary")
         for key, value in mnemonic_table.items():
             if "range_unit" in value:
-                pzu.registry.ureg.parse_units(value["range_unit"])
+                pzu.registry.unit_registry.parse_units(value["range_unit"])
         self._lut = copy.deepcopy(mnemonic_table)
 
     def resolve(self, key, contexts):
