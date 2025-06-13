@@ -83,6 +83,17 @@ class LasUnitRegistry:
             )
         return None
 
+    def parse_unit(self, unit_str):
+        try:
+            if not hasattr(self.unit_registry, "parse_units"):
+                raise AttributeError(
+                    "unit_registry does not have a 'parse_units' method"
+                )
+            return self.unit_registry.parse_units(unit_str)
+        except Exception as e:
+            warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+            return None
+
     def parse_unit_from_context(self, mnemonic, unit, data):
         """
         Parses a unit string using context from mnemonic and data.
@@ -101,17 +112,6 @@ class LasUnitRegistry:
             raise UnitException("Empty unit not allowed- please map it")
 
         return self._try_parse_unit_with_fallback(unit, mnemonic)
-
-    def parse_unit(self, unit_str):
-        try:
-            if not hasattr(self.unit_registry, "parse_units"):
-                raise AttributeError(
-                    "unit_registry does not have a 'parse_units' method"
-                )
-            return self.unit_registry.parse_units(unit_str)
-        except Exception as e:
-            warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
-            return None
 
     def _try_parse_unit_with_fallback(self, unit, mnemonic):
         try:
