@@ -65,7 +65,7 @@ class LasUnitRegistry:
         """Resolve a SI unit to its corresponding LAS unit for a given mnemonic."""
         unit = unit if isinstance(unit, pint.Unit) else self.parse_unit(unit)
         mnemonic = pozo.deLASio(mnemonic)
-        return self._si_unit_to_las_unit_mapper(mnemonic, unit)
+        return self._si_unit_to_las_mapper(mnemonic, unit)
 
     def resolve_las_unit(self, mnemonic, unit, data):
         """Resolve the appropriate LAS unit based on data range and mnemonic."""
@@ -142,7 +142,7 @@ class LasUnitRegistry:
             return self._mnemonic_to_units["-"][unit]
         return None
 
-    def _si_unit_to_las_unit_mapper(self, mnemonic, si_unit):
+    def _si_unit_to_las_mapper(self, mnemonic, si_unit):
         if (
             mnemonic in self._units_to_mnemonic
             and si_unit in self._units_to_mnemonic[mnemonic]
