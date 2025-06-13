@@ -15,7 +15,7 @@ from .units import (
     UnitException,
 )
 
-registry = LasUnitRegistry(unit_registry=pint.UnitRegistry())
+registry = LasUnitRegistry()
 Quantity = Q = registry.unit_registry.Quantity
 
 registry_config.registry_defines(registry)

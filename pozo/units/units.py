@@ -31,7 +31,12 @@ class RangeBoundaries:
 
 
 class LasUnitRegistry:
-    def __init__(self, *, unit_registry):
+    def __init__(self, *, unit_registry=pint.UnitRegistry()):
+        """
+        Initializes the class with a default `pint.UnitRegistry`.
+
+        You can override the default by calling `set_unit_registry(class)` with a custom registry class.
+        """
         self.unit_registry = unit_registry
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}
