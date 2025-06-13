@@ -16,15 +16,12 @@ from .units import (
 )
 
 registry = LasUnitRegistry()
-Quantity = Q = registry.Quantity
+Quantity = Q = registry.unit_registry.Quantity
 
 registry_config.registry_defines(registry)
 registry_config.registry_mapping(registry)
 
-desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
-red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
-orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
-delimiter = chr(0x1E)
+_delimiter = chr(0x1E)
 
 
 def _apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
@@ -36,10 +33,12 @@ def _apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
 
 
 def _generate_html_table(data):
+    red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
+    orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
     post_result = "\n".join(data)
-    output = pd.read_csv(StringIO(post_result), delimiter=delimiter, na_filter=False)
-    html_output = output.to_html()
 
+    output = pd.read_csv(StringIO(post_result), delimiter=_delimiter, na_filter=False)
+    html_output = output.to_html()
     html_output = _apply_color_styling(html_output, red_low, "red")
     html_output = _apply_color_styling(html_output, orange_medium, "#B95000")
 
@@ -59,6 +58,7 @@ def check_las(las, registry=registry, HTML_out=True, div_id=""):
         warnings.simplefilter("default")
         warnings.filterwarnings("error", category=MissingLasUnitWarning)
 
+        desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
         col_names = [
             "mnemonic",
             "las unit",
@@ -72,7 +72,7 @@ def check_las(las, registry=registry, HTML_out=True, div_id=""):
             "#NaN",
         ]
 
-        result = [delimiter.join(col_names)] if HTML_out else []
+        result = [_delimiter.join(col_names)] if HTML_out else []
 
         for curve in las.curves:
             resolved = None
@@ -123,7 +123,7 @@ def check_las(las, registry=registry, HTML_out=True, div_id=""):
             if not HTML_out:
                 result.append(curve_data)
             else:
-                result.append(delimiter.join([n0(x) for x in curve_data.values()]))
+                result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
 
         if not HTML_out:
             return result
@@ -144,3 +144,12 @@ def parse_unit_from_curve(curve, registry=registry):
     except Exception as e:
         warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
         return None
+
+
+def parse(unit):
+    """
+    Parses a unit string using the current unit registry.
+
+    Returns the parsed unit object, or None if parsing fails.
+    """
+    return registry.parse_unit(unit)

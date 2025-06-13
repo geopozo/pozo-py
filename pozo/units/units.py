@@ -30,52 +30,23 @@ class RangeBoundaries:
         return False
 
 
-class UnitMapper:
-    def __init__(self):
+class LasUnitRegistry:
+    def __init__(self, *, unit_registry=pint.UnitRegistry()):
+        """
+        Initializes the class with a default `pint.UnitRegistry`.
+
+        You can override the default by calling `set_unit_registry(class)` with a custom registry class.
+        """
+        self.unit_registry = unit_registry
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}
 
-    def register_mapping(self, mnemonic, unit, ranges):
-        if mnemonic not in self._mnemonic_to_units:
-            self._mnemonic_to_units[mnemonic] = {}
-            self._units_to_mnemonic[mnemonic] = {}
-
-        self._mnemonic_to_units[mnemonic][unit] = ranges
-
-        for ra in ranges:
-            parsed_unit = ra.unit
-            self._units_to_mnemonic[mnemonic][parsed_unit] = unit
-
-    def get_entries(self, mnemonic, unit):
-        if (
-            mnemonic in self._mnemonic_to_units
-            and unit in self._mnemonic_to_units[mnemonic]
-        ):
-            return self._mnemonic_to_units[mnemonic][unit]
-        if "-" in self._mnemonic_to_units and unit in self._mnemonic_to_units["-"]:
-            return self._mnemonic_to_units["-"][unit]
-        return None
-
-    def get_las_unit(self, mnemonic, si_unit):
-        if (
-            mnemonic in self._units_to_mnemonic
-            and si_unit in self._units_to_mnemonic[mnemonic]
-        ):
-            return self._units_to_mnemonic[mnemonic][si_unit]
-        if "-" in self._units_to_mnemonic and si_unit in self._units_to_mnemonic["-"]:
-            return self._units_to_mnemonic["-"][si_unit]
-        return None
-
-
-# Namespace would be nicer and I could hide registries if this wasn't overriden
-# But would the map be global?
-# Or would we just use a default register like in init
-class LasUnitRegistry(pint.UnitRegistry):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.mapper = UnitMapper()
+    def set_unit_registry(self, unit_registry):
+        """Set a new unit registry."""
+        self.unit_registry = unit_registry
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
+        """Add a mapping between a mnemonic and a unit with associated ranges."""
         if not isinstance(ranges, list):
             ranges = (
                 [RangeBoundaries((), ranges, confidence)]
@@ -86,20 +57,22 @@ class LasUnitRegistry(pint.UnitRegistry):
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self.parse_units(ra.unit)
+            self.parse_unit(ra.unit)
 
-        self.mapper.register_mapping(mnemonic, unit, ranges)
+        self._mnemonic_to_units_mapper(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
-        unit = unit if isinstance(unit, pint.Unit) else self.parse_units(unit)
+        """Resolve a SI unit to its corresponding LAS unit for a given mnemonic."""
+        unit = unit if isinstance(unit, pint.Unit) else self.parse_unit(unit)
         mnemonic = pozo.deLASio(mnemonic)
-        return self.mapper.get_las_unit(mnemonic, unit)
+        return self._si_unit_to_las_mapper(mnemonic, unit)
 
     def resolve_las_unit(self, mnemonic, unit, data):
+        """Resolve the appropriate LAS unit based on data range and mnemonic."""
         mnemonic = pozo.deLASio(mnemonic)
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
-        ranges = self.mapper.get_entries(mnemonic, unit)
+        ranges = self._ranges_for_las_unit_mapper(mnemonic, unit)
 
         if ranges:
             for ra in ranges:
@@ -110,11 +83,28 @@ class LasUnitRegistry(pint.UnitRegistry):
             )
         return None
 
+    def parse_unit(self, unit_str):
+        try:
+            if not hasattr(self.unit_registry, "parse_units"):
+                raise AttributeError(
+                    "unit_registry does not have a 'parse_units' method"
+                )
+            return self.unit_registry.parse_units(unit_str)
+        except Exception as e:
+            warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+            return None
+
     def parse_unit_from_context(self, mnemonic, unit, data):
+        """
+        Parses a unit string using context from mnemonic and data.
+
+        Attempts to resolve the unit via LAS mappings first; falls back to direct parsing.
+        Raises UnitException if the unit is empty or missing.
+        """
         try:
             resolved = self.resolve_las_unit(mnemonic, unit, data)
             if resolved is not None:
-                return self._try_parse_unit(resolved.unit)
+                return self.parse_unit(resolved.unit)
         except MissingRangeError as e:
             warnings.warn(str(e))
 
@@ -122,18 +112,42 @@ class LasUnitRegistry(pint.UnitRegistry):
             raise UnitException("Empty unit not allowed- please map it")
 
         return self._try_parse_unit_with_fallback(unit, mnemonic)
-            
-    def _try_parse_unit(self, unit_str):
-        try:
-            return self.parse_units(unit_str)
-        except Exception as e:
-            warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
-            return None
-        
+
     def _try_parse_unit_with_fallback(self, unit, mnemonic):
         try:
-            return self._try_parse_unit(unit)
-        except pint.UndefinedUnitError as e:
+            return self.parse_unit(unit)
+        except Exception as e:
             raise UnitException(
                 f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
             ) from e
+
+    def _mnemonic_to_units_mapper(self, mnemonic, unit, ranges):
+        if mnemonic not in self._mnemonic_to_units:
+            self._mnemonic_to_units[mnemonic] = {}
+            self._units_to_mnemonic[mnemonic] = {}
+
+        self._mnemonic_to_units[mnemonic][unit] = ranges
+
+        for ra in ranges:
+            parsed_unit = ra.unit
+            self._units_to_mnemonic[mnemonic][parsed_unit] = unit
+
+    def _ranges_for_las_unit_mapper(self, mnemonic, unit):
+        if (
+            mnemonic in self._mnemonic_to_units
+            and unit in self._mnemonic_to_units[mnemonic]
+        ):
+            return self._mnemonic_to_units[mnemonic][unit]
+        if "-" in self._mnemonic_to_units and unit in self._mnemonic_to_units["-"]:
+            return self._mnemonic_to_units["-"][unit]
+        return None
+
+    def _si_unit_to_las_mapper(self, mnemonic, si_unit):
+        if (
+            mnemonic in self._units_to_mnemonic
+            and si_unit in self._units_to_mnemonic[mnemonic]
+        ):
+            return self._units_to_mnemonic[mnemonic][si_unit]
+        if "-" in self._units_to_mnemonic and si_unit in self._units_to_mnemonic["-"]:
+            return self._units_to_mnemonic["-"][si_unit]
+        return None

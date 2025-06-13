@@ -9,7 +9,7 @@ def a_data(data=[1], depth=[1], unit=None, depth_unit=None):
 def test_data_units():
     with pytest.raises(ValueError):
         pozo.traces.Trace([1], depth=None, name="!!!")
-    meter = pzu.registry.meter
+    meter = pzu.registry.unit_registry.meter
     a_meter = pzu.Q([1], "meter")
 
     assert meter == a_data(unit="meter").get_unit()

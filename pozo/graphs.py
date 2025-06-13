@@ -176,9 +176,9 @@ class Graph(ood.Observer, pzt.Themeable):
             unit = None
             if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
-                    unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
+                    unit = pzu.parse(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:
-                    unit = pzu.registry.parse_units(unit_map[mnemonic])
+                    unit = pzu.parse(unit_map[mnemonic])
             elif curve.unit is None:
                 warnings.warn(
                     f"No units found for mnemonic {mnemonic}"
@@ -235,9 +235,9 @@ class Graph(ood.Observer, pzt.Themeable):
 
             if unit_map and (curve.mnemonic in unit_map or mnemonic in unit_map):
                 if curve.mnemonic in unit_map:
-                    unit = pzu.registry.parse_units(unit_map[curve.mnemonic])
+                    unit = pzu.parse(unit_map[curve.mnemonic])
                 elif mnemonic in unit_map:
-                    unit = pzu.registry.parse_units(unit_map[mnemonic])
+                    unit = pzu.parse(unit_map[mnemonic])
             if curve.units is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}")
             else:
