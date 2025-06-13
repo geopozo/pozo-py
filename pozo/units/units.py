@@ -97,6 +97,11 @@ class LasUnitRegistry:
         return self._try_parse_unit_with_fallback(unit, mnemonic)
 
     def parse_unit(self, unit_str):
+        """
+        Parses a unit string using the current unit registry.
+
+        Returns the parsed unit object, or None if parsing fails.
+        """
         try:
             if not hasattr(self.unit_registry, "parse_units"):
                 raise AttributeError(
