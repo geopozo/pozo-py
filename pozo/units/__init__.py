@@ -139,6 +139,7 @@ def check_las(las, registry=registry, HTML_out=True, div_id=""):
 
 # Just a shortcut to make the API nice
 def parse_unit_from_curve(curve, registry=registry):
+    """Returns the correct pint unit from the las.curve object."""
     try:
         return registry.parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
     except Exception as e:
@@ -148,6 +149,8 @@ def parse_unit_from_curve(curve, registry=registry):
 
 def parse(unit):
     """
+    This is a shortcut so that the user doesn't have to specify which registry.
+    Use the default.
     Parses a unit string using the current unit registry.
 
     Returns the parsed unit object, or None if parsing fails.

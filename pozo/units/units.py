@@ -12,6 +12,7 @@ os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentatio
 
 
 class RangeBoundaries:
+    """To store a range and necessary calculations."""
     def __init__(self, boundaries, unit, confidence):
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
@@ -23,6 +24,7 @@ class RangeBoundaries:
         self.confidence = confidence
 
     def is_within_range(self, min_val, max_val):
+        """Test if values are within range."""
         if len(self.boundaries) == 0:
             return True
         elif min_val > self.boundaries[0] and max_val < self.boundaries[1]:
@@ -31,6 +33,7 @@ class RangeBoundaries:
 
 
 class LasUnitRegistry:
+    """This class is probably doing too many things."""
     def __init__(self, *, unit_registry=pint.UnitRegistry()):
         """
         Initializes the class with a default `pint.UnitRegistry`.
@@ -38,11 +41,20 @@ class LasUnitRegistry:
         You can override the default by calling `set_unit_registry(class)` with a custom registry class.
         """
         self.unit_registry = unit_registry
+        """The pint unit registry used by the user."""
         self._mnemonic_to_units = {}
+        """A dictionary of what mnemonics were mapped to what units."""
         self._units_to_mnemonic = {}
+        """A dictionary or what units were mappped to what mnemonics."""
 
     def set_unit_registry(self, unit_registry):
-        """Set a new unit registry."""
+        """
+        Set a new unit registry.
+
+        Está bien eso pero por tener todo en LasUnitRegistry vamos a hacer
+        más complejo creo la API.
+
+        """
         self.unit_registry = unit_registry
 
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
@@ -65,6 +77,7 @@ class LasUnitRegistry:
         """Resolve a SI unit to its corresponding LAS unit for a given mnemonic."""
         unit = unit if isinstance(unit, pint.Unit) else self.parse_unit(unit)
         mnemonic = pozo.deLASio(mnemonic)
+        # no fue necesario separar esto
         return self._si_unit_to_las_mapper(mnemonic, unit)
 
     def resolve_las_unit(self, mnemonic, unit, data):
@@ -84,6 +97,7 @@ class LasUnitRegistry:
         return None
 
     def parse_unit(self, unit_str):
+        """Otra envoltura rara."""
         try:
             if not hasattr(self.unit_registry, "parse_units"):
                 raise AttributeError(

@@ -14,6 +14,9 @@ percent_general = [
 
 
 def registry_defines(registry: LasUnitRegistry):
+    """
+    Add units to the pint registry. These are nbrand new units.
+    """
     registry.unit_registry.define("gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI")
     registry.unit_registry.define("porosity_unit = percent = pu")
     registry.unit_registry.define("of_1 = 100 * percent = fraction")
@@ -21,6 +24,10 @@ def registry_defines(registry: LasUnitRegistry):
 
 
 def registry_mapping(registry: LasUnitRegistry):
+    """
+    Try to convert mal-formed LAS-style units to regular SI-system units,
+    which will then be coverted to pint objects.
+    """
     registry.add_las_map("-", "MM", "millimeter", "decided without mnemonic- MEDIUM")
     registry.add_las_map("-", "M", "meter", "decided without mnemonic- MEDIUM")
     registry.add_las_map("-", "CM", "centimeter", "decided without mnemonic- MEDIUM")
@@ -36,10 +43,10 @@ def registry_mapping(registry: LasUnitRegistry):
     registry.add_las_map("GR", "", "gAPI", "HIGH")
     registry.add_las_map("CGR", "GAPI", "gAPI", "HIGH")
     registry.add_las_map("CALI", "CM", "centimeter", "HIGH")
-    registry.add_las_map("CALI", "IN", "inch", "HIGH")
-    registry.add_las_map("DRHO", "G/C3", "gram / centimeter ** 3", "HIGH")
-    registry.add_las_map("RHOB", "G/C3", "gram / centimeter ** 3", "HIGH")
-    registry.add_las_map("DT", "US/F", "microsecond / foot", "HIGH")
+        registry.add_las_map("CALI", "IN", "inch", "HIGH")
+        registry.add_las_map("DRHO", "G/C3", "gram / centimeter ** 3", "HIGH")
+        registry.add_las_map("RHOB", "G/C3", "gram / centimeter ** 3", "HIGH")
+        registry.add_las_map("DT", "US/F", "microsecond / foot", "HIGH")
     registry.add_las_map("ILD", "OHMM", "ohm * meter", "HIGH")
     registry.add_las_map("LLS", "OHMM", "ohm * meter", "HIGH")
     registry.add_las_map("ILM", "OHMM", "ohm * meter", "HIGH")
