@@ -84,6 +84,12 @@ class LasUnitRegistry:
         return None
 
     def parse_unit_from_context(self, mnemonic, unit, data):
+        """
+        Parses a unit string using context from mnemonic and data.
+
+        Attempts to resolve the unit via LAS mappings first; falls back to direct parsing.
+        Raises UnitException if the unit is empty or missing.
+        """
         try:
             resolved = self.resolve_las_unit(mnemonic, unit, data)
             if resolved is not None:
