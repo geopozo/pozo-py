@@ -23,6 +23,7 @@ registry_config.registry_mapping(registry)
 
 _delimiter = chr(0x1E)
 
+
 def _apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
     for match in pattern.finditer(html_str):
         current_match = match.group()
@@ -143,3 +144,7 @@ def parse_unit_from_curve(curve, registry=registry):
     except Exception as e:
         warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
         return None
+
+
+def parse(unit):
+    return registry.parse_unit(unit)

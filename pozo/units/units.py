@@ -57,7 +57,7 @@ class LasUnitRegistry:
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self._parse_unit(ra.unit)
+            self.parse_unit(ra.unit)
 
         self._mnemonic_to_units_mapper(mnemonic, unit, ranges)
 
@@ -93,7 +93,7 @@ class LasUnitRegistry:
         try:
             resolved = self.resolve_las_unit(mnemonic, unit, data)
             if resolved is not None:
-                return self._parse_unit(resolved.unit)
+                return self.parse_unit(resolved.unit)
         except MissingRangeError as e:
             warnings.warn(str(e))
 
@@ -120,7 +120,7 @@ class LasUnitRegistry:
 
     def _try_parse_unit_with_fallback(self, unit, mnemonic):
         try:
-            return self._parse_unit(unit)
+            return self.parse_unit(unit)
         except Exception as e:
             raise UnitException(
                 f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
