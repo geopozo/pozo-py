@@ -136,7 +136,7 @@ class Trace(Drawable):
         self, unit
     ):  # Call this early, in set_data, in set_depth, in init()
         if isinstance(unit, str):
-            return pzu.registry.parse(unit)
+            return pzu.registry.parse_unit(unit)
         elif not isinstance(unit, pint.Unit) and unit is not None:
             raise pint.UndefinedUnitError(str(type(unit))) from TypeError(
                 f"Unrecognized unit type: {unit}"
@@ -145,7 +145,7 @@ class Trace(Drawable):
 
     def set_unit(self, unit):
         if isinstance(unit, str):
-            unit = pzu.registry.parse(unit)
+            unit = pzu.registry.parse_unit(unit)
         elif isinstance(unit, pint.Unit) or unit is None:
             pass
         else:
@@ -159,7 +159,7 @@ class Trace(Drawable):
 
     def set_depth_unit(self, unit):
         if isinstance(unit, str):
-            unit = pzu.registry.parse(unit)
+            unit = pzu.registry.parse_unit(unit)
         elif isinstance(unit, pint.Unit) or unit is None:
             pass
         else:

@@ -40,12 +40,6 @@ class LasUnitRegistry:
         """Set a new unit registry."""
         self.unit_registry = unit_registry
 
-    def parse(self, unit):
-        """Parse a unit string using the current unit registry."""
-        if not hasattr(self.unit_registry, "parse_units"):
-            raise AttributeError("unit_registry does not have a 'parse_units' method")
-        return self.unit_registry.parse_units(unit)
-
     def add_las_map(self, mnemonic, unit, ranges, confidence="- not indicated - LOW"):
         """Add a mapping between a mnemonic and a unit with associated ranges."""
         if not isinstance(ranges, list):
@@ -58,13 +52,13 @@ class LasUnitRegistry:
         for ra in ranges:
             if not isinstance(ra, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
-            self.parse(ra.unit)
+            self._parse_unit(ra.unit)
 
         self._mnemonic_to_units_mapper(mnemonic, unit, ranges)
 
     def resolve_SI_unit_to_las(self, mnemonic, unit):
         """Resolve a SI unit to its corresponding LAS unit for a given mnemonic."""
-        unit = unit if isinstance(unit, pint.Unit) else self.parse(unit)
+        unit = unit if isinstance(unit, pint.Unit) else self.parse_unit(unit)
         mnemonic = pozo.deLASio(mnemonic)
         return self._si_unit_to_las_unit_mapper(mnemonic, unit)
 
@@ -73,7 +67,7 @@ class LasUnitRegistry:
         mnemonic = pozo.deLASio(mnemonic)
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)
-        ranges = self._ranges_for_unit_mapper(mnemonic, unit)
+        ranges = self._ranges_for_las_unit_mapper(mnemonic, unit)
 
         if ranges:
             for ra in ranges:
@@ -88,7 +82,7 @@ class LasUnitRegistry:
         try:
             resolved = self.resolve_las_unit(mnemonic, unit, data)
             if resolved is not None:
-                return self._try_parse_unit(resolved.unit)
+                return self._parse_unit(resolved.unit)
         except MissingRangeError as e:
             warnings.warn(str(e))
 
@@ -97,16 +91,20 @@ class LasUnitRegistry:
 
         return self._try_parse_unit_with_fallback(unit, mnemonic)
 
-    def _try_parse_unit(self, unit_str):
+    def parse_unit(self, unit_str):
         try:
-            return self.parse(unit_str)
+            if not hasattr(self.unit_registry, "parse_units"):
+                raise AttributeError(
+                    "unit_registry does not have a 'parse_units' method"
+                )
+            return self.unit_registry.parse_units(unit_str)
         except Exception as e:
             warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
             return None
 
     def _try_parse_unit_with_fallback(self, unit, mnemonic):
         try:
-            return self._try_parse_unit(unit)
+            return self._parse_unit(unit)
         except Exception as e:
             raise UnitException(
                 f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
@@ -123,7 +121,7 @@ class LasUnitRegistry:
             parsed_unit = ra.unit
             self._units_to_mnemonic[mnemonic][parsed_unit] = unit
 
-    def _ranges_for_unit_mapper(self, mnemonic, unit):
+    def _ranges_for_las_unit_mapper(self, mnemonic, unit):
         if (
             mnemonic in self._mnemonic_to_units
             and unit in self._mnemonic_to_units[mnemonic]
