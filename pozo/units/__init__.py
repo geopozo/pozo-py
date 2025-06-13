@@ -147,4 +147,9 @@ def parse_unit_from_curve(curve, registry=registry):
 
 
 def parse(unit):
+    """
+    Parses a unit string using the current unit registry.
+
+    Returns the parsed unit object, or None if parsing fails.
+    """
     return registry.parse_unit(unit)
