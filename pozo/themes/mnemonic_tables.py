@@ -36,18 +36,6 @@ cangrejo  = {
         "color" : "red",
         "range": [0.2, 2000],
         "scale": "log",
-        "range_unit":  "ohm * meter",
-    },
-    "LLD" : {
-        "color" : "red",
-        "range": [0.2, 2000],
-        "scale": "log",
-        "range_unit":  "ohm * meter",
-    },
-    "LLD" : {
-        "color" : "red",
-        "range": [0.2, 2000],
-        "scale": "log",
         "range_unit": "ohm * meter",
     },
     "NPHI" : {

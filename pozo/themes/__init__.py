@@ -1,8 +1,11 @@
 import copy
-import colour
 import json
-from IPython.display import display, HTML
+
+import colour
+from IPython.display import HTML, display
+
 import pozo.themes.mnemonic_tables as tables
+from pozo.themes.theme_tools import ColorWheel, MnemonicDictionary, default_theme
 
 ThemeValues = dict(color="Can be a single color value or list of color values from colour package",
                    track_width="A number in pixels",
@@ -108,7 +111,6 @@ class Themeable(): # Meant to be inherited by objects
         return self._get_theme()
 
 # Above are inheritables
-from pozo.themes.theme_tools import * # should it be relative?
 # Below is implementations
 themes = {'cangrejo': MnemonicDictionary(tables.cangrejo)}
 cangrejo = MnemonicDictionary(tables.cangrejo)

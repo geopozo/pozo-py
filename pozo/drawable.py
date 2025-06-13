@@ -12,7 +12,7 @@ import warnings
 
 class VersionedProperty:
     def __set_name__(self, owner, name):
-        if type(owner) == str(Drawable):
+        if not issubclass(owner, Drawable):
             raise AttributeError(f"{name} must be a member of a class inheriting pozo.drawable.Drawable, not {owner}. Is type {type(owner)}.")
         self._private_name = "_" + name
         self._name = name
