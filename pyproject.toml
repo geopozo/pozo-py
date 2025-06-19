@@ -1,17 +1,21 @@
 [build-system]
-requires = ["setuptools>=65.0.0", "wheel"]
+requires = ["setuptools>=65.0.0", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages]
-find = {namespaces = false}
+find = {namespaces = false, where = ["src"]}
+
+[tool.setuptools.package-data]
 
 [project]
 name = "pozo"
-license = {file = "LICENSE.txt"}
 description = "Help visualizing well log data - Herramienta para visualizar registros de pozos"
-readme = "README.md"
+dynamic = ["version"]
 requires-python = ">=3.9"
-version = "0.9.29"
+readme = "README.md"
+authors = [
+    { name = "Andrew Pikul", email = "ajpikul@gmail.com" }
+]
 dependencies = [
  "ood >=1.0.9",
  "plotly >=5.18.0",
@@ -25,8 +29,49 @@ dependencies = [
  "lasio"
  ]
 
-[project.optional-dependencies]
-dev = ["pytest"]
+[dependency-groups]
+dev = [
+    "poethepoet>=0.31.1",
+    "pytest-xdist",
+    "pytest>=8.3.4",
+    "mypy>=1.14.1",
+    "ipdb>=0.13.13",
+]
 
 [tool.ruff.lint]
-ignore = ["E701"]
+select = ["ALL"]
+ignore = [
+          "EM", # allow strings in raise(), despite python being ugly about it
+          "TRY003", # allow long error messages inside raise()
+          "D203", # No blank before class docstring (D211 = require blank line)
+          "D212", # Commit message style docstring is D213, ignore D212
+          "COM812", # manual says linter rule conflicts with formatter
+          "ISC001", # manual says litner rule conflicts with formatter
+          "RET504", # Allow else if unnecessary because more readable
+          "RET505", # Allow else if unnecessary because more readable
+          "RET506", # Allow else if unnecessary because more readable
+          "RET507", # Allow else if unnecessary because more readable
+          "RET508", # Allow else if unnecessary because more readable
+          "SIM105", # Too opionated (try-except-pass) (readability?)
+          "PT003", # scope="function" implied but I like readability
+          "G004", # I like fstrings in my log
+          ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+              "D", # ignore docstring errors
+              "S101", # allow assert
+              "INP001", # no need for __init__ in test directories
+            ]
+
+[tool.poe.tasks.test]
+cmd = "pytest -W error -n auto -v -rfE"
+help = "Run all tests quickly"
+
+[tool.poe.tasks.debug-test]
+cmd = "pytest -W error -vvvx -rA"
+help = "Run test by test, slowly, quitting after first error"
+
+[tool.poe.tasks.filter-test]
+cmd = "pytest -W error -vvvx -rA"
+help = "Run any/all tests one by one with basic settings: can include filename and -k filters"
