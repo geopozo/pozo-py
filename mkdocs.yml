@@ -15,10 +15,10 @@ nav:
         "src": "../README.md",
         "replace": {"src='docs/": "src='"}
       }
-  - Themes:
-      - >-
+  - Themes: >-
         {
           "api": "pozo.themes",
+          "tree": "packages"
         }
 
 theme:

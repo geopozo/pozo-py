@@ -38,6 +38,16 @@ dev = [
     "ipdb>=0.13.13",
 ]
 
+# uv run --group docs --python 3.11 --pre mkdocs serve|build
+#docs = [
+#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote; python_version >= '3.11'",
+#    "mkdocs>=1.6.1",
+#    "mkdocs-material>=9.5.49",
+#]
+
+[tool.uv.sources]
+mkquixote = { path = "/home/ajp/projects/DEVOPS/mkquixote", editable = true }
+
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
