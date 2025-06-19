@@ -1,0 +1,42 @@
+---
+### Site metadata ###
+
+site_name: pozo
+repo_name: github
+# most set dynamically
+
+### Build settings ###
+
+docs_dir: './docs/'
+nav:
+  - Readme: >-
+      {
+        "dest": "README.md",
+        "src": "../README.md",
+        "replace": {"src='docs/": "src='"}
+      }
+  - Themes:
+      - >-
+        {
+          "api": "pozo.themes",
+        }
+
+theme:
+  name: material
+  logo: icon_white.svg
+  favicon: icon_white.svg
+  features:
+    - content.code.copy
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+plugins:
+  - quimeta
+  - quicopy
+  - quiapi
+  - search
