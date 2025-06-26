@@ -2,11 +2,11 @@ import os
 
 import pint
 
-from .units import LasUnitRegistry
+from .units import LasMap
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
-las_registry = LasUnitRegistry()
+las_map = LasMap()
 unit_registry = pint.UnitRegistry()
 Quantity = Q = unit_registry.Quantity
 
