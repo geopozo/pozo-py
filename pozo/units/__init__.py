@@ -1,14 +1,18 @@
 import os
 
-import pint
+from pint import UnitRegistry, get_application_registry, set_application_registry
 
+from .registry_config import registry_defines, registry_mapping
 from .units import LasMap
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
 las_map = LasMap()
-unit_registry = pint.UnitRegistry()
-Quantity = Q = unit_registry.Quantity
+registry: UnitRegistry = get_application_registry()
+Quantity = Q = registry.Quantity
+
+registry_mapping(las_map)
+registry_defines(registry)
 
 
 def check_las(data):
@@ -19,6 +23,5 @@ def parse_unit_from_curve(curve):
     pass
 
 
-def set_unit_registry(new_registry):
-    global unit_registry
-    unit_registry = new_registry
+def set_unit_registry(registry: UnitRegistry):
+    set_application_registry(registry)
