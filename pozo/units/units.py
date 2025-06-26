@@ -28,3 +28,15 @@ class LasMap:
             parsed_unit = ra.unit
             self.units_to_mnemonic[mnemonic][parsed_unit] = unit
 
+    def resolve_las_unit(self, mnemonic, unit, data):
+        pass
+
+    def get_las_unit(self, mnemonic, unit):
+        if (
+            mnemonic in self.units_to_mnemonic
+            and unit in self.units_to_mnemonic[mnemonic]
+        ):
+            return self.units_to_mnemonic[mnemonic][unit]
+        if "-" in self.units_to_mnemonic and unit in self.units_to_mnemonic["-"]:
+            return self.units_to_mnemonic["-"][unit]
+        return None
