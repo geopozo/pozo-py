@@ -20,4 +20,5 @@ def parse_unit_from_curve(curve):
 
 
 def set_unit_registry(new_registry):
-    pass
+    global unit_registry
+    unit_registry = new_registry
