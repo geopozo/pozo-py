@@ -408,7 +408,7 @@ class Graph(ood.Observer, pzt.Themeable):
 
     def depth_to_las_CurveItem(self, trace):
         mnemonic = "DEPT"
-        unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
+        unit = pzu.parse_unit_to_las(mnemonic, trace.get_unit())
         descr = "Depth"
         return lasio.CurveItem(mnemonic=mnemonic, unit=unit, value="", descr=descr, data=trace.get_depth())
 
@@ -437,7 +437,7 @@ class Graph(ood.Observer, pzt.Themeable):
                     raise ValueError(f"If you are using an array for units, it must be the same size as traces: {len(traces)}")
                 unit = units[index]
             else:
-                unit = pzu.registry.resolve_SI_unit_to_las(mnemonic, trace.get_unit())
+                unit = pzu.parse_unit_to_las(mnemonic, trace.get_unit())
                 if unit is None: unit = str(trace.get_unit())
 
             unit = unit.upper() # las standard all uppercase

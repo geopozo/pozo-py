@@ -53,3 +53,9 @@ def parse_unit_from_curve(curve: CurveItem) -> Unit:
         raise UnitException("Empty unit not allowed- please map it")
 
     return _try_parse_unit_with_fallback(curve.unit, curve.mnemonic)
+
+
+def parse_unit_to_las(mnemonic: str, unit: str | Unit):
+    unit = unit if isinstance(unit, Unit) else registry.parse_units(unit)
+    mnemonic = pozo.deLASio(mnemonic)
+    return las_map.get_las_unit(mnemonic, unit)
