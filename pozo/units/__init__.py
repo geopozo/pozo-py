@@ -1,13 +1,14 @@
 import os
 import warnings
 
+import registry_config
 from lasio import CurveItem
 from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
 
-from . import LasMap, registry_config
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
+from .units import LasMap
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
@@ -23,7 +24,7 @@ def check_las(data):
     pass
 
 
-def parse_unit_safe(unit: str):
+def parse_unit_safe(unit: str) -> Unit | None:
     try:
         return registry.parse_units(unit)
     except Exception as e:
@@ -31,7 +32,7 @@ def parse_unit_safe(unit: str):
         return None
 
 
-def _try_parse_unit_with_fallback(unit: str, mnemonic: str) -> Unit:
+def _try_parse_unit_with_fallback(unit: str, mnemonic: str) -> Unit | Exception:
     try:
         return registry.parse_units(unit)
     except Exception as e:
@@ -54,7 +55,7 @@ def parse_unit_from_curve(curve: CurveItem) -> Unit:
     return _try_parse_unit_with_fallback(curve.unit, curve.mnemonic)
 
 
-def parse_unit_to_las(mnemonic: str, unit: str | Unit):
+def parse_unit_to_las(mnemonic: str, unit: str | Unit) -> str:
     unit = unit if isinstance(unit, Unit) else registry.parse_units(unit)
     mnemonic = pozo.deLASio(mnemonic)
     return las_map.get_las_unit(mnemonic, unit)
