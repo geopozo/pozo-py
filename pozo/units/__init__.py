@@ -1,7 +1,6 @@
 import os
 import warnings
 
-import registry_config
 from lasio import CurveItem
 from pint import Unit, UnitRegistry, get_application_registry
 
@@ -9,6 +8,7 @@ import pozo
 
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 from .units import LasMap
+from . import registry_config
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
