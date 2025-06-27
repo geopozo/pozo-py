@@ -4,7 +4,7 @@ from io import StringIO
 import pandas as pd
 
 
-def apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
+def apply_color_styling(html_str: str, pattern: re.Pattern, color: str) -> str:
     for match in pattern.finditer(html_str):
         current_match = match.group()
         colored = f'<td style="color:{color}">' + current_match[4:]
@@ -12,7 +12,7 @@ def apply_color_styling(html_str: str, pattern: re.Pattern, color: str):
     return html_str
 
 
-def generate_html_table(data, delimiter):
+def generate_html_table(data: list, delimiter: str) -> str:
     red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
     orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
     post_result = "\n".join(data)

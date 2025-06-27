@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 from IPython.display import HTML, display
-from lasio import CurveItem
+from lasio import CurveItem, LASFile
 from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
@@ -25,7 +25,7 @@ registry_config.registry_mapping(las_map)
 registry_config.registry_defines(registry)
 
 
-def check_las(las, HTML_out=True, div_id=""):
+def check_las(las: LASFile, HTML_out=True, div_id=""):
     def n0(s):
         return "" if s is None else str(s)
 
