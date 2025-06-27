@@ -1,7 +1,9 @@
 import os
 import re
 import warnings
+from pathlib import Path
 
+import lasio
 import numpy as np
 from IPython.display import HTML, display
 from lasio import CurveItem, LASFile
@@ -161,3 +163,14 @@ def parse_unit_to_las(mnemonic: str, unit: str | Unit) -> str:
     unit = unit if isinstance(unit, Unit) else registry.parse_units(unit)
     mnemonic = pozo.deLASio(mnemonic)
     return las_map.get_las_unit(mnemonic, unit)
+
+
+def check_las_file(path: str) -> None:
+    """
+    Receives a path as an argument to read a LAS file using lasio and then executes check_las
+    """
+    if not Path(path).is_file():
+        raise FileNotFoundError(f"{path} not exist")
+
+    las_file = lasio.read(path)
+    check_las(las_file)
