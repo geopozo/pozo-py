@@ -25,7 +25,11 @@ registry_config.registry_mapping(las_map)
 registry_config.registry_defines(registry)
 
 
-def check_las(las: LASFile, HTML_out=True, div_id=""):
+def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
+    """
+    Check the data from the LAS file and print a table with the analysis.
+    """
+
     def n0(s):
         return "" if s is None else str(s)
 
@@ -109,6 +113,9 @@ def check_las(las: LASFile, HTML_out=True, div_id=""):
 
 
 def parse_unit_safe(unit: str) -> Unit | None:
+    """
+    Parse the unit by returning a Unit object from pint and catch the error if it occurs
+    """
     try:
         return registry.parse_units(unit)
     except Exception as e:
@@ -117,6 +124,12 @@ def parse_unit_safe(unit: str) -> Unit | None:
 
 
 def parse_unit_from_context(mnemonic: str, unit: str, data: list) -> Unit | Exception:
+    """
+    Parses a unit string using context from mnemonic and data.
+
+    Attempts to resolve the unit via LAS mappings first;
+    Raises UnitException if the unit is empty or missing.
+    """
     try:
         resolved = las_map.resolve_las_unit(mnemonic, unit, data)
     except MissingRangeError as e:
@@ -135,10 +148,16 @@ def parse_unit_from_context(mnemonic: str, unit: str, data: list) -> Unit | Exce
 
 
 def parse_unit_from_curve(curve: CurveItem) -> Unit | Exception:
+    """
+    Parses the unit from a CurveItem object and returns a Unit
+    """
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
 
 def parse_unit_to_las(mnemonic: str, unit: str | Unit) -> str:
+    """
+    Parse the unit returning the LAS value mapped from a mnemonic
+    """
     unit = unit if isinstance(unit, Unit) else registry.parse_units(unit)
     mnemonic = pozo.deLASio(mnemonic)
     return las_map.get_las_unit(mnemonic, unit)
