@@ -8,8 +8,8 @@ from .range_bondaries import RangeBoundaries
 
 class LasMap:
     def __init__(self):
-        self.mnemonic_to_units = {}
-        self.units_to_mnemonic = {}
+        self._mnemonic_to_units = {}
+        self._units_to_mnemonic = {}
 
     def add_las_map(
         self,
@@ -29,15 +29,15 @@ class LasMap:
             if not isinstance(range, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
-        if mnemonic not in self.mnemonic_to_units:
-            self.mnemonic_to_units[mnemonic] = {}
-            self.units_to_mnemonic[mnemonic] = {}
+        if mnemonic not in self._mnemonic_to_units:
+            self._mnemonic_to_units[mnemonic] = {}
+            self._units_to_mnemonic[mnemonic] = {}
 
-        self.mnemonic_to_units[mnemonic][unit] = ranges
+        self._mnemonic_to_units[mnemonic][unit] = ranges
 
         for range in ranges:
             parsed_unit = range.unit
-            self.units_to_mnemonic[mnemonic][parsed_unit] = unit
+            self._units_to_mnemonic[mnemonic][parsed_unit] = unit
 
     def resolve_las_unit(self, mnemonic: str, unit: str, data: list):
         mnemonic = pozo.deLASio(mnemonic)
@@ -45,12 +45,12 @@ class LasMap:
         min_val = np.nanmin(data)
         ranges = None
         if (
-            mnemonic in self.mnemonic_to_units
-            and unit in self.mnemonic_to_units[mnemonic]
+            mnemonic in self._mnemonic_to_units
+            and unit in self._mnemonic_to_units[mnemonic]
         ):
-            ranges: list[RangeBoundaries] = self.mnemonic_to_units[mnemonic][unit]
-        elif unit in self.mnemonic_to_units["-"]:
-            ranges = self.mnemonic_to_units["-"][unit]
+            ranges: list[RangeBoundaries] = self._mnemonic_to_units[mnemonic][unit]
+        elif unit in self._mnemonic_to_units["-"]:
+            ranges = self._mnemonic_to_units["-"][unit]
         if ranges:
             for range in ranges:
                 if range.is_within_range(min_val, max_val):
@@ -62,10 +62,10 @@ class LasMap:
 
     def get_las_unit(self, mnemonic: str, unit: str) -> str:
         if (
-            mnemonic in self.units_to_mnemonic
-            and unit in self.units_to_mnemonic[mnemonic]
+            mnemonic in self._units_to_mnemonic
+            and unit in self._units_to_mnemonic[mnemonic]
         ):
-            return self.units_to_mnemonic[mnemonic][unit]
-        if "-" in self.units_to_mnemonic and unit in self.units_to_mnemonic["-"]:
-            return self.units_to_mnemonic["-"][unit]
+            return self._units_to_mnemonic[mnemonic][unit]
+        if "-" in self._units_to_mnemonic and unit in self._units_to_mnemonic["-"]:
+            return self._units_to_mnemonic["-"][unit]
         return None
