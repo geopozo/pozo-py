@@ -2,13 +2,12 @@ import os
 import warnings
 
 from lasio import CurveItem
-from pint import UnitRegistry, get_application_registry, Unit
+from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
 
+from . import LasMap, registry_config
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
-from .registry_config import registry_defines, registry_mapping
-from .units import LasMap
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
@@ -16,8 +15,8 @@ las_map = LasMap()
 registry: UnitRegistry = get_application_registry()
 Quantity = Q = registry.Quantity
 
-registry_mapping(las_map)
-registry_defines(registry)
+registry_config.registry_mapping(las_map)
+registry_config.registry_defines(registry)
 
 
 def check_las(data):
