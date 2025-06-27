@@ -25,8 +25,8 @@ class LasMap:
                 else [ranges]
             )
 
-        for ra in ranges:
-            if not isinstance(ra, RangeBoundaries):
+        for range in ranges:
+            if not isinstance(range, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
         if mnemonic not in self.mnemonic_to_units:
@@ -35,8 +35,8 @@ class LasMap:
 
         self.mnemonic_to_units[mnemonic][unit] = ranges
 
-        for ra in ranges:
-            parsed_unit = ra.unit
+        for range in ranges:
+            parsed_unit = range.unit
             self.units_to_mnemonic[mnemonic][parsed_unit] = unit
 
     def resolve_las_unit(self, mnemonic: str, unit: str, data: list):
@@ -52,9 +52,9 @@ class LasMap:
         elif unit in self.mnemonic_to_units["-"]:
             ranges = self.mnemonic_to_units["-"][unit]
         if ranges:
-            for ra in ranges:
-                if ra.is_within_range(min_val, max_val):
-                    return ra
+            for range in ranges:
+                if range.is_within_range(min_val, max_val):
+                    return range
             raise MissingRangeError(
                 f"{unit} for {mnemonic} found but not in range: {ranges}."
             )
