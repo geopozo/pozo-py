@@ -1,15 +1,20 @@
 import os
+import re
 import warnings
 
+import numpy as np
+from IPython.display import HTML, display
 from lasio import CurveItem
 from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
 
+from . import registry_config
+from ._utils import generate_html_table
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 from .units import LasMap
-from . import registry_config
 
+_delimiter = chr(0x1E)
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
 las_map = LasMap()
@@ -20,8 +25,87 @@ registry_config.registry_mapping(las_map)
 registry_config.registry_defines(registry)
 
 
-def check_las(data):
-    pass
+def check_las(las, HTML_out=True, div_id=""):
+    def n0(s):
+        return "" if s is None else str(s)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("default")
+        warnings.filterwarnings("error", category=MissingLasUnitWarning)
+
+        desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
+        col_names = [
+            "mnemonic",
+            "las unit",
+            "pozo mapping",
+            "confidence",
+            "parsed",
+            "description",
+            "min",
+            "med",
+            "max",
+            "#NaN",
+        ]
+
+        result = [_delimiter.join(col_names)] if HTML_out else []
+        for curve in las.curves:
+            resolved = None
+            pozo_match = None
+            confidence = None
+            parsed = None
+            try:
+                resolved = las_map.resolve_las_unit(
+                    curve.mnemonic, curve.unit, curve.data
+                )
+                if resolved is not None:
+                    pozo_match = resolved.unit
+                    confidence = resolved.confidence
+                parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+
+                if resolved is None:
+                    raise MissingLasUnitWarning(
+                        "Parsed directly from LAS, probably wrong"
+                    )
+            except (
+                MissingRangeError,
+                UnitException,
+                MissingLasUnitWarning,
+            ) as e:
+                confidence = f" - {str(e)} - NONE"
+
+            desc_match = desc_wo_num.findall(curve.descr)
+            desc = desc_match[0] if len(desc_match) > 0 else curve.descr
+
+            v_min, v_med, v_max = map(str, np.nanquantile(curve.data, [0, 0.5, 1]))
+            n_nan = np.count_nonzero(np.isnan(curve.data))
+
+            curve_data = dict(
+                mnemonic=curve.mnemonic,
+                las_unit=curve.unit,
+                pozo_match=pozo_match,
+                confidence=confidence,
+                parsed_unit=parsed,
+                desc=desc,
+                v_min=v_min,
+                v_med=v_med,
+                v_max=v_max,
+                n_nan=n_nan,
+            )
+            if not HTML_out:
+                result.append(curve_data)
+            else:
+                result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
+
+        if not HTML_out:
+            return result
+
+        try:
+            html_output = generate_html_table(result, _delimiter)
+            display(HTML(f'<div id="{div_id}">{html_output}</div>'))
+
+        except Exception as e:
+            display(str(e))
+            display(HTML("<br>".join(result)))
 
 
 def parse_unit_safe(unit: str) -> Unit | None:
@@ -32,7 +116,7 @@ def parse_unit_safe(unit: str) -> Unit | None:
         return None
 
 
-def parse_unit_from_context(mnemonic: str, unit: str, data) -> Unit | Exception:
+def parse_unit_from_context(mnemonic: str, unit: str, data: list) -> Unit | Exception:
     try:
         resolved = las_map.resolve_las_unit(mnemonic, unit, data)
     except MissingRangeError as e:
