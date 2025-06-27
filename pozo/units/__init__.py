@@ -32,7 +32,7 @@ def parse_unit_safe(unit: str) -> Unit | None:
         return None
 
 
-def parse_unit_from_curve(curve: CurveItem) -> Unit:
+def parse_unit_from_curve(curve: CurveItem) -> Unit | Exception:
     if not curve.unit or curve.unit == "":
         raise UnitException("Empty unit not allowed- please map it")
 
