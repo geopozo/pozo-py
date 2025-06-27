@@ -39,7 +39,7 @@ class LasMap:
             parsed_unit = ra.unit
             self.units_to_mnemonic[mnemonic][parsed_unit] = unit
 
-    def resolve_las_unit(self, mnemonic: str, unit: str, data: list[int]):
+    def resolve_las_unit(self, mnemonic: str, unit: str, data: list):
         mnemonic = pozo.deLASio(mnemonic)
         max_val = np.nanmax(data)
         min_val = np.nanmin(data)

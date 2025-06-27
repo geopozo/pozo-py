@@ -153,7 +153,7 @@ class Graph(ood.Observer, pzt.Themeable):
             yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name]) if not yaxis_unit else yaxis_unit
         else:
             yaxis = ar.index
-            yaxis_unit = pzu.registry.parse_unit_from_context("DEPT", ar.index_unit, ar.index) if not yaxis_unit else yaxis_unit
+            yaxis_unit = pzu.parse_unit_from_context("DEPT", ar.index_unit, ar.index) if not yaxis_unit else yaxis_unit
 
         return yaxis, yaxis_name, yaxis_unit
 
@@ -208,7 +208,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if yaxis_name and hasattr(yaxis, "mnemonic"):
                 yaxis_name = yaxis.mnemonic
             if not yaxis_unit and hasattr(yaxis, "units"):
-                yaxis_unit = pzu.registry.parse_unit_from_context(
+                yaxis_unit = pzu.parse_unit_from_context(
                     pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values
                 )
             else:
@@ -217,7 +217,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 yaxis = yaxis.values
         elif yaxis_name and yaxis_name in ar.data.keys():
             yaxis = ar.data[yaxis_name]
-            yaxis_unit = pzu.registry.parse_unit_from_context(
+            yaxis_unit = pzu.parse_unit_from_context(
                 pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values
             )
 
@@ -241,7 +241,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if curve.units is None:
                 warnings.warn(f"No units found for mnemonic {mnemonic}")
             else:
-                unit = pzu.registry.parse_unit_from_context(
+                unit = pzu.parse_unit_from_context(
                     mnemonic, curve.units, curve.values
                 )  # TODO is curve correct?
 
