@@ -32,27 +32,23 @@ def parse_unit_safe(unit: str) -> Unit | None:
         return None
 
 
-def _try_parse_unit_with_fallback(unit: str, mnemonic: str) -> Unit | Exception:
-    try:
-        return registry.parse_units(unit)
-    except Exception as e:
-        raise UnitException(
-            f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
-        ) from e
-
-
 def parse_unit_from_curve(curve: CurveItem) -> Unit:
-    try:
-        resolved = las_map.resolve_las_unit(curve.mnemonic, curve.unit, curve.data)
-        if resolved is not None:
-            return registry.parse_units(resolved.unit)
-    except MissingRangeError as e:
-        warnings.warn(str(e))
-
     if not curve.unit or curve.unit == "":
         raise UnitException("Empty unit not allowed- please map it")
 
-    return _try_parse_unit_with_fallback(curve.unit, curve.mnemonic)
+    try:
+        resolved = las_map.resolve_las_unit(curve.mnemonic, curve.unit, curve.data)
+        if resolved is not None:
+            return parse_unit_safe(resolved.unit)
+        else:
+            try:
+                return registry.parse_units(curve.unit)
+            except Exception as e:
+                raise UnitException(
+                    f"'{curve.unit}' for '{pozo.deLASio(curve.mnemonic)}' not found."
+                ) from e
+    except MissingRangeError as e:
+        warnings.warn(str(e))
 
 
 def parse_unit_to_las(mnemonic: str, unit: str | Unit) -> str:
