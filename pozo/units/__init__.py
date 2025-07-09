@@ -9,7 +9,7 @@ from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
 
-from . import registry_config, si_pint
+from . import las_si, si_pint
 from ._table_utils import generate_html_table
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
@@ -19,7 +19,7 @@ from .units import LasMap
 _delimiter = chr(0x1E)
 
 las_map = LasMap()
-registry_config.add_to_las_map(las_map)
+las_si.add_to_las_map(las_map)
 
 registry: UnitRegistry = get_application_registry()
 Quantity = Q = registry.Quantity
