@@ -14,7 +14,7 @@ from ._table_utils import generate_html_table
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
-from .units import LasSiMap
+from .las_si_map import LasSiMap
 
 _delimiter = chr(0x1E)
 
