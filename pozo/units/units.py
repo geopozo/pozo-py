@@ -11,7 +11,7 @@ class LasMap:
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}
 
-    def add_las_map(
+    def add(
         self,
         mnemonic: str,
         unit: str,

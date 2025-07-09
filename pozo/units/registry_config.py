@@ -13,14 +13,14 @@ percent_general = (
     RangeBoundaries((), "ppm", "catch all, ppm - LOW"),
 )
 
-new_definitions = (
+pint_map = (  # mapa de pint
     "gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI",
     "porosity_unit = percent = pu",
     "of_1 = 100 * percent = fraction",
     "legacy_api_porosity_unit = [Legacy_API_Porosity_Unit] = puAPI",
 )
 
-units = (
+las_si_map = (  # mapa de las_si
     ("-", "MM", "millimeter", "decided without mnemonic- MEDIUM"),
     ("-", "M", "meter", "decided without mnemonic- MEDIUM"),
     ("-", "CM", "centimeter", "decided without mnemonic- MEDIUM"),
@@ -57,11 +57,13 @@ units = (
 )
 
 
-def registry_defines(registry: UnitRegistry) -> None:
-    for definition in new_definitions:
+# agrega a pint
+def add_to_pint(registry: UnitRegistry) -> None:
+    for definition in pint_map:
         registry.define(definition)
 
 
-def registry_mapping(las_map: LasMap) -> None:
-    for unit_args in units:
-        las_map.add_las_map(*unit_args)
+# agrega a las_map
+def add_to_las_map(las_map: LasMap) -> None:
+    for unit_args in las_si_map:
+        las_map.add(*unit_args)

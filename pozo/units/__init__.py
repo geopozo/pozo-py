@@ -21,8 +21,8 @@ las_map = LasMap()
 registry: UnitRegistry = get_application_registry()
 Quantity = Q = registry.Quantity
 
-registry_config.registry_mapping(las_map)
-registry_config.registry_defines(registry)
+registry_config.add_to_las_map(las_map)
+registry_config.add_to_pint(registry)
 
 
 def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
