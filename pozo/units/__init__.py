@@ -14,11 +14,11 @@ from ._table_utils import generate_html_table
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
-from .units import LasMap
+from .units import LasSiMap
 
 _delimiter = chr(0x1E)
 
-las_map = LasMap()
+las_map = LasSiMap()
 las_si.add_to_las_map(las_map)
 
 registry: UnitRegistry = get_application_registry()

@@ -6,7 +6,7 @@ from .errors import MissingRangeError
 from .range_bondaries import RangeBoundaries
 
 
-class LasMap:
+class LasSiMap:
     def __init__(self):
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}

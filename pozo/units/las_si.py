@@ -1,4 +1,4 @@
-from .units import LasMap, RangeBoundaries
+from .units import LasSiMap, RangeBoundaries
 
 PU = (
     RangeBoundaries((-50, 80), "pu", "decide by range - MEDIUM"),
@@ -50,6 +50,6 @@ las_si_map = (  # mapa de las_si
 
 
 # agrega a las_map
-def add_to_las_map(las_map: LasMap) -> None:
+def add_to_las_map(las_map: LasSiMap) -> None:
     for unit_args in las_si_map:
         las_map.add(*unit_args)
