@@ -10,8 +10,6 @@ class RangeBoundaries:
         self.confidence = confidence
 
     def is_within_range(self, min_val, max_val):
-        if len(self.boundaries) == 0:
-            return True
-        elif min_val > self.boundaries[0] and max_val < self.boundaries[1]:
-            return True
-        return False
+        return len(self.boundaries) == 0 or (
+            min_val > self.boundaries[0] and max_val < self.boundaries[1]
+        )
