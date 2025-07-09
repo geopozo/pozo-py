@@ -1,9 +1,7 @@
 import os
 import re
 import warnings
-from pathlib import Path
 
-import lasio
 import numpy as np
 from IPython.display import HTML, display
 from lasio import CurveItem, LASFile
@@ -12,7 +10,7 @@ from pint import Unit, UnitRegistry, get_application_registry
 import pozo
 
 from . import registry_config
-from ._utils import generate_html_table
+from ._table_utils import generate_html_table
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 from .units import LasMap
 
