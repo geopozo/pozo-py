@@ -9,20 +9,21 @@ from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
 
-from . import registry_config
+from . import registry_config, si_pint
 from ._table_utils import generate_html_table
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
+
+os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 from .units import LasMap
 
 _delimiter = chr(0x1E)
-os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
 las_map = LasMap()
+registry_config.add_to_las_map(las_map)
+
 registry: UnitRegistry = get_application_registry()
 Quantity = Q = registry.Quantity
-
-registry_config.add_to_las_map(las_map)
-registry_config.add_to_pint(registry)
+si_pint.add_to_pint(registry)
 
 
 def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
