@@ -1,5 +1,5 @@
 class RangeBoundaries:
-    def __init__(self, boundaries, unit, confidence):
+    def __init__(self, boundaries, unit: str | tuple["RangeBoundaries"], confidence):
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
                 "boundaries should contain a tuple with (min, max) or () catch-all"
