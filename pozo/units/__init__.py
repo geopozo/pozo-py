@@ -6,7 +6,7 @@ import numpy as np
 import pint
 from lasio import LASFile
 
-from pozo.utilities import display_utils, lasio_utils, _table_utils
+from pozo.utilities import _table_utils, display_utils, lasio_utils
 from pozo.utilities.types import Array, Curve
 
 from . import las_si, si_pint
@@ -160,10 +160,14 @@ def parse_unit_from_curve(curve: Curve) -> pint.Unit | Exception:
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
 
-def parse_unit_to_las(mnemonic: str, unit: str | pint.Unit) -> str:
+def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str:
     """
     Parse the unit returning the LAS value mapped from a mnemonic
     """
-    unit = unit if isinstance(unit, pint.Unit) else registry.parse_units(unit)
+    pint_unit = (
+        pint_unit
+        if isinstance(pint_unit, pint.Unit)
+        else registry.parse_units(pint_unit)
+    )
     mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
-    return las_map.get_las_unit(mnemonic, unit)
+    return las_map.get_las_unit(mnemonic, pint_unit)
