@@ -144,7 +144,7 @@ def parse_unit_from_context(
         return parse_unit_safe(resolved.unit)
     else:
         try:
-            if not si_unit or si_unit == "":
+            if not si_unit:
                 raise UnitException("Empty unit not allowed- please map it")
             return parse_unit_safe(si_unit)
         except Exception as e:
