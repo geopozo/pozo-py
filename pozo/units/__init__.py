@@ -127,7 +127,7 @@ def parse_unit_safe(unit: str) -> pint.Unit | None:
 
 def parse_unit_from_context(
     mnemonic: str,
-    unit: str,
+    si_unit: str,
     data: Array,
 ) -> pint.Unit | Exception:
     """
@@ -137,19 +137,19 @@ def parse_unit_from_context(
     Raises UnitException if the unit is empty or missing.
     """
     try:
-        resolved = las_map.resolve_las_unit(mnemonic, unit, data)
+        resolved = las_map.resolve_las_unit(mnemonic, si_unit, data)
     except MissingRangeError as e:
         warnings.warn(str(e))
     if resolved is not None:
         return parse_unit_safe(resolved.unit)
     else:
         try:
-            if not unit or unit == "":
+            if not si_unit or si_unit == "":
                 raise UnitException("Empty unit not allowed- please map it")
-            return parse_unit_safe(unit)
+            return parse_unit_safe(si_unit)
         except Exception as e:
             raise UnitException(
-                f"'{unit}' for '{lasio_utils.remove_lasio_suffix(mnemonic)}' not found."
+                f"'{si_unit}' for '{lasio_utils.remove_lasio_suffix(mnemonic)}' not found."
             ) from e
 
 
