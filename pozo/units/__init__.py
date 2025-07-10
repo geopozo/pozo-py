@@ -5,10 +5,10 @@ import warnings
 import numpy as np
 from IPython.display import HTML, display
 from lasio import LASFile
-from pint import Unit, UnitRegistry, get_application_registry
+import pint
 
-import pozo
-from pozo.utilities.types import Array, Curve
+from ..utilities import lasio_utils
+from ..utilities.types import Array, Curve
 
 from . import las_si, si_pint
 from ._table_utils import generate_html_table
@@ -22,7 +22,7 @@ _delimiter = chr(0x1E)
 las_map = LasSiMap()
 las_si.add_to_las_map(las_map)
 
-registry: UnitRegistry = get_application_registry()
+registry: pint.UnitRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
 si_pint.add_to_pint(registry)
 
@@ -114,7 +114,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             display(HTML("<br>".join(result)))
 
 
-def parse_unit_safe(unit: str) -> Unit | None:
+def parse_unit_safe(unit: str) -> pint.Unit | None:
     """
     Parse the unit by returning a Unit object from pint and catch the error if it occurs
     """
@@ -129,7 +129,7 @@ def parse_unit_from_context(
     mnemonic: str,
     unit: str,
     data: Array,
-) -> Unit | Exception:
+) -> pint.Unit | Exception:
     """
     Parses a unit string using context from mnemonic and data.
 
@@ -149,21 +149,21 @@ def parse_unit_from_context(
             return parse_unit_safe(unit)
         except Exception as e:
             raise UnitException(
-                f"'{unit}' for '{pozo.deLASio(mnemonic)}' not found."
+                f"'{unit}' for '{lasio_utils.remove_lasio_suffix(mnemonic)}' not found."
             ) from e
 
 
-def parse_unit_from_curve(curve: Curve) -> Unit | Exception:
+def parse_unit_from_curve(curve: Curve) -> pint.Unit | Exception:
     """
     Parses the unit from a Curve object and returns a Unit
     """
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
 
-def parse_unit_to_las(mnemonic: str, unit: str | Unit) -> str:
+def parse_unit_to_las(mnemonic: str, unit: str | pint.Unit) -> str:
     """
     Parse the unit returning the LAS value mapped from a mnemonic
     """
-    unit = unit if isinstance(unit, Unit) else registry.parse_units(unit)
-    mnemonic = pozo.deLASio(mnemonic)
+    unit = unit if isinstance(unit, pint.Unit) else registry.parse_units(unit)
+    mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
     return las_map.get_las_unit(mnemonic, unit)
