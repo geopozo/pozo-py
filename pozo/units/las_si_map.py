@@ -18,7 +18,7 @@ class LasSiMap:
     def add(
         self,
         mnemonic: str,
-        unit: str,
+        las_unit: str,
         ranges: str | tuple[RangeBoundaries],
         confidence: str = "- not indicated - LOW",
     ) -> None:
@@ -36,10 +36,10 @@ class LasSiMap:
         if mnemonic not in self._las_to_si_by_mnemonic:
             self.set_default(mnemonic)
 
-        self._las_to_si_by_mnemonic[mnemonic][unit] = ranges
+        self._las_to_si_by_mnemonic[mnemonic][las_unit] = ranges
 
         for range in ranges:
-            self._si_to_las_by_mnemonic[mnemonic][range.unit] = unit
+            self._si_to_las_by_mnemonic[mnemonic][range.unit] = las_unit
 
     def resolve_las_unit(
         self,
