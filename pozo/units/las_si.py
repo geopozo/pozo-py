@@ -51,6 +51,6 @@ las_si_map = (  # mapa de las_si
 
 
 # agrega a las_map
-def add_to_las_map(las_map: LasSiMap) -> None:
+def add_to_las_si_map(las_map: LasSiMap) -> None:
     for unit_args in las_si_map:
         las_map.add(*unit_args)

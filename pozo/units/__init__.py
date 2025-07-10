@@ -18,7 +18,7 @@ from .las_si_map import LasSiMap
 _delimiter = chr(0x1E)
 
 las_map = LasSiMap()
-las_si.add_to_las_map(las_map)
+las_si.add_to_las_si_map(las_map)
 
 registry: pint.UnitRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
