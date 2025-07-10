@@ -8,12 +8,12 @@ from .range_bondaries import RangeBoundaries
 
 class LasSiMap:
     def __init__(self):
-        self._mnemonic_to_si = {}
-        self._si_to_mnemonic = {}
+        self._las_to_si_by_mnemonic = {}  # las a si por mnemotecnica
+        self._si_to_las_by_mnemonic = {}  # si a las por mnemotecnica
 
     def set_default(self, mnemonic):
-        self._mnemonic_to_si[mnemonic] = {}
-        self._si_to_mnemonic[mnemonic] = {}
+        self._las_to_si_by_mnemonic[mnemonic] = {}
+        self._si_to_las_by_mnemonic[mnemonic] = {}
 
     def add(
         self,
@@ -33,13 +33,13 @@ class LasSiMap:
             if not isinstance(range, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
-        if mnemonic not in self._mnemonic_to_si:
+        if mnemonic not in self._las_to_si_by_mnemonic:
             self.set_default(mnemonic)
 
-        self._mnemonic_to_si[mnemonic][unit] = ranges
+        self._las_to_si_by_mnemonic[mnemonic][unit] = ranges
 
         for range in ranges:
-            self._si_to_mnemonic[mnemonic][range.unit] = unit
+            self._si_to_las_by_mnemonic[mnemonic][range.unit] = unit
 
     def resolve_las_unit(
         self,
@@ -52,13 +52,10 @@ class LasSiMap:
         min_val = data_utils.get_min_value(data)
         ranges = None
 
-        if (
-            mnemonic in self._mnemonic_to_si
-            and unit in self._mnemonic_to_si[mnemonic]
-        ):
-            ranges: list[RangeBoundaries] = self._mnemonic_to_si[mnemonic][unit]
-        elif unit in self._mnemonic_to_si["-"]:
-            ranges = self._mnemonic_to_si["-"][unit]
+        if mnemonic in self._las_to_si_by_mnemonic and unit in self._las_to_si_by_mnemonic[mnemonic]:
+            ranges: list[RangeBoundaries] = self._las_to_si_by_mnemonic[mnemonic][unit]
+        elif unit in self._las_to_si_by_mnemonic["-"]:
+            ranges = self._las_to_si_by_mnemonic["-"][unit]
 
         if ranges:
             for range in ranges:
@@ -74,11 +71,8 @@ class LasSiMap:
         mnemonic: str,
         unit: str,
     ) -> str:
-        if (
-            mnemonic in self._si_to_mnemonic
-            and unit in self._si_to_mnemonic[mnemonic]
-        ):
-            return self._si_to_mnemonic[mnemonic][unit]
-        if "-" in self._si_to_mnemonic and unit in self._si_to_mnemonic["-"]:
-            return self._si_to_mnemonic["-"][unit]
+        if mnemonic in self._si_to_las_by_mnemonic and unit in self._si_to_las_by_mnemonic[mnemonic]:
+            return self._si_to_las_by_mnemonic[mnemonic][unit]
+        if "-" in self._si_to_las_by_mnemonic and unit in self._si_to_las_by_mnemonic["-"]:
+            return self._si_to_las_by_mnemonic["-"][unit]
         return None
