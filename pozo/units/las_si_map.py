@@ -52,8 +52,13 @@ class LasSiMap:
         min_val = data_utils.get_min_value(data)
         ranges = None
 
-        if mnemonic in self._las_to_si_by_mnemonic and las_unit in self._las_to_si_by_mnemonic[mnemonic]:
-            ranges: list[RangeBoundaries] = self._las_to_si_by_mnemonic[mnemonic][las_unit]
+        if (
+            mnemonic in self._las_to_si_by_mnemonic
+            and las_unit in self._las_to_si_by_mnemonic[mnemonic]
+        ):
+            ranges: list[RangeBoundaries] = self._las_to_si_by_mnemonic[mnemonic][
+                las_unit
+            ]
         elif las_unit in self._las_to_si_by_mnemonic["-"]:
             ranges = self._las_to_si_by_mnemonic["-"][las_unit]
 
@@ -70,9 +75,15 @@ class LasSiMap:
         self,
         mnemonic: str,
         si_unit: str,
-    ) -> str:
-        if mnemonic in self._si_to_las_by_mnemonic and si_unit in self._si_to_las_by_mnemonic[mnemonic]:
+    ) -> str | None:
+        if (
+            mnemonic in self._si_to_las_by_mnemonic
+            and si_unit in self._si_to_las_by_mnemonic[mnemonic]
+        ):
             return self._si_to_las_by_mnemonic[mnemonic][si_unit]
-        if "-" in self._si_to_las_by_mnemonic and si_unit in self._si_to_las_by_mnemonic["-"]:
+        if (
+            "-" in self._si_to_las_by_mnemonic
+            and si_unit in self._si_to_las_by_mnemonic["-"]
+        ):
             return self._si_to_las_by_mnemonic["-"][si_unit]
         return None
