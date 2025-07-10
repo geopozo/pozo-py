@@ -1,6 +1,7 @@
-import numpy as np
+from typing import Any
 
 import pozo
+from ..data_operations.format import get_max_value, get_min_value
 
 from .errors import MissingRangeError
 from .range_bondaries import RangeBoundaries
@@ -39,10 +40,10 @@ class LasSiMap:
             parsed_unit = range.unit
             self._units_to_mnemonic[mnemonic][parsed_unit] = unit
 
-    def resolve_las_unit(self, mnemonic: str, unit: str, data: list):
+    def resolve_las_unit(self, mnemonic: str, unit: str, data: list[Any]):
         mnemonic = pozo.deLASio(mnemonic)
-        max_val = np.nanmax(data)
-        min_val = np.nanmin(data)
+        max_val = get_max_value(data)
+        min_val = get_min_value(data)
         ranges = None
         if (
             mnemonic in self._mnemonic_to_units
