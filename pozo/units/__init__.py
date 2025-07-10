@@ -4,10 +4,9 @@ import warnings
 
 import numpy as np
 import pint
-from IPython.display import HTML, display
 from lasio import LASFile
 
-from pozo.utilities import lasio_utils
+from pozo.utilities import display_utils, lasio_utils
 from pozo.utilities.types import Array, Curve
 
 from . import _table_utils, las_si, si_pint
@@ -106,11 +105,13 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
 
         try:
             html_output = _table_utils.generate_html_table(result, _delimiter)
-            display(HTML(f'<div id="{div_id}">{html_output}</div>'))
+            display_utils.show_content(
+                f'<div id="{div_id}">{html_output}</div>', html=True
+            )
 
         except Exception as e:
-            display(str(e))
-            display(HTML("<br>".join(result)))
+            display_utils.show_content(str(e))
+            display_utils.show_content("<br>".join(result), html=True)
 
 
 def parse_unit_safe(unit: str) -> pint.Unit | None:
