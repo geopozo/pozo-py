@@ -12,6 +12,10 @@ class LasSiMap:
         self._mnemonic_to_units = {}
         self._units_to_mnemonic = {}
 
+    def set_default(self, mnemonic):
+        self._mnemonic_to_units[mnemonic] = {}
+        self._units_to_mnemonic[mnemonic] = {}
+
     def add(
         self,
         mnemonic: str,
@@ -31,8 +35,7 @@ class LasSiMap:
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
         if mnemonic not in self._mnemonic_to_units:
-            self._mnemonic_to_units[mnemonic] = {}
-            self._units_to_mnemonic[mnemonic] = {}
+            self.set_default(mnemonic)
 
         self._mnemonic_to_units[mnemonic][unit] = ranges
 
