@@ -4,10 +4,11 @@ import warnings
 
 import numpy as np
 from IPython.display import HTML, display
-from lasio import CurveItem, LASFile
+from lasio import LASFile
 from pint import Unit, UnitRegistry, get_application_registry
 
 import pozo
+from pozo.utilities.types import Array, Curve
 
 from . import las_si, si_pint
 from ._table_utils import generate_html_table
@@ -124,7 +125,11 @@ def parse_unit_safe(unit: str) -> Unit | None:
         return None
 
 
-def parse_unit_from_context(mnemonic: str, unit: str, data: list) -> Unit | Exception:
+def parse_unit_from_context(
+    mnemonic: str,
+    unit: str,
+    data: Array,
+) -> Unit | Exception:
     """
     Parses a unit string using context from mnemonic and data.
 
@@ -148,9 +153,9 @@ def parse_unit_from_context(mnemonic: str, unit: str, data: list) -> Unit | Exce
             ) from e
 
 
-def parse_unit_from_curve(curve: CurveItem) -> Unit | Exception:
+def parse_unit_from_curve(curve: Curve) -> Unit | Exception:
     """
-    Parses the unit from a CurveItem object and returns a Unit
+    Parses the unit from a Curve object and returns a Unit
     """
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
