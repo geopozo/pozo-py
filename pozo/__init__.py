@@ -17,9 +17,6 @@ import pozo.units as units # noqa
 class PozoWarning(UserWarning):
     pass
 
-# These are all utility functions
-def deLASio(mnemonic):
-    return mnemonic.split(":", 1)[0] if ":" in mnemonic else mnemonic
 
 # is_array use the input data to verify if is pint data or other type that has
 # __len__ and return a boolean. Be careful with this, it will return true for Pozo objects.

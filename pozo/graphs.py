@@ -1,13 +1,16 @@
+import re
 import warnings
-import lasio # quiero quitar esto pero en el futuro
-import pozo
-import pozo.units as pzu
-import pozo.renderers as pzr
-import pozo.themes as pzt
+
+import lasio  # quiero quitar esto pero en el futuro
 import ood
 
-import re
-desc_wo_num = re.compile(r'^(?:\s*\d+\s+)?(.*)$')
+import pozo
+import pozo.renderers as pzr
+import pozo.themes as pzt
+import pozo.units as pzu
+from pozo.utilities import lasio_utils
+
+desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
 WELLY_WELL_TYPE = "<class 'welly.well.Well'>"
 WELLY_PROJECT_TYPE = "<class 'welly.project.Project'>"
@@ -168,7 +171,7 @@ class Graph(ood.Observer, pzt.Themeable):
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
 
-            mnemonic = pozo.deLASio(curve.mnemonic)
+            mnemonic = lasio_utils.remove_lasio_suffix(curve.mnemonic)
             if include and len(include) != 0 and curve.mnemonic not in include:
                 continue
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
@@ -209,7 +212,9 @@ class Graph(ood.Observer, pzt.Themeable):
                 yaxis_name = yaxis.mnemonic
             if not yaxis_unit and hasattr(yaxis, "units"):
                 yaxis_unit = pzu.parse_unit_from_context(
-                    pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values
+                    lasio_utils.remove_lasio_suffix(yaxis.mnemonic),
+                    yaxis.units,
+                    yaxis.values,
                 )
             else:
                 warnings.warn("Not sure what yaxis units are.")
@@ -218,14 +223,16 @@ class Graph(ood.Observer, pzt.Themeable):
         elif yaxis_name and yaxis_name in ar.data.keys():
             yaxis = ar.data[yaxis_name]
             yaxis_unit = pzu.parse_unit_from_context(
-                pozo.deLASio(yaxis.mnemonic), yaxis.units, yaxis.values
+                lasio_utils.remove_lasio_suffix(yaxis.mnemonic),
+                yaxis.units,
+                yaxis.values,
             )
 
         for curve in ar.data.values():
             if yaxis_name is not None and curve.mnemonic == yaxis_name:
                 continue
 
-            mnemonic = pozo.deLASio(curve.mnemonic)
+            mnemonic = lasio_utils.remove_lasio_suffix(curve.mnemonic)
             if include and len(include) != 0 and curve.mnemonic not in include:
                 continue
             elif exclude and len(exclude) != 0 and curve.mnemonic in exclude:
@@ -253,7 +260,9 @@ class Graph(ood.Observer, pzt.Themeable):
             else:
                 depth = curve.index
                 depth_unit = pzu.parse_unit_from_context(
-                    pozo.deLASio(curve.index_name), curve.index_name, curve.index
+                    lasio_utils.remove_lasio_suffix(curve.index_name),
+                    curve.index_name,
+                    curve.index,
                 )
 
             trace = pozo.Trace(
