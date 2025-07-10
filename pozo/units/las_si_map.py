@@ -2,7 +2,7 @@ from typing import Any
 
 import pozo
 
-from ..data_operations.format import get_max_value, get_min_value
+from ..utilities.data import get_max_value, get_min_value
 from .errors import MissingRangeError
 from .range_bondaries import RangeBoundaries
 

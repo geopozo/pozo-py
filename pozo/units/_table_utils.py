@@ -1,6 +1,6 @@
 import re
 
-from pozo.data_operations.format import format_csv
+from pozo.utilities.data import format_csv
 
 
 def apply_color_styling(
