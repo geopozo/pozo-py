@@ -3,15 +3,14 @@ import re
 import warnings
 
 import numpy as np
+import pint
 from IPython.display import HTML, display
 from lasio import LASFile
-import pint
 
-from ..utilities import lasio_utils
-from ..utilities.types import Array, Curve
+from pozo.utilities import lasio_utils
+from pozo.utilities.types import Array, Curve
 
-from . import las_si, si_pint
-from ._table_utils import generate_html_table
+from . import _table_utils, las_si, si_pint
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
@@ -106,7 +105,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             return result
 
         try:
-            html_output = generate_html_table(result, _delimiter)
+            html_output = _table_utils.generate_html_table(result, _delimiter)
             display(HTML(f'<div id="{div_id}">{html_output}</div>'))
 
         except Exception as e:
