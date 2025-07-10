@@ -29,5 +29,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest"]
 
+[dependency-groups]
+dev = [
+    "mypy>=1.16.1",
+]
+
 [tool.ruff.lint]
 ignore = ["E701"]
