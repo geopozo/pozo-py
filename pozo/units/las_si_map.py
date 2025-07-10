@@ -69,10 +69,10 @@ class LasSiMap:
     def get_las_unit(
         self,
         mnemonic: str,
-        unit: str,
+        si_unit: str,
     ) -> str:
-        if mnemonic in self._si_to_las_by_mnemonic and unit in self._si_to_las_by_mnemonic[mnemonic]:
-            return self._si_to_las_by_mnemonic[mnemonic][unit]
-        if "-" in self._si_to_las_by_mnemonic and unit in self._si_to_las_by_mnemonic["-"]:
-            return self._si_to_las_by_mnemonic["-"][unit]
+        if mnemonic in self._si_to_las_by_mnemonic and si_unit in self._si_to_las_by_mnemonic[mnemonic]:
+            return self._si_to_las_by_mnemonic[mnemonic][si_unit]
+        if "-" in self._si_to_las_by_mnemonic and si_unit in self._si_to_las_by_mnemonic["-"]:
+            return self._si_to_las_by_mnemonic["-"][si_unit]
         return None
