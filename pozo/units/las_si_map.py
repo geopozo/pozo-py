@@ -40,8 +40,7 @@ class LasSiMap:
         self._mnemonic_to_units[mnemonic][unit] = ranges
 
         for range in ranges:
-            parsed_unit = range.unit
-            self._units_to_mnemonic[mnemonic][parsed_unit] = unit
+            self._units_to_mnemonic[mnemonic][range.unit] = unit
 
     def resolve_las_unit(self, mnemonic: str, unit: str, data: list[Any]):
         mnemonic = pozo.deLASio(mnemonic)
