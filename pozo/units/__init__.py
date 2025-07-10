@@ -6,10 +6,10 @@ import numpy as np
 import pint
 from lasio import LASFile
 
-from pozo.utilities import display_utils, lasio_utils
+from pozo.utilities import display_utils, lasio_utils, _table_utils
 from pozo.utilities.types import Array, Curve
 
-from . import _table_utils, las_si, si_pint
+from . import las_si, si_pint
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
