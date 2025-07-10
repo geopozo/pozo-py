@@ -44,7 +44,7 @@ class LasSiMap:
     def resolve_las_unit(
         self,
         mnemonic: str,
-        unit: str,
+        las_unit: str,
         data: list[Any],
     ) -> RangeBoundaries | None:
         mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
@@ -52,17 +52,17 @@ class LasSiMap:
         min_val = data_utils.get_min_value(data)
         ranges = None
 
-        if mnemonic in self._las_to_si_by_mnemonic and unit in self._las_to_si_by_mnemonic[mnemonic]:
-            ranges: list[RangeBoundaries] = self._las_to_si_by_mnemonic[mnemonic][unit]
-        elif unit in self._las_to_si_by_mnemonic["-"]:
-            ranges = self._las_to_si_by_mnemonic["-"][unit]
+        if mnemonic in self._las_to_si_by_mnemonic and las_unit in self._las_to_si_by_mnemonic[mnemonic]:
+            ranges: list[RangeBoundaries] = self._las_to_si_by_mnemonic[mnemonic][las_unit]
+        elif las_unit in self._las_to_si_by_mnemonic["-"]:
+            ranges = self._las_to_si_by_mnemonic["-"][las_unit]
 
         if ranges:
             for range in ranges:
                 if range.is_within_range(min_val, max_val):
                     return range
             raise MissingRangeError(
-                f"{unit} for {mnemonic} found but not in range: {ranges}."
+                f"{las_unit} for {mnemonic} found but not in range: {ranges}."
             )
         return None
 
