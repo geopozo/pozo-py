@@ -1,8 +1,8 @@
 from typing import Any
 
 import pozo
-from ..data_operations.format import get_max_value, get_min_value
 
+from ..data_operations.format import get_max_value, get_min_value
 from .errors import MissingRangeError
 from .range_bondaries import RangeBoundaries
 
@@ -42,11 +42,17 @@ class LasSiMap:
         for range in ranges:
             self._units_to_mnemonic[mnemonic][range.unit] = unit
 
-    def resolve_las_unit(self, mnemonic: str, unit: str, data: list[Any]):
+    def resolve_las_unit(
+        self,
+        mnemonic: str,
+        unit: str,
+        data: list[Any],
+    ) -> RangeBoundaries | None:
         mnemonic = pozo.deLASio(mnemonic)
         max_val = get_max_value(data)
         min_val = get_min_value(data)
         ranges = None
+
         if (
             mnemonic in self._mnemonic_to_units
             and unit in self._mnemonic_to_units[mnemonic]
@@ -54,6 +60,7 @@ class LasSiMap:
             ranges: list[RangeBoundaries] = self._mnemonic_to_units[mnemonic][unit]
         elif unit in self._mnemonic_to_units["-"]:
             ranges = self._mnemonic_to_units["-"][unit]
+
         if ranges:
             for range in ranges:
                 if range.is_within_range(min_val, max_val):
@@ -63,7 +70,11 @@ class LasSiMap:
             )
         return None
 
-    def get_las_unit(self, mnemonic: str, unit: str) -> str:
+    def get_las_unit(
+        self,
+        mnemonic: str,
+        unit: str,
+    ) -> str:
         if (
             mnemonic in self._units_to_mnemonic
             and unit in self._units_to_mnemonic[mnemonic]
