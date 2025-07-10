@@ -9,12 +9,12 @@ from .range_bondaries import RangeBoundaries
 
 class LasSiMap:
     def __init__(self):
-        self._mnemonic_to_units = {}
-        self._units_to_mnemonic = {}
+        self._mnemonic_to_si = {}
+        self._si_to_mnemonic = {}
 
     def set_default(self, mnemonic):
-        self._mnemonic_to_units[mnemonic] = {}
-        self._units_to_mnemonic[mnemonic] = {}
+        self._mnemonic_to_si[mnemonic] = {}
+        self._si_to_mnemonic[mnemonic] = {}
 
     def add(
         self,
@@ -34,13 +34,13 @@ class LasSiMap:
             if not isinstance(range, RangeBoundaries):
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
-        if mnemonic not in self._mnemonic_to_units:
+        if mnemonic not in self._mnemonic_to_si:
             self.set_default(mnemonic)
 
-        self._mnemonic_to_units[mnemonic][unit] = ranges
+        self._mnemonic_to_si[mnemonic][unit] = ranges
 
         for range in ranges:
-            self._units_to_mnemonic[mnemonic][range.unit] = unit
+            self._si_to_mnemonic[mnemonic][range.unit] = unit
 
     def resolve_las_unit(
         self,
@@ -54,12 +54,12 @@ class LasSiMap:
         ranges = None
 
         if (
-            mnemonic in self._mnemonic_to_units
-            and unit in self._mnemonic_to_units[mnemonic]
+            mnemonic in self._mnemonic_to_si
+            and unit in self._mnemonic_to_si[mnemonic]
         ):
-            ranges: list[RangeBoundaries] = self._mnemonic_to_units[mnemonic][unit]
-        elif unit in self._mnemonic_to_units["-"]:
-            ranges = self._mnemonic_to_units["-"][unit]
+            ranges: list[RangeBoundaries] = self._mnemonic_to_si[mnemonic][unit]
+        elif unit in self._mnemonic_to_si["-"]:
+            ranges = self._mnemonic_to_si["-"][unit]
 
         if ranges:
             for range in ranges:
@@ -76,10 +76,10 @@ class LasSiMap:
         unit: str,
     ) -> str:
         if (
-            mnemonic in self._units_to_mnemonic
-            and unit in self._units_to_mnemonic[mnemonic]
+            mnemonic in self._si_to_mnemonic
+            and unit in self._si_to_mnemonic[mnemonic]
         ):
-            return self._units_to_mnemonic[mnemonic][unit]
-        if "-" in self._units_to_mnemonic and unit in self._units_to_mnemonic["-"]:
-            return self._units_to_mnemonic["-"][unit]
+            return self._si_to_mnemonic[mnemonic][unit]
+        if "-" in self._si_to_mnemonic and unit in self._si_to_mnemonic["-"]:
+            return self._si_to_mnemonic["-"][unit]
         return None
