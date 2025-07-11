@@ -56,7 +56,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             confidence = None
             parsed = None
             try:
-                resolved = las_map.resolve_las_unit(
+                resolved = las_map.get_las_unit_to_si_unit_range(
                     curve.mnemonic, curve.unit, curve.data
                 )
                 if resolved is not None:
@@ -138,8 +138,8 @@ def parse_unit_from_context(
     Raises UnitException if the unit is empty or missing.
     """
     try:
-        resolved = las_map.resolve_las_unit(mnemonic, si_unit, data)
-    except MissingRangeError as e:
+        resolved = las_map.get_las_unit_to_si_unit_range(mnemonic, si_unit, data)
+    except errors.MissingRangeError as e:
         warnings.warn(str(e))
     if resolved is not None:
         return parse_unit_safe(resolved.unit)
