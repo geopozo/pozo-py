@@ -9,6 +9,7 @@ from lasio import LASFile
 
 from pozo.utilities import _table_utils, display_utils, lasio_utils
 from pozo.utilities.types import Array, Curve
+import si_pint.config
 
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
@@ -22,7 +23,7 @@ las_si.config.add_to_las_si_map(las_map)
 
 registry: pint.UnitRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
-si_pint.add_to_pint(registry)
+si_pint.config.add_to_pint(registry)
 
 
 def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
