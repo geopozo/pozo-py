@@ -14,3 +14,11 @@ def get_max_value(data):
 
 def get_min_value(data):
     return np.nanmin(data)
+
+
+def get_string_quantiles(data, quantiles):
+    return [str(x) for x in np.nanquantile(data, quantiles)]
+
+
+def count_missing_values(data):
+    return np.count_nonzero(np.isnan(data))

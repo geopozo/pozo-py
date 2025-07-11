@@ -2,15 +2,14 @@ import os
 import re
 import warnings
 
-import numpy as np
-import pint
 import las_si.config
-import si_pint
+import pint
+import si_pint.config
+from las_si.las_si_map import LasSiMap
 from lasio import LASFile
 
-from pozo.utilities import _table_utils, display_utils, lasio_utils
+from pozo.utilities import _table_utils, data_utils, display_utils, lasio_utils
 from pozo.utilities.types import Array, Curve
-import si_pint.config
 
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
@@ -19,7 +18,7 @@ import las_si
 
 _delimiter = chr(0x1E)
 
-las_map = las_si.LasSiMap()
+las_map = LasSiMap()
 las_si.config.add_to_las_si_map(las_map)
 
 registry: pint.UnitRegistry = pint.get_application_registry()
@@ -82,8 +81,11 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             desc_match = desc_wo_num.findall(curve.descr)
             desc = desc_match[0] if len(desc_match) > 0 else curve.descr
 
-            v_min, v_med, v_max = map(str, np.nanquantile(curve.data, [0, 0.5, 1]))
-            n_nan = np.count_nonzero(np.isnan(curve.data))
+            [v_min, v_med, v_max] = data_utils.get_string_quantiles(
+                curve.data,
+                [0, 0.5, 1],
+            )
+            n_nan = data_utils.count_missing_values(curve.data)
 
             curve_data = dict(
                 mnemonic=curve.mnemonic,
