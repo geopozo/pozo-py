@@ -6,7 +6,8 @@ import pint
 from lasio import LASFile
 
 from pozo.units import errors
-from pozo.units.las_si import las_si_config, las_si_map
+from pozo.units.las_si import las_si_config
+from pozo.units.las_si import mapper
 from pozo.units.si_pint import si_pint_config
 from pozo.utils import _lasio as lasio_utils
 from pozo.utils import _table, display, stats, types
@@ -15,7 +16,7 @@ os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentatio
 
 _delimiter = chr(0x1E)
 
-las_map = las_si_map.LasSiMap()
+las_map = mapper.LasSiMap()
 las_si_config.add_to_las_si_map(las_map)
 
 registry: pint.UnitRegistry = pint.get_application_registry()

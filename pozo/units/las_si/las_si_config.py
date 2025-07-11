@@ -1,15 +1,14 @@
-from .las_si_map import LasSiMap
-from .range_bondaries import RangeBoundaries
+from pozo.units.las_si import mapper
 
 PU = (
-    RangeBoundaries((-50, 80), "pu", "decide by range - MEDIUM"),
-    RangeBoundaries((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
-    RangeBoundaries((), "puAPI", "catch all, legacy unit - LOW"),
+    mapper.RangeBoundaries((-50, 80), "pu", "decide by range - MEDIUM"),
+    mapper.RangeBoundaries((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
+    mapper.RangeBoundaries((), "puAPI", "catch all, legacy unit - LOW"),
 )
 percent_general = (
-    RangeBoundaries((-100, 100), "percent", "decide by range, verify - LOW"),
-    RangeBoundaries((-1, 1), "of_1", "decide by range, verify - LOW"),
-    RangeBoundaries((), "ppm", "catch all, ppm - LOW"),
+    mapper.RangeBoundaries((-100, 100), "percent", "decide by range, verify - LOW"),
+    mapper.RangeBoundaries((-1, 1), "of_1", "decide by range, verify - LOW"),
+    mapper.RangeBoundaries((), "ppm", "catch all, ppm - LOW"),
 )
 
 
@@ -51,6 +50,6 @@ las_si_map = (  # mapa de las_si
 
 
 # agrega a las_map
-def add_to_las_si_map(las_map: LasSiMap) -> None:
+def add_to_las_si_map(las_map: mapper.LasSiMap) -> None:
     for unit_args in las_si_map:
         las_map.add(*unit_args)
