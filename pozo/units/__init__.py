@@ -8,7 +8,7 @@ from lasio import LASFile
 from pozo.units import errors
 from pozo.units.las_si import las_si_config, las_si_map
 from pozo.units.si_pint import si_pint_config
-from pozo.utils import _table_utils, display, lasio_utils, stats, types
+from pozo.utils import _table, display, lasio_utils, stats, types
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
@@ -104,7 +104,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             return result
 
         try:
-            html_output = _table_utils.generate_html_table(result, _delimiter)
+            html_output = _table.generate_html_table(result, _delimiter)
             display.show_content(f'<div id="{div_id}">{html_output}</div>', html=True)
 
         except Exception as e:

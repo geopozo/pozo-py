@@ -1,6 +1,6 @@
 import re
 
-from pozo.utils import data_utils
+from pozo.utils import stats
 
 
 def apply_color_styling(
@@ -23,7 +23,7 @@ def generate_html_table(
     orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
     post_result = "\n".join(data)
 
-    output = data_utils.format_csv(post_result, delimiter)
+    output = stats.format_csv(post_result, delimiter)
     html_output = output.to_html()
     html_output = apply_color_styling(html_output, red_low, "red")
     html_output = apply_color_styling(html_output, orange_medium, "#B95000")
