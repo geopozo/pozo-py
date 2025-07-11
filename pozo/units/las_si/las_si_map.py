@@ -71,7 +71,7 @@ class LasSiMap:
             )
         return None
 
-    def get_las_unit(
+    def get_si_unit_to_las_unit(
         self,
         mnemonic: str,
         si_unit: str,

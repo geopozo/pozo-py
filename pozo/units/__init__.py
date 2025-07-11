@@ -172,4 +172,4 @@ def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str:
         else registry.parse_units(pint_unit)
     )
     mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
-    return las_map.get_las_unit(mnemonic, pint_unit)
+    return las_map.get_si_unit_to_las_unit(mnemonic, pint_unit)
