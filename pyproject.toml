@@ -36,3 +36,6 @@ dev = [
 
 [tool.ruff.lint]
 ignore = ["E701"]
+
+[tool.mypy]
+files = ["pozo/units"]
