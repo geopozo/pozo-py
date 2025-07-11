@@ -1,7 +1,7 @@
 from typing import Any
 
 from pozo.units import errors
-from pozo.utilities import data_utils, lasio_utils
+from pozo.utils import stats, lasio_utils
 
 
 class RangeBoundaries:
@@ -65,8 +65,8 @@ class LasSiMap:
         data: list[Any],
     ) -> RangeBoundaries | None:
         mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
-        max_val = data_utils.get_max_value(data)
-        min_val = data_utils.get_min_value(data)
+        max_val = stats.get_max_value(data)
+        min_val = stats.get_min_value(data)
         ranges = None
 
         if (

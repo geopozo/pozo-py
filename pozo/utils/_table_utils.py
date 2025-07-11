@@ -1,6 +1,6 @@
 import re
 
-from pozo.utilities import data_utils
+from pozo.utils import data_utils
 
 
 def apply_color_styling(

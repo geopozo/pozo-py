@@ -8,7 +8,7 @@ from lasio import LASFile
 from pozo.units import errors
 from pozo.units.las_si import las_si_config, las_si_map
 from pozo.units.si_pint import si_pint_config
-from pozo.utils import _table_utils, data_utils, display_utils, lasio_utils, types
+from pozo.utils import _table_utils, stats, display_utils, lasio_utils, types
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
@@ -77,11 +77,11 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             desc_match = desc_wo_num.findall(curve.descr)
             desc = desc_match[0] if len(desc_match) > 0 else curve.descr
 
-            [v_min, v_med, v_max] = data_utils.get_string_quantiles(
+            [v_min, v_med, v_max] = stats.get_string_quantiles(
                 curve.data,
                 [0, 0.5, 1],
             )
-            n_nan = data_utils.count_missing_values(curve.data)
+            n_nan = stats.count_missing_values(curve.data)
 
             curve_data = dict(
                 mnemonic=curve.mnemonic,
