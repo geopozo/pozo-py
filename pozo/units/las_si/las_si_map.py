@@ -2,7 +2,7 @@ from typing import Any
 
 from pozo.utilities import lasio_utils, data_utils
 
-from .errors import MissingRangeError
+from ..errors import MissingRangeError
 from .range_bondaries import RangeBoundaries
 
 
