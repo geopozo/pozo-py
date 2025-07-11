@@ -4,6 +4,7 @@ import warnings
 
 import numpy as np
 import pint
+import las_si.config
 import si_pint
 from lasio import LASFile
 
