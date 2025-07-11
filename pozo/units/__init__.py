@@ -6,10 +6,9 @@ import pint
 from lasio import LASFile
 
 from pozo.units import errors
-from pozo.utilities import _table_utils, data_utils, display_utils, lasio_utils, types
-
 from pozo.units.las_si import las_si_config, las_si_map
 from pozo.units.si_pint import si_pint_config
+from pozo.utils import _table_utils, data_utils, display_utils, lasio_utils, types
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
