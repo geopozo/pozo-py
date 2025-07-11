@@ -3,14 +3,14 @@ import re
 import warnings
 
 import pint
-from las_si import las_si_config, las_si_map
 from lasio import LASFile
-from si_pint import si_pint_config
 
 from pozo.utilities import _table_utils, data_utils, display_utils, lasio_utils
 from pozo.utilities.types import Array, Curve
 
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
+from .las_si import las_si_config, las_si_map
+from .si_pint import si_pint_config
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
