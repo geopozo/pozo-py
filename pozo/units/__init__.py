@@ -8,7 +8,8 @@ from lasio import LASFile
 from pozo.units import errors
 from pozo.units.las_si import las_si_config, las_si_map
 from pozo.units.si_pint import si_pint_config
-from pozo.utils import _table, display, lasio_utils, stats, types
+from pozo.utils import _lasio as lasio_utils
+from pozo.utils import _table, display, stats, types
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
