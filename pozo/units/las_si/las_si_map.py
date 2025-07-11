@@ -1,6 +1,7 @@
 from typing import Any
 
-from pozo.utilities import lasio_utils, data_utils
+from pozo.units import errors
+from pozo.utilities import data_utils, lasio_utils
 
 
 class RangeBoundaries:
@@ -82,7 +83,7 @@ class LasSiMap:
             for range in ranges:
                 if range.is_within_range(min_val, max_val):
                     return range
-            raise MissingRangeError(
+            raise errors.MissingRangeError(
                 f"{las_unit} for {mnemonic} found but not in range: {ranges}."
             )
         return None

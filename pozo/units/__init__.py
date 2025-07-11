@@ -5,12 +5,11 @@ import warnings
 import pint
 from lasio import LASFile
 
-from pozo.utilities import _table_utils, data_utils, display_utils, lasio_utils
-from pozo.utilities.types import Array, Curve
+from pozo.units import errors
+from pozo.utilities import _table_utils, data_utils, display_utils, lasio_utils, types
 
-from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
-from .las_si import las_si_config, las_si_map
-from .si_pint import si_pint_config
+from pozo.units.las_si import las_si_config, las_si_map
+from pozo.units.si_pint import si_pint_config
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
@@ -34,7 +33,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
 
     with warnings.catch_warnings():
         warnings.simplefilter("default")
-        warnings.filterwarnings("error", category=MissingLasUnitWarning)
+        warnings.filterwarnings("error", category=errors.MissingLasUnitWarning)
 
         desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
         col_names = [
@@ -66,13 +65,13 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
                 parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
                 if resolved is None:
-                    raise MissingLasUnitWarning(
+                    raise errors.MissingLasUnitWarning(
                         "Parsed directly from LAS, probably wrong"
                     )
             except (
-                MissingRangeError,
-                UnitException,
-                MissingLasUnitWarning,
+                errors.MissingRangeError,
+                errors.UnitException,
+                errors.MissingLasUnitWarning,
             ) as e:
                 confidence = f" - {str(e)} - NONE"
 
@@ -123,14 +122,14 @@ def parse_unit_safe(unit: str) -> pint.Unit | None:
     try:
         return registry.parse_units(unit)
     except Exception as e:
-        warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+        warnings.warn(f"Couldn't parse unit: {e}", errors.MissingLasUnitWarning)
         return None
 
 
 def parse_unit_from_context(
     mnemonic: str,
     si_unit: str,
-    data: Array,
+    data: types.Array,
 ) -> pint.Unit | Exception:
     """
     Parses a unit string using context from mnemonic and data.
@@ -147,15 +146,15 @@ def parse_unit_from_context(
     else:
         try:
             if not si_unit:
-                raise UnitException("Empty unit not allowed- please map it")
+                raise errors.UnitException("Empty unit not allowed- please map it")
             return parse_unit_safe(si_unit)
         except Exception as e:
-            raise UnitException(
+            raise errors.UnitException(
                 f"'{si_unit}' for '{lasio_utils.remove_lasio_suffix(mnemonic)}' not found."
             ) from e
 
 
-def parse_unit_from_curve(curve: Curve) -> pint.Unit | Exception:
+def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | Exception:
     """
     Parses the unit from a Curve object and returns a Unit
     """
