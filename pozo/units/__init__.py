@@ -2,11 +2,10 @@ import os
 import re
 import warnings
 
-import las_si.config
 import pint
-import si_pint.config
-from las_si.las_si_map import LasSiMap
+from las_si import las_si_config, las_si_map
 from lasio import LASFile
+from si_pint import si_pint_config
 
 from pozo.utilities import _table_utils, data_utils, display_utils, lasio_utils
 from pozo.utilities.types import Array, Curve
@@ -14,16 +13,15 @@ from pozo.utilities.types import Array, Curve
 from .errors import MissingLasUnitWarning, MissingRangeError, UnitException
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
-import las_si
 
 _delimiter = chr(0x1E)
 
-las_map = LasSiMap()
-las_si.config.add_to_las_si_map(las_map)
+las_map = las_si_map.LasSiMap()
+las_si_config.add_to_las_si_map(las_map)
 
 registry: pint.UnitRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
-si_pint.config.add_to_pint(registry)
+si_pint_config.add_to_pint(registry)
 
 
 def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
