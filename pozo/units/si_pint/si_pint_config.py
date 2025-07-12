@@ -1,4 +1,4 @@
-from pint import UnitRegistry
+import pint
 
 pint_map = (  # mapa de pint
     "gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI",
@@ -9,6 +9,6 @@ pint_map = (  # mapa de pint
 
 
 # agrega a pint
-def add_to_pint(registry: UnitRegistry) -> None:
+def add_to_pint(registry: pint.UnitRegistry) -> None:
     for definition in pint_map:
         registry.define(definition)
