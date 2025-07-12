@@ -5,7 +5,6 @@ import warnings
 import pint
 from lasio import LASFile
 
-from pozo.units import errors
 from pozo.units.las_si import config, mapper
 from pozo.units.si_pint import si_pint_config
 from pozo.utils import _lasio as lasio_utils
@@ -23,6 +22,12 @@ Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
 
 
+class MissingLasUnitWarning(UserWarning):
+    """Warning for unresolved LAS units."""
+
+    pass
+
+
 def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
     """
     Check the data from the LAS file and print a table with the analysis.
@@ -33,7 +38,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
 
     with warnings.catch_warnings():
         warnings.simplefilter("default")
-        warnings.filterwarnings("error", category=errors.MissingLasUnitWarning)
+        warnings.filterwarnings("error", category=MissingLasUnitWarning)
 
         desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
         col_names = [
@@ -56,22 +61,19 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             confidence = None
             parsed = None
             try:
-                resolved = las_map.las_to_si_unit(
-                    curve.mnemonic, curve.unit, curve.data
-                )
+                resolved = las_map.las_to_Range(curve.mnemonic, curve.unit, curve.data)
                 if resolved is not None:
                     pozo_match = resolved.unit
                     confidence = resolved.confidence
                 parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
                 if resolved is None:
-                    raise errors.MissingLasUnitWarning(
+                    raise MissingLasUnitWarning(
                         "Parsed directly from LAS, probably wrong"
                     )
             except (
-                errors.MissingRangeError,
-                errors.UnitException,
-                errors.MissingLasUnitWarning,
+                UnitException,
+                MissingLasUnitWarning,
             ) as e:
                 confidence = f" - {str(e)} - NONE"
 
@@ -120,8 +122,14 @@ def parse_unit_safe(unit: str) -> pint.Unit | None:
     try:
         return registry.parse_units(unit)
     except Exception as e:
-        warnings.warn(f"Couldn't parse unit: {e}", errors.MissingLasUnitWarning)
+        warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
         return None
+
+
+class UnitException(Exception):
+    """Raised when unit parsing fails."""
+
+    pass
 
 
 def parse_unit_from_context(
@@ -135,19 +143,18 @@ def parse_unit_from_context(
     Attempts to resolve the unit via LAS mappings first;
     Raises UnitException if the unit is empty or missing.
     """
-    try:
-        resolved = las_map.las_to_si_unit(mnemonic, si_unit, data)
-    except errors.MissingRangeError as e:
-        warnings.warn(str(e))
+
+    resolved = las_map.las_to_Range(mnemonic, si_unit, data)
+
     if resolved is not None:
         return parse_unit_safe(resolved.unit)
     else:
         try:
             if not si_unit:
-                raise errors.UnitException("Empty unit not allowed- please map it")
+                raise UnitException("Empty unit not allowed- please map it")
             return parse_unit_safe(si_unit)
         except Exception as e:
-            raise errors.UnitException(
+            raise UnitException(
                 f"'{si_unit}' for '{lasio_utils.remove_lasio_suffix(mnemonic)}' not found."
             ) from e
 
