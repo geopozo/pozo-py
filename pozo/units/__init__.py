@@ -78,7 +78,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             desc_match = desc_wo_num.findall(curve.descr)
             desc = desc_match[0] if len(desc_match) > 0 else curve.descr
 
-            [v_min, v_med, v_max] = stats.get_string_quantiles(
+            [v_min, v_med, v_max] = stats.quantiles_values(
                 curve.data,
                 [0, 0.5, 1],
             )

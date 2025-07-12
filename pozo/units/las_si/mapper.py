@@ -67,8 +67,8 @@ class LasSiMap:
         data: list[Any],
     ) -> RangeBoundaries | None:
         mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
-        max_val = stats.get_max_value(data)
-        min_val = stats.get_min_value(data)
+        max_val = stats.max_value(data)
+        min_val = stats.min_value(data)
         ranges = None
 
         if (
