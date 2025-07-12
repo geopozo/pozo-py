@@ -24,6 +24,7 @@ dependencies = [
  "nbformat",
  "lasio",
  "anywidget>=0.9.18",
+ "pandas-stubs>=2.2.2.240807",
 ]
 
 [project.optional-dependencies]
