@@ -1,14 +1,14 @@
 from pozo.units.las_si import mapper
 
 PU = (
-    mapper.RangeBoundaries((-50, 80), "pu", "decide by range - MEDIUM"),
-    mapper.RangeBoundaries((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
-    mapper.RangeBoundaries((), "puAPI", "catch all, legacy unit - LOW"),
+    mapper.Range((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
+    mapper.Range((-50, 80), "pu", "decide by range - MEDIUM"),
+    mapper.Range((), "puAPI", "catch all, legacy unit - LOW"),
 )
 percent_general = (
-    mapper.RangeBoundaries((-100, 100), "percent", "decide by range, verify - LOW"),
-    mapper.RangeBoundaries((-1, 1), "of_1", "decide by range, verify - LOW"),
-    mapper.RangeBoundaries((), "ppm", "catch all, ppm - LOW"),
+    mapper.Range((-1, 1), "of_1", "decide by range, verify - LOW"),
+    mapper.Range((-100, 100), "percent", "decide by range, verify - LOW"),
+    mapper.Range((), "ppm", "catch all, ppm - LOW"),
 )
 
 
