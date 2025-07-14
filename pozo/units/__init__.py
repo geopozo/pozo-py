@@ -2,14 +2,13 @@ import os
 import re
 import warnings
 
-import pint  # type: ignore
 import lasio  # type: ignore
+import pint  # type: ignore
 
 from pozo.units.las_si import config as las_si_config
 from pozo.units.las_si import mapper as las_si_mapper
 from pozo.units.si_pint import config as si_pint_config
-from pozo.utils import _lasio as lasio_utils
-from pozo.utils import _table, display, stats, types
+from pozo.utils import _lasio, _table, display, stats, types
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
@@ -163,7 +162,7 @@ def parse_unit_from_context(
             return parse_unit_safe(si_unit)
         except Exception as e:
             raise UnitException(
-                f"'{si_unit}' for '{lasio_utils.remove_lasio_suffix(mnemonic)}' not found."
+                f"'{si_unit}' for '{_lasio.remove_lasio_suffix(mnemonic)}' not found."
             ) from e
 
 
@@ -183,5 +182,5 @@ def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str |
         if isinstance(pint_unit, pint.Unit)
         else registry.parse_units(pint_unit)
     )
-    mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
+    mnemonic = _lasio.remove_lasio_suffix(mnemonic)
     return las_map.si_to_las_unit(mnemonic, pint_unit)
