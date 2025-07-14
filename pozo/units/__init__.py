@@ -176,7 +176,7 @@ def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
 
-def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str | None:
+def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit) -> str | None:
     """
     Parse the unit returning the LAS value mapped from a mnemonic
     """
@@ -186,4 +186,5 @@ def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str |
         if isinstance(pint_unit, pint.Unit)
         else registry.parse_units(pint_unit)
     )
-    return las_map.si_to_las_unit(mnemonic, pint_unit)
+
+    return las_map.si_to_las_unit(mnemonic, str(pint_unit))
