@@ -123,7 +123,8 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
 
 
 def parse_unit_safe(
-    unit: str | tuple[las_si_mapper.Range] | pint.Unit | None,
+    unit: str
+    | pint.Unit,  # esta api debe ser igual a lo de pint, si pint acepta pint.Unit, debe aceptar pint.Unit, o visceversa
 ) -> pint.Unit | None:
     """
     Parse the unit by returning a Unit object from pint and catch the error if it occurs
@@ -143,7 +144,7 @@ class UnitException(Exception):
 
 def parse_unit_from_context(
     mnemonic: str,
-    si_unit: str | pint.Unit | None,
+    las_unit: str,
     data: types.Array,
 ) -> pint.Unit | None:
     """
@@ -153,18 +154,18 @@ def parse_unit_from_context(
     Raises UnitException if the unit is empty or missing.
     """
 
-    resolved = las_map.las_to_Range(mnemonic, si_unit, data)
+    resolved = las_map.las_to_Range(mnemonic, las_unit, data)
 
     if resolved is not None:
         return parse_unit_safe(resolved.unit)
     else:
         try:
-            if not si_unit:
+            if not las_unit:
                 raise UnitException("Empty unit not allowed- please map it")
-            return parse_unit_safe(si_unit)
+            return parse_unit_safe(las_unit)
         except Exception as e:
             raise UnitException(
-                f"'{si_unit}' for '{_lasio.remove_lasio_suffix(mnemonic)}' not found."
+                f"'{las_unit}' for '{_lasio.remove_lasio_suffix(mnemonic)}' not found."
             ) from e
 
 
