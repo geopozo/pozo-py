@@ -70,7 +70,7 @@ class LasSiMap:
     def las_to_Range(
         self,
         mnemonic: str,
-        las_unit: str | pint.Unit | None,
+        las_unit: str,
         data: list[Any],
     ) -> Range | None:
         mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
@@ -91,7 +91,7 @@ class LasSiMap:
     def si_to_las_unit(
         self,
         mnemonic: str,
-        si_unit: str | pint.Unit | None,
+        si_unit: str,
     ) -> str | None:
         if (
             mnemonic in self._si_to_las_by_mnemonic
