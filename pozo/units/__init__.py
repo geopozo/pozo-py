@@ -1,6 +1,5 @@
 import os
 import re
-import warnings
 
 import lasio  # type: ignore
 import pint  # type: ignore
@@ -22,12 +21,6 @@ Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
 
 
-class MissingLasUnitWarning(UserWarning):
-    """Warning for unresolved LAS units."""
-
-    pass
-
-
 _delimiter = chr(0x1E)
 
 
@@ -39,85 +32,73 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
     def n0(s):
         return "" if s is None else str(s)
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("default")
-        warnings.filterwarnings("error", category=MissingLasUnitWarning)
+    desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
+    col_names = [
+        "mnemonic",
+        "las unit",
+        "pozo mapping",
+        "confidence",
+        "parsed",
+        "description",
+        "min",
+        "med",
+        "max",
+        "#NaN",
+    ]
 
-        desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
-        col_names = [
-            "mnemonic",
-            "las unit",
-            "pozo mapping",
-            "confidence",
-            "parsed",
-            "description",
-            "min",
-            "med",
-            "max",
-            "#NaN",
-        ]
-
-        result = [_delimiter.join(col_names)] if HTML else []
-        for curve in las.curves:
-            range = None
-            si_unit = None
-            confidence = None
-            parsed = None
-            try:
-                range = las_map.las_to_Range(curve.mnemonic, curve.unit, curve.data)
-                if range is not None:
-                    si_unit = range.unit
-                    confidence = range.confidence
-                parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
-
-                if range is None:
-                    raise MissingLasUnitWarning(
-                        "Parsed directly from LAS, probably wrong"
-                    )
-            except (
-                UnitException,
-                MissingLasUnitWarning,
-            ) as e:
-                confidence = f" - {str(e)} - NONE"
-
-            desc_match = desc_wo_num.findall(curve.descr)
-            desc = desc_match[0] if len(desc_match) > 0 else curve.descr
-
-            [v_min, v_med, v_max] = stats.quantiles_values(
-                curve.data,
-                [0, 0.5, 1],
-            )
-            n_nan = stats.count_missing_values(curve.data)
-
-            curve_data = dict(
-                mnemonic=curve.mnemonic,
-                las_unit=curve.unit,
-                pozo_match=si_unit,
-                confidence=confidence,
-                parsed_unit=parsed,
-                desc=desc,
-                v_min=v_min,
-                v_med=v_med,
-                v_max=v_max,
-                n_nan=n_nan,
-            )
-            if not HTML:
-                # Tengo mis dudas sobre 👇 esa solución del pato agrega el casteo
-                result.append(str(curve_data))
-                return result
-            else:
-                result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
-
+    result = [_delimiter.join(col_names)] if HTML else []
+    for curve in las.curves:
+        range = None
+        si_unit = None
+        confidence = None
+        parsed = None
         try:
-            html_output = _table.generate_html_table(result, _delimiter)
-            display.show_content(
-                f'<div id="{div_id}">{html_output}</div>',
-                html=HTML,
-            )
+            range = las_map.las_to_Range(curve.mnemonic, curve.unit, curve.data)
+            if range is not None:
+                si_unit = range.unit
+                confidence = range.confidence
+            parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
-        except Exception as e:
-            display.show_content(str(e))
-            display.show_content("<br>".join(result), html=HTML)
+        except UnitException as e:
+            confidence = f" - {str(e)} - NONE"
+
+        desc_match = desc_wo_num.findall(curve.descr)
+        desc = desc_match[0] if len(desc_match) > 0 else curve.descr
+
+        [v_min, v_med, v_max] = stats.quantiles_values(
+            curve.data,
+            [0, 0.5, 1],
+        )
+        n_nan = stats.count_missing_values(curve.data)
+
+        curve_data = dict(
+            mnemonic=curve.mnemonic,
+            las_unit=curve.unit,
+            pozo_match=si_unit,
+            confidence=confidence,
+            parsed_unit=parsed,
+            desc=desc,
+            v_min=v_min,
+            v_med=v_med,
+            v_max=v_max,
+            n_nan=n_nan,
+        )
+        if not HTML:
+            result.append(curve_data)
+            return result
+        else:
+            result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
+
+    try:
+        html_output = _table.generate_html_table(result, _delimiter)
+        display.show_content(
+            f'<div id="{div_id}">{html_output}</div>',
+            html=HTML,
+        )
+
+    except Exception as e:
+        display.show_content(str(e))
+        display.show_content("<br>".join(result), html=HTML)
 
     return None
 
@@ -131,8 +112,7 @@ def parse_unit_safe(
     """
     try:
         return registry.parse_units(unit)
-    except Exception as e:
-        warnings.warn(f"Couldn't parse unit: {e}", MissingLasUnitWarning)
+    except pint.UndefinedUnitError:
         return None
 
 
