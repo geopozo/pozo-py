@@ -6,8 +6,8 @@ from pozo.utils import stats
 if TYPE_CHECKING:
     from typing import TypeAlias, Any
 
-    Number: TypeAlias = int | float
-    RangeBoundary: TypeAlias = tuple[Number, Number] | tuple[()]
+    Numeric: TypeAlias = int | float
+    RangeBoundary: TypeAlias = tuple[Numeric, Numeric] | tuple[()]
 
 
 class Range:
