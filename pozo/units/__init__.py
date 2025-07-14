@@ -59,18 +59,18 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
 
         result = [_delimiter.join(col_names)] if HTML_out else []
         for curve in las.curves:
-            resolved = None
-            pozo_match = None
+            range = None
+            si_unit = None
             confidence = None
             parsed = None
             try:
-                resolved = las_map.las_to_Range(curve.mnemonic, curve.unit, curve.data)
-                if resolved is not None:
-                    pozo_match = resolved.unit
-                    confidence = resolved.confidence
+                range = las_map.las_to_Range(curve.mnemonic, curve.unit, curve.data)
+                if range is not None:
+                    si_unit = range.unit
+                    confidence = range.confidence
                 parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
-                if resolved is None:
+                if range is None:
                     raise MissingLasUnitWarning(
                         "Parsed directly from LAS, probably wrong"
                     )
