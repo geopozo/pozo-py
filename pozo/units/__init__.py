@@ -92,7 +92,7 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
             curve_data = dict(
                 mnemonic=curve.mnemonic,
                 las_unit=curve.unit,
-                pozo_match=pozo_match,
+                pozo_match=si_unit,
                 confidence=confidence,
                 parsed_unit=parsed,
                 desc=desc,
