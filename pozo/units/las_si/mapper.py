@@ -1,18 +1,26 @@
-from typing import Any
-
-import pint
+from typing import TYPE_CHECKING
 
 from pozo.utils import _lasio as lasio_utils
 from pozo.utils import stats
 
+if TYPE_CHECKING:
+    from typing import TypeAlias, Any
+
+    Number: TypeAlias = int | float
+    RangeBoundary: TypeAlias = tuple[Number, Number] | tuple[()]
+
 
 class Range:
-    def __init__(self, boundaries, las_unit: str | tuple["Range"], confidence):
+    boundaries: RangeBoundary
+    unit: str
+    confidence: str
+
+    def __init__(self, boundaries: RangeBoundary, las_unit: str, confidence: str):
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
                 "boundaries should contain a tuple with (min, max) or () catch-all"
             )
-        # TODO: Chequeo de orden de rangos
+
         self.boundaries = boundaries
         self.unit = las_unit
         self.confidence = confidence
