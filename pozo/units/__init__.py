@@ -13,13 +13,16 @@ from pozo.utils import _table, display, stats, types
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
-_delimiter = chr(0x1E)
-
+# Conexión a LasSiMap
 las_map = las_si_mapper.LasSiMap()
 las_si_config.add_to_las_si_map(las_map)
+
+# Conexión a pint
 registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
+
+_delimiter = chr(0x1E)
 
 
 class MissingLasUnitWarning(UserWarning):
