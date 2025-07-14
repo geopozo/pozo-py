@@ -3,10 +3,11 @@ import re
 import warnings
 
 import pint  # type: ignore
-from lasio import LASFile  # type: ignore
+import lasio  # type: ignore
 
-from pozo.units.las_si import config, mapper
-from pozo.units.si_pint import si_pint_config
+from pozo.units.las_si import config as las_si_config
+from pozo.units.las_si import mapper as las_si_mapper
+from pozo.units.si_pint import config as si_pint_config
 from pozo.utils import _lasio as lasio_utils
 from pozo.utils import _table, display, stats, types
 
@@ -14,8 +15,8 @@ os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentatio
 
 _delimiter = chr(0x1E)
 
-las_map = mapper.LasSiMap()
-config.add_to_las_si_map(las_map)
+las_map = las_si_mapper.LasSiMap()
+las_si_config.add_to_las_si_map(las_map)
 registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
@@ -27,7 +28,7 @@ class MissingLasUnitWarning(UserWarning):
     pass
 
 
-def check_las(las: LASFile, HTML_out=True, div_id="") -> list[str] | None:
+def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
     """
     Check the data from the LAS file and print a table with the analysis.
     """
@@ -98,7 +99,8 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> list[str] | None:
                 n_nan=n_nan,
             )
             if not HTML_out:
-                result.append(curve_data)
+                # Tengo mis dudas sobre 👇 esa solución del pato agrega el casteo
+                result.append(str(curve_data))
             else:
                 result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
 
@@ -117,7 +119,7 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> list[str] | None:
 
 
 def parse_unit_safe(
-    unit: str | tuple[mapper.Range] | pint.Unit | None,
+    unit: str | tuple[las_si_mapper.Range] | pint.Unit | None,
 ) -> pint.Unit | None:
     """
     Parse the unit by returning a Unit object from pint and catch the error if it occurs
