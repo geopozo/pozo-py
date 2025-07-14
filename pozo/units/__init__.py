@@ -103,19 +103,20 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
             if not HTML_out:
                 # Tengo mis dudas sobre 👇 esa solución del pato agrega el casteo
                 result.append(str(curve_data))
+                return result
             else:
                 result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
 
-        if not HTML_out:
-            return result
-
         try:
             html_output = _table.generate_html_table(result, _delimiter)
-            display.show_content(f'<div id="{div_id}">{html_output}</div>', html=True)
+            display.show_content(
+                f'<div id="{div_id}">{html_output}</div>',
+                html=HTML_out,
+            )
 
         except Exception as e:
             display.show_content(str(e))
-            display.show_content("<br>".join(result), html=True)
+            display.show_content("<br>".join(result), html=HTML_out)
 
     return None
 
@@ -177,10 +178,10 @@ def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str |
     """
     Parse the unit returning the LAS value mapped from a mnemonic
     """
+    mnemonic = _lasio.remove_lasio_suffix(mnemonic)
     pint_unit = (
         pint_unit
         if isinstance(pint_unit, pint.Unit)
         else registry.parse_units(pint_unit)
     )
-    mnemonic = _lasio.remove_lasio_suffix(mnemonic)
     return las_map.si_to_las_unit(mnemonic, pint_unit)

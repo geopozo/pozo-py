@@ -58,7 +58,7 @@ class LasSiMap:
         for range in ranges:
             self._si_to_las_by_mnemonic[mnemonic][range.unit] = las_unit
 
-    # De las_unit a si_unit
+    # De las_unit a range
     def las_to_Range(
         self,
         mnemonic: str,
