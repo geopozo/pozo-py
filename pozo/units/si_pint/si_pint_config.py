@@ -9,6 +9,6 @@ pint_map = (  # mapa de pint
 
 
 # agrega a pint
-def add_to_pint(registry: pint.UnitRegistry) -> None:
+def add_to_pint(registry: pint.registry.ApplicationRegistry) -> None:
     for definition in pint_map:
         registry.define(definition)

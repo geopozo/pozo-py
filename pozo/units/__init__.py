@@ -2,8 +2,8 @@ import os
 import re
 import warnings
 
-import pint
-from lasio import LASFile
+import pint  # type: ignore
+from lasio import LASFile  # type: ignore
 
 from pozo.units.las_si import config, mapper
 from pozo.units.si_pint import si_pint_config
@@ -16,8 +16,7 @@ _delimiter = chr(0x1E)
 
 las_map = mapper.LasSiMap()
 config.add_to_las_si_map(las_map)
-
-registry: pint.UnitRegistry = pint.get_application_registry()
+registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
 
@@ -28,7 +27,7 @@ class MissingLasUnitWarning(UserWarning):
     pass
 
 
-def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
+def check_las(las: LASFile, HTML_out=True, div_id="") -> list[str] | None:
     """
     Check the data from the LAS file and print a table with the analysis.
     """
@@ -114,8 +113,12 @@ def check_las(las: LASFile, HTML_out=True, div_id="") -> None:
             display.show_content(str(e))
             display.show_content("<br>".join(result), html=True)
 
+    return None
 
-def parse_unit_safe(unit: str) -> pint.Unit | None:
+
+def parse_unit_safe(
+    unit: str | tuple[mapper.Range] | pint.Unit | None,
+) -> pint.Unit | None:
     """
     Parse the unit by returning a Unit object from pint and catch the error if it occurs
     """
@@ -134,9 +137,9 @@ class UnitException(Exception):
 
 def parse_unit_from_context(
     mnemonic: str,
-    si_unit: str,
+    si_unit: str | pint.Unit | None,
     data: types.Array,
-) -> pint.Unit | Exception:
+) -> pint.Unit | None:
     """
     Parses a unit string using context from mnemonic and data.
 
@@ -159,14 +162,14 @@ def parse_unit_from_context(
             ) from e
 
 
-def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | Exception:
+def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
     """
     Parses the unit from a Curve object and returns a Unit
     """
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
 
-def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str:
+def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit | None) -> str | None:
     """
     Parse the unit returning the LAS value mapped from a mnemonic
     """
