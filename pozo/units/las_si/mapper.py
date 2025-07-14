@@ -94,13 +94,8 @@ class LasSiMap:
         si_unit: str,
     ) -> str | None:
         if (
-            mnemonic in self._si_to_las_by_mnemonic
-            and si_unit in self._si_to_las_by_mnemonic[mnemonic]
-        ):
-            return self._si_to_las_by_mnemonic[mnemonic][si_unit]
-        if (
-            "-" in self._si_to_las_by_mnemonic
-            and si_unit in self._si_to_las_by_mnemonic["-"]
-        ):
-            return self._si_to_las_by_mnemonic["-"][si_unit]
-        return None
+            las_unit := self._si_to_las_by_mnemonic.get(mnemonic, {}).get(si_unit)
+        ) is None:
+            las_unit = self._si_to_las_by_mnemonic.get("-", {}).get(si_unit)
+
+        return las_unit
