@@ -1,6 +1,5 @@
 from typing import Any
 
-from pozo.units import errors
 from pozo.utils import _lasio as lasio_utils
 from pozo.utils import stats
 
