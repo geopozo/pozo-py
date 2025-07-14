@@ -21,13 +21,14 @@ registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
 
-_delimiter = chr(0x1E)
-
 
 class MissingLasUnitWarning(UserWarning):
     """Warning for unresolved LAS units."""
 
     pass
+
+
+_delimiter = chr(0x1E)
 
 
 def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
