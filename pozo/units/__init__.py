@@ -31,7 +31,7 @@ class MissingLasUnitWarning(UserWarning):
 _delimiter = chr(0x1E)
 
 
-def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
+def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
     """
     Check the data from the LAS file and print a table with the analysis.
     """
@@ -57,7 +57,7 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
             "#NaN",
         ]
 
-        result = [_delimiter.join(col_names)] if HTML_out else []
+        result = [_delimiter.join(col_names)] if HTML else []
         for curve in las.curves:
             range = None
             si_unit = None
@@ -101,7 +101,7 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
                 v_max=v_max,
                 n_nan=n_nan,
             )
-            if not HTML_out:
+            if not HTML:
                 # Tengo mis dudas sobre 👇 esa solución del pato agrega el casteo
                 result.append(str(curve_data))
                 return result
@@ -112,12 +112,12 @@ def check_las(las: lasio.LASFile, HTML_out=True, div_id="") -> list[str] | None:
             html_output = _table.generate_html_table(result, _delimiter)
             display.show_content(
                 f'<div id="{div_id}">{html_output}</div>',
-                html=HTML_out,
+                html=HTML,
             )
 
         except Exception as e:
             display.show_content(str(e))
-            display.show_content("<br>".join(result), html=HTML_out)
+            display.show_content("<br>".join(result), html=HTML)
 
     return None
 
