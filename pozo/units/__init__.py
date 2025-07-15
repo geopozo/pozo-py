@@ -149,7 +149,7 @@ def parse_unit_from_context(
     )
 
 
-def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
+def get_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
     """Parse the unit from a Curve object and returns a Unit."""
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 

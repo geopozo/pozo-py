@@ -46,7 +46,7 @@ class Graph(ood.Observer, pzt.Themeable):
                     if ('optional' in axis_options and axis_options['optional']):
                         continue
                     raise RuntimeError(f"Missing any mnemonics for {axis_name}")
-                unit = pozo.units.parse_unit_from_curve(found_curve)
+                unit = pozo.units.get_unit_from_curve(found_curve)
                 axes.append(pozo.Axis(pozo.Trace(
                         found_curve.data,
                         depth = yaxis,
@@ -153,7 +153,7 @@ class Graph(ood.Observer, pzt.Themeable):
                 )
         elif yaxis_name in ar.curves.keys():
             yaxis = ar.curves[yaxis_name].data
-            yaxis_unit = pzu.parse_unit_from_curve(ar.curves[yaxis_name]) if not yaxis_unit else yaxis_unit
+            yaxis_unit = pzu.get_unit_from_curve(ar.curves[yaxis_name]) if not yaxis_unit else yaxis_unit
         else:
             yaxis = ar.index
             yaxis_unit = pzu.parse_unit_from_context("DEPT", ar.index_unit, ar.index) if not yaxis_unit else yaxis_unit
@@ -187,7 +187,7 @@ class Graph(ood.Observer, pzt.Themeable):
                     f"No units found for mnemonic {mnemonic}"
                 )  # TODO should return proper type of error
             else:
-                unit = pzu.parse_unit_from_curve(curve)
+                unit = pzu.get_unit_from_curve(curve)
 
             trace = pozo.Trace(
                 curve.data,
