@@ -134,14 +134,12 @@ def parse_unit_from_context(
     Raises UnitException if the unit is empty or missing.
     """
 
-    resolved = las_map.las_to_Range(mnemonic, las_unit, data)
+    range = las_map.las_to_Range(mnemonic, las_unit, data)
 
-    if resolved is not None:
-        return parse_unit_safe(resolved.unit)
+    if range is not None:
+        return parse_unit_safe(range.unit)
     else:
         try:
-            if not las_unit:
-                raise UnitException("Empty unit not allowed- please map it")
             return parse_unit_safe(las_unit)
         except Exception as e:
             raise UnitException(
