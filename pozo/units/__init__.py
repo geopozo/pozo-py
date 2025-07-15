@@ -1,13 +1,18 @@
+from __future__ import annotations
+
 import os
 import re
+from typing import TYPE_CHECKING
 
-import lasio  # type: ignore
-import pint  # type: ignore
+import pint  # type: ignore[import-untyped]
 
 from pozo.units.las_si import config as las_si_config
 from pozo.units.las_si import mapper as las_si_mapper
 from pozo.units.si_pint import config as si_pint_config
 from pozo.utils import _lasio, _table, display, stats, types
+
+if TYPE_CHECKING:
+    import lasio  # type: ignore[import-untyped]
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
