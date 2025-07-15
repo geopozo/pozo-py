@@ -19,8 +19,8 @@ def generate_html_table(
     data: list,
     delimiter: str,
 ) -> str:
-    red_low = re.compile(r"<td>(.+)?(?:LOW|0%)(.+)?</td>")
-    orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
+    red_low = re.compile(r"<td>\s*(?:[0-9]|[1-2][0-9]|3[0-3])\s*</td>")
+    orange_medium = re.compile(r"<td>\s*(?:3[4-9]|[4-5]\d|6[0-6])\s*</td>")
     post_result = "\n".join(data)
 
     output = stats.format_csv(post_result, delimiter)
