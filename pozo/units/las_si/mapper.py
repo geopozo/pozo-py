@@ -19,13 +19,15 @@ class Range:
 
     boundaries: RangeBoundary
     unit: str
-    confidence: str
+    confidence: int
+    comment: str
 
     def __init__(
         self,
         las_unit: str,
         boundaries: RangeBoundary,
-        confidence: str,
+        confidence: int,
+        comment: str,
     ) -> None:
         """Initialize the class range."""
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
@@ -36,6 +38,7 @@ class Range:
         self.boundaries = boundaries
         self.unit = las_unit
         self.confidence = confidence
+        self.comment = comment
 
     def is_within_range(
         self,
@@ -65,12 +68,13 @@ class LasSiMap:
         mnemonic: str,
         las_unit: str,
         ranges: str | list[Range] | tuple[Range],
-        confidence: str = "- not indicated - LOW",
+        confidence: int = 0,
+        comment: str = "- not indicated",
     ) -> None:
         """Add to the unit conversion dictionaries by classifying from mnemonics."""
         if not isinstance(ranges, (tuple, list)):
             ranges = (
-                [Range(ranges, (), confidence)]
+                [Range(ranges, (), confidence, comment)]
                 if not isinstance(ranges, Range)
                 else [ranges]
             )
@@ -137,11 +141,11 @@ class LasSiMap:
         if _range is not None:
             si_unit = _range.unit
             confidence = _range.confidence
+            comment = _range.comment
         else:
             si_unit = ""
-            confidence = (
-                f"- {las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)} - 0%"
-            )
+            confidence = 0
+            comment = f"- {las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)}"
 
         diagnosis = types.Diagnosis(
             mnemonic=mnemonic,
@@ -149,6 +153,7 @@ class LasSiMap:
             data=data,
             si_unit=si_unit,
             confidence=confidence,
+            comment=comment,
             v_min=v_min,
             v_med=v_med,
             v_max=v_max,

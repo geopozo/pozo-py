@@ -48,14 +48,15 @@ def check_las(
         curve_data = {
             "mnemonic": curve.mnemonic,
             "las unit": curve.unit,
-            "pozo mapping": diagnosis.get("si_unit", None),
-            "confidence": diagnosis.get("confidence", None),
-            "parsed": parsed,
+            "si unit": diagnosis.get("si_unit"),
+            "pint unit": parsed,
+            "confidence": diagnosis.get("confidence"),
+            "comment:": diagnosis.get("comment"),
             "description": descr,
-            "min": diagnosis.get("v_min", 0),
-            "med": diagnosis.get("v_med", 0),
-            "max": diagnosis.get("v_max", 0),
-            "#NaN": diagnosis.get("n_nan", 0),
+            "min": diagnosis.get("v_min"),
+            "med": diagnosis.get("v_med"),
+            "max": diagnosis.get("v_max"),
+            "#NaN": diagnosis.get("n_nan"),
         }
 
         if i == 0 and html:
