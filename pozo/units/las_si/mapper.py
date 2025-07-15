@@ -15,7 +15,7 @@ class Range:
     unit: str
     confidence: str
 
-    def __init__(self, boundaries: RangeBoundary, las_unit: str, confidence: str):
+    def __init__(self, las_unit: str, boundaries: RangeBoundary, confidence: str):
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
                 "boundaries should contain a tuple with (min, max) or () catch-all"
@@ -40,12 +40,12 @@ class LasSiMap:
         self,
         mnemonic: str,
         las_unit: str,
-        ranges: str | tuple[Range] | list[Range],
+        ranges: str | list[Range] | tuple[Range],
         confidence: str = "- not indicated - LOW",
     ) -> None:
         if not isinstance(ranges, (tuple, list)):
             ranges = (
-                [Range((), ranges, confidence)]
+                [Range(ranges, (), confidence)]
                 if not isinstance(ranges, Range)
                 else [ranges]
             )

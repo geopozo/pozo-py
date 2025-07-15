@@ -1,18 +1,18 @@
 from pozo.units.las_si import mapper
 
 PU = (
-    mapper.Range((-0.5, 0.8), "of_1", "decide by range - MEDIUM"),
-    mapper.Range((-50, 80), "pu", "decide by range - MEDIUM"),
-    mapper.Range((), "puAPI", "catch all, legacy unit - LOW"),
+    mapper.Range("of_1", (-0.5, 0.8), "decide by range - MEDIUM"),
+    mapper.Range("pu", (-50, 80), "decide by range - MEDIUM"),
+    mapper.Range("puAPI", (), "catch all, legacy unit - LOW"),
 )
 percent_general = (
-    mapper.Range((-1, 1), "of_1", "decide by range, verify - LOW"),
-    mapper.Range((-100, 100), "percent", "decide by range, verify - LOW"),
-    mapper.Range((), "ppm", "catch all, ppm - LOW"),
+    mapper.Range("of_1", (-1, 1), "decide by range, verify - LOW"),
+    mapper.Range("percent", (-100, 100), "decide by range, verify - LOW"),
+    mapper.Range("ppm", (), "catch all, ppm - LOW"),
 )
 
-
-las_si_map = (  # mapa de las_si
+# mapa de las_si
+las_si_map = (
     ("-", "MM", "millimeter", "decided without mnemonic- MEDIUM"),
     ("-", "M", "meter", "decided without mnemonic- MEDIUM"),
     ("-", "CM", "centimeter", "decided without mnemonic- MEDIUM"),
@@ -52,4 +52,4 @@ las_si_map = (  # mapa de las_si
 # agrega a las_map
 def add_to_las_si_map(las_map: mapper.LasSiMap) -> None:
     for unit_args in las_si_map:
-        las_map.add(*unit_args)
+        las_map.add(*unit_args)  # type: ignore
