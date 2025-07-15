@@ -82,6 +82,7 @@ class LasSiMap:
         las_unit: str,
         data: list[Any],
     ) -> Range | None:
+        """Convert a LAS unit to a Range using a mnemonic."""
         mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
         max_val = stats.max_value(data)
         min_val = stats.min_value(data)
@@ -102,6 +103,7 @@ class LasSiMap:
         mnemonic: str,
         si_unit: str,
     ) -> str | None:
+        """Convert an SI unit to a LAS unit using a mnemonic."""
         if (
             las_unit := self._si_to_las_by_mnemonic.get(mnemonic, {}).get(si_unit)
         ) is None:
