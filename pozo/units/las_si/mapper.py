@@ -36,10 +36,6 @@ class LasSiMap:
         self._las_to_ranges_by_mnemonic = {}  # las a si por mnemotecnica
         self._si_to_las_by_mnemonic = {}  # si a las por mnemotecnica
 
-    def set_default(self, mnemonic):
-        self._las_to_ranges_by_mnemonic[mnemonic] = {}
-        self._si_to_las_by_mnemonic[mnemonic] = {}
-
     def add(
         self,
         mnemonic: str,
@@ -59,7 +55,8 @@ class LasSiMap:
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
         if mnemonic not in self._las_to_ranges_by_mnemonic:
-            self.set_default(mnemonic)
+            self._las_to_ranges_by_mnemonic.setdefault(mnemonic, {})
+            self._si_to_las_by_mnemonic.setdefault(mnemonic, {})
 
         self._las_to_ranges_by_mnemonic[mnemonic][las_unit] = ranges
 
