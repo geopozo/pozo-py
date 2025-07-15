@@ -37,7 +37,6 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
     def n0(s):
         return "" if s is None else str(s)
 
-    desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
     col_names = [
         "mnemonic",
         "las unit",
@@ -67,6 +66,8 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
         except UnitException as e:
             confidence = f" - {str(e)} - NONE"
 
+        # TODO: lasio utilidad 👇
+        desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
         desc_match = desc_wo_num.findall(curve.descr)
         desc = desc_match[0] if len(desc_match) > 0 else curve.descr
 
