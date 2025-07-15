@@ -39,21 +39,8 @@ def check_las(
     def n0(s: str | pint.Unit | int | None) -> str:
         return "" if s is None else str(s)
 
-    col_names = [
-        "mnemonic",
-        "las unit",
-        "pozo mapping",
-        "confidence",
-        "parsed",
-        "description",
-        "min",
-        "med",
-        "max",
-        "#NaN",
-    ]
-
-    result = [_delimiter.join(col_names)] if html else []
-    for curve in las.curves:
+    result = []
+    for i, curve in enumerate(las.curves):
         _range = None
         si_unit = None
         confidence = None
@@ -69,29 +56,36 @@ def check_las(
             confidence = f" - {str(e)} - NONE"
 
         desc = _lasio.remove_prefix_number(curve.descr)
+
         [v_min, v_med, v_max] = stats.quantiles_values(
             curve.data,
             [0, 0.5, 1],
         )
         n_nan = stats.count_missing_values(curve.data)
 
-        curve_data = dict(
-            mnemonic=curve.mnemonic,
-            las_unit=curve.unit,
-            pozo_match=si_unit,
-            confidence=confidence,
-            parsed_unit=parsed,
-            desc=desc,
-            v_min=v_min,
-            v_med=v_med,
-            v_max=v_max,
-            n_nan=n_nan,
-        )
+        curve_data = {
+            "mnemonic": curve.mnemonic,
+            "las unit": curve.unit,
+            "pozo mapping": si_unit,
+            "confidence": confidence,
+            "parsed": parsed,
+            "description": desc,
+            "min": v_min,
+            "med": v_med,
+            "max": v_max,
+            "#NaN": n_nan,
+        }
+
+        if i == 0 and html:
+            result.append(_delimiter.join(curve_data.keys()))
+
         if not html:
             result.append(curve_data)
-            return result
         else:
             result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
+
+    if not html:
+        return result
 
     try:
         html_output = _table.generate_html_table(result, _delimiter)
