@@ -136,15 +136,9 @@ def parse_unit_from_context(
 
     range = las_map.las_to_Range(mnemonic, las_unit, data)
 
-    if range is not None:
-        return parse_unit_safe(range.unit)
-    else:
-        try:
-            return parse_unit_safe(las_unit)
-        except Exception as e:
-            raise UnitException(
-                f"'{las_unit}' for '{_lasio.remove_lasio_suffix(mnemonic)}' not found."
-            ) from e
+    return (
+        parse_unit_safe(range.unit) if range is not None else parse_unit_safe(las_unit)
+    )
 
 
 def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
