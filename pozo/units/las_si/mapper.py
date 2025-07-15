@@ -63,8 +63,8 @@ class LasSiMap:
                 else [ranges]
             )
 
-        for range in ranges:
-            if not isinstance(range, Range):
+        for _range in ranges:
+            if not isinstance(_range, Range):
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
         las_to_ranges = self._las_to_ranges_by_mnemonic.setdefault(mnemonic, {})
@@ -72,8 +72,8 @@ class LasSiMap:
 
         las_to_ranges[las_unit] = ranges
 
-        for range in ranges:
-            si_to_las[range.unit] = las_unit
+        for _range in ranges:
+            si_to_las[_range.unit] = las_unit
 
     # De las_unit a range
     def _las_to_Range(
@@ -91,9 +91,9 @@ class LasSiMap:
         ) is None:
             ranges = self._las_to_ranges_by_mnemonic.get("-", {}).get(las_unit, [])
 
-        for range in ranges:
-            if range.is_within_range(min_val, max_val):
-                return range
+        for _range in ranges:
+            if _range.is_within_range(min_val, max_val):
+                return _range
         return None
 
     # De si a las_unit
