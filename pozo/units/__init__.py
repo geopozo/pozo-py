@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import re
 from typing import TYPE_CHECKING
 
 import pint  # type: ignore[import-untyped]
@@ -69,11 +68,7 @@ def check_las(
         except UnitException as e:
             confidence = f" - {str(e)} - NONE"
 
-        # TODO: lasio utilidad 👇
-        desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
-        desc_match = desc_wo_num.findall(curve.descr)
-        desc = desc_match[0] if len(desc_match) > 0 else curve.descr
-
+        desc = _lasio.remove_prefix_number(curve.descr)
         [v_min, v_med, v_max] = stats.quantiles_values(
             curve.data,
             [0, 0.5, 1],
