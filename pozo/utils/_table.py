@@ -19,7 +19,7 @@ def generate_html_table(
     data: list,
     delimiter: str,
 ) -> str:
-    red_low = re.compile(r"<td>(.+)?(?:LOW|NONE)(.+)?</td>")
+    red_low = re.compile(r"<td>(.+)?(?:LOW|0%)(.+)?</td>")
     orange_medium = re.compile(r"<td>(.+)?MEDIUM(.+)?</td>")
     post_result = "\n".join(data)
 
