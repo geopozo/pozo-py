@@ -9,7 +9,7 @@ import pint  # type: ignore[import-untyped]
 from pozo.units.las_si import config as las_si_config
 from pozo.units.las_si import mapper as las_si_mapper
 from pozo.units.si_pint import config as si_pint_config
-from pozo.utils import _lasio, _table, display, stats, types
+from pozo.utils import _lasio, _table, display, types
 
 if TYPE_CHECKING:
     import lasio  # type: ignore[import-untyped]
@@ -41,39 +41,21 @@ def check_las(
 
     result = []
     for i, curve in enumerate(las.curves):
-        _range = None
-        si_unit = None
-        confidence = None
-        parsed = None
-        try:
-            _range = las_map._las_to_Range(curve.mnemonic, curve.unit, curve.data)
-            if _range is not None:
-                si_unit = _range.unit
-                confidence = _range.confidence
-            parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
-
-        except UnitException as e:
-            confidence = f" - {str(e)} - NONE"
-
-        desc = _lasio.remove_prefix_number(curve.descr)
-
-        [v_min, v_med, v_max] = stats.quantiles_values(
-            curve.data,
-            [0, 0.5, 1],
-        )
-        n_nan = stats.count_missing_values(curve.data)
+        diagnosis = las_map.las_to_si_diagnosis(curve.mnemonic, curve.unit, curve.data)
+        parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+        descr = _lasio.remove_prefix_number(curve.descr)
 
         curve_data = {
             "mnemonic": curve.mnemonic,
             "las unit": curve.unit,
-            "pozo mapping": si_unit,
-            "confidence": confidence,
+            "pozo mapping": diagnosis.get("si_unit", None),
+            "confidence": diagnosis.get("confidence", None),
             "parsed": parsed,
-            "description": desc,
-            "min": v_min,
-            "med": v_med,
-            "max": v_max,
-            "#NaN": n_nan,
+            "description": descr,
+            "min": diagnosis.get("v_min", 0),
+            "med": diagnosis.get("v_med", 0),
+            "max": diagnosis.get("v_max", 0),
+            "#NaN": diagnosis.get("n_nan", 0),
         }
 
         if i == 0 and html:
@@ -112,12 +94,6 @@ def parse_unit_safe(
         return None
 
 
-class UnitException(Exception):
-    """Raised when unit parsing fails."""
-
-    pass
-
-
 def parse_unit_from_context(
     mnemonic: str,
     las_unit: str,
@@ -127,14 +103,11 @@ def parse_unit_from_context(
     Parse a unit string using context from mnemonic and data.
 
     Attempts to resolve the unit via LAS mappings first;
-    Raises UnitException if the unit is empty or missing.
     """
-    _range = las_map._las_to_Range(mnemonic, las_unit, data)
+    si_unit = las_map.las_to_si(mnemonic, las_unit, data)
 
     return (
-        parse_unit_safe(_range.unit)
-        if _range is not None
-        else parse_unit_safe(las_unit)
+        parse_unit_safe(si_unit) if si_unit is not None else parse_unit_safe(las_unit)
     )
 
 
