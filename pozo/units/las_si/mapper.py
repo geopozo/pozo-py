@@ -1,4 +1,4 @@
-"""Mapper from las_units to si_units with conversion functions."""
+"""Classes for units to units with conversion functions."""
 
 from __future__ import annotations
 
@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 
 class Range:
+    """Range to assign unit information."""
+
     boundaries: RangeBoundary
     unit: str
     confidence: str
@@ -25,6 +27,7 @@ class Range:
         boundaries: RangeBoundary,
         confidence: str,
     ) -> None:
+        """Initialize the class range."""
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
                 "boundaries should contain a tuple with (min, max) or () catch-all"
@@ -39,13 +42,21 @@ class Range:
         min_val: Numeric,
         max_val: Numeric,
     ) -> bool:
+        """
+        Check if the given range is within set boundaries.
+
+        Returns True if boundaries are undefined or the range fits within them.
+        """
         return not self.boundaries or (
             min_val > self.boundaries[0] and max_val < self.boundaries[1]
         )
 
 
 class LasSiMap:
+    """Mapper from las_units to si_units with conversion functions."""
+
     def __init__(self) -> None:
+        """Initialize the class LasSiMap."""
         self._las_to_ranges_by_mnemonic = {}  # las a si por mnemotecnica
         self._si_to_las_by_mnemonic = {}  # si a las por mnemotecnica
 
@@ -56,6 +67,7 @@ class LasSiMap:
         ranges: str | list[Range] | tuple[Range],
         confidence: str = "- not indicated - LOW",
     ) -> None:
+        """Add to the unit conversion dictionaries by classifying from mnemonics."""
         if not isinstance(ranges, (tuple, list)):
             ranges = (
                 [Range(ranges, (), confidence)]
@@ -76,7 +88,7 @@ class LasSiMap:
             si_to_las[_range.unit] = las_unit
 
     # De las_unit a range
-    def _las_to_Range(
+    def _las_to_Range(  # noqa: N802 👈 ruff se queda de la 'R'
         self,
         mnemonic: str,
         las_unit: str,
