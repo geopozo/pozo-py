@@ -17,12 +17,13 @@ class Curve(Protocol):
 
 
 class Diagnosis(TypedDict):
-    """Custon Dict type for diagnosis of las to si."""
+    """Custom Dict type for diagnosis of las to si."""
 
     mnemonic: str
     las_unit: str
     data: Array | None
-    confidence: str
+    confidence: int
+    comment: str
     si_unit: str
     v_min: str
     v_med: str
