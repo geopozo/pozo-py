@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
+os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 import pint  # type: ignore[import-untyped]
 
 from pozo.units.las_si import config as las_si_config
@@ -13,7 +14,6 @@ from pozo.utils import _lasio, _table, display, stats, types
 if TYPE_CHECKING:
     import lasio  # type: ignore[import-untyped]
 
-os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 
 # Conexión a LasSiMap
 las_map = las_si_mapper.LasSiMap()
