@@ -19,7 +19,12 @@ class Range:
     unit: str
     confidence: str
 
-    def __init__(self, las_unit: str, boundaries: RangeBoundary, confidence: str):
+    def __init__(
+        self,
+        las_unit: str,
+        boundaries: RangeBoundary,
+        confidence: str,
+    ) -> None:
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
                 "boundaries should contain a tuple with (min, max) or () catch-all"
@@ -29,14 +34,18 @@ class Range:
         self.unit = las_unit
         self.confidence = confidence
 
-    def is_within_range(self, min_val, max_val):
+    def is_within_range(
+        self,
+        min_val: Numeric,
+        max_val: Numeric,
+    ) -> bool:
         return not self.boundaries or (
             min_val > self.boundaries[0] and max_val < self.boundaries[1]
         )
 
 
 class LasSiMap:
-    def __init__(self):
+    def __init__(self) -> None:
         self._las_to_ranges_by_mnemonic = {}  # las a si por mnemotecnica
         self._si_to_las_by_mnemonic = {}  # si a las por mnemotecnica
 
