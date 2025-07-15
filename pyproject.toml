@@ -35,8 +35,34 @@ dev = [
     "mypy>=1.16.1",
 ]
 
-[tool.ruff.lint]
-ignore = ["E701"]
-
 [tool.mypy]
 files = ["pozo/units"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+          "EM", # allow strings in raise(), despite python being ugly about it
+          "TRY003", # allow long error messages inside raise()
+          "D203", # No blank before class docstring (D211 = require blank line)
+          "D212", # Commit message style docstring is D213, ignore D212
+          "COM812", # manual says linter rule conflicts with formatter
+          "ISC001", # manual says litner rule conflicts with formatter
+          "RET504", # Allow else if unnecessary because more readable
+          "RET505", # Allow else if unnecessary because more readable
+          "RET506", # Allow else if unnecessary because more readable
+          "RET507", # Allow else if unnecessary because more readable
+          "RET508", # Allow else if unnecessary because more readable
+          "RUF012", # We don't do typing, so no typing
+          "SIM105", # Too opionated (try-except-pass)
+          "PT003", # scope="function" implied but I like readability
+          "G004", # fstrings in my logs
+          ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+              "D", # ignore docstring errors
+              "S101", # allow assert
+              "INP001", # no need for __init__ in test directories
+              "T201", # if we're printing in tests, there is a reason
+              "ERA001"
+            ]
