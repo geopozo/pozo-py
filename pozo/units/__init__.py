@@ -29,12 +29,15 @@ si_pint_config.add_to_pint(registry)
 _delimiter = chr(0x1E)
 
 
-def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
-    """
-    Check the data from the LAS file and print a table with the analysis.
-    """
+def check_las(
+    las: lasio.LASFile,
+    *,
+    html: bool = True,
+    div_id: str = "",
+) -> list[str] | None:
+    """Check the data from the LAS file and print a table with the analysis."""
 
-    def n0(s):
+    def n0(s: str | pint.Unit | int | None) -> str:
         return "" if s is None else str(s)
 
     col_names = [
@@ -50,17 +53,17 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
         "#NaN",
     ]
 
-    result = [_delimiter.join(col_names)] if HTML else []
+    result = [_delimiter.join(col_names)] if html else []
     for curve in las.curves:
-        range = None
+        _range = None
         si_unit = None
         confidence = None
         parsed = None
         try:
-            range = las_map._las_to_Range(curve.mnemonic, curve.unit, curve.data)
-            if range is not None:
-                si_unit = range.unit
-                confidence = range.confidence
+            _range = las_map._las_to_Range(curve.mnemonic, curve.unit, curve.data)
+            if _range is not None:
+                si_unit = _range.unit
+                confidence = _range.confidence
             parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
         except UnitException as e:
@@ -89,7 +92,7 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
             v_max=v_max,
             n_nan=n_nan,
         )
-        if not HTML:
+        if not html:
             result.append(curve_data)
             return result
         else:
@@ -99,12 +102,12 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
         html_output = _table.generate_html_table(result, _delimiter)
         display.show_content(
             f'<div id="{div_id}">{html_output}</div>',
-            html=HTML,
+            html=html,
         )
 
     except Exception as e:
         display.show_content(str(e))
-        display.show_content("<br>".join(result), html=HTML)
+        display.show_content("<br>".join(result), html=html)
 
     return None
 
@@ -113,9 +116,7 @@ def parse_unit_safe(
     unit: str
     | pint.Unit,  # esta api debe ser igual a lo de pint, si pint acepta pint.Unit, debe aceptar pint.Unit, o visceversa
 ) -> pint.Unit | None:
-    """
-    Parse the unit by returning a Unit object from pint and catch the error if it occurs
-    """
+    """Parse the unit by returning a Unit object from pint and catch the error."""
     try:
         return registry.parse_units(unit)
     except pint.UndefinedUnitError:
@@ -134,30 +135,27 @@ def parse_unit_from_context(
     data: types.Array,
 ) -> pint.Unit | None:
     """
-    Parses a unit string using context from mnemonic and data.
+    Parse a unit string using context from mnemonic and data.
 
     Attempts to resolve the unit via LAS mappings first;
     Raises UnitException if the unit is empty or missing.
     """
-
-    range = las_map._las_to_Range(mnemonic, las_unit, data)
+    _range = las_map._las_to_Range(mnemonic, las_unit, data)
 
     return (
-        parse_unit_safe(range.unit) if range is not None else parse_unit_safe(las_unit)
+        parse_unit_safe(_range.unit)
+        if _range is not None
+        else parse_unit_safe(las_unit)
     )
 
 
 def parse_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
-    """
-    Parses the unit from a Curve object and returns a Unit
-    """
+    """Parse the unit from a Curve object and returns a Unit."""
     return parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
 
 
 def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit) -> str | None:
-    """
-    Parse the unit returning the LAS value mapped from a mnemonic
-    """
+    """Parse the unit returning the LAS value mapped from a mnemonic."""
     mnemonic = _lasio.remove_lasio_suffix(mnemonic)
     pint_unit = (
         pint_unit
