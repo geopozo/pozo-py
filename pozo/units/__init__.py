@@ -53,7 +53,7 @@ def check_las(las: lasio.LASFile, HTML=True, div_id="") -> list[str] | None:
         confidence = None
         parsed = None
         try:
-            range = las_map.las_to_Range(curve.mnemonic, curve.unit, curve.data)
+            range = las_map._las_to_Range(curve.mnemonic, curve.unit, curve.data)
             if range is not None:
                 si_unit = range.unit
                 confidence = range.confidence
@@ -134,7 +134,7 @@ def parse_unit_from_context(
     Raises UnitException if the unit is empty or missing.
     """
 
-    range = las_map.las_to_Range(mnemonic, las_unit, data)
+    range = las_map._las_to_Range(mnemonic, las_unit, data)
 
     return (
         parse_unit_safe(range.unit) if range is not None else parse_unit_safe(las_unit)
