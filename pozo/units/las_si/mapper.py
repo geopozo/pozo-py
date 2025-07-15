@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from pozo.utils import _lasio as lasio_utils
 from pozo.utils import stats
 
 if TYPE_CHECKING:
-    from typing import TypeAlias, Any
+    from typing import Any, TypeAlias
 
     Numeric: TypeAlias = int | float
     RangeBoundary: TypeAlias = tuple[Numeric, Numeric] | tuple[()]
