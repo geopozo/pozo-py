@@ -31,7 +31,9 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.16.1",
+    "poethepoet>=0.36.0",
     "pytest>=8.3.5",
+    "pytest-xdist>=3.8.0",
 ]
 
 [tool.mypy]
@@ -65,3 +67,16 @@ ignore = [
               "T201", # if we're printing in tests, there is a reason
               "ERA001"
             ]
+
+
+[tool.poe.tasks.test]
+cmd = "pytest -W error -n auto -v -rfE"
+help = "Run all tests quickly"
+
+[tool.poe.tasks.debug-test]
+cmd = "pytest -W error -vvvx -rA"
+help = "Run test by test, slowly, quitting after first error"
+
+[tool.poe.tasks.filter-test]
+cmd = "pytest -W error -vvvx -rA"
+help = "Run any/all tests one by one with basic settings: can include filename and -k filters"
