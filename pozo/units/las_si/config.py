@@ -53,5 +53,6 @@ las_si_map = (
 
 # agrega a las_map
 def add_to_las_si_map(las_map: mapper.LasSiMap) -> None:
+    """Add new units to las_si_map."""
     for unit_args in las_si_map:
         las_map.add(*unit_args)  # type: ignore
