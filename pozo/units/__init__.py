@@ -1,3 +1,5 @@
+"""API to connect pint registry and LasSiMap."""
+
 from __future__ import annotations
 
 import os
