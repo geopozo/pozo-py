@@ -26,3 +26,4 @@ dist/
 build/
 .vscode/
 data/
+.idea/
