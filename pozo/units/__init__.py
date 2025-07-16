@@ -72,19 +72,11 @@ def check_las(
     if not html:
         return result
 
-    try:
-        html_output = _table.generate_html_table(result, _delimiter)
-        display.show_content(
-            f'<div id="{div_id}">{html_output}</div>',
-            html=html,
-        )
-
-    except Exception as e:
-        display.show_content(str(e))
-        display.show_content(
-            "<br>".join([r for r in result if isinstance(r, str)]),
-            html=html,
-        )
+    html_output = _table.generate_html_table(result, _delimiter)
+    display.show_content(
+        f'<div id="{div_id}">{html_output}</div>',
+        html=html,
+    )
 
     return None
 
