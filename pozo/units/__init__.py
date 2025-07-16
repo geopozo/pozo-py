@@ -94,11 +94,7 @@ def parse_unit_from_context(
     las_unit: str,
     data: types.Array,
 ) -> pint.Unit | None:
-    """
-    Parse a unit string using context from mnemonic and data.
-
-    Attempts to resolve the unit via LAS mappings first;
-    """
+    """Parse a unit string using context from mnemonic and data."""
     si_unit = las_map.las_to_si(mnemonic, las_unit, data)
 
     return (
