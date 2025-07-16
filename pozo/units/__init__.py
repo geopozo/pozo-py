@@ -33,13 +33,13 @@ def check_las(
     *,
     html: bool = True,
     div_id: str = "",
-) -> list[str] | None:
+) -> list[str | dict[str, str]] | None:
     """Check the data from the LAS file and print a table with the analysis."""
 
     def n0(s: str | pint.Unit | int | None) -> str:
         return "" if s is None else str(s)
 
-    result = []
+    result: list[str | dict[str, str]] = []
     for i, curve in enumerate(las.curves):
         diagnosis = las_map.las_to_si_diagnosis(curve.mnemonic, curve.unit, curve.data)
         parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
@@ -79,7 +79,10 @@ def check_las(
 
     except Exception as e:
         display.show_content(str(e))
-        display.show_content("<br>".join(result), html=html)
+        display.show_content(
+            "<br>".join([r for r in result if isinstance(r, str)]),
+            html=html,
+        )
 
     return None
 
