@@ -1,4 +1,4 @@
-import pint
+import pint  # type: ignore[import-untyped]
 
 pint_map = (  # mapa de pint
     "gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI",

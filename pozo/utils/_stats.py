@@ -1,7 +1,7 @@
 from io import StringIO
 
-import numpy as np
-import pandas as pd
+import numpy as np  # type: ignore[import-untyped]
+import pandas as pd  # type: ignore[import-untyped]
 
 
 def format_csv(data, delimiter):

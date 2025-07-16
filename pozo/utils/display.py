@@ -1,6 +1,6 @@
 """Display util functions."""
 
-from IPython.display import HTML, display
+from IPython.display import HTML, display  # type: ignore[import-untyped]
 
 
 def show_content(content: str, *, html: bool = False) -> None:
