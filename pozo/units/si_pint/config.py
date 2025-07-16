@@ -1,4 +1,12 @@
-import pint  # type: ignore[import-untyped]
+"""Pint unit configuration file."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pint  # type: ignore[import-untyped]
+
 
 pint_map = (  # mapa de pint
     "gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI",
@@ -10,5 +18,6 @@ pint_map = (  # mapa de pint
 
 # agrega a pint
 def add_to_pint(registry: pint.registry.ApplicationRegistry) -> None:
+    """Add new units to pint from pint_map."""
     for definition in pint_map:
         registry.define(definition)
