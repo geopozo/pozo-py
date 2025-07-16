@@ -1,4 +1,4 @@
-"""Classes for units to units with conversion functions."""
+"""Class for LAS units to SI units with conversion functions."""
 
 from __future__ import annotations
 
