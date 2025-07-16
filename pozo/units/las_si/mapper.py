@@ -58,6 +58,9 @@ class Range:
 class LasSiMap:
     """Mapper from las_units to si_units with conversion functions."""
 
+    _las_to_ranges_by_mnemonic: dict
+    _si_to_las_by_mnemonic: dict
+
     def __init__(self) -> None:
         """Initialize the class LasSiMap."""
         self._las_to_ranges_by_mnemonic = {}  # las a si por mnemotecnica
