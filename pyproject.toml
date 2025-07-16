@@ -27,12 +27,11 @@ dependencies = [
  "pandas-stubs>=2.2.2.240807",
 ]
 
-[project.optional-dependencies]
-dev = ["pytest"]
 
 [dependency-groups]
 dev = [
     "mypy>=1.16.1",
+    "pytest>=8.3.5",
 ]
 
 [tool.mypy]
