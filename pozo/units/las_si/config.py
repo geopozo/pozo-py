@@ -1,3 +1,5 @@
+"""LAS unit to SI unit configuration file."""
+
 from pozo.units.las_si import mapper
 
 PU = (
