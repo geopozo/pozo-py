@@ -89,10 +89,7 @@ def check_las(
     return None
 
 
-def parse_unit_safe(
-    unit: str
-    | pint.Unit,  # esta api debe ser igual a lo de pint, si pint acepta pint.Unit, debe aceptar pint.Unit, o visceversa
-) -> pint.Unit | None:
+def parse_unit_safe(unit: str) -> pint.Unit | None:
     """Parse the unit by returning a Unit object from pint and catch the error."""
     try:
         return registry.parse_units(unit)
