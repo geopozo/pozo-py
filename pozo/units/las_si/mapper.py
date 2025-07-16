@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from pozo.utils import _lasio as lasio_utils
-from pozo.utils import stats, types
+from pozo.utils import _stats, types
 
 if TYPE_CHECKING:
     from typing import Any, TypeAlias
@@ -103,8 +103,8 @@ class LasSiMap:
     ) -> Range | None:
         """Convert a LAS unit to a Range using a mnemonic."""
         mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
-        max_val = stats.max_value(data)
-        min_val = stats.min_value(data)
+        max_val = _stats.max_value(data)
+        min_val = _stats.min_value(data)
 
         if (
             ranges := self._las_to_ranges_by_mnemonic.get(mnemonic, {}).get(las_unit)
@@ -138,8 +138,8 @@ class LasSiMap:
     ) -> types.Diagnosis:
         """Convert a LAS unit to SI Diagnosis using mnemonic."""
         _range = self._las_to_Range(mnemonic, las_unit, data)
-        [v_min, v_med, v_max] = stats.quantiles_values(data, [0, 0.5, 1])
-        n_nan = stats.count_missing_values(data)
+        [v_min, v_med, v_max] = _stats.quantiles_values(data, [0, 0.5, 1])
+        n_nan = _stats.count_missing_values(data)
 
         if _range is not None:
             si_unit = _range.unit
