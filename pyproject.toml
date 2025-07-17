@@ -66,6 +66,7 @@ ignore = [
               "INP001", # no need for __init__ in test directories
               "T201", # if we're printing in tests, there is a reason
               "ERA001",
+              "ANN001", # ignore missing argument type
               "ANN201", # ignore missing return type
               "PLR2004" # ignore magic value
             ]
