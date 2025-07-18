@@ -58,13 +58,13 @@ class Range:
 class LasSiMap:
     """Mapper from las_units to si_units with conversion functions."""
 
-    _las_to_ranges_by_mnemonic: dict
-    _si_to_las_by_mnemonic: dict
+    las_to_ranges_by_mnemonic: dict
+    si_to_las_by_mnemonic: dict
 
     def __init__(self) -> None:
         """Initialize the class LasSiMap."""
-        self._las_to_ranges_by_mnemonic = {}  # las a si por mnemotecnica
-        self._si_to_las_by_mnemonic = {}  # si a las por mnemotecnica
+        self.las_to_ranges_by_mnemonic = {}  # las a si por mnemotecnica
+        self.si_to_las_by_mnemonic = {}  # si a las por mnemotecnica
 
     def add(
         self,
@@ -86,8 +86,8 @@ class LasSiMap:
             if not isinstance(_range, Range):
                 raise TypeError("All entries must be of type RangeBoundaries.")
 
-        las_to_ranges = self._las_to_ranges_by_mnemonic.setdefault(mnemonic, {})
-        si_to_las = self._si_to_las_by_mnemonic.setdefault(mnemonic, {})
+        las_to_ranges = self.las_to_ranges_by_mnemonic.setdefault(mnemonic, {})
+        si_to_las = self.si_to_las_by_mnemonic.setdefault(mnemonic, {})
 
         las_to_ranges[las_unit] = ranges
 
@@ -107,9 +107,9 @@ class LasSiMap:
         min_val = _stats.min_value(data)
 
         if (
-            ranges := self._las_to_ranges_by_mnemonic.get(mnemonic, {}).get(las_unit)
+            ranges := self.las_to_ranges_by_mnemonic.get(mnemonic, {}).get(las_unit)
         ) is None:
-            ranges = self._las_to_ranges_by_mnemonic.get("-", {}).get(las_unit, [])
+            ranges = self.las_to_ranges_by_mnemonic.get("-", {}).get(las_unit, [])
 
         for _range in ranges:
             if _range.is_within_range(min_val, max_val):
@@ -124,9 +124,9 @@ class LasSiMap:
     ) -> str | None:
         """Convert an SI unit to a LAS unit using a mnemonic."""
         if (
-            las_unit := self._si_to_las_by_mnemonic.get(mnemonic, {}).get(si_unit)
+            las_unit := self.si_to_las_by_mnemonic.get(mnemonic, {}).get(si_unit)
         ) is None:
-            las_unit = self._si_to_las_by_mnemonic.get("-", {}).get(si_unit)
+            las_unit = self.si_to_las_by_mnemonic.get("-", {}).get(si_unit)
 
         return las_unit
 
