@@ -143,9 +143,9 @@ class LasSiMap:
             confidence = _range.confidence
             comment = _range.comment
         else:
-            si_unit = ""
+            si_unit = None
             confidence = 0
-            comment = f"- {las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)}"
+            comment = f"{las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)}"
 
         diagnosis = types.Diagnosis(
             mnemonic=mnemonic,
@@ -161,7 +161,7 @@ class LasSiMap:
         )
         return diagnosis
 
-    def las_to_si(self, mnemonic: str, las_unit: str, data: list[Any]) -> str:
+    def las_to_si(self, mnemonic: str, las_unit: str, data: list[Any]) -> str | None:
         """Convert a LAS unit to SI using mnemonic and diagnosis."""
         si_dict = self.las_to_si_diagnosis(mnemonic, las_unit, data)
         return si_dict["si_unit"]

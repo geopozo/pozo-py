@@ -26,7 +26,7 @@ class Diagnosis(TypedDict):
     data: Array | None
     confidence: int
     comment: str
-    si_unit: str
+    si_unit: str | None
     v_min: str
     v_med: str
     v_max: str
