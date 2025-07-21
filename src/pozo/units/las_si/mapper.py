@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from pozo.utils import _lasio as lasio_utils
 from pozo.utils import _stats, types
@@ -53,6 +53,21 @@ class Range:
         return not self.boundaries or (
             min_val > self.boundaries[0] and max_val < self.boundaries[1]
         )
+
+
+class Diagnosis(TypedDict):
+    """Custom Dict type for diagnosis of las to si."""
+
+    mnemonic: str
+    las_unit: str
+    data: types.Array | None
+    confidence: int
+    comment: str
+    si_unit: str | None
+    v_min: str
+    v_med: str
+    v_max: str
+    n_nan: int
 
 
 class LasSiMap:
@@ -132,7 +147,7 @@ class LasSiMap:
         mnemonic: str,
         las_unit: str,
         data: list[Any],
-    ) -> types.Diagnosis:
+    ) -> Diagnosis:
         """Convert a LAS unit to SI Diagnosis using mnemonic."""
         _range = self._las_to_range(mnemonic, las_unit, data)
         [v_min, v_med, v_max] = _stats.quantiles_values(data, [0, 0.5, 1])
@@ -147,7 +162,7 @@ class LasSiMap:
             confidence = 0
             comment = f"{las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)}"
 
-        diagnosis = types.Diagnosis(
+        diagnosis = Diagnosis(
             mnemonic=mnemonic,
             las_unit=las_unit,
             data=data,
@@ -164,4 +179,4 @@ class LasSiMap:
     def las_to_si(self, mnemonic: str, las_unit: str, data: list[Any]) -> str | None:
         """Convert a LAS unit to SI using mnemonic and diagnosis."""
         si_dict = self.las_to_si_diagnosis(mnemonic, las_unit, data)
-        return si_dict["si_unit"]
+        return si_dict.get("si_unit")
