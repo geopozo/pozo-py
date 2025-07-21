@@ -74,7 +74,7 @@ def check_las(
         return result
 
     html_output = _table.generate_html_table(result, _delimiter)
-    display.show_content(
+    display.show_html(
         f'<div id="{div_id}">{html_output}</div>',
         html=html,
     )
