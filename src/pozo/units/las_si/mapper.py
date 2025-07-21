@@ -85,7 +85,7 @@ class LasSiMap:
         self,
         mnemonic: str,
         las_unit: str,
-        ranges: str | list[Range] | tuple[Range],
+        ranges: str | list[Range] | tuple[Range, ...],
         confidence: int = 0,
         comment: str = "Without comment.",
     ) -> None:

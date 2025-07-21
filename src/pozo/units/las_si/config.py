@@ -1,6 +1,14 @@
 """LAS unit to SI unit configuration file."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pozo.units.las_si import mapper
+
+if TYPE_CHECKING:
+    LasSiEntry = tuple[str, str, str, int, str]
+    LasSiRangeEntry = tuple[str, str, tuple[mapper.Range, ...]]
 
 PU = (
     mapper.Range("of_1", (-0.5, 0.8), 50, "decide by range"),
@@ -14,7 +22,7 @@ percent_general = (
 )
 
 # mapa de las_si
-las_si_map = (
+las_si_map: tuple[LasSiEntry | LasSiRangeEntry, ...] = (
     ("-", "MM", "millimeter", 50, "decided without mnemonic"),
     ("-", "M", "meter", 50, "decided without mnemonic"),
     ("-", "CM", "centimeter", 50, "decided without mnemonic"),
