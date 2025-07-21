@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 # Conexión a LasSiMap
 las_map = las_si_mapper.LasSiMap()
 for unit_args in las_si_config.las_si_map:
-    las_map.add(*unit_args)  # type: ignore  # noqa: PGH003
+    las_map.add(*unit_args)  # type: ignore[arg-type], para Pyright
 
 # Conexión a pint
 registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
