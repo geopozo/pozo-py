@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pozo.utils._table import generate_html_table
+from pozo.utils._table import colorize_html_table
 from tests.data_types import make_param_list
 
 _table_basic = "<table><tr><td>25</td><td>40</td></tr></table>"
@@ -20,7 +20,7 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = ["a,b", "25,40"]
-        result = generate_html_table(data, ",")
+        result = colorize_html_table(data, ",")
 
         mock_format_csv.assert_called_once_with("a,b\n25,40", ",")
         assert f"{_red_style}25</td>" in result
@@ -34,7 +34,7 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = ["a,b", "100,200"]
-        result = generate_html_table(data, ",")
+        result = colorize_html_table(data, ",")
 
         mock_format_csv.assert_called_once_with("a,b\n100,200", ",")
         assert result == no_color_table
@@ -47,7 +47,7 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = ["a,b,c", "0,15,33"]
-        result = generate_html_table(data, ",")
+        result = colorize_html_table(data, ",")
 
         assert f"{_red_style}0</td>" in result
         assert f"{_red_style}15</td>" in result
@@ -61,7 +61,7 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = ["a,b,c", "34,50,66"]
-        result = generate_html_table(data, ",")
+        result = colorize_html_table(data, ",")
 
         assert f"{_orange_style}34</td>" in result
         assert f"{_orange_style}50</td>" in result
@@ -75,7 +75,7 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = ["a,b,c", "25,40,70"]
-        result = generate_html_table(data, ",")
+        result = colorize_html_table(data, ",")
 
         assert f"{_red_style}25</td>" in result
         assert f"{_orange_style}40</td>" in result
@@ -89,11 +89,11 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = ["a;b", "25;40"]
-        generate_html_table(data, ";")
+        colorize_html_table(data, ";")
         mock_format_csv.assert_called_with("a;b\n25;40", ";")
 
         data = ["a\tb", "25\t40"]
-        generate_html_table(data, "\t")
+        colorize_html_table(data, "\t")
         mock_format_csv.assert_called_with("a\tb\n25\t40", "\t")
 
     @patch(_format_csv_patch)
@@ -103,7 +103,7 @@ class TestGenerateHtmlTable:
         mock_format_csv.return_value = mock_df
 
         data = []
-        result = generate_html_table(data, ",")
+        result = colorize_html_table(data, ",")
 
         mock_format_csv.assert_called_once_with("", ",")
         assert result == _table_empty
@@ -115,7 +115,7 @@ class TestGenerateHtmlTable:
         data = ["invalid,data"]
 
         with pytest.raises(Exception, match="CSV parsing error"):
-            generate_html_table(data, ",")
+            colorize_html_table(data, ",")
 
     @patch(_format_csv_patch)
     def test_generate_html_table_to_html_error(self, mock_format_csv):
@@ -126,7 +126,7 @@ class TestGenerateHtmlTable:
         data = ["a,b", "1,2"]
 
         with pytest.raises(Exception, match="HTML generation error"):
-            generate_html_table(data, ",")
+            colorize_html_table(data, ",")
 
     @pytest.mark.parametrize(
         ("data", "delimiter", "expected_join"),
@@ -138,12 +138,16 @@ class TestGenerateHtmlTable:
     )
     @patch(_format_csv_patch)
     def test_generate_html_table_data_joining(
-        self, mock_format_csv, data, delimiter, expected_join
+        self,
+        mock_format_csv,
+        data,
+        delimiter,
+        expected_join,
     ):
         mock_df = Mock()
         mock_df.to_html.return_value = _table_empty
         mock_format_csv.return_value = mock_df
 
-        generate_html_table(data, delimiter)
+        colorize_html_table(data, delimiter)
 
         mock_format_csv.assert_called_once_with(expected_join, delimiter)

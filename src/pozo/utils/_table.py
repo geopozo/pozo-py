@@ -15,7 +15,7 @@ def _apply_color_styling(
     return html_str
 
 
-def generate_html_table(
+def colorize_html_table(
     data: list,
     delimiter: str,
 ) -> str:
