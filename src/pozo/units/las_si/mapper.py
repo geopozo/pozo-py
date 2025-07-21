@@ -84,7 +84,7 @@ class LasSiMap:
 
         for _range in ranges:
             if not isinstance(_range, Range):
-                raise TypeError("All entries must be of type RangeBoundaries.")
+                raise TypeError("All entries must be of type Range.")
 
         las_to_ranges = self.las_to_ranges_by_mnemonic.setdefault(mnemonic, {})
         si_to_las = self.si_to_las_by_mnemonic.setdefault(mnemonic, {})
