@@ -75,12 +75,10 @@ class LasSiMap:
         comment: str = "Without comment.",
     ) -> None:
         """Add to the unit conversion dictionaries by classifying from mnemonics."""
-        if not isinstance(ranges, (tuple, list)):
-            ranges = (
-                [Range(ranges, (), confidence, comment)]
-                if not isinstance(ranges, Range)
-                else [ranges]
-            )
+        if isinstance(ranges, str):
+            ranges = [Range(ranges, (), confidence, comment)]
+        elif isinstance(ranges, Range):
+            ranges = [ranges]
 
         for _range in ranges:
             if not isinstance(_range, Range):
