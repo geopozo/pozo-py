@@ -8,7 +8,7 @@ from pozo.utils._stats import (
     max_value,
     min_value,
     quantiles_values,
-)
+)  # sabes el asunto que tengo acá
 from tests.data_types import (
     data_array,
     data_empty,
@@ -23,6 +23,7 @@ class TestFormatCsv:
         make_param_list(
             data_str.values(),
             [{"a": [1, 4], "b": [2, 5]}] * 3,
+            # expected debe estar en data_types
             [",", ";", "\t"],
         ),
         ids=data_str.keys(),
@@ -60,6 +61,8 @@ class TestMaxValue:
     def test_max_value_success(self, data, expected):
         result = max_value(data)
         assert result == expected
+
+        # otra cosa
 
     @pytest.mark.parametrize("data", data_empty.values())
     def test_max_value_empty_error(self, data):
@@ -144,3 +147,7 @@ class TestCountMissingValues:
     def test_count_missing_values(self, data, expected):
         result = count_missing_values(data)
         assert result == expected
+
+
+# pero tambien esta bien la cantidad de funciones, pero expectedes deben
+# venir con los data_types

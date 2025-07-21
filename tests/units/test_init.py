@@ -21,7 +21,11 @@ class TestCheckLas:
     """Test the check_las function."""
 
     def _create_mock_curve(
-        self, mnemonic: str, unit: str, data: list, descr: str = "Test description"
+        self,
+        mnemonic: str,
+        unit: str,
+        data: list,
+        descr: str = "Test description",
     ) -> Mock:
         """Create a mock curve object for testing."""
         curve = Mock()
@@ -53,7 +57,9 @@ class TestCheckLas:
             "v_max": "3.0",
             "n_nan": 0,
         }
-
+        # los parches estan para evitar probar las funciones
+        # pero tambien fijan las funciones y sus nombres como necesario
+        # y realmente no es necesario todo esto
         with (
             patch(
                 "pozo.units.las_map.las_to_si_diagnosis",
@@ -76,7 +82,7 @@ class TestCheckLas:
 
         las_file = self._create_mock_las_file([curve1, curve2])
 
-        mock_diagnosis = {
+        mock_diagnosis = {  # mucha duplicación de codigo
             "si_unit": "meter",
             "confidence": 95,
             "comment": "High confidence",
@@ -146,7 +152,7 @@ class TestCheckLas:
             result = check_las(las_file, html=True, div_id=div_id)
 
             assert result is None
-            mock_html_table.assert_called_once()
+            mock_html_table.assert_called_once()  # por que
             mock_show_content.assert_called_once()
 
             call_args = mock_show_content.call_args
@@ -156,7 +162,7 @@ class TestCheckLas:
         """Test error handling when las_to_si_diagnosis raises an exception."""
         curve = self._create_mock_curve("DEPTH", "M", [1.0, 2.0, 3.0])
         las_file = self._create_mock_las_file([curve])
-
+        # vamos a forzar un error, y revisar el error. por. que.
         with (
             patch(
                 "pozo.units.las_map.las_to_si_diagnosis",
@@ -183,7 +189,8 @@ class TestCheckLas:
 
         with (
             patch(
-                "pozo.units.las_map.las_to_si_diagnosis", return_value=mock_diagnosis
+                "pozo.units.las_map.las_to_si_diagnosis",
+                return_value=mock_diagnosis,
             ),
             patch(
                 "pozo.units.parse_unit_from_context",
@@ -192,6 +199,8 @@ class TestCheckLas:
             pytest.raises(Exception, match="Parse error"),
         ):
             check_las(las_file, html=False)
+            # otras vez estamos revisando que funcione un patch en vez del
+            # comportamiento de la function?
 
     def test_check_las_error_in_html_table_generation(self) -> None:
         """Test error handling when HTML table generation raises an exception."""
@@ -210,7 +219,8 @@ class TestCheckLas:
 
         with (
             patch(
-                "pozo.units.las_map.las_to_si_diagnosis", return_value=mock_diagnosis
+                "pozo.units.las_map.las_to_si_diagnosis",
+                return_value=mock_diagnosis,
             ),
             patch(
                 "pozo.units.parse_unit_from_context",
@@ -264,7 +274,7 @@ class TestCheckLas:
         """Test check_las with empty curves list."""
         las_file = self._create_mock_las_file([])
 
-        result = check_las(las_file, html=False)
+        result = check_las(las_file, html=False)  # bueno
         assert result == []
 
     def test_check_las_none_values_in_diagnosis(self) -> None:
@@ -281,10 +291,12 @@ class TestCheckLas:
             "v_max": None,
             "n_nan": None,
         }
-
+        # por que estamos rehaciendo un mock y patch cada vez. mejor armar un
+        # ejemplo fijo y correcto con todas las instancias y probar eso.
         with (
             patch(
-                "pozo.units.las_map.las_to_si_diagnosis", return_value=mock_diagnosis
+                "pozo.units.las_map.las_to_si_diagnosis",
+                return_value=mock_diagnosis,
             ),
             patch("pozo.units.parse_unit_from_context", return_value=None),
         ):
@@ -345,6 +357,7 @@ class TestCheckLas:
             )
 
 
+# okay
 class TestParseUnitSafe:
     """Test the parse_unit_safe function."""
 
@@ -460,6 +473,7 @@ class TestGetUnitFromCurve:
             get_unit_from_curve(pint_unit)
 
 
+# pero unit to las solo funciona si ya hicimos un las to unit
 class TestParseUnitToLas:
     """Test the parse_unit_to_las function."""
 

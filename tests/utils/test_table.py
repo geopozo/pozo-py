@@ -2,14 +2,26 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pozo.utils._table import generate_html_table
+from pozo.utils._table import generate_html_table  # meh
 from tests.data_types import make_param_list
 
 _table_basic = "<table><tr><td>25</td><td>40</td></tr></table>"
 _table_empty = "<table></table>"
 _red_style = '<td style="color:red">'
 _orange_style = '<td style="color:#B95000">'
-_format_csv_patch = "pozo.utils._table._stats.format_csv"
+_format_csv_patch = "pozo.utils._table._stats.format_csv"  # realmente no es
+# no es stats, format_csv. es más de mostrar.
+
+# debemos hacer mejor lo de colores de todos modos, esto está muy enredado
+# habria mas facil probar el regex en vez de probar las funciones que llaman
+# el regex
+
+# bueno, estamos probando el colorizador, pero no probando la generacion
+# de html, eso es un mock
+# pero por que necesitamos un mock?
+
+# me siento que... tal vez está bien eso?
+# pero esta demasiado, lo reviso está otra vez
 
 
 class TestGenerateHtmlTable:
@@ -138,7 +150,11 @@ class TestGenerateHtmlTable:
     )
     @patch(_format_csv_patch)
     def test_generate_html_table_data_joining(
-        self, mock_format_csv, data, delimiter, expected_join
+        self,
+        mock_format_csv,
+        data,
+        delimiter,
+        expected_join,
     ):
         mock_df = Mock()
         mock_df.to_html.return_value = _table_empty

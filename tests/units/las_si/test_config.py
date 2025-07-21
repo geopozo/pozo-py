@@ -10,22 +10,37 @@ simple_units = [
 ]
 
 
+# es que, me parece muy enredado solo para probar que funciona add_to_las_si_map
+# y es una function que no necesitamos? add_to_las_si_map
+# has creado estas capas con muy poco codigo pero se generan lineas y linease
+# de pruebas
 class TestAddToLasSiMap:
     @pytest.mark.parametrize(
-        ("mnemonic", "las_unit", "si_unit", "confidence", "comment"), simple_units
+        ("mnemonic", "las_unit", "si_unit", "confidence", "comment"),
+        simple_units,
     )
     def test_add_to_las_si_map_valid_args(
-        self, mnemonic, las_unit, si_unit, confidence, comment
+        self,
+        mnemonic,
+        las_unit,
+        si_unit,
+        confidence,
+        comment,
     ):
         las_map = mapper.LasSiMap()
         add_to_las_si_map(las_map)
 
         assert mnemonic in las_map.las_to_ranges_by_mnemonic
         assert las_unit in las_map.las_to_ranges_by_mnemonic[mnemonic]
+
+        # por que esto dos veces?
         assert mnemonic in las_map.si_to_las_by_mnemonic
         assert si_unit in las_map.si_to_las_by_mnemonic[mnemonic]
+
+        # por que esto dos veces?
         assert las_unit in las_map.las_to_ranges_by_mnemonic[mnemonic]
 
+        # tal vez esta bien esto
         ranges = las_map.las_to_ranges_by_mnemonic[mnemonic][las_unit]
         assert len(ranges) == 1
         assert ranges[0].unit == si_unit
@@ -38,10 +53,15 @@ class TestAddToLasSiMap:
         initial_si_count = len(las_map.si_to_las_by_mnemonic)
 
         add_to_las_si_map(las_map)
+        # realmente otra vez es necessario?
+        # esta prueba?
+        # la funciona que prueba?
 
         assert len(las_map.las_to_ranges_by_mnemonic) > initial_las_count
         assert len(las_map.si_to_las_by_mnemonic) > initial_si_count
 
+    # y el resto tal vez es mejor? Yo odio que haya una function
+    # add_to_las_si_map
     def test_add_to_las_si_map_with_ranges(self):
         las_map = mapper.LasSiMap()
         add_to_las_si_map(las_map)

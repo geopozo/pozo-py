@@ -1,6 +1,8 @@
 from pozo.utils._lasio import remove_lasio_suffix, remove_prefix_number
 
 
+# por que tantas funciones para hacer la misma cosa?
+# pero ok
 class TestRemoveLasioSuffix:
     def test_remove_lasio_suffix_with_colon(self) -> None:
         """Test removing suffix when colon is present"""

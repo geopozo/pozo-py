@@ -1,10 +1,26 @@
 """Tests for display util functions."""
 
+
+## muchas de estas pruebas no son necesarias
+## primero, son funciones visuals y estamás usand
+## "assert_not_called" y eso realmente...
+## no es asambroso
+## tambien solo que hay demasiado codigo
+## todo sobre-divido
+## no estoy seguro que estamos realmente probando coses que debemos o
+## necesitamos probar
+## quien importa que una function en particular esta llamada?
+## y no vamos a cambaiar eso en el futuro de todos modos
+## y tenemos que cambiar todas las pruebas?
+## mal
+
 from unittest.mock import MagicMock, patch
+# raro usar unittest? no es algo que realmente usamos
+# tienes que explicar un poco
 
 import pytest
 
-from pozo.utils.display import show_content
+from pozo.utils.display import show_content  # important funciones directo
 from tests.data_types import make_param_list
 
 _display_ipython = "pozo.utils.display.display"
@@ -57,11 +73,16 @@ class TestShowContent:
     )
     @patch("pozo.utils.display.display")
     def test_show_content_parametrized_text(
-        self, mock_display, content, html_flag, expected_display_arg
+        self,
+        mock_display,
+        content,
+        html_flag,
+        expected_display_arg,
     ):
         """Test show_content with various text inputs."""
         show_content(content, html=html_flag)
         mock_display.assert_called_once_with(expected_display_arg)
+        # ???? está
 
     @pytest.mark.parametrize(
         ("content", "html_flag"),
@@ -77,7 +98,11 @@ class TestShowContent:
     @patch(_display_ipython)
     @patch(_display_html)
     def test_show_content_parametrized_html(
-        self, mock_html, mock_display, content, html_flag
+        self,
+        mock_html,
+        mock_display,
+        content,
+        html_flag,
     ):
         """Test show_content with various HTML inputs."""
         mock_html_instance = MagicMock()

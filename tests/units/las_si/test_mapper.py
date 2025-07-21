@@ -75,6 +75,12 @@ class TestLasSiMap:
         assert "m" in _mapper.si_to_las_by_mnemonic["DEPTH"]
         assert _mapper.si_to_las_by_mnemonic["DEPTH"]["m"] == "FT"
 
+        # el problema tambien es que consideramos estes atributos publicos?
+        # realmente lo que debemos probar es que podamos agregar un valor al
+        # mapa, y funcione el mapeo.
+        # pero que los atributos que son casi internos (pero no marcados con
+        # _) estan correctos es raro. No deben estar marcados con _?
+
     def test_add_with_range_object(self):
         """Test add method with Range object."""
         range_obj = Range("m", (0, 1000), 2, "depth range")
@@ -84,6 +90,9 @@ class TestLasSiMap:
         assert "FT" in _mapper.las_to_ranges_by_mnemonic["DEPTH"]
         assert _mapper.las_to_ranges_by_mnemonic["DEPTH"]["FT"][0] == range_obj
 
+    # deben set una funciona, creo...
+    # no hay tanta ventaja en tener todo tan sobre-organizado
+    # mas codigo, mas probalidad de error
     def test_add_with_multiple_ranges(self):
         """Test add method with multiple ranges."""
         range1 = Range("m", (0, 100), 1, "shallow")
@@ -106,7 +115,7 @@ class TestLasSiMap:
     )
     def test_las_to_si_with_data(self, mnemonic, las_unit, data, expected_unit):
         """Test las_to_si method with different data ranges."""
-
+        # bueno
         range_obj = Range("m", (0, 1000), 1, "depth")
         _mapper.add("DEPTH", "FT", [range_obj])
         _mapper.add("DEPTH", "M", [range_obj])
@@ -118,7 +127,8 @@ class TestLasSiMap:
         """Test las_to_si method with fallback to '-' mnemonic."""
         range_obj = Range("m", (0, 1000), 1, "default depth")
         _mapper.add("-", "FT", [range_obj])
-
+        # ok pero debemos probar el mecanismo de fallback en caso de falla?
+        # no solo cuando se existe?
         result = _mapper.las_to_si("UNKNOWN", "FT", [10, 20, 30])
         assert result == "m"
 
@@ -128,7 +138,7 @@ class TestLasSiMap:
         _mapper.add("DEPTH", "FT", [range_obj])
 
         result = _mapper.las_to_si("DEPTH", "FT", [500, 600, 700])  # Outside range
-        assert result == ""
+        assert result == ""  # no match debe set None? "" es valido.
 
     @pytest.mark.parametrize(
         ("mnemonic", "si_unit", "expected_las_unit"),
@@ -154,6 +164,7 @@ class TestLasSiMap:
 
         result = _mapper.si_to_las_unit("UNKNOWN", "m")
         assert result == "FT"
+        # no habia pensando en como funcionan los fallback aca
 
     def test_las_to_si_diagnosis(self):
         """Test las_to_si_diagnosis method."""
@@ -170,6 +181,8 @@ class TestLasSiMap:
             mock_remove_suffix.return_value = "DEPTH"
             mock_quantiles.return_value = [10, 30, 50]
             mock_count_nan.return_value = 0
+            # por que tenemos que mock?
+            # si vamos a mock, por no que no solo... no probar?
 
             result = _mapper.las_to_si_diagnosis("DEPTH", "FT", data)
 
@@ -202,6 +215,8 @@ class TestLasSiMap:
             assert result["si_unit"] == ""
             assert result["confidence"] == 0
             assert result["comment"] == "- UNKNOWN_UNIT for UNKNOWN"
+            # no creo que debamos probar comentarios, son mensajes y cambian
+            # facilmente
 
     def test_las_to_si(self):
         """Test las_to_si method."""

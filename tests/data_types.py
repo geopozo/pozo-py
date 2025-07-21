@@ -4,10 +4,15 @@ import numpy as np
 import pandas as pd
 
 
-def make_param_list(*args: Iterable):
+def make_param_list(*args: Iterable):  # no me parece necesario esto
     return list(zip(*args))
 
 
+# si vamos a usar listas como definiciones, y las mismas listas, debemos
+# usarlas como constantes
+# list_ints = [1, 5, 3, 9, 2]
+# array_int64 = np.array(list_ints, dtype=np.int64)
+# etc
 data_array = {
     "list_ints": [1, 5, 3, 9, 2],
     "list_negative_ints": [-1, -5, -3, -9, -2],

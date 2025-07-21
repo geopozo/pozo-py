@@ -9,6 +9,9 @@ import pytest
 
 from pozo.units.si_pint.config import add_to_pint, pint_map
 
+# Creo que es igual a mi problema con el otro config
+# me parece que ya estamos probando funciones de Pint, no de Pozo
+
 
 class TestAddToPint:
     """Test the add_to_pint function."""
@@ -68,7 +71,7 @@ class TestAddToPint:
         """Test error handling when a definition has invalid format."""
         mock_registry = Mock()
         mock_registry.define.side_effect = pint.DefinitionSyntaxError(
-            "Invalid definition"
+            "Invalid definition",
         )
 
         with pytest.raises(pint.DefinitionSyntaxError, match="Invalid definition"):
@@ -78,11 +81,12 @@ class TestAddToPint:
         """Test error handling when definition references undefined unit."""
         mock_registry = Mock()
         mock_registry.define.side_effect = pint.UndefinedUnitError(
-            "Undefined unit in definition"
+            "Undefined unit in definition",
         )
 
         with pytest.raises(
-            pint.UndefinedUnitError, match="Undefined unit in definition"
+            pint.UndefinedUnitError,
+            match="Undefined unit in definition",
         ):
             add_to_pint(mock_registry)
 
@@ -102,7 +106,7 @@ class TestAddToPint:
         with patch("pozo.units.si_pint.config.pint_map", custom_map):
             add_to_pint(mock_registry)
             mock_registry.define.assert_called_once_with(
-                "custom_unit = [Custom_Dimension] = cu"
+                "custom_unit = [Custom_Dimension] = cu",
             )
 
     def test_pint_map_contains_expected_definitions(self) -> None:
