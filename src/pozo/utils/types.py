@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol, TypeAlias
+from typing import Any, Protocol
 
-Array: TypeAlias = Any  # temporal
+Array = Any  # temporal
 
 
 class Curve(Protocol):

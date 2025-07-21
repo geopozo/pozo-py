@@ -7,11 +7,9 @@ import numpy as np  # type: ignore[import-untyped]
 import pandas as pd  # type: ignore[import-untyped]
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from pozo.utils import types
 
-    Numeric: TypeAlias = int | float
+    Numeric: int | float
 
 
 def format_csv(data: str, delimiter: str) -> pd.DataFrame:

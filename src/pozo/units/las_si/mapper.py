@@ -8,10 +8,10 @@ from pozo.utils import _lasio as lasio_utils
 from pozo.utils import _stats, types
 
 if TYPE_CHECKING:
-    from typing import Any, TypeAlias
+    from typing import Any, Union
 
-    Numeric: TypeAlias = int | float
-    RangeBoundary: TypeAlias = tuple[Numeric, Numeric] | tuple[()]
+    Numeric = Union[int, float]
+    RangeBoundary = Union[tuple[Numeric, Numeric], tuple[()]]
 
 
 class Range:
@@ -32,7 +32,7 @@ class Range:
         """Initialize the class range."""
         if not isinstance(boundaries, tuple) or len(boundaries) not in {0, 2}:
             raise TypeError(
-                "boundaries should contain a tuple with (min, max) or () catch-all"
+                "boundaries should contain a tuple with (min, max) or () catch-all",
             )
 
         self.boundaries = boundaries
