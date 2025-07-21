@@ -18,6 +18,7 @@ class Curve(Protocol):
     def data(self) -> Array | None: ...  # noqa: D102
 
 
+# está bien, pero también es algo muy especifico para LAS
 class Diagnosis(TypedDict):
     """Custom Dict type for diagnosis of las to si."""
 

@@ -2,7 +2,7 @@ import re
 
 from pozo.utils import _stats
 
-
+# no me gusta pero ok
 def _apply_color_styling(
     html_str: str,
     pattern: re.Pattern,
@@ -15,7 +15,7 @@ def _apply_color_styling(
     return html_str
 
 
-def generate_html_table(
+def colorize_html_table(
     data: list,
     delimiter: str,
 ) -> str:
@@ -29,3 +29,6 @@ def generate_html_table(
     html_output = _apply_color_styling(html_output, orange_medium, "#B95000")
 
     return html_output
+
+# esto es todo para hacer colores.... es necesario ya que usamos numeros de
+# confianza?
