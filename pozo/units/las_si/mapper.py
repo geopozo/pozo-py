@@ -72,9 +72,18 @@ class LasSiMap:
         las_unit: str,
         ranges: str | list[Range] | tuple[Range],
         confidence: int = 0,
-        comment: str = "- not indicated",
+        comment: str = "Without comment.",
     ) -> None:
         """Add to the unit conversion dictionaries by classifying from mnemonics."""
+
+        # creo que debe ser
+        if isinstance(ranges, str):
+            ranges = [Range(ranges, (), confidence, comment)]
+        # no puede ser el predeterminados del __init__?
+        elif isinstance(ranges, Range):
+            ranges = [ranges]
+
+        # enredado
         if not isinstance(ranges, (tuple, list)):
             ranges = (
                 [Range(ranges, (), confidence, comment)]
@@ -85,6 +94,7 @@ class LasSiMap:
         for _range in ranges:
             if not isinstance(_range, Range):
                 raise TypeError("All entries must be of type RangeBoundaries.")
+                # incorrecto el mensaje, o string? entonces... mmm
 
         las_to_ranges = self.las_to_ranges_by_mnemonic.setdefault(mnemonic, {})
         si_to_las = self.si_to_las_by_mnemonic.setdefault(mnemonic, {})
@@ -95,7 +105,7 @@ class LasSiMap:
             si_to_las[_range.unit] = las_unit
 
     # De las_unit a range
-    def _las_to_Range(  # noqa: N802 👈 ruff se queda de la 'R'
+    def _las_to_range(  # ruff gana, pregunté al pato
         self,
         mnemonic: str,
         las_unit: str,
@@ -130,6 +140,7 @@ class LasSiMap:
 
         return las_unit
 
+    # TIENES QUE PESNAR EN QUE DEBEMOS DEVOLVER SI NO HAY ENTRADA, "" NO
     def las_to_si_diagnosis(
         self,
         mnemonic: str,
@@ -146,9 +157,10 @@ class LasSiMap:
             confidence = _range.confidence
             comment = _range.comment
         else:
-            si_unit = ""
+            si_unit = "" # ??? que está pasando acá, vamos a tener una
+            # devolución predeterminada de dimensionlist? Debem devolver none
             confidence = 0
-            comment = f"- {las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)}"
+            comment = f"{las_unit} for {lasio_utils.remove_lasio_suffix(mnemonic)}"
 
         diagnosis = types.Diagnosis(
             mnemonic=mnemonic,

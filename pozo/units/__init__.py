@@ -21,10 +21,10 @@ if TYPE_CHECKING:
 las_map = las_si_mapper.LasSiMap()
 las_si_config.add_to_las_si_map(las_map)
 
-# Conexión a pint
 registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
 Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
+# add_to_pint ---> cambiar a "register_new_units"
 
 
 _delimiter = chr(0x1E)
@@ -45,6 +45,10 @@ def check_las(
     for i, curve in enumerate(las.curves):
         diagnosis = las_map.las_to_si_diagnosis(curve.mnemonic, curve.unit, curve.data)
         parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+
+        # no debemos solo llamar la funcion de pint en vez de
+        # parse_unit_from_context? repetimos las mismas cosas
+
         descr = _lasio.remove_prefix_number(curve.descr)
 
         curve_data = {
@@ -61,6 +65,7 @@ def check_las(
             "#NaN": diagnosis.get("n_nan"),
         }
 
+        # create table headers if in first iteration
         if i == 0 and html:
             result.append(_delimiter.join(curve_data.keys()))
 
@@ -73,6 +78,8 @@ def check_las(
         return result
 
     html_output = _table.generate_html_table(result, _delimiter)
+    # estos nombres vamos a cambiar
+
     display.show_content(
         f'<div id="{div_id}">{html_output}</div>',
         html=html,
@@ -89,7 +96,7 @@ def parse_unit_safe(unit: str) -> pint.Unit | None:
         return None
 
 
-def parse_unit_from_context(
+def parse_unit_from_context( # _safe, no?
     mnemonic: str,
     las_unit: str,
     data: types.Array,
