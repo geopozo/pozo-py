@@ -94,8 +94,7 @@ class LasSiMap:
         for _range in ranges:
             si_to_las[_range.unit] = las_unit
 
-    # De las_unit a range
-    def _las_to_Range(  # noqa: N802 👈 ruff se queda de la 'R'
+    def _las_to_range(
         self,
         mnemonic: str,
         las_unit: str,
@@ -137,7 +136,7 @@ class LasSiMap:
         data: list[Any],
     ) -> types.Diagnosis:
         """Convert a LAS unit to SI Diagnosis using mnemonic."""
-        _range = self._las_to_Range(mnemonic, las_unit, data)
+        _range = self._las_to_range(mnemonic, las_unit, data)
         [v_min, v_med, v_max] = _stats.quantiles_values(data, [0, 0.5, 1])
         n_nan = _stats.count_missing_values(data)
 
