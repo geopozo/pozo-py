@@ -24,7 +24,7 @@ def min_value(data: types.Array) -> np.float64:
     return np.nanmin(data)
 
 
-def quantiles_values(data: types.Array, quantiles: types.Array) -> list[str]:
+def quantiles_values(data: types.Array, quantiles: list) -> list[str]:
     return [str(x) for x in np.nanquantile(data, quantiles)]
 
 
