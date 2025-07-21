@@ -41,7 +41,7 @@ dev = [
 ]
 
 [tool.mypy]
-files = ["pozo/units"]
+files = ["src/pozo/units"]
 
 [tool.ruff.lint]
 select = ["ALL"]
