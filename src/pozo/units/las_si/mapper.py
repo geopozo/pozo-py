@@ -72,7 +72,7 @@ class LasSiMap:
         las_unit: str,
         ranges: str | list[Range] | tuple[Range],
         confidence: int = 0,
-        comment: str = "- not indicated",
+        comment: str = "Without comment.",
     ) -> None:
         """Add to the unit conversion dictionaries by classifying from mnemonics."""
         if not isinstance(ranges, (tuple, list)):
