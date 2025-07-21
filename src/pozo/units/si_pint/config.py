@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import pint  # type: ignore[import-untyped]
+    import pint
 
 
 pint_map = (  # mapa de pint

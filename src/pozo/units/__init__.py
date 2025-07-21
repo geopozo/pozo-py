@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
-import pint  # type: ignore[import-untyped]
+import pint
 
 from pozo.units.las_si import config as las_si_config
 from pozo.units.las_si import mapper as las_si_mapper
@@ -20,10 +20,11 @@ if TYPE_CHECKING:
 # Conexión a LasSiMap
 las_map = las_si_mapper.LasSiMap()
 for unit_args in las_si_config.las_si_map:
-    las_map.add(*unit_args)  # type: ignore[arg-type], para Pyright
+    las_map.add(*unit_args)  # type: ignore[arg-type, unused-ignore]
+# Nota: Se agrega el ignore porque pyright no reconoce # de args desconocidos
 
 # Conexión a pint
-registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
+registry: pint.registry.ApplicationRegistry = pint.get_application_registry()  # type: ignore[no-untyped-call]
 Quantity = Q = registry.Quantity
 si_pint_config.add_to_pint(registry)
 
@@ -85,7 +86,7 @@ def check_las(
 def parse_unit_safe(unit: str) -> pint.Unit | None:
     """Parse the unit by returning a Unit object from pint and catch the error."""
     try:
-        return registry.parse_units(unit)
+        return cast("pint.Unit", registry.parse_units(unit))
     except pint.UndefinedUnitError:
         return None
 

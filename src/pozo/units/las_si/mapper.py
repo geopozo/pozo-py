@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
     Numeric = Union[int, float]
     RangeBoundary = Union[tuple[Numeric, Numeric], tuple[()]]
+    Ranges = Union[list["Range"], tuple["Range", ...]]
 
 
 class Range:
@@ -73,8 +74,8 @@ class Diagnosis(TypedDict):
 class LasSiMap:
     """Mapper from las_units to si_units with conversion functions."""
 
-    las_to_ranges_by_mnemonic: dict
-    si_to_las_by_mnemonic: dict
+    las_to_ranges_by_mnemonic: dict[str, dict[str, Ranges]]
+    si_to_las_by_mnemonic: dict[str, dict[str, str]]
 
     def __init__(self) -> None:
         """Initialize the class LasSiMap."""
@@ -85,15 +86,15 @@ class LasSiMap:
         self,
         mnemonic: str,
         las_unit: str,
-        ranges: str | list[Range] | tuple[Range, ...],
+        ranges: str | Ranges,
         confidence: int = 0,
         comment: str = "Without comment.",
     ) -> None:
         """Add to the unit conversion dictionaries by classifying from mnemonics."""
         if isinstance(ranges, str):
-            ranges = [Range(ranges, (), confidence, comment)]
+            ranges = (Range(ranges, (), confidence, comment),)
         elif isinstance(ranges, Range):
-            ranges = [ranges]
+            ranges = (ranges,)
 
         for _range in ranges:
             if not isinstance(_range, Range):
@@ -150,7 +151,7 @@ class LasSiMap:
     ) -> Diagnosis:
         """Convert a LAS unit to SI Diagnosis using mnemonic."""
         _range = self._las_to_range(mnemonic, las_unit, data)
-        [v_min, v_med, v_max] = _stats.quantiles_values(data, [0, 0.5, 1])
+        [v_min, v_med, v_max] = map(str, _stats.quantiles_values(data, [0, 0.5, 1]))
         n_nan = _stats.count_missing_values(data)
 
         if _range is not None:

@@ -3,29 +3,31 @@ from __future__ import annotations
 from io import StringIO
 from typing import TYPE_CHECKING
 
-import numpy as np  # type: ignore[import-untyped]
-import pandas as pd  # type: ignore[import-untyped]
+import numpy as np
+import pandas as pd
 
 if TYPE_CHECKING:
+    from typing import Union
+
     from pozo.utils import types
 
-    Numeric: int | float
+    Numeric = Union[int, float]
 
 
 def format_csv(data: str, delimiter: str) -> pd.DataFrame:
     return pd.read_csv(StringIO(data), delimiter=delimiter, na_filter=False)
 
 
-def max_value(data: types.Array) -> np.float64:
+def max_value(data: types.Array) -> Numeric:
     return np.nanmax(data)
 
 
-def min_value(data: types.Array) -> np.float64:
+def min_value(data: types.Array) -> Numeric:
     return np.nanmin(data)
 
 
-def quantiles_values(data: types.Array, quantiles: list) -> list[str]:
-    return [str(x) for x in np.nanquantile(data, quantiles)]
+def quantiles_values(data: types.Array, quantiles: list) -> list[Numeric]:
+    return list(np.nanquantile(data, quantiles))
 
 
 def count_missing_values(data: types.Array) -> int:
