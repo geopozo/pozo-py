@@ -3,6 +3,6 @@
 from IPython.display import HTML, display  # type: ignore[import-untyped]
 
 
-def show_content(content: str, *, html: bool = False) -> None:
+def show_html(content: str, *, html: bool = False) -> None:
     """Display text or HTML content in an IPython environment."""
     display(HTML(content) if html else content)
