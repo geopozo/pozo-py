@@ -19,7 +19,8 @@ if TYPE_CHECKING:
 
 # Conexión a LasSiMap
 las_map = las_si_mapper.LasSiMap()
-las_si_config.add_to_las_si_map(las_map)
+for unit_args in las_si_config.las_si_map:
+    las_map.add(*unit_args)  # type: ignore  # noqa: PGH003
 
 # Conexión a pint
 registry: pint.registry.ApplicationRegistry = pint.get_application_registry()
