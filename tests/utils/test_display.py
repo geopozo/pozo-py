@@ -4,8 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pozo.utils.display import show_html
-from tests.data_types import make_param_list
+from pozo.utils import display
 
 _display_ipython = "pozo.utils.display.display"
 _display_html = "pozo.utils.display.HTML"
@@ -19,7 +18,7 @@ class TestShowContent:
     def test_show_content_text(self, mock_html, mock_display):
         """Test show_content with text content."""
         content = "Hello, world!"
-        show_html(content)
+        display.show_html(content)
 
         mock_html.assert_not_called()
         mock_display.assert_called_once_with(content)
@@ -32,7 +31,7 @@ class TestShowContent:
         mock_html_instance = MagicMock()
         mock_html.return_value = mock_html_instance
 
-        show_html(content, html=True)
+        display.show_html(content, html=True)
 
         mock_html.assert_called_once_with(content)
         mock_display.assert_called_once_with(mock_html_instance)
@@ -42,17 +41,19 @@ class TestShowContent:
     def test_show_content_html_false(self, mock_html, mock_display):
         """Test show_content with HTML content and html=False."""
         content = "<h1>Hello, world!</h1>"
-        show_html(content, html=False)
+        display.show_html(content, html=False)
 
         mock_html.assert_not_called()
         mock_display.assert_called_once_with(content)
 
     @pytest.mark.parametrize(
         ("content", "html_flag", "expected_display_arg"),
-        make_param_list(
-            ["Plain text", "Another text", ""],
-            [False, False, False],
-            ["Plain text", "Another text", ""],
+        list(
+            zip(
+                ["Plain text", "Another text", ""],
+                [False, False, False],
+                ["Plain text", "Another text", ""],
+            ),
         ),
     )
     @patch("pozo.utils.display.display")
@@ -64,18 +65,20 @@ class TestShowContent:
         expected_display_arg,
     ):
         """Test show_content with various text inputs."""
-        show_html(content, html=html_flag)
+        display.show_html(content, html=html_flag)
         mock_display.assert_called_once_with(expected_display_arg)
 
     @pytest.mark.parametrize(
         ("content", "html_flag"),
-        make_param_list(
-            [
-                "<p>HTML content</p>",
-                "<div>Another HTML</div>",
-                "<script>alert('test')</script>",
-            ],
-            [True, True, True],
+        list(
+            zip(
+                [
+                    "<p>HTML content</p>",
+                    "<div>Another HTML</div>",
+                    "<script>alert('test')</script>",
+                ],
+                [True, True, True],
+            ),
         ),
     )
     @patch(_display_ipython)
@@ -91,7 +94,7 @@ class TestShowContent:
         mock_html_instance = MagicMock()
         mock_html.return_value = mock_html_instance
 
-        show_html(content, html=html_flag)
+        display.show_html(content, html=html_flag)
 
         mock_html.assert_called_once_with(content)
         mock_display.assert_called_once_with(mock_html_instance)
@@ -102,4 +105,4 @@ class TestShowContent:
         mock_display.side_effect = Exception("Display error")
 
         with pytest.raises(Exception, match="Display error"):
-            show_html("test content")
+            display.show_html("test content")
