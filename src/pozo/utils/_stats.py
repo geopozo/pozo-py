@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import csv
 from io import StringIO
 from typing import TYPE_CHECKING
 
 import numpy as np
-import pandas as pd
 
 if TYPE_CHECKING:
     from typing import Union
@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     Numeric = Union[int, float]
 
 
-def read_csv(data: str, delimiter: str = ",") -> pd.DataFrame:
-    return pd.read_csv(StringIO(data), delimiter=delimiter, na_filter=False)
+def read_csv(data: str, delimiter: str = ",") -> list:
+    return list(csv.reader(StringIO(data), delimiter=delimiter))
 
 
 def max_value(data: types.Array) -> Numeric:
