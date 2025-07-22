@@ -1,12 +1,5 @@
-from collections.abc import Iterable
-
 import numpy as np
 import pandas as pd
-
-
-def make_param_list(*args: Iterable):
-    return list(zip(*args))
-
 
 data_array = {
     "list_ints": [1, 5, 3, 9, 2],
