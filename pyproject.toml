@@ -27,6 +27,7 @@ dependencies = [
  "nbformat",
  "lasio",
  "anywidget>=0.9.18",
+ "narwhals>=1.48.0",
 ]
 
 
