@@ -1,23 +1,8 @@
 """Pint unit configuration file."""
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import pint
-
-
-pint_map = (  # mapa de pint
+pint_map = (
     "gamma_API_unit = [Gamma_Ray_Tool_Response]  = gAPI",
     "porosity_unit = percent = pu",
     "of_1 = 100 * percent = fraction",
     "legacy_api_porosity_unit = [Legacy_API_Porosity_Unit] = puAPI",
 )
-
-
-# agrega a pint
-def add_to_pint(registry: pint.registry.ApplicationRegistry) -> None:
-    """Add new units to pint from pint_map."""
-    for definition in pint_map:
-        registry.define(definition)

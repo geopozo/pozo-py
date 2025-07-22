@@ -26,7 +26,8 @@ for unit_args in las_si_config.las_si_map:
 # Conexión a pint
 registry: pint.registry.ApplicationRegistry = pint.get_application_registry()  # type: ignore[no-untyped-call]
 Quantity = Q = registry.Quantity
-si_pint_config.add_to_pint(registry)
+for definition in si_pint_config.pint_map:
+    registry.define(definition)
 
 
 _delimiter = chr(0x1E)
