@@ -3,7 +3,6 @@ from unittest.mock import patch
 import pytest
 
 from pozo.units.las_si.mapper import LasSiMap, Range
-from tests.data_types import make_param_list
 
 
 class TestRange:
@@ -32,11 +31,13 @@ class TestRange:
 
     @pytest.mark.parametrize(
         ("boundaries", "min_val", "max_val", "expected"),
-        make_param_list(
-            [(), (0, 100), (10, 50), (0, 100)],
-            [5, 20, 5, 150],
-            [95, 80, 25, 200],
-            [True, True, False, False],
+        list(
+            zip(
+                [(), (0, 100), (10, 50), (0, 100)],
+                [5, 20, 5, 150],
+                [95, 80, 25, 200],
+                [True, True, False, False],
+            ),
         ),
     )
     def test_is_within_range(self, boundaries, min_val, max_val, expected):
@@ -97,11 +98,13 @@ class TestLasSiMap:
 
     @pytest.mark.parametrize(
         ("mnemonic", "las_unit", "data", "expected_unit"),
-        make_param_list(
-            ["DEPTH", "DEPTH", "UNKNOWN"],
-            ["FT", "M", "UNKNOWN_UNIT"],
-            [[10, 20, 30], [100, 200, 300], [1, 2, 3]],
-            ["m", "m", ""],
+        list(
+            zip(
+                ["DEPTH", "DEPTH", "UNKNOWN"],
+                ["FT", "M", "UNKNOWN_UNIT"],
+                [[10, 20, 30], [100, 200, 300], [1, 2, 3]],
+                ["m", "m", ""],
+            ),
         ),
     )
     def test_las_to_si_with_data(self, mnemonic, las_unit, data, expected_unit):
@@ -132,11 +135,7 @@ class TestLasSiMap:
 
     @pytest.mark.parametrize(
         ("mnemonic", "si_unit", "expected_las_unit"),
-        make_param_list(
-            ["DEPTH", "DEPTH", "UNKNOWN"],
-            ["m", "kg", "m"],
-            ["FT", None, None],
-        ),
+        list(zip(["DEPTH", "DEPTH", "UNKNOWN"], ["m", "kg", "m"], ["FT", None, None])),
     )
     def test_si_to_las_unit(self, mnemonic, si_unit, expected_las_unit):
         """Test si_to_las_unit method."""

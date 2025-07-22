@@ -3,13 +3,12 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pozo.utils._table import colorize_html_table
-from tests.data_types import make_param_list
 
 _table_basic = "<table><tr><td>25</td><td>40</td></tr></table>"
 _table_empty = "<table></table>"
 _red_style = '<td style="color:red">'
 _orange_style = '<td style="color:#B95000">'
-_format_csv_patch = "pozo.utils._table._stats.format_csv"
+_format_csv_patch = "pozo.utils._table._stats.read_csv"
 
 
 class TestGenerateHtmlTable:
@@ -130,10 +129,12 @@ class TestGenerateHtmlTable:
 
     @pytest.mark.parametrize(
         ("data", "delimiter", "expected_join"),
-        make_param_list(
-            [["line1", "line2", "line3"], ["a,b", "1,2"], ["single_line"]],
-            [",", ",", "\t"],
-            ["line1\nline2\nline3", "a,b\n1,2", "single_line"],
+        list(
+            zip(
+                [["line1", "line2", "line3"], ["a,b", "1,2"], ["single_line"]],
+                [",", ",", "\t"],
+                ["line1\nline2\nline3", "a,b\n1,2", "single_line"],
+            ),
         ),
     )
     @patch(_format_csv_patch)
