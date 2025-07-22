@@ -1,31 +1,34 @@
-import re
+from html import escape
 
 from pozo.utils import _stats
 
 
-def _apply_color_styling(
-    html_str: str,
-    pattern: re.Pattern,
-    color: str,
-) -> str:
-    for match in pattern.finditer(html_str):
-        current_match = match.group()
-        colored = f'<td style="color:{color}">' + current_match[4:]
-        html_str = html_str.replace(current_match, colored)
-    return html_str
+def _color(cell: int) -> str:
+    style = " style='color:"
+    if 0 <= cell <= 33:
+        return style + "red'"
+    elif 34 <= cell <= 66:
+        return style + "#B95000'"
+    else:
+        return ""
 
 
-def colorize_html_table(
+def generate_html_table(
     data: list,
     delimiter: str,
 ) -> str:
-    red_low = re.compile(r"<td>\s*(?:[0-9]|[1-2][0-9]|3[0-3])\s*</td>")
-    orange_medium = re.compile(r"<td>\s*(?:3[4-9]|[4-5]\d|6[0-6])\s*</td>")
     post_result = "\n".join(data)
+    rows = _stats.read_csv(post_result, delimiter)
+    headers = "".join(f"<th>{escape(h)}</th>" for h in rows[0])
+    conf_index = rows[0].index("confidence")
+    thead = f"<thead>\n<tr>{headers}</tr>\n</thead>"
 
-    output = _stats.read_csv(post_result, delimiter)
-    html_output = output.to_html()
-    html_output = _apply_color_styling(html_output, red_low, "red")
-    html_output = _apply_color_styling(html_output, orange_medium, "#B95000")
+    def render_row(row: list[str]) -> str:
+        cells = "".join(
+            f"<td{_color(int(c)) if conf_index == i else ''}>{escape(c)}</td>"
+            for i, c in enumerate(row)
+        )
+        return f"<tr>{cells}</tr>"
 
-    return html_output
+    body_rows = "\n".join(map(render_row, rows[1:]))
+    return f"<table border='1'>\n{thead}\n<tbody>{body_rows}</tbody>\n</table>"
