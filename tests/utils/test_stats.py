@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import pytest
 
 from pozo.utils import _stats
@@ -13,9 +12,9 @@ class TestFormatCsv:
         ids=data_types.data_str.keys(),
     )
     def test_format_csv_success(self, data, expected, delimiter):
-        expected = pd.DataFrame({"a": [1, 4], "b": [2, 5]})
+        expected = [["a", "confidence"], ["1", "2"], ["4", "5"]]
         result = _stats.read_csv(data, delimiter)
-        pd.testing.assert_frame_equal(result, expected)
+        assert result == expected
 
 
 class TestMaxValue:

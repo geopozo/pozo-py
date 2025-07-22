@@ -74,7 +74,7 @@ def check_las(
     if not html:
         return result
 
-    html_output = _table.colorize_html_table(result, _delimiter)
+    html_output = _table.generate_html_table(result, _delimiter)
     display.show_html(
         f'<div id="{div_id}">{html_output}</div>',
         html=html,
