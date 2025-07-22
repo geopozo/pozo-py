@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 import pint
 
-from pozo._utils import _lasio, _table, display, types
+from pozo._utils import _lasio, display, table, types
 from pozo.units.las_si import config as las_si_config
 from pozo.units.las_si import mapper as las_si_mapper
 from pozo.units.si_pint import config as si_pint_config
@@ -74,7 +74,7 @@ def check_las(
     if not html:
         return result
 
-    html_output = _table.generate_html_table(result, _delimiter)
+    html_output = table.generate_html_table(result, _delimiter)
     display.show_html(
         f'<div id="{div_id}">{html_output}</div>',
         html=html,
