@@ -21,20 +21,20 @@ dependencies = [
  "plotly >=5.18.0",
  "colour >= 0.1.5",
  "pint >= 0.23",
- "pandas >= 2.0.0",
  "numpy >= 1.26.0",
  "kaleido >=0.2.1",
  "ipywidgets",
  "nbformat",
  "lasio",
  "anywidget>=0.9.18",
- "pandas-stubs>=2.2.2.240807",
 ]
 
 
 [dependency-groups]
 dev = [
     "mypy>=1.16.1",
+    "pandas>=2.3.1",
+    "pandas-stubs>=2.2.2.240807",
     "poethepoet>=0.36.0",
     "pytest>=8.3.5",
     "pytest-xdist>=3.8.0",

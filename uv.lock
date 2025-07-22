@@ -944,9 +944,6 @@ dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "numpy", version = "2.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "ood" },
-    { name = "pandas" },
-    { name = "pandas-stubs", version = "2.2.2.240807", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
-    { name = "pandas-stubs", version = "2.3.0.250703", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pint" },
     { name = "plotly" },
 ]
@@ -954,6 +951,9 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "pandas" },
+    { name = "pandas-stubs", version = "2.2.2.240807", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pandas-stubs", version = "2.3.0.250703", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "poethepoet" },
     { name = "pytest" },
     { name = "pytest-xdist" },
@@ -969,8 +969,6 @@ requires-dist = [
     { name = "nbformat" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "ood", specifier = ">=1.0.9" },
-    { name = "pandas", specifier = ">=2.0.0" },
-    { name = "pandas-stubs", specifier = ">=2.2.2.240807" },
     { name = "pint", specifier = ">=0.23" },
     { name = "plotly", specifier = ">=5.18.0" },
 ]
@@ -978,6 +976,8 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.16.1" },
+    { name = "pandas", specifier = ">=2.3.1" },
+    { name = "pandas-stubs", specifier = ">=2.2.2.240807" },
     { name = "poethepoet", specifier = ">=0.36.0" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
