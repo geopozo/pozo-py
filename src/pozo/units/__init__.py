@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 os.environ["PINT_ARRAY_PROTOCOL_FALLBACK"] = "0"  # from numpy/pint documentation
 import pint
 
-from pozo._utils import _lasio, display, table, types
+from pozo._utils import display, lasio_utils, table, types
 from pozo.units.las_si import config as las_si_config
 from pozo.units.las_si import mapper as las_si_mapper
 from pozo.units.si_pint import config as si_pint_config
@@ -47,7 +47,7 @@ def check_las(
     for i, curve in enumerate(las.curves):
         diagnosis = las_map.las_to_si_diagnosis(curve.mnemonic, curve.unit, curve.data)
         parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
-        descr = _lasio.remove_prefix_number(curve.descr)
+        descr = lasio_utils.remove_prefix_number(curve.descr)
 
         curve_data = {
             "mnemonic": curve.mnemonic,
@@ -111,7 +111,7 @@ def get_unit_from_curve(curve: types.Curve) -> pint.Unit | None:
 
 def parse_unit_to_las(mnemonic: str, pint_unit: str | pint.Unit) -> str | None:
     """Parse the unit returning the LAS value mapped from a mnemonic."""
-    mnemonic = _lasio.remove_lasio_suffix(mnemonic)
+    mnemonic = lasio_utils.remove_lasio_suffix(mnemonic)
     pint_unit = (
         pint_unit
         if isinstance(pint_unit, pint.Unit)

@@ -334,7 +334,7 @@ class TestCheckLas:
                 return_value=registry.parse_units("meter"),
             ),
             patch(
-                "pozo.units._lasio.remove_prefix_number",
+                "pozo.units.lasio_utils.remove_prefix_number",
                 return_value="Test description",
             ),
             patch(
