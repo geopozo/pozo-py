@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pozo.utils import _stats
+from pozo._utils import _stats
 from tests import data_types
 
 

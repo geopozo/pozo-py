@@ -2,13 +2,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pozo.utils._table import generate_html_table
+from pozo._utils._table import generate_html_table
 
 _table_basic = "<table><tr><td>25</td><td>40</td></tr></table>"
 _table_empty = "<table></table>"
 _red_style = '<td style="color:red">'
 _orange_style = '<td style="color:#B95000">'
-_format_csv_patch = "pozo.utils._table._stats.read_csv"
+_format_csv_patch = "pozo._utils._table._stats.read_csv"
 
 
 class TestGenerateHtmlTable:

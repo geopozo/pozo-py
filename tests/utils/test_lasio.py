@@ -1,4 +1,4 @@
-from pozo.utils import _lasio
+from pozo._utils import _lasio
 
 
 class TestRemoveLasioSuffix:

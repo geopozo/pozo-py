@@ -9,7 +9,7 @@ import numpy as np
 if TYPE_CHECKING:
     from typing import Union
 
-    from pozo.utils import types
+    from pozo._utils import types
 
     Numeric = Union[int, float]
 

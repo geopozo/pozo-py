@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict
 
-from pozo.utils import _lasio as lasio_utils
-from pozo.utils import _stats, types
+from pozo._utils import _lasio as lasio_utils
+from pozo._utils import _stats, types
 
 if TYPE_CHECKING:
     from typing import Any, Union

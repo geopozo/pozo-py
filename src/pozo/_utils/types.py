@@ -11,8 +11,8 @@ class Curve(Protocol):
     """Protocol with curve properties."""
 
     @property
-    def mnemonic(self) -> str: ...  # noqa: D102
+    def mnemonic(self) -> str: ...
     @property
-    def unit(self) -> str: ...  # noqa: D102
+    def unit(self) -> str: ...
     @property
-    def data(self) -> Array | None: ...  # noqa: D102
+    def data(self) -> Array | None: ...

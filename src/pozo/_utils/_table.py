@@ -1,6 +1,6 @@
 from html import escape
 
-from pozo.utils import _stats
+from pozo._utils import _stats
 
 
 def _color(cell: int) -> str:
