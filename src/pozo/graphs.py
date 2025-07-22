@@ -8,7 +8,7 @@ import pozo
 import pozo.renderers as pzr
 import pozo.themes as pzt
 import pozo.units as pzu
-from pozo.utils import _lasio as lasio_utils
+from pozo._utils import _lasio as lasio_utils
 
 desc_wo_num = re.compile(r"^(?:\s*\d+\s+)?(.*)$")
 LAS_TYPE = "<class 'lasio.las.LASFile'>"
