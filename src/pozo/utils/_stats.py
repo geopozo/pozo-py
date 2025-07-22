@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     Numeric = Union[int, float]
 
 
-def format_csv(data: str, delimiter: str) -> pd.DataFrame:
+def read_csv(data: str, delimiter: str = ",") -> pd.DataFrame:
     return pd.read_csv(StringIO(data), delimiter=delimiter, na_filter=False)
 
 
