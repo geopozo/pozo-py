@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pozo._utils import _stats
+from pozo._utils import stats
 from tests import data_types
 
 
@@ -13,7 +13,7 @@ class TestFormatCsv:
     )
     def test_format_csv_success(self, data, expected, delimiter):
         expected = [["a", "confidence"], ["1", "2"], ["4", "5"]]
-        result = _stats.read_csv(data, delimiter)
+        result = stats.read_csv(data, delimiter)
         assert result == expected
 
 
@@ -44,13 +44,13 @@ class TestMaxValue:
         ids=data_types.data_array.keys(),
     )
     def test_max_value_success(self, data, expected):
-        result = _stats.max_value(data)
+        result = stats.max_value(data)
         assert result == expected
 
     @pytest.mark.parametrize("data", data_types.data_empty.values())
     def test_max_value_empty_error(self, data):
         with pytest.raises(ValueError, match="Value error"):
-            _stats.max_value(data)
+            stats.max_value(data)
 
 
 class TestMinValue:
@@ -80,13 +80,13 @@ class TestMinValue:
         ids=data_types.data_array.keys(),
     )
     def test_min_value_success(self, data, expected):
-        result = _stats.min_value(data)
+        result = stats.min_value(data)
         assert result == expected
 
     @pytest.mark.parametrize("data", data_types.data_empty.values())
     def test_min_value_empty_error(self, data):
         with pytest.raises(ValueError, match="Value error"):
-            _stats.min_value(data)
+            stats.min_value(data)
 
 
 class TestQuantilesValues:
@@ -116,7 +116,7 @@ class TestQuantilesValues:
         ids=data_types.data_array.keys(),
     )
     def test_quantiles_values_success(self, data, expected):
-        result = _stats.quantiles_values(data, [0.25, 0.5, 0.75])
+        result = stats.quantiles_values(data, [0.25, 0.5, 0.75])
         print(result)
         assert result == expected
 
@@ -133,5 +133,5 @@ class TestCountMissingValues:
         ids=data_types.data_array.keys(),
     )
     def test_count_missing_values(self, data, expected):
-        result = _stats.count_missing_values(data)
+        result = stats.count_missing_values(data)
         assert result == expected

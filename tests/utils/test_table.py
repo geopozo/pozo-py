@@ -8,7 +8,7 @@ _table_basic = "<table><tr><td>25</td><td>40</td></tr></table>"
 _table_empty = "<table></table>"
 _red_style = '<td style="color:red">'
 _orange_style = '<td style="color:#B95000">'
-_format_csv_patch = "pozo._utils._table._stats.read_csv"
+_format_csv_patch = "pozo._utils.table.stats.read_csv"
 
 
 class TestGenerateHtmlTable:

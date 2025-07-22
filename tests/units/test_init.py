@@ -21,7 +21,11 @@ class TestCheckLas:
     """Test the check_las function."""
 
     def _create_mock_curve(
-        self, mnemonic: str, unit: str, data: list, descr: str = "Test description"
+        self,
+        mnemonic: str,
+        unit: str,
+        data: list,
+        descr: str = "Test description",
     ) -> Mock:
         """Create a mock curve object for testing."""
         curve = Mock()
@@ -138,7 +142,7 @@ class TestCheckLas:
                 return_value=registry.parse_units("meter"),
             ),
             patch(
-                "pozo.units._table.generate_html_table",
+                "pozo.units.table.generate_html_table",
                 return_value="<table>test</table>",
             ) as mock_html_table,
             patch("pozo.units.display.show_content") as mock_show_content,
@@ -183,7 +187,8 @@ class TestCheckLas:
 
         with (
             patch(
-                "pozo.units.las_map.las_to_si_diagnosis", return_value=mock_diagnosis
+                "pozo.units.las_map.las_to_si_diagnosis",
+                return_value=mock_diagnosis,
             ),
             patch(
                 "pozo.units.parse_unit_from_context",
@@ -210,14 +215,15 @@ class TestCheckLas:
 
         with (
             patch(
-                "pozo.units.las_map.las_to_si_diagnosis", return_value=mock_diagnosis
+                "pozo.units.las_map.las_to_si_diagnosis",
+                return_value=mock_diagnosis,
             ),
             patch(
                 "pozo.units.parse_unit_from_context",
                 return_value=registry.parse_units("meter"),
             ),
             patch(
-                "pozo.units._table.generate_html_table",
+                "pozo.units.table.generate_html_table",
                 side_effect=Exception("HTML table error"),
             ),
             pytest.raises(Exception, match="HTML table error"),
@@ -249,7 +255,7 @@ class TestCheckLas:
                 return_value=registry.parse_units("meter"),
             ),
             patch(
-                "pozo.units._table.generate_html_table",
+                "pozo.units.table.generate_html_table",
                 return_value="<table>test</table>",
             ),
             patch(
@@ -284,7 +290,8 @@ class TestCheckLas:
 
         with (
             patch(
-                "pozo.units.las_map.las_to_si_diagnosis", return_value=mock_diagnosis
+                "pozo.units.las_map.las_to_si_diagnosis",
+                return_value=mock_diagnosis,
             ),
             patch("pozo.units.parse_unit_from_context", return_value=None),
         ):
@@ -331,7 +338,7 @@ class TestCheckLas:
                 return_value="Test description",
             ),
             patch(
-                "pozo.units._table.generate_html_table",
+                "pozo.units.table.generate_html_table",
                 return_value="<table>test</table>",
             ),
             patch("pozo.units.display.show_content") as mock_show_content,

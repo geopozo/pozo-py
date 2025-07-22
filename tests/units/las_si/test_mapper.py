@@ -56,8 +56,8 @@ class TestRange:
 
 _mapper = LasSiMap()
 _remove_suffix = "pozo._utils._lasio.remove_lasio_suffix"
-_quantiles_values = "pozo._utils._stats.quantiles_values"
-_count_nan = "pozo._utils._stats.count_missing_values"
+_quantiles_values = "pozo._utils.stats.quantiles_values"
+_count_nan = "pozo._utils.stats.count_missing_values"
 
 
 class TestLasSiMap:

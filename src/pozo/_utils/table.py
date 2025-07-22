@@ -1,6 +1,6 @@
 from html import escape
 
-from pozo._utils import _stats
+from pozo._utils import stats
 
 
 def _color(cell: int) -> str:
@@ -18,7 +18,7 @@ def generate_html_table(
     delimiter: str,
 ) -> str:
     post_result = "\n".join(data)
-    rows = _stats.read_csv(post_result, delimiter)
+    rows = stats.read_csv(post_result, delimiter)
     headers = "".join(f"<th>{escape(h)}</th>" for h in rows[0])
     conf_index = rows[0].index("confidence")
     thead = f"<thead>\n<tr>{headers}</tr>\n</thead>"
