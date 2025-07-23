@@ -27,3 +27,4 @@ build/
 .vscode/
 data/
 .idea/
+.hypothesis
