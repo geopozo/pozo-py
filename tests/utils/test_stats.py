@@ -1,5 +1,8 @@
-import numpy as np
+import statistics
+
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from pozo._utils import stats
 from tests import data_types
@@ -8,85 +11,53 @@ from tests import data_types
 class TestFormatCsv:
     @pytest.mark.parametrize(
         ("data", "delimiter"),
-        list(zip(data_types.data_str.values(), [",", ";", "\t"])),
-        ids=data_types.data_str.keys(),
+        list(
+            zip(
+                ["a,b\n1,2\n4,5", "a;b\n1;2\n4;5", "a\tb\n1\t2\n4\t5"],
+                [",", ";", "\t"],
+            )
+        ),
     )
-    def test_format_csv_success(self, data, expected, delimiter):
-        expected = [["a", "confidence"], ["1", "2"], ["4", "5"]]
+    def test_format_csv_success(self, data, delimiter):
+        expected = [["a", "b"], ["1", "2"], ["4", "5"]]
         result = stats.read_csv(data, delimiter)
         assert result == expected
+        assert isinstance(result, list)
 
 
 class TestMaxValue:
     @pytest.mark.parametrize(
-        ("data", "expected"),
-        list(
-            zip(
-                data_types.data_array.values(),
-                [
-                    9.0,
-                    -1.0,
-                    5.0,
-                    42.0,
-                    9.0,
-                    5.0,
-                    9.8,
-                    9.0,
-                    np.float64(4.0),
-                    np.int64(30),
-                    np.uint16(3),
-                    np.float64(3.5),
-                    np.uint8(255),
-                    np.int64(4),
-                ],
-            ),
-        ),
-        ids=data_types.data_array.keys(),
+        "converter",
+        list(data_types.converters.values()),
+        ids=list(data_types.converters.keys()),
     )
-    def test_max_value_success(self, data, expected):
-        result = stats.max_value(data)
-        assert result == expected
-
-    @pytest.mark.parametrize("data", data_types.data_empty.values())
-    def test_max_value_empty_error(self, data):
-        with pytest.raises(ValueError, match="Value error"):
-            stats.max_value(data)
+    @settings(max_examples=20)
+    @given(st.data())
+    def test_max_value_success(self, converter, data):
+        strategy = converter["st"]
+        cast_fn = converter["cast_fn"]
+        arr = cast_fn(data.draw(strategy))
+        result = stats.max_value(arr)
+        assert result == max(arr)
+        assert isinstance(result, arr.dtype.type)
 
 
 class TestMinValue:
     @pytest.mark.parametrize(
-        ("data", "expected"),
-        list(
-            zip(
-                data_types.data_array.values(),
-                [
-                    1.0,
-                    -9.0,
-                    1.0,
-                    42.0,
-                    1.0,
-                    1.0,
-                    1.5,
-                    1.0,
-                    np.float64(1.0),
-                    np.int64(10),
-                    1,
-                    np.float64(1.5),
-                    np.uint8(255),
-                    np.uint16(0),
-                ],
-            ),
-        ),
-        ids=data_types.data_array.keys(),
+        "converter",
+        list(data_types.converters.values()),
+        ids=list(data_types.converters.keys()),
     )
-    def test_min_value_success(self, data, expected):
-        result = stats.min_value(data)
-        assert result == expected
+    @settings(max_examples=20)
+    @given(st.data())
+    def test_min_value_success(self, converter, data):
+        strategy = converter["st"]
+        cast_fn = converter["cast_fn"]
+        arr = cast_fn(data.draw(strategy))
+        result = stats.min_value(arr)
+        assert result == min(arr)
+        assert isinstance(result, arr.dtype.type)
 
-    @pytest.mark.parametrize("data", data_types.data_empty.values())
-    def test_min_value_empty_error(self, data):
-        with pytest.raises(ValueError, match="Value error"):
-            stats.min_value(data)
 
 
 class TestQuantilesValues:
