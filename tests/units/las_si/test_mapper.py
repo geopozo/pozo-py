@@ -34,19 +34,20 @@ class TestLasSiMap:
         return LasSiMap()
 
     @pytest.mark.parametrize(
-        ("mnemonic", "unit", "ranges", "expected_unit"),
+        ("mnemonic", "las_unit", "ranges", "expected"),
         [
             ("GR", "API", (Range("gAPI", (0, 150), 90, "Gamma Ray"),), "gAPI"),
             ("GR", "API", "gAPI", "gAPI"),
         ],
     )
-    def test_add_valid_ranges(self, las_si_map, mnemonic, unit, ranges, expected_unit):
-        las_si_map.add(mnemonic, unit, ranges)
-        assert mnemonic in las_si_map.las_to_ranges_by_mnemonic
-        assert (
-            las_si_map.las_to_ranges_by_mnemonic[mnemonic][unit][0].unit
-            == expected_unit
-        )
+    def test_add_valid_ranges(self, las_si_map, mnemonic, las_unit, ranges, expected):
+        las_si_map.add(mnemonic, las_unit, ranges)
+
+        diagnosis = las_si_map.las_to_si_diagnosis(mnemonic, las_unit, [10, 20, 30])
+
+        assert diagnosis["si_unit"] == expected
+        assert diagnosis["mnemonic"] == mnemonic
+        assert diagnosis["las_unit"] == las_unit
 
     @pytest.mark.parametrize(
         ("mnemonic", "unit", "ranges", "data"),
