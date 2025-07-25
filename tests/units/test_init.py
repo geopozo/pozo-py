@@ -1,7 +1,13 @@
 import pint
 import pytest
 
-from pozo.units import parse_unit_from_context, parse_unit_safe
+from pozo.units import (
+    get_unit_from_curve,
+    parse_unit_from_context,
+    parse_unit_safe,
+    parse_unit_to_las,
+    registry,
+)
 
 
 class TestParseUnitSafe:
@@ -36,7 +42,7 @@ class TestParseUnitFromContext:
         ("mnemonic", "las_unit", "data", "expected"),
         [
             ("DEPTH", "M", [1, 2, 3], "meter"),
-            ("UNKNOWN", "", [1.0, 2.0, 3.0], ""),  # dimensionless
+            ("UNKNOWN", "", [1.0, 2.0, 3.0], ""),
             ("UNKNOWN", "invalid_unit_xyz", [1.0, 2.0, 3.0], None),
         ],
     )
@@ -50,3 +56,43 @@ class TestParseUnitFromContext:
         else:
             assert isinstance(result, pint.Unit)
             assert str(result) == expected
+
+
+class TestGetUnitFromCurve:
+    class MockCurve:
+        def __init__(self, mnemonic, unit, data) -> None:
+            self.mnemonic = mnemonic
+            self.unit = unit
+            self.data = data
+
+    @pytest.mark.parametrize(
+        ("mnemonic", "unit", "data", "expected"),
+        [("DEPTH", "M", [1.0, 2.0, 3.0], "meter"), ("ANY", "", [0.1, 0.2], "")],
+    )
+    def test_get_unit_from_curve(self, mnemonic, unit, data, expected):
+        curve = self.MockCurve(mnemonic, unit, data)
+        result = get_unit_from_curve(curve)
+        if expected == "":
+            assert result is not None
+            assert result.dimensionless
+        else:
+            assert isinstance(result, pint.Unit)
+            assert str(result) == expected
+
+
+class TestParseUnitToLas:
+    @pytest.mark.parametrize(
+        ("curve", "unit_input", "expected"),
+        [
+            ("DEPTH", "meter", "M"),
+            ("DEPTH", "m", "M"),
+            ("DEPTH", registry.Unit("meter"), "M"),
+            ("DEPTH", registry.Unit(""), None),
+            ("DEPTH", "", None),
+            ("TEMP", registry.Unit("degC"), None),
+            ("TEMP", "celsius", None),
+        ],
+    )
+    def test_parse_unit_to_las(self, curve, unit_input, expected):
+        result = parse_unit_to_las(curve, unit_input)
+        assert result == expected
