@@ -82,7 +82,7 @@ class TestGetUnitFromCurve:
 
 class TestParseUnitToLas:
     @pytest.mark.parametrize(
-        ("curve", "unit_input", "expected"),
+        ("mnemonic", "pint_unit", "expected"),
         [
             ("DEPTH", "meter", "M"),
             ("DEPTH", "m", "M"),
@@ -93,6 +93,6 @@ class TestParseUnitToLas:
             ("TEMP", "celsius", None),
         ],
     )
-    def test_parse_unit_to_las(self, curve, unit_input, expected):
-        result = parse_unit_to_las(curve, unit_input)
+    def test_parse_unit_to_las(self, mnemonic, pint_unit, expected):
+        result = parse_unit_to_las(mnemonic, pint_unit)
         assert result == expected
