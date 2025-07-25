@@ -1,7 +1,7 @@
 import pint
 import pytest
 
-from pozo.units import parse_unit_safe
+from pozo.units import parse_unit_from_context, parse_unit_safe
 
 
 class TestParseUnitSafe:
@@ -29,3 +29,24 @@ class TestParseUnitSafe:
         if is_dimensionless:
             assert result is not None
             assert result.dimensionless
+
+
+class TestParseUnitFromContext:
+    @pytest.mark.parametrize(
+        ("mnemonic", "las_unit", "data", "expected"),
+        [
+            ("DEPTH", "M", [1, 2, 3], "meter"),
+            ("UNKNOWN", "", [1.0, 2.0, 3.0], ""),  # dimensionless
+            ("UNKNOWN", "invalid_unit_xyz", [1.0, 2.0, 3.0], None),
+        ],
+    )
+    def test_various_inputs(self, mnemonic, las_unit, data, expected):
+        result = parse_unit_from_context(mnemonic, las_unit, data)
+        if expected is None:
+            assert result is None
+        elif expected == "":
+            assert result is not None
+            assert result.dimensionless
+        else:
+            assert isinstance(result, pint.Unit)
+            assert str(result) == expected
