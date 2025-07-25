@@ -75,7 +75,8 @@ ignore = [
               "ERA001",
               "ANN001", # ignore missing argument type
               "ANN201", # ignore missing return type
-              "PLR2004" # ignore magic value
+              "PLR2004", # ignore magic value
+              "PLR0913" # ignore too many args
             ]
 
 
