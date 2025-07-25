@@ -75,11 +75,23 @@ class TestLasSiMap:
         assert las_si_map.si_to_las_unit("XYZ", "gAPI") == "GAPI"
 
     @pytest.mark.parametrize(
-        ("ranges", "expected"),
-        [((Range("gAPI", (0, 100), 90, "Gamma"),), "gAPI"), ("gAPI", "gAPI")],
+        ("mnemonic", "registered_unit", "query_unit", "ranges", "expected"),
+        [
+            ("GR", "API", "API", (Range("gAPI", (0, 100), 90, "Gamma"),), "gAPI"),
+            ("GR", "API", "UNK", (Range("gAPI", (0, 100), 90, "Gamma"),), None),
+            ("GR", "API", "API", None, None),
+        ],
     )
-    def test_las_to_si(self, las_si_map, ranges, expected):
+    def test_las_to_si(
+        self,
+        las_si_map,
+        mnemonic,
+        registered_unit,
+        query_unit,
+        ranges,
+        expected,
+    ):
         if ranges:
-            las_si_map.add("GR", "GAPI", ranges)
-        result = las_si_map.las_to_si("GR", "GAPI", [5, 10, 15])
+            las_si_map.add(mnemonic, registered_unit, ranges)
+        result = las_si_map.las_to_si(mnemonic, query_unit, [5, 10, 15])
         assert result == expected
