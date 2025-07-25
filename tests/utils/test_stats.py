@@ -1,5 +1,6 @@
 import statistics
 
+import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -59,37 +60,22 @@ class TestMinValue:
         assert isinstance(result, arr.dtype.type)
 
 
-
 class TestQuantilesValues:
     @pytest.mark.parametrize(
-        ("data", "expected"),
-        list(
-            zip(
-                data_types.data_array.values(),
-                [
-                    ["2.0", "3.0", "5.0"],
-                    ["-5.0", "-3.0", "-2.0"],
-                    ["2.0", "3.0", "4.0"],
-                    ["42.0", "42.0", "42.0"],
-                    ["2.0", "3.0", "5.0"],
-                    ["2.0", "3.0", "4.0"],
-                    ["2.299999952316284", "3.0999999046325684", "5.199999809265137"],
-                    ["2.0", "3.0", "5.0"],
-                    ["1.75", "2.5", "3.25"],
-                    ["15.0", "20.0", "25.0"],
-                    ["1.5", "2.0", "2.5"],
-                    ["2.0", "2.5", "3.0"],
-                    ["255.0", "255.0", "255.0"],
-                    ["1.0", "2.0", "3.0"],
-                ],
-            ),
-        ),
-        ids=data_types.data_array.keys(),
+        "converter",
+        list(data_types.converters.values()),
+        ids=list(data_types.converters.keys()),
     )
-    def test_quantiles_values_success(self, data, expected):
-        result = stats.quantiles_values(data, [0.25, 0.5, 0.75])
-        print(result)
-        assert result == expected
+    @settings(max_examples=20)
+    @given(st.data())
+    def test_quantiles_values_success(self, converter, data):
+        quantiles = [0.25, 0.5, 0.75]
+        strategy = converter["st"]
+        cast_fn = converter["cast_fn"]
+        arr = cast_fn(data.draw(strategy))
+        result = stats.quantiles_values(arr, quantiles)
+        expected = statistics.quantiles(arr, method="inclusive")
+        assert np.allclose(result, expected)
 
 
 class TestCountMissingValues:
