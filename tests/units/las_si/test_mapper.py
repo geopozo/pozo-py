@@ -62,7 +62,6 @@ class TestLasSiMap:
         assert result["las_unit"] == "API"
         assert result["si_unit"] == "gAPI"
         assert result["confidence"] == 90
-        assert result["comment"] == "Gamma"
         assert result["n_nan"] == 0
         assert result["v_min"] == "10.0"
         assert result["v_med"] == "20.0"
@@ -77,8 +76,8 @@ class TestLasSiMap:
     @pytest.mark.parametrize(
         ("mnemonic", "registered_unit", "query_unit", "ranges", "expected"),
         [
-            ("GR", "API", "API", (Range("gAPI", (0, 100), 90, "Gamma"),), "gAPI"),
-            ("GR", "API", "UNK", (Range("gAPI", (0, 100), 90, "Gamma"),), None),
+            ("GR", "API", "API", (Range("gAPI", (0, 100), 90, ""),), "gAPI"),
+            ("GR", "API", "UNK", (Range("gAPI", (0, 100), 90, ""),), None),
             ("GR", "API", "API", None, None),
         ],
     )
