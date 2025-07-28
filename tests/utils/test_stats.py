@@ -1,3 +1,4 @@
+import math
 import statistics
 
 import numpy as np
@@ -16,7 +17,7 @@ class TestFormatCsv:
             zip(
                 ["a,b\n1,2\n4,5", "a;b\n1;2\n4;5", "a\tb\n1\t2\n4\t5"],
                 [",", ";", "\t"],
-            )
+            ),
         ),
     )
     def test_format_csv_success(self, data, delimiter):
@@ -80,15 +81,20 @@ class TestQuantilesValues:
 
 class TestCountMissingValues:
     @pytest.mark.parametrize(
-        ("data", "expected"),
-        list(
-            zip(
-                data_types.data_array.values(),
-                [0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 1],
-            ),
-        ),
-        ids=data_types.data_array.keys(),
+        "converter",
+        list(data_types.converters.values()),
+        ids=list(data_types.converters.keys()),
     )
-    def test_count_missing_values(self, data, expected):
-        result = stats.count_missing_values(data)
+    @settings(max_examples=20)
+    @given(st.data())
+    def test_count_missing_values(self, converter, data):
+        strategy = converter["st"]
+        cast_fn = converter["cast_fn"]
+        arr = cast_fn(data.draw(strategy))
+        result = stats.count_missing_values(arr)
+
+        expected = sum(
+            x is None or (isinstance(x, float) and math.isnan(x)) for x in arr
+        )
+
         assert result == expected
