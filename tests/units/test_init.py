@@ -1,7 +1,12 @@
+from unittest.mock import MagicMock
+
+import lasio
+import numpy as np
 import pint
 import pytest
 
 from pozo.units import (
+    check_las,
     get_unit_from_curve,
     parse_unit_from_context,
     parse_unit_safe,
@@ -96,3 +101,76 @@ class TestParseUnitToLas:
     def test_parse_unit_to_las(self, mnemonic, pint_unit, expected):
         result = parse_unit_to_las(mnemonic, pint_unit)
         assert result == expected
+
+
+class TestCheckLas:
+    @pytest.fixture
+    def mock_las_file(self):
+        """Create a mock LAS file with curves for testing."""
+        las = MagicMock(spec=lasio.LASFile)
+        las.curves = []
+        return las
+
+    def add_mock_curve(self, las_file, mnemonic, unit, data, descr=None):
+        """Helper to add a mock curve to the LAS file."""
+        curve = MagicMock()  # Para similar un objeto Curve de lasio
+        curve.mnemonic = mnemonic
+        curve.unit = unit
+        curve.data = np.array(data)  # Para este caso solo usare numpy arrays
+        curve.descr = descr or f"{mnemonic} description"
+        las_file.curves.append(curve)
+        return curve
+
+    @pytest.mark.parametrize(
+        ("curves", "html_output"),
+        [
+            (
+                [
+                    ("DEPT", "M", [1, 2, 3], "Depth"),
+                    ("GR", "GAPI", [45, 50, 55], "Gamma Ray"),
+                ],
+                False,
+            ),
+            (
+                [
+                    ("DEPT", "M", [1, 2, 3], "Depth"),
+                    ("GR", "GAPI", [45, 50, 55], "Gamma Ray"),
+                    ("RT", "OHMM", [10, 20, 30], "Resistivity"),
+                ],
+                True,
+            ),
+            ([("CALI", "", [8.5, 8.6, 8.7], "Caliper")], False),
+        ],
+    )
+    def test_check_las(self, mock_las_file, curves, html_output):
+        expected_keys = [
+            "mnemonic",
+            "las unit",
+            "si unit",
+            "pint unit",
+            "confidence",
+            "comment:",
+            "description",
+            "min",
+            "med",
+            "max",
+            "#NaN",
+        ]
+        for mnemonic, unit, data, descr in curves:
+            self.add_mock_curve(mock_las_file, mnemonic, unit, data, descr)
+
+        result = check_las(mock_las_file, html=html_output)
+
+        if not html_output:
+            assert isinstance(result, list)
+            assert len(result) == len(curves)
+
+            for i, curve_result in enumerate(result):
+                assert isinstance(curve_result, dict)
+                assert set(curve_result.keys()) == set(expected_keys)
+                assert curve_result["mnemonic"] == curves[i][0]
+                assert curve_result["las unit"] == curves[i][1]
+                assert curve_result["description"] == curves[i][3]
+        else:
+            assert result is None
+            _ = mock_las_file.curves
