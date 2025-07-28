@@ -27,7 +27,7 @@ def min_value(data: types.Array) -> Numeric:
 
 
 def quantiles_values(data: types.Array, quantiles: list) -> np.ndarray:
-    return np.nanquantile(data, quantiles)
+    return np.nanquantile(data, quantiles, method="linear")
 
 
 def count_missing_values(data: types.Array) -> int:
