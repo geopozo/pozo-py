@@ -28,6 +28,7 @@ dependencies = [
  "lasio",
  "anywidget>=0.9.18",
  "narwhals>=1.48.0",
+ "marimo>=0.14.15",
 ]
 
 
