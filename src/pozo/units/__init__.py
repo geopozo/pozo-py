@@ -15,6 +15,7 @@ from pozo.units.si_pint import config as si_pint_config
 
 if TYPE_CHECKING:
     import lasio  # type: ignore[import-untyped]
+    import marimo as mo
 
 
 # Conexión a LasSiMap
@@ -38,7 +39,7 @@ def check_las(
     *,
     html: bool = True,
     div_id: str = "",
-) -> list[str | dict[str, str]] | None:
+) -> list[str | dict[str, str]] | mo.Html | None:
     """Check the data from the LAS file and print a table with the analysis."""
 
     def n0(s: str | pint.Unit | int | None) -> str:
@@ -76,12 +77,10 @@ def check_las(
         return result
 
     html_output = table.generate_html_table(result, _delimiter)
-    display.show_html(
+    return display.show_html(
         f'<div id="{div_id}">{html_output}</div>',
         html=html,
     )
-
-    return None
 
 
 def parse_unit_safe(unit: str) -> pint.Unit | None:
