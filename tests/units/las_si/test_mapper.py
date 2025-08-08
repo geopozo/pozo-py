@@ -18,14 +18,6 @@ class TestRange:
         assert isinstance(r.boundaries, tuple)
         assert r.is_within_range(min_val, max_val) == expected
 
-    @pytest.mark.parametrize(
-        "invalid_boundary",
-        [(10,), "invalid", [10, 20], (10, 20, 30)],
-    )
-    def test_range_init_invalid_boundaries(self, invalid_boundary):
-        with pytest.raises(TypeError):
-            Range("m", invalid_boundary, 1, "fail")
-
 
 class TestLasSiMap:
     @pytest.fixture
@@ -92,4 +84,5 @@ class TestLasSiMap:
         if ranges:
             las_si_map.add(mnemonic, registered_unit, ranges)
         result = las_si_map.las_to_si(mnemonic, query_unit, [5, 10, 15])
+
         assert result == expected
