@@ -10,7 +10,7 @@ from pozo._utils import stats
 from tests import data_types
 
 
-class TestFormatCsv:
+class TestReadCsv:
     @pytest.mark.parametrize(
         ("data", "delimiter"),
         list(
@@ -20,7 +20,7 @@ class TestFormatCsv:
             ),
         ),
     )
-    def test_format_csv_success(self, data, delimiter):
+    def test_read_csv_success(self, data, delimiter):
         expected = [["a", "b"], ["1", "2"], ["4", "5"]]
         result = stats.read_csv(data, delimiter)
         assert result == expected
