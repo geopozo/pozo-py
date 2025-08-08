@@ -95,6 +95,6 @@ class TestCountMissingValues:
 
         expected = sum(
             x is None or (isinstance(x, float) and math.isnan(x)) for x in arr
-        )
+        )  # Esta es la forma canónica que encontré de contar valores faltantes
 
         assert result == expected
