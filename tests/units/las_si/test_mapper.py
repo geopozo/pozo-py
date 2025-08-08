@@ -58,7 +58,7 @@ class TestLasSiMap:
         assert result["v_med"] == "20.0"
         assert result["v_max"] == "30.0"
 
-    def test_si_to_las_unit_default_and_fallback(self, las_si_map):
+    def test_si_to_las_unit_default(self, las_si_map):
         las_si_map.add("GR", "GAPI", "gAPI")
         las_si_map.add("-", "GAPI", "gAPI")
         assert las_si_map.si_to_las_unit("GR", "gAPI") == "GAPI"
