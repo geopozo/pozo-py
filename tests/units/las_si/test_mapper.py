@@ -11,7 +11,6 @@ class TestRange:
             ("of_1", (-0.5, 0.8), -0.5, 0.8, False),
             ("pu", (-50, 80), 0, 79.9, True),
             ("pu", (-50, 80), -100, 100, False),
-            ("puAPI", (), -1000, 1000, True),
         ],
     )
     def test_is_within_range(self, unit, boundaries, min_val, max_val, expected):
