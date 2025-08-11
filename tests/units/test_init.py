@@ -5,14 +5,7 @@ import numpy as np
 import pint
 import pytest
 
-from pozo.units import (
-    check_las,
-    get_unit_from_curve,
-    parse_unit_from_context,
-    parse_unit_safe,
-    parse_unit_to_las,
-    registry,
-)
+from pozo import units
 
 
 class TestParseUnitSafe:
@@ -32,7 +25,7 @@ class TestParseUnitSafe:
         expected_str,
         is_dimensionless,
     ):
-        result = parse_unit_safe(input_value)
+        result = units.parse_unit_safe(input_value)
 
         assert isinstance(result, expected_type)
         if expected_str is not None:
@@ -52,7 +45,7 @@ class TestParseUnitFromContext:
         ],
     )
     def test_various_inputs(self, mnemonic, las_unit, data, expected):
-        result = parse_unit_from_context(mnemonic, las_unit, data)
+        result = units.parse_unit_from_context(mnemonic, las_unit, data)
         if expected is None:
             assert result is None
         elif expected == "":
@@ -72,11 +65,14 @@ class TestGetUnitFromCurve:
 
     @pytest.mark.parametrize(
         ("mnemonic", "unit", "data", "expected"),
-        [("DEPTH", "M", [1.0, 2.0, 3.0], "meter"), ("ANY", "", [0.1, 0.2], "")],
+        [
+            ("DEPTH", "M", [1.0, 2.0, 3.0], "meter"),
+            ("ANY", "", [0.1, 0.2], ""),
+        ],
     )
     def test_get_unit_from_curve(self, mnemonic, unit, data, expected):
         curve = self.MockCurve(mnemonic, unit, data)
-        result = get_unit_from_curve(curve)
+        result = units.get_unit_from_curve(curve)
         if expected == "":
             assert result is not None
             assert result.dimensionless
@@ -91,15 +87,15 @@ class TestParseUnitToLas:
         [
             ("DEPTH", "meter", "M"),
             ("DEPTH", "m", "M"),
-            ("DEPTH", registry.Unit("meter"), "M"),
-            ("DEPTH", registry.Unit(""), None),
+            ("DEPTH", units.registry.Unit("meter"), "M"),
+            ("DEPTH", units.registry.Unit(""), None),
             ("DEPTH", "", None),
-            ("TEMP", registry.Unit("degC"), None),
+            ("TEMP", units.registry.Unit("degC"), None),
             ("TEMP", "celsius", None),
         ],
     )
     def test_parse_unit_to_las(self, mnemonic, pint_unit, expected):
-        result = parse_unit_to_las(mnemonic, pint_unit)
+        result = units.parse_unit_to_las(mnemonic, pint_unit)
         assert result == expected
 
 
@@ -159,7 +155,7 @@ class TestCheckLas:
         for mnemonic, unit, data, descr in curves:
             self.add_mock_curve(mock_las_file, mnemonic, unit, data, descr)
 
-        result = check_las(mock_las_file, html=html_output)
+        result = units.check_las(mock_las_file, html=html_output)
 
         if not html_output:
             assert isinstance(result, list)
