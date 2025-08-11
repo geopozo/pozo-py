@@ -37,23 +37,38 @@ class TestParseUnitSafe:
 
 class TestParseUnitFromContext:
     @pytest.mark.parametrize(
-        ("mnemonic", "las_unit", "data", "expected"),
+        (
+            "mnemonic",
+            "las_unit",
+            "data",
+            "expect_none",
+            "expect_dimensionless",
+            "expected_str",
+        ),
         [
-            ("DEPTH", "M", [1, 2, 3], "meter"),
-            ("UNKNOWN", "", [1.0, 2.0, 3.0], ""),
-            ("UNKNOWN", "invalid_unit_xyz", [1.0, 2.0, 3.0], None),
+            ("DEPTH", "M", [1, 2, 3], False, False, "meter"),
+            ("UNKNOWN", "", [1.0, 2.0, 3.0], False, True, "dimensionless"),
+            ("UNKNOWN", "invalid_unit_xyz", [1.0, 2.0, 3.0], True, False, None),
+            ("DEPTH", "FT", [10, 20], True, False, None),
+            ("PRES", "Pa", [1000, 2000], False, False, "pascal"),
         ],
     )
-    def test_various_inputs(self, mnemonic, las_unit, data, expected):
+    def test_various_inputs(
+        self,
+        mnemonic,
+        las_unit,
+        data,
+        expect_none,
+        expect_dimensionless,
+        expected_str,
+    ):
         result = units.parse_unit_from_context(mnemonic, las_unit, data)
-        if expected is None:
-            assert result is None
-        elif expected == "":
-            assert result is not None
-            assert result.dimensionless
-        else:
-            assert isinstance(result, pint.Unit)
-            assert str(result) == expected
+
+        assert isinstance(result, (pint.Unit, type(None)))
+        assert (result is None) == expect_none
+        assert bool(getattr(result, "dimensionless", False)) == expect_dimensionless
+        result_str = (str(result), None)[result is None]
+        assert result_str == expected_str
 
 
 class TestGetUnitFromCurve:
