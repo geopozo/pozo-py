@@ -1,6 +1,12 @@
-from html import escape
+from __future__ import annotations
 
-from pozo._utils import stats
+import html
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pint
+
+    from pozo._utils import types
 
 
 def _color(cell: int) -> str:
@@ -13,22 +19,22 @@ def _color(cell: int) -> str:
         return ""
 
 
-def generate_html_table(
-    data: list,
-    delimiter: str,
-) -> str:
-    post_result = "\n".join(data)
-    rows = stats.read_csv(post_result, delimiter)
-    headers = "".join(f"<th>{escape(h)}</th>" for h in rows[0])
-    conf_index = rows[0].index("confidence")
-    thead = f"<thead>\n<tr>{headers}</tr>\n</thead>"
+def generate_html_table(data: types.CurveData) -> str:
+    def n0(s: str | pint.Unit | int | None) -> str:
+        return "" if s is None else str(s)
 
-    def render_row(row: list[str]) -> str:
-        cells = "".join(
-            f"<td{_color(int(c)) if conf_index == i else ''}>{escape(c)}</td>"
+    keys = list(data.keys())
+    headers = "".join(f"<th>{html.escape(k)}</th>" for k in keys)
+    thead = f"<thead>\n<tr>{headers}</tr>\n</thead>"
+    conf_index = keys.index("confidence")
+
+    rows = [
+        "".join(
+            f"<td{_color(int(c)) if conf_index == i else ''}>{html.escape(n0(c))}</td>"
             for i, c in enumerate(row)
         )
-        return f"<tr>{cells}</tr>"
+        for row in zip(*(data[k] for k in keys))
+    ]
 
-    body_rows = "\n".join(map(render_row, rows[1:]))
+    body_rows = "\n".join([f"<tr>{r}</tr>" for r in rows])
     return f"<table border='1'>\n{thead}\n<tbody>{body_rows}</tbody>\n</table>"
