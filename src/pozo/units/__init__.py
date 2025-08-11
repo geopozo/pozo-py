@@ -38,50 +38,47 @@ def check_las(
     *,
     html: bool = True,
     div_id: str = "",
-) -> list[str | dict[str, str]] | None:
+) -> types.CurveData | None:
     """Check the data from the LAS file and print a table with the analysis."""
+    result: types.CurveData = {
+        "mnemonic": [],
+        "las unit": [],
+        "si unit": [],
+        "pint unit": [],
+        "confidence": [],
+        "comment": [],
+        "description": [],
+        "min": [],
+        "med": [],
+        "max": [],
+        "#NaN": [],
+    }
 
-    def n0(s: str | pint.Unit | int | None) -> str:
-        return "" if s is None else str(s)
-
-    result: list[str | dict[str, str]] = []
-    for i, curve in enumerate(las.curves):
+    for curve in las.curves:
         diagnosis = las_map.las_to_si_diagnosis(curve.mnemonic, curve.unit, curve.data)
-        parsed = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
+        pint_unit = parse_unit_from_context(curve.mnemonic, curve.unit, curve.data)
         descr = lasio_utils.remove_prefix_number(curve.descr)
 
-        curve_data = {
-            "mnemonic": curve.mnemonic,
-            "las unit": curve.unit,
-            "si unit": diagnosis.get("si_unit"),
-            "pint unit": parsed,
-            "confidence": diagnosis.get("confidence"),
-            "comment:": diagnosis.get("comment"),
-            "description": descr,
-            "min": diagnosis.get("v_min"),
-            "med": diagnosis.get("v_med"),
-            "max": diagnosis.get("v_max"),
-            "#NaN": diagnosis.get("n_nan"),
-        }
-
-        if i == 0 and html:
-            result.append(_delimiter.join(curve_data.keys()))
-
-        if not html:
-            result.append(curve_data)
-        else:
-            result.append(_delimiter.join([n0(x) for x in curve_data.values()]))
+        result["mnemonic"].append(curve.mnemonic)
+        result["las unit"].append(curve.unit)
+        result["si unit"].append(diagnosis.get("si_unit"))
+        result["pint unit"].append(pint_unit)
+        result["confidence"].append(diagnosis.get("confidence"))
+        result["comment"].append(diagnosis.get("comment"))
+        result["description"].append(descr)
+        result["min"].append(diagnosis.get("v_min"))
+        result["med"].append(diagnosis.get("v_med"))
+        result["max"].append(diagnosis.get("v_max"))
+        result["#NaN"].append(diagnosis.get("n_nan"))
 
     if not html:
         return result
 
-    html_output = table.generate_html_table(result, _delimiter)
-    display.show_html(
+    html_output = table.generate_html_table(result)
+    return display.show_html(
         f'<div id="{div_id}">{html_output}</div>',
         html=html,
     )
-
-    return None
 
 
 def parse_unit_safe(unit: str) -> pint.Unit | None:
