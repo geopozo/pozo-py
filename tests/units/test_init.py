@@ -83,6 +83,11 @@ class TestGetUnitFromCurve:
         [
             ("DEPTH", "M", [1.0, 2.0, 3.0], "meter"),
             ("ANY", "", [0.1, 0.2], ""),
+            ("DEPTH", "m", [5, 6, 7], "meter"),
+            ("PRES", "Pa", [1000, 2000], "pascal"),
+            ("TEMP", "K", [273.15, 300.0], "kelvin"),
+            ("PORO", "", [0.25, 0.3, 0.35], ""),
+            ("UNKNOWN", "", [1.0, 2.0], ""),
         ],
     )
     def test_get_unit_from_curve(self, mnemonic, unit, data, expected):
