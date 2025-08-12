@@ -21,7 +21,7 @@ def _color(cell: int) -> str:
 
 def generate_html_table(data: types.CurveData) -> str:
     def n0(s: str | pint.Unit | int | None) -> str:
-        return "" if s is None else str(s)
+        return str(s) if s else ""
 
     keys = list(data.keys())
     headers = "".join(f"<th>{html.escape(k)}</th>" for k in keys)
