@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol, TypedDict
+from typing import Any, Protocol, TypedDict, Union
 
 import pint
 
@@ -25,14 +25,14 @@ CurveData = TypedDict(
     {
         "mnemonic": list[str],
         "las unit": list[str],
-        "si unit": list[str | None],
-        "pint unit": list[pint.Unit | None],
-        "confidence": list[int | None],
-        "comment": list[str | None],
+        "si unit": list[Union[str, None]],
+        "pint unit": list[Union[pint.Unit, None]],
+        "confidence": list[Union[int, None]],
+        "comment": list[str],
         "description": list[str],
-        "min": list[str | None],
-        "med": list[str | None],
-        "max": list[str | None],
-        "#NaN": list[int | None],
+        "min": list[str],
+        "med": list[str],
+        "max": list[str],
+        "#NaN": list[Union[int, None]],
     },
 )

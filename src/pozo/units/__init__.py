@@ -64,11 +64,11 @@ def check_las(
         result["si unit"].append(diagnosis.get("si_unit"))
         result["pint unit"].append(pint_unit)
         result["confidence"].append(diagnosis.get("confidence"))
-        result["comment"].append(diagnosis.get("comment"))
+        result["comment"].append(diagnosis.get("comment", ""))
         result["description"].append(descr)
-        result["min"].append(diagnosis.get("v_min"))
-        result["med"].append(diagnosis.get("v_med"))
-        result["max"].append(diagnosis.get("v_max"))
+        result["min"].append(diagnosis.get("v_min", ""))
+        result["med"].append(diagnosis.get("v_med", ""))
+        result["max"].append(diagnosis.get("v_max", ""))
         result["#NaN"].append(diagnosis.get("n_nan"))
 
     if not html:
