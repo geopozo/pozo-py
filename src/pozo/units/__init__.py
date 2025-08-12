@@ -61,15 +61,15 @@ def check_las(
 
         result["mnemonic"].append(curve.mnemonic)
         result["las unit"].append(curve.unit)
-        result["si unit"].append(diagnosis.get("si_unit"))
-        result["pint unit"].append(pint_unit)
-        result["confidence"].append(diagnosis.get("confidence"))
+        result["si unit"].append(diagnosis.get("si_unit") or "")
+        result["pint unit"].append(pint_unit or "")
+        result["confidence"].append(diagnosis.get("confidence", 0))
         result["comment"].append(diagnosis.get("comment", ""))
         result["description"].append(descr)
         result["min"].append(diagnosis.get("v_min", ""))
         result["med"].append(diagnosis.get("v_med", ""))
         result["max"].append(diagnosis.get("v_max", ""))
-        result["#NaN"].append(diagnosis.get("n_nan"))
+        result["#NaN"].append(diagnosis.get("n_nan", 0))
 
     if not html:
         return result
