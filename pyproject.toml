@@ -1,33 +1,93 @@
 [build-system]
-requires = ["setuptools>=65.0.0", "wheel"]
+requires = ["setuptools>=65.0.0", "wheel", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages]
-find = {namespaces = false}
+find = {namespaces = false, where = ["src"]}
+
+[tool.setuptools.package-data]
 
 [project]
 name = "pozo"
-license = {file = "LICENSE.txt"}
 description = "Help visualizing well log data - Herramienta para visualizar registros de pozos"
-readme = "README.md"
+dynamic = ["version"]
 requires-python = ">=3.9"
-version = "0.9.29"
+readme = "README.md"
+authors = [
+    { name = "Andrew Pikul", email = "ajpikul@gmail.com" }
+]
 dependencies = [
  "ood >=1.0.9",
  "plotly >=5.18.0",
  "colour >= 0.1.5",
  "pint >= 0.23",
- "pandas >= 2.0.0",
  "numpy >= 1.26.0",
  "kaleido >=0.2.1",
  "ipywidgets",
  "nbformat",
  "lasio",
  "anywidget>=0.9.18",
+ "narwhals>=1.48.0",
 ]
 
-[project.optional-dependencies]
-dev = ["pytest"]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.136.2",
+    "mypy>=1.16.1",
+    "pandas>=2.3.1",
+    "pandas-stubs>=2.2.2.240807",
+    "poethepoet>=0.36.0",
+    "pytest>=8.3.5",
+    "pytest-xdist>=3.8.0",
+]
+
+[tool.mypy]
+files = ["src/pozo/units"]
 
 [tool.ruff.lint]
-ignore = ["E701"]
+select = ["ALL"]
+ignore = [
+          "EM", # allow strings in raise(), despite python being ugly about it
+          "TRY003", # allow long error messages inside raise()
+          "D203", # No blank before class docstring (D211 = require blank line)
+          "D212", # Commit message style docstring is D213, ignore D212
+          "COM812", # manual says linter rule conflicts with formatter
+          "ISC001", # manual says litner rule conflicts with formatter
+          "RET504", # Allow else if unnecessary because more readable
+          "RET505", # Allow else if unnecessary because more readable
+          "RET506", # Allow else if unnecessary because more readable
+          "RET507", # Allow else if unnecessary because more readable
+          "RET508", # Allow else if unnecessary because more readable
+          "RUF012", # We don't do typing, so no typing
+          "SIM105", # Too opionated (try-except-pass)
+          "PT003", # scope="function" implied but I like readability
+          "G004", # fstrings in my logs
+          "PLR2004", # Allow magic value
+          ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+              "D", # ignore docstring errors
+              "S101", # allow assert
+              "INP001", # no need for __init__ in test directories
+              "T201", # if we're printing in tests, there is a reason
+              "ERA001",
+              "ANN001", # ignore missing argument type
+              "ANN201", # ignore missing return type
+              "PLR2004", # ignore magic value
+              "PLR0913" # ignore too many args
+            ]
+
+
+[tool.poe.tasks.test]
+cmd = "pytest -W error -n auto -v -rfE"
+help = "Run all tests quickly"
+
+[tool.poe.tasks.debug-test]
+cmd = "pytest -W error -vvvx -rA"
+help = "Run test by test, slowly, quitting after first error"
+
+[tool.poe.tasks.filter-test]
+cmd = "pytest -W error -vvvx -rA"
+help = "Run any/all tests one by one with basic settings: can include filename and -k filters"

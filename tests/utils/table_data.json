@@ -1,0 +1,55 @@
+{
+  "tests": [
+    "test_generate_html_table_basic_structure",
+    "test_generate_html_table_confidence_style_red",
+    "test_generate_html_table_confidence_styles_orange"
+  ],
+  "input": [
+    {
+      "mnemonic": ["DEPT:1", "CALI"],
+      "las unit": ["M", "CM"],
+      "si unit": ["meter", "centimeter"],
+      "pint unit": ["meter", "centimeter"],
+      "confidence": [100, 100],
+      "comment": ["Clear match.", "Clear match."],
+      "description": ["Depth", "Caliper Log"],
+      "min": ["0.1524", "8.308773"],
+      "med": ["916.1526", "12.11199"],
+      "max": ["1832.1528", "18.68778"],
+      "#NaN": [0, 2162]
+    },
+    {
+      "mnemonic": ["URAN"],
+      "las unit": [""],
+      "si unit": ["percent"],
+      "pint unit": ["percent"],
+      "confidence": [25],
+      "comment": ["decide by range, verify"],
+      "description": ["Uranium"],
+      "min": ["-0.2344602"],
+      "med": ["0.126292"],
+      "max": ["3.758161"],
+      "#NaN": [11337]
+    },
+    {
+      "mnemonic": ["NPHI"],
+      "las unit": ["PU"],
+      "si unit": ["pu"],
+      "pint unit": ["porosity_unit"],
+      "confidence": [50],
+      "comment": ["decide by range"],
+      "description": ["Neutron Log Porosity"],
+      "min": ["7.626792"],
+      "med": ["24.326625"],
+      "max": ["51.50284"],
+      "#NaN": [7284]
+    }
+  ],
+  "output": [
+    "<table border='1'>\n<thead>\n<tr><th>mnemonic</th><th>las unit</th><th>si unit</th><th>pint unit</th><th>confidence</th><th>comment</th><th>description</th><th>min</th><th>med</th><th>max</th><th>#NaN</th></tr>\n</thead>\n<tbody><tr><td>DEPT:1</td><td>M</td><td>meter</td><td>meter</td><td>100</td><td>Clear match.</td><td>Depth</td><td>0.1524</td><td>916.1526</td><td>1832.1528</td><td></td></tr>\n<tr><td>CALI</td><td>CM</td><td>centimeter</td><td>centimeter</td><td>100</td><td>Clear match.</td><td>Caliper Log</td><td>8.308773</td><td>12.11199</td><td>18.68778</td><td>2162</td></tr></tbody>\n</table>",
+    "<table border='1'>\n<thead>\n<tr><th>mnemonic</th><th>las unit</th><th>si unit</th><th>pint unit</th><th>confidence</th><th>comment</th><th>description</th><th>min</th><th>med</th><th>max</th><th>#NaN</th></tr>\n</thead>\n<tbody><tr><td>URAN</td><td></td><td>percent</td><td>percent</td><td style='color:red'>25</td><td>decide by range, verify</td><td>Uranium</td><td>-0.2344602</td><td>0.126292</td><td>3.758161</td><td>11337</td></tr></tbody>\n</table>",
+    "<table border='1'>\n<thead>\n<tr><th>mnemonic</th><th>las unit</th><th>si unit</th><th>pint unit</th><th>confidence</th><th>comment</th><th>description</th><th>min</th><th>med</th><th>max</th><th>#NaN</th></tr>\n</thead>\n<tbody><tr><td>NPHI</td><td>PU</td><td>pu</td><td>porosity_unit</td><td style='color:#B95000'>50</td><td>decide by range</td><td>Neutron Log Porosity</td><td>7.626792</td><td>24.326625</td><td>51.50284</td><td>7284</td></tr></tbody>\n</table>"
+  ],
+  "n_rows": [3, 2, 2],
+  "styles": ["<td>", "<td style='color:red'>", "<td style='color:#B95000'>"]
+}
