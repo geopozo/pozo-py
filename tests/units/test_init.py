@@ -138,34 +138,56 @@ class TestCheckLas:
         return curve
 
     @pytest.mark.parametrize(
-        ("curves", "html_output"),
+        ("curves", "expected"),
         [
             (
                 [
-                    ("DEPT", "M", [1, 2, 3], "Depth"),
+                    ("CALI", "", [8.5, 8.6, 8.7], "Caliper"),
                     ("GR", "GAPI", [45, 50, 55], "Gamma Ray"),
                 ],
-                False,
+                {
+                    "mnemonic": ["CALI", "GR"],
+                    "las unit": ["", "GAPI"],
+                    "si unit": ["", "gAPI"],
+                    "pint unit": [pint.Unit(""), pint.Unit("gamma_API_unit")],
+                    "confidence": [0, 100],
+                    "comment": [" for CALI", "Clear match."],
+                    "description": ["Caliper", "Gamma Ray"],
+                    "min": ["8.5", "45.0"],
+                    "med": ["8.6", "50.0"],
+                    "max": ["8.7", "55.0"],
+                    "#NaN": [0, 0],
+                },
             ),
             (
                 [
-                    ("DEPT", "M", [1, 2, 3], "Depth"),
                     ("GR", "GAPI", [45, 50, 55], "Gamma Ray"),
                     ("RT", "OHMM", [10, 20, 30], "Resistivity"),
                 ],
-                True,
+                {
+                    "mnemonic": ["GR", "RT"],
+                    "las unit": ["GAPI", "OHMM"],
+                    "si unit": ["gAPI", ""],
+                    "pint unit": [pint.Unit("gamma_API_unit"), pint.Unit("")],
+                    "confidence": [100, 0],
+                    "comment": ["Clear match.", "OHMM for RT"],
+                    "description": ["Gamma Ray", "Resistivity"],
+                    "min": ["45.0", "10.0"],
+                    "med": ["50.0", "20.0"],
+                    "max": ["55.0", "30.0"],
+                    "#NaN": [0, 0],
+                },
             ),
-            ([("CALI", "", [8.5, 8.6, 8.7], "Caliper")], False),
         ],
     )
-    def test_check_las(self, mock_las_file, curves, html_output):
+    def test_check_las(self, mock_las_file, curves, expected):
         expected_keys = [
             "mnemonic",
             "las unit",
             "si unit",
             "pint unit",
             "confidence",
-            "comment:",
+            "comment",
             "description",
             "min",
             "med",
@@ -175,18 +197,8 @@ class TestCheckLas:
         for mnemonic, unit, data, descr in curves:
             self.add_mock_curve(mock_las_file, mnemonic, unit, data, descr)
 
-        result = units.check_las(mock_las_file, html=html_output)
+        result = units.check_las(mock_las_file, html=False)
 
-        if not html_output:
-            assert isinstance(result, list)
-            assert len(result) == len(curves)
-
-            for i, curve_result in enumerate(result):
-                assert isinstance(curve_result, dict)
-                assert set(curve_result.keys()) == set(expected_keys)
-                assert curve_result["mnemonic"] == curves[i][0]
-                assert curve_result["las unit"] == curves[i][1]
-                assert curve_result["description"] == curves[i][3]
-        else:
-            assert result is None
-            _ = mock_las_file.curves
+        assert result == expected
+        assert isinstance(result, dict)
+        assert list(result.keys()) == expected_keys
