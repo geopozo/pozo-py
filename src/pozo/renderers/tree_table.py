@@ -1,5 +1,5 @@
 import pozo.renderers as pzr
-from IPython.core.display import HTML, display, Javascript
+from IPython.display import HTML, display, Javascript
 import html
 
 def javascript():
